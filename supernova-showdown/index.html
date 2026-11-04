@@ -122,7 +122,7 @@ html.srml #srml-menu .srml-b{flex:1;max-width:150px;height:52px!important;width:
 html.srml #srml-menu .srml-ok{border-color:#5cff8a!important}
 html.srml #srml-menu .srml-bk{border-color:#ff8a5c!important}
 html.srml #srml-menu .srml-st{border-color:#ffe650!important}
-html.srml .srml-b.on{background:#2a3456!important;transform:scale(.95)!important}
+html.srml .srml-b{transition:transform .08s,box-shadow .08s,filter .08s}html.srml .srml-b.on,html.srml .srml-b:hover{background:#2a3456!important;transform:scale(1.12)!important;box-shadow:0 0 14px 4px rgba(255,230,80,.75)!important;filter:brightness(1.25);z-index:2;position:relative}
 html.srml #srml-dir{flex:none;display:flex;gap:8px;align-items:center}
 html.srml #srml-dir.cross{display:grid;grid-template-columns:repeat(3,46px);grid-template-rows:repeat(3,46px);gap:3px}
 html.srml #srml-dir.cross [data-b=up]{grid-column:2;grid-row:1}html.srml #srml-dir.cross [data-b=left]{grid-column:1;grid-row:2}html.srml #srml-dir.cross [data-b=right]{grid-column:3;grid-row:2}html.srml #srml-dir.cross [data-b=down]{grid-column:2;grid-row:3}
@@ -171,7 +171,7 @@ function alias(label,cls,target){var b=document.createElement("div");b.className
  var up=function(e){e.preventDefault();if(!b.classList.contains("on"))return;b.classList.remove("on");fire("pointerup");};
  b.addEventListener("pointerup",up);b.addEventListener("pointerleave",up);b.addEventListener("pointercancel",up);b.addEventListener("contextmenu",function(e){e.preventDefault();});return b;}
 if(C.back)menu.appendChild(alias("BACK","srml-bk",C.back));
-if(by.start){by.start.classList.add("srml-st");by.start.textContent=C.startLabel||"START";menu.appendChild(by.start);}
+if(by.start){by.start.classList.add("srml-st");by.start.textContent=C.startLabel||"START";menu.appendChild(by.start);}else if(C.startAlias){menu.appendChild(alias("START","srml-st",C.startAlias));}
 if(C.ok)menu.appendChild(alias("OK","srml-ok",C.ok));
 var st=document.getElementById("stick");
 if(st){dir.appendChild(st);[["\u25B2","left:50%;top:6px;transform:translateX(-50%)"],["\u25BC","left:50%;bottom:6px;transform:translateX(-50%)"],["\u25C0","left:7px;top:50%;transform:translateY(-50%)"],["\u25B6","right:7px;top:50%;transform:translateY(-50%)"]].forEach(function(a){var s=document.createElement("span");s.className="srml-ar";s.textContent=a[0];s.style.cssText=a[1];st.appendChild(s);});}
