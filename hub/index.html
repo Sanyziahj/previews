@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex,nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Space Riders Arcade - Free Browser Games</title>
+<meta name="description" content="Space Riders Arcade: free retro pixel browser games. Hunter Rider: Void Anomalies, Space Riders: Cosmic Board, Space Riders Fighter, Skippy's Quest, Star Squadron, SuperNova Showdown, Dream Strike and Station Strike. No wallet needed.">
+<meta name="theme-color" content="#08061a">
+<link rel="canonical" href="https://sanyziahj.github.io/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Space Riders Arcade">
+<meta property="og:title" content="Space Riders Arcade - Free Browser Games">
+<meta property="og:description" content="Free retro pixel games. Tap and play in your browser. No wallet needed.">
+<meta property="og:url" content="https://sanyziahj.github.io/">
+<meta property="og:image" content="https://sanyziahj.github.io/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Space Riders Arcade - victory posters">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Space Riders Arcade - Free Browser Games">
+<meta name="twitter:description" content="Free retro pixel games. Tap and play in your browser. No wallet needed.">
+<meta name="twitter:image" content="https://sanyziahj.github.io/og.jpg">
+<link rel="preload" href="press-start-2p.woff" as="font" type="font/woff" crossorigin>
+<style>
+@font-face{font-family:"PS2P";src:url(https://sanyziahj.github.io/press-start-2p.woff) format("woff");font-display:swap}
+:root{--bg:#08061a;--pink:#ff3cc8;--yel:#ffe650;--cyan:#78e6ff;--card:#140f33}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:#fff;font-family:"PS2P",ui-monospace,monospace;-webkit-text-size-adjust:100%}
+body{min-height:100vh;background:
+ radial-gradient(1px 1px at 20px 30px,#fff,transparent),radial-gradient(1px 1px at 120px 80px,#cdf,transparent),
+ radial-gradient(2px 2px at 200px 150px,#fff,transparent),radial-gradient(1px 1px at 300px 40px,#fcf,transparent),
+ radial-gradient(1px 1px at 60px 200px,#fff,transparent),var(--bg);background-size:340px 240px;image-rendering:pixelated}
+.wrap{max-width:1100px;margin:0 auto;padding:max(20px,env(safe-area-inset-top)) 16px 40px}
+header{text-align:center;padding:18px 0 22px}
+h1{margin:0;font-size:clamp(22px,7.2vw,52px);line-height:1.25;color:var(--yel);text-shadow:4px 4px 0 var(--pink),8px 8px 0 #3a1a7a;letter-spacing:1px}
+.tag{margin:18px 0 0;font-size:clamp(10px,2.9vw,15px);color:var(--cyan);line-height:1.7}
+.blink{animation:b 1.1s steps(2) infinite;color:var(--yel)}@keyframes b{50%{opacity:0}}
+.grid{display:grid;gap:22px;grid-template-columns:1fr}
+@media(min-width:700px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1000px){.grid{grid-template-columns:repeat(3,1fr)}}
+.card{display:flex;flex-direction:column;background:var(--card);border:4px solid var(--pink);box-shadow:6px 6px 0 #3a1a7a;text-decoration:none;color:#fff;transition:transform .08s}
+.card:active{transform:translate(3px,3px);box-shadow:3px 3px 0 #3a1a7a}
+.card img{display:block;width:100%;height:auto;aspect-ratio:3/4;object-fit:cover;border-bottom:4px solid var(--pink);background:#000}
+@media(max-width:699px){.card:not(.soon){flex-direction:row}.card img{width:42%;flex:none;align-self:flex-start;border-bottom:0;border-right:4px solid var(--pink)}
+.body{padding:10px 10px 12px;gap:8px}h2{font-size:12px}.desc{font-size:13px;line-height:1.35}.play{font-size:15px;padding:13px 0}.grid{gap:16px}}
+.body{padding:14px 14px 16px;display:flex;flex-direction:column;gap:10px;flex:1}
+.new{align-self:flex-start;font-size:9px;background:var(--yel);color:#000;padding:4px 6px}.tags{display:flex;gap:6px;align-self:flex-start}.done{background:#3dff6a}
+h2{margin:0;font-size:16px;line-height:1.4;color:var(--yel)}
+.desc{margin:0;font-family:ui-sans-serif,system-ui,sans-serif;font-size:15px;line-height:1.45;color:#dcd8ff;flex:1}
+.note{font-size:9px;color:var(--cyan);line-height:1.5}
+.play{display:block;text-align:center;font-size:18px;padding:16px 0;background:var(--yel);color:#000;border:3px solid #000;box-shadow:inset -4px -4px 0 #c9a800}
+.card:hover .play{background:#fff}
+.soon{border-style:dashed;border-color:var(--cyan);justify-content:center;align-items:center;text-align:center;min-height:220px;padding:24px;box-shadow:none}
+.soon h2{color:var(--cyan)}
+footer{text-align:center;margin-top:34px;font-size:9px;line-height:1.8;color:#8f88c9}
+footer a{color:var(--cyan)}
+
+/* uniform cards */
+.card h2{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;height:4.2em}
+.card .desc{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;flex:none;height:4.35em}
+.card .tags{min-height:17px}
+.card .play{margin-top:auto}
+.card:hover .play,.card:focus .play{box-shadow:0 0 14px var(--yel),inset -4px -4px 0 #c9a800}
+@media(max-width:699px){.card:not(.soon){height:auto}.card img{align-self:stretch;height:auto;aspect-ratio:3/4}.card .desc{-webkit-line-clamp:4;height:5.5em}.card h2{height:4.2em;font-size:11px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+ <h1>SPACE RIDERS<br>ARCADE</h1>
+ <p class="tag">Free browser games.<br>No wallet needed. <span class="blink">&#9654; Tap to play</span></p>
+</header>
+<main class="grid" id="games"></main>
+<footer><a href="verify.html" style="color:#ffe650">Verify a victory poster</a> &middot; &copy; Space Riders &middot; More games dropping soon</footer>
+</div>
+<noscript><p style="text-align:center"><a href="space-riders-kart/" style="color:#ffe650">Space Riders Kart</a> &middot; <a href="space-saga-of-fate/" style="color:#ffe650">Space Riders: Space Saga of Fate - Golden Force vs Silver Force</a> &middot; <a href="ros-bounty-run/" style="color:#ffe650">ROS Bounty Run: Daily Rider</a> &middot; <a href="hunter-rider/" style="color:#ffe650">Hunter Rider: Void Anomalies</a> &middot; <a href="space-riders-board/" style="color:#ffe650">Space Riders: Cosmic Board</a> &middot; <a href="star-squadron/" style="color:#ffe650">Star Squadron</a> &middot; <a href="supernova-showdown/" style="color:#ffe650">SuperNova Showdown</a> &middot; <a href="dream-strike/" style="color:#ffe650">Dream Strike</a> &middot; <a href="station-strike/" style="color:#ffe650">Station Strike</a></p></noscript>
+<script>
+// Add new games at the top of this list.
+const GAMES = [
+ {title:"Space Riders Kart", url:"https://sanyziahj.github.io/space-riders-kart/", img:"https://sanyziahj.github.io/img/space-riders-kart.webp", isNew:true,
+  desc:"Drift, boost and blast items as you race from the Moon to the Void Rift.", touch:true},
+ {title:"Space Riders: Space Saga of Fate - Golden Force vs Silver Force", url:"https://sanyziahj.github.io/space-saga-of-fate/", img:"https://sanyziahj.github.io/img/space-saga-of-fate.webp", isNew:true,
+  desc:"Pick a side and surf the cosmos in an epic Golden vs Silver showdown.", touch:true},
+ {title:"ROS Bounty Run: Daily Rider", url:"https://sanyziahj.github.io/ros-bounty-run/", img:"https://sanyziahj.github.io/img/ros-bounty-run.webp", isNew:true,
+  desc:"A fresh bounty every day. Blast the arena, keep your streak, face ROS.", touch:true},
+ {title:"Hunter Rider: Void Anomalies", url:"https://sanyziahj.github.io/hunter-rider/", img:"https://sanyziahj.github.io/img/hunter-rider.webp", isNew:true,
+  desc:"Gothic mystery platformer. Whip, blast and solve your way to the Underworld.", touch:true},
+ {title:"Space Riders: Cosmic Board", url:"https://sanyziahj.github.io/space-riders-board/", img:"https://sanyziahj.github.io/img/space-riders-board.webp", isNew:true,
+  desc:"Flip, grab and beam-grind on neon hoverboards all the way up to the sky.", touch:true},
+ {title:"Space Riders Fighter", url:"https://sanyziahj.github.io/space-riders-fighter/", img:"https://sanyziahj.github.io/img/space-riders-fighter.webp", isNew:true,
+  desc:"16-bit versus fighter. Raygun blasts, specials and supers for the Cosmic Championship.", touch:true},
+ {title:"Skippy's Quest", url:"https://sanyziahj.github.io/skippys-quest/", img:"https://sanyziahj.github.io/img/skippys-quest.webp", isNew:true, done:true,
+  desc:"Ride from the desert to Fright's Castle gathering Star Shards to bring the Red King home.", touch:true},
+ {title:"Star Squadron", url:"https://sanyziahj.github.io/star-squadron/", img:"https://sanyziahj.github.io/img/star-squadron.webp",
+  desc:"Barrel roll through meteors, Mars and deep space in a classic space shooter.", touch:true},
+ {title:"SuperNova Showdown", url:"https://sanyziahj.github.io/supernova-showdown/", img:"https://sanyziahj.github.io/img/supernova-showdown.webp",
+  desc:"Arcade beat 'em up from the Space Rider Diner to the SuperNova club.", touch:true},
+ {title:"Dream Strike", url:"https://sanyziahj.github.io/dream-strike/", img:"https://sanyziahj.github.io/img/dream-strike.webp",
+  desc:"Run-and-gun through the Moon Colony, DreamLand Carnival and Fright's Castle.", touch:true},
+ {title:"Station Strike", url:"https://sanyziahj.github.io/station-strike/", img:"https://sanyziahj.github.io/img/station-strike.webp",
+  desc:"The original. Blast through the Station to stop the Overlord before he finishes UPLOADING.", touch:true}
+];
+const SOON = true;
+const el = document.getElementById("games");
+const esc = s => s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+el.innerHTML = GAMES.map((g,i) => `
+ <a class="card" href="${g.url}">
+  <img src="${g.img}" alt="${esc(g.title)} victory poster" width="600" height="800" decoding="async">
+  <div class="body">
+   ${true?`<span class="tags">${g.isNew?'<span class="new">NEW</span>':''}${g.done?'<span class="new done">COMPLETE</span>':''}</span>`:''}
+   <h2>${esc(g.title)}</h2>
+   <p class="desc">${esc(g.desc)}</p>
+   
+   <span class="play">&#9654; PLAY</span>
+  </div>
+ </a>`).join("") + (SOON ? `
+ <div class="card soon"><h2>MORE COMING SOON</h2><p class="desc" style="flex:0;margin-top:12px">New Space Riders games drop here first.</p></div>` : "");
+</script>
+</body>
+</html>
