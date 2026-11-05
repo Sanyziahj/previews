@@ -1340,5 +1340,159 @@
     }
    ]
   }
+ ],
+ "missions": [
+  {
+   "id": "m1",
+   "title": "Our Home Planet",
+   "lessons": [
+    "e1",
+    "e5",
+    "e3",
+    "e2",
+    "e4"
+   ]
+  },
+  {
+   "id": "m2",
+   "title": "Green Earth",
+   "lessons": [
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+    "p5"
+   ]
+  },
+  {
+   "id": "m3",
+   "title": "Rock and Ice",
+   "lessons": [
+    "t1",
+    "t2",
+    "t3",
+    "t4",
+    "t5"
+   ]
+  },
+  {
+   "id": "m4",
+   "title": "Weather Watch",
+   "lessons": [
+    "w1",
+    "w2",
+    "w3",
+    "w4",
+    "w5"
+   ]
+  },
+  {
+   "id": "m5",
+   "title": "Wild Neighbors",
+   "lessons": [
+    "n1",
+    "n2",
+    "n3",
+    "n4",
+    "n5"
+   ]
+  },
+  {
+   "id": "m6",
+   "title": "Strange Signals",
+   "lessons": [
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5"
+   ]
+  },
+  {
+   "id": "m7",
+   "title": "Voices from Space",
+   "lessons": [
+    "x1",
+    "x2",
+    "x3",
+    "x4",
+    "x5"
+   ]
+  },
+  {
+   "id": "m8",
+   "title": "Machines and Minds",
+   "lessons": [
+    "x6",
+    "x7",
+    "x8",
+    "x9",
+    "x10"
+   ]
+  },
+  {
+   "id": "m9",
+   "title": "Survival Boot Camp",
+   "lessons": [
+    "s1",
+    "s2",
+    "s3",
+    "s4",
+    "s5"
+   ]
+  },
+  {
+   "id": "m10",
+   "title": "Survive the Wild",
+   "lessons": [
+    "s6",
+    "s7",
+    "s8",
+    "s9",
+    "s10"
+   ]
+  }
+ ],
+ "books": [
+  {
+   "id": "survival",
+   "title": "SURVIVAL MANUAL",
+   "track": "S"
+  },
+  {
+   "id": "plants",
+   "title": "FIELD GUIDE: PLANTS",
+   "track": "P"
+  },
+  {
+   "id": "land",
+   "title": "FIELD GUIDE: LAND & ROCK",
+   "track": "T"
+  },
+  {
+   "id": "sky",
+   "title": "FIELD GUIDE: SKY & WEATHER",
+   "track": "W"
+  },
+  {
+   "id": "wild",
+   "title": "FIELD GUIDE: WILD ANIMALS",
+   "track": "N"
+  },
+  {
+   "id": "space",
+   "title": "EARTH, MOON & SUN",
+   "track": "E"
+  },
+  {
+   "id": "signals",
+   "title": "HUMAN SIGNALS LOG",
+   "track": "H"
+  },
+  {
+   "id": "tech",
+   "title": "INTERCEPTED TECH MANUAL",
+   "track": "X"
+  }
  ]
 }
