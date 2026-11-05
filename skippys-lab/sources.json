@@ -534,6 +534,176 @@
    ]
   },
   {
+   "id": "s1",
+   "track": "S",
+   "title": "The Fire Triangle",
+   "sources": [
+    {
+     "name": "NPS: Wildland Fire Facts, There Must Be All Three",
+     "url": "https://www.nps.gov/articles/wildlandfire-facts-fuel-heat-oxygen.htm"
+    },
+    {
+     "name": "Smokey Bear (USDA Forest Service): Fire Science",
+     "url": "https://smokeybear.com/en/about-wildland-fire/fire-science"
+    }
+   ]
+  },
+  {
+   "id": "s2",
+   "track": "S",
+   "title": "Campfire Safety",
+   "sources": [
+    {
+     "name": "Smokey Bear (USDA Forest Service): Campfire Safety",
+     "url": "https://smokeybear.com/en/prevention-how-tos/campfire-safety"
+    },
+    {
+     "name": "Smokey Bear: About the Campaign",
+     "url": "https://smokeybear.com/en/smokeys-history/about-the-campaign"
+    }
+   ]
+  },
+  {
+   "id": "s3",
+   "track": "S",
+   "title": "Plant Safety",
+   "sources": [
+    {
+     "name": "CDC NIOSH: Poisonous Plants",
+     "url": "https://www.cdc.gov/niosh/outdoor-workers/about/poisonous-plants.html"
+    },
+    {
+     "name": "HRSA Poison Help: Plants",
+     "url": "https://poisonhelp.hrsa.gov/faq/plants"
+    }
+   ]
+  },
+  {
+   "id": "s4",
+   "track": "S",
+   "title": "Reading the Land",
+   "sources": [
+    {
+     "name": "USGS: Topographic Map Symbols",
+     "url": "https://pubs.usgs.gov/gip/TopographicMapSymbols/topomapsymbols.pdf"
+    },
+    {
+     "name": "USGS: Watersheds and Drainage Basins",
+     "url": "https://www.usgs.gov/special-topics/water-science-school/science/watersheds-and-drainage-basins"
+    }
+   ]
+  },
+  {
+   "id": "s5",
+   "track": "S",
+   "title": "Map and Compass",
+   "sources": [
+    {
+     "name": "NOAA NCEI: Magnetic Declination",
+     "url": "https://www.ncei.noaa.gov/products/magnetic-declination"
+    },
+    {
+     "name": "USGS: Topographic Map Symbols",
+     "url": "https://pubs.usgs.gov/gip/TopographicMapSymbols/topomapsymbols.pdf"
+    },
+    {
+     "name": "USGS: How to Get Your Map and Compass to Face the Same Direction",
+     "url": "https://www.usgs.gov/educational-resources/how-get-your-map-and-compass-face-same-direction"
+    }
+   ]
+  },
+  {
+   "id": "s6",
+   "track": "S",
+   "title": "STOP If You Get Lost",
+   "sources": [
+    {
+     "name": "USDA Forest Service: If You Get Lost",
+     "url": "https://www.fs.usda.gov/visit/know-before-you-go/if-you-get-lost"
+    },
+    {
+     "name": "USDA Forest Service: Naches Forest Safety (Hug a Tree)",
+     "url": "https://www.fs.usda.gov/sites/nfs/files/r06/okanogan-wenatchee/publication/OKE-Permits-RecRes-Naches-SafeUse-stelprdb5308013.pdf"
+    },
+    {
+     "name": "USDA Forest Service: Backcountry Safety, Water and Sanitation",
+     "url": "https://www.fs.usda.gov/sites/nfs/files/r05/sequoia/publication/Backcountry%20Safety_%20Water%20%26%20Sanitation%202025.pdf"
+    }
+   ]
+  },
+  {
+   "id": "s7",
+   "track": "S",
+   "title": "The Ten Essentials",
+   "sources": [
+    {
+     "name": "NPS: Ten Essentials",
+     "url": "https://www.nps.gov/articles/10essentials.htm"
+    },
+    {
+     "name": "CDC: Water Treatment When Hiking, Camping, or Traveling",
+     "url": "https://www.cdc.gov/drinking-water/prevention/water-treatment-hiking-camping-traveling.html"
+    }
+   ]
+  },
+  {
+   "id": "s8",
+   "track": "S",
+   "title": "Wild Animal Safety",
+   "sources": [
+    {
+     "name": "NPS: 7 Ways to Safely Watch Wildlife",
+     "url": "https://www.nps.gov/subjects/watchingwildlife/7ways.htm"
+    },
+    {
+     "name": "NPS Yellowstone: Safety",
+     "url": "https://www.nps.gov/yell/planyourvisit/safety-press.htm"
+    },
+    {
+     "name": "NPS: Staying Safe Around Bears",
+     "url": "https://www.nps.gov/subjects/bears/safety.htm"
+    },
+    {
+     "name": "NPS Montezuma Castle: Snakes",
+     "url": "https://www.nps.gov/moca/learn/nature/snakes.htm"
+    }
+   ]
+  },
+  {
+   "id": "s9",
+   "track": "S",
+   "title": "Cold Weather",
+   "sources": [
+    {
+     "name": "CDC: Preventing Hypothermia",
+     "url": "https://www.cdc.gov/winter-weather/prevention/"
+    }
+   ]
+  },
+  {
+   "id": "s10",
+   "track": "S",
+   "title": "Hot Weather",
+   "sources": [
+    {
+     "name": "NOAA NWS: Heat Cramps, Exhaustion, Stroke",
+     "url": "https://www.weather.gov/safety/heat-illness"
+    },
+    {
+     "name": "CDC: Sun Safety Facts",
+     "url": "https://www.cdc.gov/skin-cancer/sun-safety/index.html"
+    },
+    {
+     "name": "NPS: Ten Essentials (hydration)",
+     "url": "https://www.nps.gov/articles/10essentials.htm"
+    },
+    {
+     "name": "USDA Forest Service: If You Get Lost (rest in the shade)",
+     "url": "https://www.fs.usda.gov/visit/know-before-you-go/if-you-get-lost"
+    }
+   ]
+  },
+  {
    "id": "final",
    "track": "F",
    "title": "The Final Class",
@@ -1075,6 +1245,28 @@
     {
      "name": "NASA: Ingenuity's first flight",
      "url": "https://www.nasa.gov/news-release/nasas-ingenuity-mars-helicopter-succeeds-in-historic-first-flight/"
+    }
+   ]
+  },
+  {
+   "id": "poisonivy",
+   "name": "Poison Ivy",
+   "sci": "Toxicodendron radicans",
+   "sources": [
+    {
+     "name": "CDC NIOSH: Poisonous Plants",
+     "url": "https://www.cdc.gov/niosh/outdoor-workers/about/poisonous-plants.html"
+    }
+   ]
+  },
+  {
+   "id": "rattlesnake",
+   "name": "Rattlesnake",
+   "sci": null,
+   "sources": [
+    {
+     "name": "NPS Tuzigoot: Snakes",
+     "url": "https://www.nps.gov/tuzi/learn/nature/snakes.htm"
     }
    ]
   }
