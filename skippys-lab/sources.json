@@ -1,0 +1,1152 @@
+{
+ "generated": "2026-11-05",
+ "lessons": [
+  {
+   "id": "p1",
+   "track": "P",
+   "title": "Leaves Eat Light",
+   "sources": [
+    {
+     "name": "Britannica Kids",
+     "url": "https://kids.britannica.com/students/article/photosynthesis/276411"
+    }
+   ]
+  },
+  {
+   "id": "p2",
+   "track": "P",
+   "title": "Seeds on the Move",
+   "sources": [
+    {
+     "name": "USDA Forest Service: Seed Biology",
+     "url": "https://www.fs.usda.gov/nsl/Wpsm/Chapter1.pdf"
+    }
+   ]
+  },
+  {
+   "id": "p3",
+   "track": "P",
+   "title": "The Biggest Tree",
+   "sources": [
+    {
+     "name": "Britannica: giant sequoia",
+     "url": "https://kids.britannica.com/students/article/giant-sequoia/601183"
+    },
+    {
+     "name": "National Park Service: The Largest Trees in the World",
+     "url": "https://www.nps.gov/seki/learn/nature/largest-trees-in-world.htm"
+    }
+   ]
+  },
+  {
+   "id": "p4",
+   "track": "P",
+   "title": "A Tree Like a Bottle",
+   "sources": [
+    {
+     "name": "Kew: Extreme plant survivors (baobab)",
+     "url": "https://www.kew.org/read-and-watch/extreme-plant-survivors-baobab"
+    },
+    {
+     "name": "Kew POWO: Adansonia digitata",
+     "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:558628-1/general-information"
+    }
+   ]
+  },
+  {
+   "id": "p5",
+   "track": "P",
+   "title": "The Snap Trap Plant",
+   "sources": [
+    {
+     "name": "NC State University: 5 Things About Venus Flytraps",
+     "url": "https://cnr.ncsu.edu/news/2021/01/five-things-about-venus-flytraps/"
+    }
+   ]
+  },
+  {
+   "id": "t1",
+   "track": "T",
+   "title": "Mountains Rise Up",
+   "sources": [
+    {
+     "name": "USGS: This Dynamic Earth, The Himalayas",
+     "url": "https://pubs.usgs.gov/gip/dynamic/himalaya.html"
+    }
+   ]
+  },
+  {
+   "id": "t2",
+   "track": "T",
+   "title": "Rivers Carve Canyons",
+   "sources": [
+    {
+     "name": "USGS: Geology of Grand Canyon National Park",
+     "url": "https://www.usgs.gov/geology-and-ecology-of-national-parks/geology-grand-canyon-national-park"
+    },
+    {
+     "name": "National Park Service: Grand Canyon fly-through",
+     "url": "https://www.nps.gov/grca/learn/photosmultimedia/fly-through.htm"
+    }
+   ]
+  },
+  {
+   "id": "t3",
+   "track": "T",
+   "title": "Volcanoes",
+   "sources": [
+    {
+     "name": "USGS: Mauna Loa FAQ",
+     "url": "https://www.usgs.gov/volcanoes/mauna-loa/frequently-asked-questions-about-mauna-loa-volcano"
+    }
+   ]
+  },
+  {
+   "id": "t4",
+   "track": "T",
+   "title": "Rivers of Ice",
+   "sources": [
+    {
+     "name": "USGS: Ice, Snow, and Glaciers and the Water Cycle",
+     "url": "https://www.usgs.gov/water-science-school/science/ice-snow-and-glaciers-and-water-cycle"
+    },
+    {
+     "name": "USGS: What is a glacier?",
+     "url": "https://www.usgs.gov/faqs/what-a-glacier"
+    }
+   ]
+  },
+  {
+   "id": "t5",
+   "track": "T",
+   "title": "Three Kinds of Rock",
+   "sources": [
+    {
+     "name": "National Park Service: How Rocks are Classified",
+     "url": "https://www.nps.gov/subjects/geology/how-rocks-are-classified.htm"
+    }
+   ]
+  },
+  {
+   "id": "w1",
+   "track": "W",
+   "title": "Water Goes Round",
+   "sources": [
+    {
+     "name": "USGS: Water Cycle for Kids",
+     "url": "https://water.usgs.gov/edu/watercycle-kids-beg.html"
+    }
+   ]
+  },
+  {
+   "id": "w2",
+   "track": "W",
+   "title": "Cloud Spotter",
+   "sources": [
+    {
+     "name": "NOAA SciJinks: Types of Clouds",
+     "url": "https://scijinks.gov/about/k-12-education/atmosphere/types-of-clouds"
+    }
+   ]
+  },
+  {
+   "id": "w3",
+   "track": "W",
+   "title": "Lightning and Thunder",
+   "sources": [
+    {
+     "name": "NOAA NWS: How Hot Is Lightning?",
+     "url": "https://www.weather.gov/safety/lightning-temperature"
+    },
+    {
+     "name": "NOAA NSSL: Lightning FAQ",
+     "url": "https://www.nssl.noaa.gov/education/svrwx101/lightning/faq/"
+    }
+   ]
+  },
+  {
+   "id": "w4",
+   "track": "W",
+   "title": "Giant Spinning Storms",
+   "sources": [
+    {
+     "name": "NOAA: Hurricanes",
+     "url": "https://www.noaa.gov/education/resource-collections/weather-atmosphere/hurricanes"
+    },
+    {
+     "name": "NOAA: Tropical Cyclone Structure",
+     "url": "https://www.noaa.gov/jetstream/tropical/tropical-cyclone-introduction/tropical-cyclone-structure"
+    }
+   ]
+  },
+  {
+   "id": "w5",
+   "track": "W",
+   "title": "Weather or Climate?",
+   "sources": [
+    {
+     "name": "NOAA: Difference between climate and weather",
+     "url": "https://www.noaa.gov/explainers/what-s-difference-between-climate-and-weather"
+    }
+   ]
+  },
+  {
+   "id": "n1",
+   "track": "N",
+   "title": "The Biggest Animal Ever",
+   "sources": [
+    {
+     "name": "NOAA Fisheries: Blue Whale",
+     "url": "https://www.fisheries.noaa.gov/species/blue-whale"
+    },
+    {
+     "name": "NOAA Sanctuaries: Blue Whale",
+     "url": "https://sanctuaries.noaa.gov/magazine/5/channel-islands/"
+    }
+   ]
+  },
+  {
+   "id": "n2",
+   "track": "N",
+   "title": "Penguin Dads",
+   "sources": [
+    {
+     "name": "Australian Antarctic Program: Emperor penguin breeding cycle",
+     "url": "https://www.antarctica.gov.au/about-antarctica/animals/penguins/emperor-penguin/breeding-cycle/"
+    }
+   ]
+  },
+  {
+   "id": "n3",
+   "track": "N",
+   "title": "The Longest Trip",
+   "sources": [
+    {
+     "name": "PNAS: Tracking of Arctic terns reveals longest animal migration",
+     "url": "https://www.pnas.org/doi/10.1073/pnas.0909493107"
+    }
+   ]
+  },
+  {
+   "id": "n4",
+   "track": "N",
+   "title": "Coral Is Alive",
+   "sources": [
+    {
+     "name": "NOAA Ocean Service: Are corals animals or plants?",
+     "url": "https://oceanservice.noaa.gov/facts/coral.html"
+    },
+    {
+     "name": "NOAA: What is Zooxanthellae?",
+     "url": "https://oceanservice.noaa.gov/education/tutorial_corals/coral02_zooxanthellae.html"
+    }
+   ]
+  },
+  {
+   "id": "n5",
+   "track": "N",
+   "title": "Desert Tricks",
+   "sources": [
+    {
+     "name": "Smithsonian National Zoo: Camel care",
+     "url": "https://www.nationalzoo.si.edu/global-health-program/news/getting-over-hump-camel-care-kenya"
+    },
+    {
+     "name": "Natural History Museum: How do camels survive in deserts?",
+     "url": "https://www.nhm.ac.uk/discover/how-do-camels-survive-in-deserts.html"
+    }
+   ]
+  },
+  {
+   "id": "e1",
+   "track": "E",
+   "title": "Day and Night",
+   "sources": [
+    {
+     "name": "NASA Space Place: What Causes the Seasons?",
+     "url": "https://spaceplace.nasa.gov/seasons/en/"
+    }
+   ]
+  },
+  {
+   "id": "e2",
+   "track": "E",
+   "title": "Moon Shapes",
+   "sources": [
+    {
+     "name": "NASA: Moon Phases",
+     "url": "https://science.nasa.gov/moon/moon-phases/"
+    },
+    {
+     "name": "NASA: Moonlight",
+     "url": "https://science.nasa.gov/moon/moonlight/"
+    }
+   ]
+  },
+  {
+   "id": "e3",
+   "track": "E",
+   "title": "Why Seasons Happen",
+   "sources": [
+    {
+     "name": "NASA Space Place: What Causes the Seasons?",
+     "url": "https://spaceplace.nasa.gov/seasons/en/"
+    }
+   ]
+  },
+  {
+   "id": "e4",
+   "track": "E",
+   "title": "Tides",
+   "sources": [
+    {
+     "name": "NOAA: How frequent are tides?",
+     "url": "https://oceanservice.noaa.gov/facts/tidefrequency.html"
+    },
+    {
+     "name": "NOAA: What Causes Tides",
+     "url": "https://oceanservice.noaa.gov/education/tutorial_tides/tides02_cause.html"
+    }
+   ]
+  },
+  {
+   "id": "e5",
+   "track": "E",
+   "title": "Our Star",
+   "sources": [
+    {
+     "name": "NASA: Sun Facts",
+     "url": "https://science.nasa.gov/sun/facts/"
+    },
+    {
+     "name": "UCAR: Meet the Sun",
+     "url": "https://scied.ucar.edu/learning-zone/sun-space-weather/sun"
+    }
+   ]
+  },
+  {
+   "id": "h1",
+   "track": "H",
+   "title": "Lights in the Dark",
+   "sources": [
+    {
+     "name": "NASA: Night Lights, The Black Marble",
+     "url": "https://science.nasa.gov/earth/earth-observatory/night-lights-2012-the-black-marble-79803/"
+    },
+    {
+     "name": "NASA VIIRS Land: Black Marble",
+     "url": "https://viirsland.gsfc.nasa.gov/Products/NASA/BlackMarble.html"
+    }
+   ]
+  },
+  {
+   "id": "h2",
+   "track": "H",
+   "title": "A Gas in the Air",
+   "sources": [
+    {
+     "name": "NOAA GML: Mauna Loa CO2 annual mean",
+     "url": "https://gml.noaa.gov/webdata/ccgg/trends/co2/co2_annmean_mlo.txt"
+    },
+    {
+     "name": "NOAA: CO2 now more than 50% higher than pre-industrial levels",
+     "url": "https://www.noaa.gov/news-release/carbon-dioxide-now-more-than-50-higher-than-pre-industrial-levels"
+    }
+   ]
+  },
+  {
+   "id": "h3",
+   "track": "H",
+   "title": "Shrinking Ice",
+   "sources": [
+    {
+     "name": "USGS: Status of Glaciers in Glacier National Park",
+     "url": "https://www.usgs.gov/centers/norock/science/status-glaciers-glacier-national-park"
+    },
+    {
+     "name": "NASA: World of Change, Glacier National Park",
+     "url": "https://science.nasa.gov/earth/earth-observatory/world-of-change/glacier-national-park/"
+    }
+   ]
+  },
+  {
+   "id": "h4",
+   "track": "H",
+   "title": "Forest Patterns",
+   "sources": [
+    {
+     "name": "NASA: World of Change, Amazon Deforestation",
+     "url": "https://science.nasa.gov/earth/earth-observatory/world-of-change/amazon-deforestation/"
+    },
+    {
+     "name": "NASA SVS: Fishbone Forest",
+     "url": "https://svs.gsfc.nasa.gov/11061"
+    }
+   ]
+  },
+  {
+   "id": "h5",
+   "track": "H",
+   "title": "The Healing Shield",
+   "sources": [
+    {
+     "name": "NASA: 2024 Ozone Hole Ranked 7th-Smallest Since Recovery Began",
+     "url": "https://www.nasa.gov/earth/climate-change/ozone-layer/nasa-noaa-rank-2024-ozone-hole-as-7th-smallest-since-recovery-began/"
+    },
+    {
+     "name": "NOAA: 2025 ozone hole is 5th smallest since 1992",
+     "url": "https://www.noaa.gov/news-release/noaa-nasa-2025-ozone-hole-is-5th-smallest-since-1992"
+    }
+   ]
+  },
+  {
+   "id": "x1",
+   "track": "X",
+   "title": "Beep! A Satellite",
+   "sources": [
+    {
+     "name": "NASA: Dawn of the Space Age",
+     "url": "https://www.nasa.gov/history/dawn-of-the-space-age/"
+    }
+   ]
+  },
+  {
+   "id": "x2",
+   "track": "X",
+   "title": "GPS: Where Am I?",
+   "sources": [
+    {
+     "name": "GPS.gov: Space Segment",
+     "url": "https://www.gps.gov/space-segment"
+    }
+   ]
+  },
+  {
+   "id": "x3",
+   "track": "X",
+   "title": "A House in Space",
+   "sources": [
+    {
+     "name": "NASA: Spot the Station FAQ",
+     "url": "https://www.nasa.gov/missions/station/spot-the-station-frequently-asked-questions/"
+    },
+    {
+     "name": "NASA: Space Station Facts and Figures",
+     "url": "https://www.nasa.gov/international-space-station/space-station-facts-and-figures/"
+    }
+   ]
+  },
+  {
+   "id": "x4",
+   "track": "X",
+   "title": "Eyes in Space",
+   "sources": [
+    {
+     "name": "NASA: Hubble Observatory",
+     "url": "https://science.nasa.gov/mission/hubble/observatory/"
+    },
+    {
+     "name": "NASA: Webb Fact Sheet",
+     "url": "https://science.nasa.gov/mission/webb/fact-sheet"
+    }
+   ]
+  },
+  {
+   "id": "x5",
+   "track": "X",
+   "title": "How Rockets Fly",
+   "sources": [
+    {
+     "name": "NASA: What Is a Rocket? (Grades K-4)",
+     "url": "https://www.nasa.gov/learning-resources/for-kids-and-students/what-is-a-rocket-grades-k-4/"
+    }
+   ]
+  },
+  {
+   "id": "x6",
+   "track": "X",
+   "title": "Power from Sunlight",
+   "sources": [
+    {
+     "name": "US Dept. of Energy: Solar Photovoltaic Cell Basics",
+     "url": "https://www.energy.gov/cmei/systems/solar-photovoltaic-cell-basics"
+    },
+    {
+     "name": "NASA: Vanguard Satellite, 1958",
+     "url": "https://www.nasa.gov/image-article/vanguard-satellite-1958/"
+    }
+   ]
+  },
+  {
+   "id": "x7",
+   "track": "X",
+   "title": "Radio Waves",
+   "sources": [
+    {
+     "name": "NASA: Radio Waves",
+     "url": "https://science.nasa.gov/ems/05_radiowaves/"
+    },
+    {
+     "name": "NASA: Anatomy of an Electromagnetic Wave",
+     "url": "https://science.nasa.gov/ems/02_anatomy/"
+    }
+   ]
+  },
+  {
+   "id": "x8",
+   "track": "X",
+   "title": "The Web",
+   "sources": [
+    {
+     "name": "CERN: A short history of the Web",
+     "url": "https://home.cern/science/computing/the-birth-of-the-web/short-history-web/"
+    }
+   ]
+  },
+  {
+   "id": "x9",
+   "track": "X",
+   "title": "Robots on Mars",
+   "sources": [
+    {
+     "name": "NASA: Perseverance lands on Mars",
+     "url": "https://www.nasa.gov/news-release/touchdown-nasas-mars-perseverance-rover-safely-lands-on-red-planet/"
+    },
+    {
+     "name": "NASA: Ingenuity's first flight",
+     "url": "https://www.nasa.gov/news-release/nasas-ingenuity-mars-helicopter-succeeds-in-historic-first-flight/"
+    }
+   ]
+  },
+  {
+   "id": "x10",
+   "track": "X",
+   "title": "Thinking Machines",
+   "sources": [
+    {
+     "name": "NIST CSRC Glossary: Machine Learning",
+     "url": "https://csrc.nist.gov/glossary/term/machine_learning"
+    },
+    {
+     "name": "NIST CSRC Glossary: Artificial Intelligence",
+     "url": "https://csrc.nist.gov/glossary/term/artificial_intelligence"
+    }
+   ]
+  },
+  {
+   "id": "final",
+   "track": "F",
+   "title": "The Final Class",
+   "sources": [
+    {
+     "name": "Skippy's Knowledge Manual: every chapter's sources",
+     "url": "about:manual"
+    }
+   ]
+  }
+ ],
+ "cards": [
+  {
+   "id": "broccoli",
+   "name": "Broccoli",
+   "sci": "Brassica oleracea (Italica Group)",
+   "sources": [
+    {
+     "name": "Britannica Kids: broccoli",
+     "url": "https://kids.britannica.com/scholars/article/broccoli/16560"
+    },
+    {
+     "name": "Kew POWO: Brassica oleracea",
+     "url": "https://powo.science.kew.org/taxon/urn:lsid:ipni.org:names:279435-1/general-information"
+    },
+    {
+     "name": "Kew: Taming the savage cabbage",
+     "url": "https://www.kew.org/read-and-watch/savage-cabbage"
+    }
+   ]
+  },
+  {
+   "id": "sunflower",
+   "name": "Sunflower",
+   "sci": "Helianthus annuus",
+   "sources": [
+    {
+     "name": "USDA NRCS Plant Guide: Annual Sunflower",
+     "url": "https://plants.sc.egov.usda.gov/DocumentLibrary/plantguide/pdf/cs_hean3.pdf"
+    }
+   ]
+  },
+  {
+   "id": "sequoia",
+   "name": "Giant Sequoia",
+   "sci": "Sequoiadendron giganteum",
+   "sources": [
+    {
+     "name": "Britannica: giant sequoia",
+     "url": "https://kids.britannica.com/students/article/giant-sequoia/601183"
+    },
+    {
+     "name": "NPS: The Largest Trees in the World",
+     "url": "https://www.nps.gov/seki/learn/nature/largest-trees-in-world.htm"
+    }
+   ]
+  },
+  {
+   "id": "baobab",
+   "name": "Baobab",
+   "sci": "Adansonia digitata",
+   "sources": [
+    {
+     "name": "Kew: Extreme plant survivors (baobab)",
+     "url": "https://www.kew.org/read-and-watch/extreme-plant-survivors-baobab"
+    }
+   ]
+  },
+  {
+   "id": "flytrap",
+   "name": "Venus Flytrap",
+   "sci": "Dionaea muscipula",
+   "sources": [
+    {
+     "name": "NC State University: 5 Things About Venus Flytraps",
+     "url": "https://cnr.ncsu.edu/news/2021/01/five-things-about-venus-flytraps/"
+    }
+   ]
+  },
+  {
+   "id": "kelp",
+   "name": "Giant Kelp",
+   "sci": "Macrocystis pyrifera",
+   "sources": [
+    {
+     "name": "NOAA Sanctuaries: Kelp Forest",
+     "url": "https://sanctuaries.noaa.gov/visit/ecosystems/kelpdesc.html"
+    },
+    {
+     "name": "NPS: Giant Kelp",
+     "url": "https://www.nps.gov/articles/giant-kelp.htm"
+    }
+   ]
+  },
+  {
+   "id": "canyon",
+   "name": "Grand Canyon",
+   "sci": null,
+   "sources": [
+    {
+     "name": "USGS: Geology of Grand Canyon National Park",
+     "url": "https://www.usgs.gov/geology-and-ecology-of-national-parks/geology-grand-canyon-national-park"
+    },
+    {
+     "name": "NPS: Grand Canyon fly-through",
+     "url": "https://www.nps.gov/grca/learn/photosmultimedia/fly-through.htm"
+    }
+   ]
+  },
+  {
+   "id": "sahara",
+   "name": "Sahara",
+   "sci": null,
+   "sources": [
+    {
+     "name": "Britannica Kids: Sahara",
+     "url": "https://kids.britannica.com/kids/article/Sahara/346205"
+    }
+   ]
+  },
+  {
+   "id": "maunaloa",
+   "name": "Mauna Loa",
+   "sci": null,
+   "sources": [
+    {
+     "name": "USGS: Mauna Loa FAQ",
+     "url": "https://www.usgs.gov/volcanoes/mauna-loa/frequently-asked-questions-about-mauna-loa-volcano"
+    }
+   ]
+  },
+  {
+   "id": "maunakea",
+   "name": "Mauna Kea",
+   "sci": null,
+   "sources": [
+    {
+     "name": "USGS: How big are the Hawaiian volcanoes?",
+     "url": "https://www.usgs.gov/faqs/how-big-are-hawaiian-volcanoes"
+    }
+   ]
+  },
+  {
+   "id": "himalaya",
+   "name": "Himalaya",
+   "sci": null,
+   "sources": [
+    {
+     "name": "USGS: This Dynamic Earth, The Himalayas",
+     "url": "https://pubs.usgs.gov/gip/dynamic/himalaya.html"
+    }
+   ]
+  },
+  {
+   "id": "trench",
+   "name": "Mariana Trench",
+   "sci": null,
+   "sources": [
+    {
+     "name": "NOAA Ocean Exploration: How deep is the ocean?",
+     "url": "https://oceanexplorer.noaa.gov/ocean-fact/ocean-depth/"
+    },
+    {
+     "name": "NOAA Fisheries: Mariana Trench Marine National Monument",
+     "url": "https://www.fisheries.noaa.gov/pacific-islands/habitat-conservation/mariana-trench-marine-national-monument"
+    }
+   ]
+  },
+  {
+   "id": "ridge",
+   "name": "Mid-Ocean Ridge",
+   "sci": null,
+   "sources": [
+    {
+     "name": "NOAA Ocean Exploration: What is a mid-ocean ridge?",
+     "url": "https://oceanexplorer.noaa.gov/ocean-fact/mid-ocean-ridge/"
+    }
+   ]
+  },
+  {
+   "id": "glacier",
+   "name": "Glacier",
+   "sci": null,
+   "sources": [
+    {
+     "name": "USGS: What is a glacier?",
+     "url": "https://www.usgs.gov/faqs/what-a-glacier"
+    },
+    {
+     "name": "USGS: Ice, Snow, and Glaciers and the Water Cycle",
+     "url": "https://www.usgs.gov/water-science-school/science/ice-snow-and-glaciers-and-water-cycle"
+    }
+   ]
+  },
+  {
+   "id": "amazon",
+   "name": "Amazon River",
+   "sci": null,
+   "sources": [
+    {
+     "name": "Britannica Kids: Amazon River",
+     "url": "https://kids.britannica.com/students/article/Amazon-River/272828"
+    }
+   ]
+  },
+  {
+   "id": "earthwater",
+   "name": "Water World",
+   "sci": null,
+   "sources": [
+    {
+     "name": "USGS: How Much Water is There on Earth?",
+     "url": "https://www.usgs.gov/water-science-school/science/how-much-water-there-earth"
+    }
+   ]
+  },
+  {
+   "id": "cumulonimbus",
+   "name": "Storm Cloud",
+   "sci": "Cumulonimbus",
+   "sources": [
+    {
+     "name": "NOAA SciJinks: Types of Clouds",
+     "url": "https://scijinks.gov/about/k-12-education/atmosphere/types-of-clouds"
+    }
+   ]
+  },
+  {
+   "id": "lightning",
+   "name": "Lightning",
+   "sci": null,
+   "sources": [
+    {
+     "name": "NOAA NWS: How Hot Is Lightning?",
+     "url": "https://www.weather.gov/safety/lightning-temperature"
+    }
+   ]
+  },
+  {
+   "id": "hurricane",
+   "name": "Hurricane",
+   "sci": null,
+   "sources": [
+    {
+     "name": "NOAA: Hurricanes",
+     "url": "https://www.noaa.gov/education/resource-collections/weather-atmosphere/hurricanes"
+    },
+    {
+     "name": "NOAA: Tropical Cyclone Structure",
+     "url": "https://www.noaa.gov/jetstream/tropical/tropical-cyclone-introduction/tropical-cyclone-structure"
+    }
+   ]
+  },
+  {
+   "id": "aurora",
+   "name": "Aurora",
+   "sci": null,
+   "sources": [
+    {
+     "name": "NOAA NESDIS: What is an Aurora?",
+     "url": "https://www.nesdis.noaa.gov/about/k-12-education/optical-phenomena/what-aurora"
+    }
+   ]
+  },
+  {
+   "id": "rainbow",
+   "name": "Rainbow",
+   "sci": null,
+   "sources": [
+    {
+     "name": "NOAA SciJinks: What Causes a Rainbow?",
+     "url": "https://scijinks.gov/about/k-12-education/optical-phenomena/what-causes-rainbow"
+    }
+   ]
+  },
+  {
+   "id": "snowflake",
+   "name": "Snowflake",
+   "sci": null,
+   "sources": [
+    {
+     "name": "NOAA: How do snowflakes form?",
+     "url": "https://www.noaa.gov/stories/how-do-snowflakes-form-science-behind-snow"
+    }
+   ]
+  },
+  {
+   "id": "tornado",
+   "name": "Tornado",
+   "sci": null,
+   "sources": [
+    {
+     "name": "NOAA NSSL: Tornado Basics",
+     "url": "https://www.nssl.noaa.gov/education/svrwx101/tornadoes/"
+    }
+   ]
+  },
+  {
+   "id": "bluewhale",
+   "name": "Blue Whale",
+   "sci": "Balaenoptera musculus",
+   "sources": [
+    {
+     "name": "NOAA Fisheries: Blue Whale",
+     "url": "https://www.fisheries.noaa.gov/species/blue-whale"
+    }
+   ]
+  },
+  {
+   "id": "penguin",
+   "name": "Emperor Penguin",
+   "sci": "Aptenodytes forsteri",
+   "sources": [
+    {
+     "name": "Australian Antarctic Program: Emperor penguin breeding cycle",
+     "url": "https://www.antarctica.gov.au/about-antarctica/animals/penguins/emperor-penguin/breeding-cycle/"
+    }
+   ]
+  },
+  {
+   "id": "tern",
+   "name": "Arctic Tern",
+   "sci": "Sterna paradisaea",
+   "sources": [
+    {
+     "name": "PNAS: Tracking of Arctic terns reveals longest animal migration",
+     "url": "https://www.pnas.org/doi/10.1073/pnas.0909493107"
+    }
+   ]
+  },
+  {
+   "id": "monarch",
+   "name": "Monarch Butterfly",
+   "sci": "Danaus plexippus",
+   "sources": [
+    {
+     "name": "USDA Forest Service: Monarch Butterfly Migration",
+     "url": "https://www.fs.usda.gov/wildflowers/pollinators/Monarch_Butterfly/migration/"
+    }
+   ]
+  },
+  {
+   "id": "octopus",
+   "name": "Octopus",
+   "sci": null,
+   "sources": [
+    {
+     "name": "Smithsonian Ocean: Octopuses, Squids, and Relatives",
+     "url": "https://ocean.si.edu/ocean-life/invertebrates/octopuses-squids-and-relatives"
+    }
+   ]
+  },
+  {
+   "id": "coral",
+   "name": "Reef Coral",
+   "sci": null,
+   "sources": [
+    {
+     "name": "NOAA Ocean Service: Are corals animals or plants?",
+     "url": "https://oceanservice.noaa.gov/facts/coral.html"
+    }
+   ]
+  },
+  {
+   "id": "cheetah",
+   "name": "Cheetah",
+   "sci": "Acinonyx jubatus",
+   "sources": [
+    {
+     "name": "Smithsonian National Zoo: Cheetah",
+     "url": "https://www.nationalzoo.si.edu/animals/cheetah"
+    }
+   ]
+  },
+  {
+   "id": "falcon",
+   "name": "Peregrine Falcon",
+   "sci": "Falco peregrinus",
+   "sources": [
+    {
+     "name": "Cornell Lab: Peregrine Falcon",
+     "url": "https://www.allaboutbirds.org/guide/Peregrine_Falcon/overview"
+    },
+    {
+     "name": "Smithsonian Magazine: The World's Fastest Animal",
+     "url": "https://www.smithsonianmag.com/science-nature/the-worlds-fastest-animal-takes-new-york-12317871/"
+    }
+   ]
+  },
+  {
+   "id": "camel",
+   "name": "Camel",
+   "sci": null,
+   "sources": [
+    {
+     "name": "Smithsonian National Zoo: Camel care",
+     "url": "https://www.nationalzoo.si.edu/global-health-program/news/getting-over-hump-camel-care-kenya"
+    }
+   ]
+  },
+  {
+   "id": "tardigrade",
+   "name": "Water Bear",
+   "sci": "Tardigrada",
+   "sources": [
+    {
+     "name": "Britannica Kids: tardigrade",
+     "url": "https://kids.britannica.com/students/article/tardigrade/701084"
+    },
+    {
+     "name": "Smithsonian Magazine: How are tardigrades so indestructible?",
+     "url": "https://www.smithsonianmag.com/smart-news/how-are-tardigrades-so-indestructible-scientists-finally-have-explanation-180983613/"
+    }
+   ]
+  },
+  {
+   "id": "panda",
+   "name": "Giant Panda",
+   "sci": "Ailuropoda melanoleuca",
+   "sources": [
+    {
+     "name": "Smithsonian National Zoo: Giant Panda FAQs",
+     "url": "https://nationalzoo.si.edu/animals/giant-panda-faqs"
+    }
+   ]
+  },
+  {
+   "id": "hummingbird",
+   "name": "Hummingbird",
+   "sci": null,
+   "sources": [
+    {
+     "name": "Smithsonian National Zoo: Hummingbirds",
+     "url": "https://www.nationalzoo.si.edu/migratory-birds/hummingbirds"
+    }
+   ]
+  },
+  {
+   "id": "moon",
+   "name": "The Moon",
+   "sci": null,
+   "sources": [
+    {
+     "name": "NASA: Moon Facts",
+     "url": "https://science.nasa.gov/moon/facts/"
+    },
+    {
+     "name": "NASA: Moonlight",
+     "url": "https://science.nasa.gov/moon/moonlight/"
+    }
+   ]
+  },
+  {
+   "id": "sun",
+   "name": "The Sun",
+   "sci": null,
+   "sources": [
+    {
+     "name": "NASA: Sun Facts",
+     "url": "https://science.nasa.gov/sun/facts/"
+    },
+    {
+     "name": "UCAR: Meet the Sun",
+     "url": "https://scied.ucar.edu/learning-zone/sun-space-weather/sun"
+    }
+   ]
+  },
+  {
+   "id": "nightlights",
+   "name": "Earth at Night",
+   "sci": null,
+   "sources": [
+    {
+     "name": "NASA: Night Lights, The Black Marble",
+     "url": "https://science.nasa.gov/earth/earth-observatory/night-lights-2012-the-black-marble-79803/"
+    }
+   ]
+  },
+  {
+   "id": "debris",
+   "name": "Space Junk",
+   "sci": null,
+   "sources": [
+    {
+     "name": "NASA Orbital Debris Program Office: FAQ",
+     "url": "https://orbitaldebris.jsc.nasa.gov/faq/"
+    }
+   ]
+  },
+  {
+   "id": "iss",
+   "name": "Space Station",
+   "sci": null,
+   "sources": [
+    {
+     "name": "NASA: Spot the Station FAQ",
+     "url": "https://www.nasa.gov/missions/station/spot-the-station-frequently-asked-questions/"
+    }
+   ]
+  },
+  {
+   "id": "hubble",
+   "name": "Hubble Telescope",
+   "sci": null,
+   "sources": [
+    {
+     "name": "NASA: Hubble Observatory",
+     "url": "https://science.nasa.gov/mission/hubble/observatory/"
+    }
+   ]
+  },
+  {
+   "id": "webb",
+   "name": "Webb Telescope",
+   "sci": null,
+   "sources": [
+    {
+     "name": "NASA: Webb Fact Sheet",
+     "url": "https://science.nasa.gov/mission/webb/fact-sheet"
+    }
+   ]
+  },
+  {
+   "id": "gps",
+   "name": "GPS Satellite",
+   "sci": null,
+   "sources": [
+    {
+     "name": "GPS.gov: Space Segment",
+     "url": "https://www.gps.gov/space-segment"
+    }
+   ]
+  },
+  {
+   "id": "helicopter",
+   "name": "Mars Helicopter",
+   "sci": null,
+   "sources": [
+    {
+     "name": "NASA: Ingenuity's first flight",
+     "url": "https://www.nasa.gov/news-release/nasas-ingenuity-mars-helicopter-succeeds-in-historic-first-flight/"
+    }
+   ]
+  }
+ ],
+ "guests": [
+  {
+   "rider": "VAPOR",
+   "lesson": "w1",
+   "sources": [
+    {
+     "name": "NASA: How Do Clouds Form?",
+     "url": "https://science.nasa.gov/kids/earth/how-do-clouds-form/"
+    }
+   ]
+  },
+  {
+   "rider": "TONI",
+   "lesson": "w2",
+   "sources": [
+    {
+     "name": "NOAA: How Clouds Form",
+     "url": "https://www.noaa.gov/jetstream/clouds/how-clouds-form"
+    },
+    {
+     "name": "NOAA SciJinks: Fog and Clouds",
+     "url": "https://scijinks.gov/about/k-12-education/atmosphere/whats-the-difference-between-fog-and-clouds"
+    }
+   ]
+  },
+  {
+   "rider": "DRACO",
+   "lesson": "w4",
+   "sources": [
+    {
+     "name": "NOAA NHC: Mariner's Guide to Tropical Cyclones",
+     "url": "https://www.nhc.noaa.gov/marinersguide.pdf"
+    }
+   ]
+  },
+  {
+   "rider": "CHAMBERS",
+   "lesson": "e2",
+   "sources": [
+    {
+     "name": "NASA: Moon Facts",
+     "url": "https://science.nasa.gov/moon/facts/"
+    }
+   ]
+  },
+  {
+   "rider": "BILLY SATURDAY",
+   "lesson": "e5",
+   "sources": [
+    {
+     "name": "NASA: Saturn Facts",
+     "url": "https://science.nasa.gov/saturn/facts/"
+    },
+    {
+     "name": "NASA Space Place: All About Saturn",
+     "url": "https://spaceplace.nasa.gov/all-about-saturn/en/"
+    }
+   ]
+  },
+  {
+   "rider": "EYEREENIA",
+   "lesson": "x4",
+   "sources": [
+    {
+     "name": "NASA: Webb's Mirrors",
+     "url": "https://science.nasa.gov/mission/webb/webbs-mirrors/"
+    }
+   ]
+  }
+ ]
+}
