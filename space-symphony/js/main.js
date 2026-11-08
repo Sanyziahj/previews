@@ -106,6 +106,7 @@ const COL = {
 };
 
 let renderer, scene, camera, composer, bloomPass, gradePass, world, cast, fluff, sun, hemi, sunTarget, audio;
+const _hud = new THREE.Vector3();
 let last = performance.now();
 
 function realmOn() { return G.realm >= 0.5; }
@@ -277,12 +278,13 @@ function setupPost() {
       void main(){
         float heatBand = (1.0 - dream) * heat * smoothstep(0.55, 0.0, vUv.y);
         vec2 uv = vUv;
-        uv.x += heatBand * 0.0035 * sin(vUv.y * 70.0 + time * 7.0 + vUv.x * 18.0);
+        uv.x += heatBand * 0.006 * sin(vUv.y * 70.0 + time * 7.0 + vUv.x * 18.0);
         uv.y += dream * 0.002 * sin(vUv.x * 30.0 + time * 1.5);
         vec4 col = texture2D(tDiffuse, uv);
-        vec3 warm = vec3(1.05, 0.96, 0.88);
-        vec3 cool = vec3(0.82, 0.78, 1.18);
+        vec3 warm = vec3(1.08, 0.94, 0.78);
+        vec3 cool = vec3(0.72, 0.62, 1.28);
         col.rgb *= mix(warm, cool, dream);
+        col.rgb += vec3(0.05, 0.0, 0.08) * dream;
         float vig = smoothstep(0.95, 0.35, length(vUv - 0.5));
         col.rgb *= mix(0.78, 1.0, vig);
         gl_FragColor = col;
@@ -304,8 +306,9 @@ function applyQuality() {
   G.features.post = (G.features.bloom || q === 'high' || q === 'med') && G.api === 'webgl2';
   if (renderer) renderer.shadowMap.enabled = shadow;
   if (sun) {
-    const sz = q === 'high' ? 2048 : 1024;
+    const sz = q === 'high' ? 2048 : q === 'med' ? 1536 : 1024;
     sun.shadow.mapSize.set(sz, sz);
+    sun.shadow.radius = q === 'high' ? 3.5 : q === 'med' ? 2 : 1;
     sun.castShadow = shadow;
     if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; }
   }
@@ -1072,6 +1075,12 @@ function tickActors(dt) {
   cast.skippy.group.visible = G.inv <= 0 || Math.sin(G.time * 28) > 0;
   cast.skippy.label.visible = false;
   animateRider(cast.skippy, G.time, G.mode === 'play' ? G.speed : 0, !!G.mount);
+  if (G.lift > 0.12 && cast.skippy.legL) {
+    cast.skippy.legL.rotation.x = -0.7;
+    cast.skippy.legR.rotation.x = 0.45;
+    cast.skippy.armL.rotation.x = -1.1;
+    cast.skippy.armR.rotation.x = -0.9;
+  }
 
   const roster = [
     ['ls', cast.ls], ['ros', cast.ros], ['tired', cast.tired], ['kid', cast.kid],
@@ -1085,13 +1094,15 @@ function tickActors(dt) {
     actor.group.visible = true;
     const moving = id === 'ros' || id === 'tired' ? 3 : 0;
     animateRider(actor, G.time, moving, false);
-    actor.label.visible = Math.hypot(G.x - p.x, G.z - p.z) < 20 && G.mode === 'play';
+    actor.label.visible = Math.hypot(G.x - p.x, G.z - p.z) < 18 && G.mode === 'play';
+    tuckLabel(actor);
   }
   const nk = G.who.nuke;
   const nukeY = heightAt(nk.x, nk.z);
   cast.nuke.group.position.set(nk.x, nukeY, nk.z);
   cast.nuke.group.rotation.y = nk.yaw || 0;
-  cast.nuke.label.visible = Math.hypot(G.x - nk.x, G.z - nk.z) < 20 && G.mode === 'play';
+  cast.nuke.label.visible = Math.hypot(G.x - nk.x, G.z - nk.z) < 18 && G.mode === 'play';
+  tuckLabel(cast.nuke);
   cast.nuke.legs.forEach((leg, i) => { leg.rotation.x = Math.sin(G.time * 10 + i) * 0.4; });
 
   placeVehicle(cast.board, G.mount === 'board' ? { x: G.x, z: G.z, y: G.displayY - 0.05 } : null, G.board, 0.15);
@@ -1171,6 +1182,21 @@ function tickActors(dt) {
   world.wakeRoot.visible = !dream;
   const flash = Math.max(0, 1 - Math.abs(G.realm - 0.5) * 7);
   $('flash').style.opacity = String(flash * 0.72);
+}
+
+function tuckLabel(actor) {
+  if (!actor?.label?.visible) return;
+  actor.label.getWorldPosition(_hud);
+  _hud.project(camera);
+  if (_hud.z < 0 || _hud.z > 1) { actor.label.visible = false; return; }
+  const sx = _hud.x * 0.5 + 0.5;
+  const sy = -_hud.y * 0.5 + 0.5;
+  if (sy < 0.46 && (sx < 0.52 || sx > 0.68)) actor.label.visible = false;
+}
+
+function cullLabels() {
+  if (!cast) return;
+  for (const actor of [cast.nuke, cast.ros, cast.ls, cast.ds, cast.rusty, cast.slide, cast.tired, cast.kid, cast.patron]) tuckLabel(actor);
 }
 
 function placeRider(actor, x, y, yaw) {
@@ -1537,6 +1563,7 @@ function updateCamera() {
   cz = G.z + (cz - G.z) * clip;
   camera.position.set(cx, cyh, cz);
   camera.lookAt(G.x, lookY, G.z);
+  cullLabels();
 }
 
 function camClip(tx, ty, tz, cx, cy, cz) {
@@ -1807,6 +1834,7 @@ function continueGame() {
 }
 
 function bind() {
+  $('qtoggle').addEventListener('click', () => $('questbox').classList.toggle('open'));
   $('playBtn').addEventListener('click', () => { ensureAudio(); startNew(); });
   $('continueBtn').addEventListener('click', () => { ensureAudio(); continueGame(); });
   $('cardNext').addEventListener('click', () => dismiss());

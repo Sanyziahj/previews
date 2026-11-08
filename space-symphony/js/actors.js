@@ -137,12 +137,16 @@ export function makeRider(THREE, spec) {
       g.add(shade);
     }
   }
-  const baked = bakeColored(THREE, g);
-  const holder = new THREE.Group();
-  holder.add(baked);
+  const neck = new THREE.Mesh(
+    geo(THREE, 'neck', () => new THREE.TorusGeometry(0.18, 0.045, 6, 14)),
+    mat(THREE, 'neck', { color: 0x14161c, roughness: 0.35, metalness: 0.55 })
+  );
+  neck.rotation.x = Math.PI / 2;
+  neck.position.y = 1.4;
+  g.add(neck);
   const label = makeLabel(THREE, spec.label || spec.name || '');
-  holder.add(label);
-  return { group: holder, label, spec };
+  g.add(label);
+  return { group: g, armL, armR, legL, legR, label, spec };
 }
 
 function bakeColored(THREE, root) {
@@ -620,14 +624,14 @@ export function makePulseRing(THREE) {
 
 export function buildCast(THREE, scene) {
   const specs = {
-    skippy: { name: 'Skippy', label: 'SKIPPY', head: 0xf7f7fb, suit: 0xf4f6f8, glove: 0xf7f7fb, boot: 0xe8e8ee, plate: 0x1c1e22, eyes: 'slit', mouth: 'grin', hat: 'beanie', backpack: true, scale: 0.9 },
+    skippy: { name: 'Skippy', label: 'SKIPPY', head: 0xf7f7fb, suit: 0xd5dee8, glove: 0xb4bec8, boot: 0x2a3344, plate: 0x1c1e22, eyes: 'slit', mouth: 'grin', hat: 'beanie', backpack: true, scale: 0.9 },
     ros: { name: 'ROS', label: 'ROS', head: 0x7a4ea3, suit: 0xc4232a, glove: 0xe0b34e, boot: 0xe0b34e, plate: 0xf0d48a, eyes: 'green', mouth: 'line', hat: 'sheriff', poncho: true, scale: 1 },
     ls: { name: 'Liberty Slugger', label: 'SLUGGER', head: 0xf6f4ef, suit: 0xf4f4f4, glove: 0xf4f4f4, boot: 0x1d4e89, plate: 0xd7263d, eyes: 'oval', mouth: 'smile', hat: 'tophat', suitMap: null, scale: 1 },
     ds: { name: 'Drill Sergeant', label: 'SERGEANT', head: 0xf08a2a, suit: 0x1aa7a1, glove: 0x243038, boot: 0xc46a32, plate: 0xff4f93, plateGlow: 0xff4f93, eyes: 'oval', mouth: 'teeth', hat: 'sheriff', belt: true, scale: 1 },
     rusty: { name: 'Rusty', label: 'RUSTY', head: 0x1d3d8f, suit: 0xe07020, glove: 0xf0d0a0, boot: 0x6a4124, eyes: 'lidded', mouth: 'grin', hat: 'trucker', scale: 1 },
     slide: { name: 'Slide', label: 'SLIDE', head: 0x8a4fd0, suit: 0xf7f4fb, glove: 0xff4fa8, boot: 0x2a2438, eyes: 'lidded', mouth: 'smile', shades: true, scale: 1 },
     tired: { name: 'Tired Rider', label: 'RIDER', head: 0xc4a574, suit: 0x6a7c92, glove: 0xd8d2c8, boot: 0x4a4038, eyes: 'lidded', mouth: 'line', hat: 'cap', scale: 1 },
-    kid: { name: 'Young Rider', label: 'RIDER', head: 0xf0c84a, suit: 0xfff3d4, glove: 0xfff6ea, boot: 0xe07020, plate: 0xff8a3d, eyes: 'slit', mouth: 'grin', hat: 'beanieBig', scale: 0.68 },
+    kid: { name: 'Young Rider', label: 'RIDER', head: 0xf0c84a, suit: 0xf4f1ea, glove: 0xd7dde6, boot: 0xe07020, plate: 0xff8a3d, eyes: 'slit', mouth: 'grin', hat: 'beanieBig', scale: 0.68 },
     patron: { name: 'Regular', label: 'REGULAR', head: 0x3faf6a, suit: 0xf2efe6, glove: 0xf2efe6, boot: 0x6a4124, eyes: 'oval', mouth: 'smile', hat: 'cap', scale: 1 },
   };
   // Liberty Slugger's suit uses the flag texture.
@@ -759,11 +763,18 @@ function spawnPuff(THREE, scene, x, z) {
 
 export function animateRider(actor, time, speed, mounted) {
   if (!actor || !actor.legL) return;
-  const swing = mounted ? 0.15 : Math.sin(time * 8 + (actor.spec?.name?.length || 1)) * Math.min(0.7, speed * 0.09);
+  const pace = speed > 8 ? 13 : 8.5;
+  const amp = mounted ? 0.22 : Math.min(0.95, speed * 0.085);
+  const swing = Math.sin(time * pace + (actor.spec?.name?.length || 1)) * amp;
+  const lift = Math.max(0, Math.sin(time * pace + (actor.spec?.name?.length || 1)));
   actor.legL.rotation.x = swing;
   actor.legR.rotation.x = -swing;
-  actor.armL.rotation.x = -swing * 0.7;
-  actor.armR.rotation.x = swing * 0.7;
+  actor.armL.rotation.x = -swing * 0.8;
+  actor.armR.rotation.x = swing * 0.8;
+  if (!mounted && speed > 0.4) {
+    actor.legL.position.y = 0.72 + lift * 0.04;
+    actor.legR.position.y = 0.72 + (1 - lift) * 0.04;
+  }
 }
 
 export function faceToward(group, yaw) {
