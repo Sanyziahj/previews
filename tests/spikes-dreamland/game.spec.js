@@ -301,6 +301,18 @@ test('every level completes by scripted run or goal warp', async ({ page }) => {
     expect(row.cleared, JSON.stringify(row)).toBe(true);
   }
   console.log('LEVELS ' + JSON.stringify(rows));
+  const variety = await page.evaluate(() => {
+    const D = __DREAM__;
+    return D.levelIds().map((id) => ({ id, ...D.levelFacts(id) }));
+  });
+  for (const v of variety) {
+    expect(v.plats + v.tubes + v.pods + v.ramps, JSON.stringify(v)).toBeGreaterThan(8);
+    expect(v.sparks, v.id).toBeGreaterThanOrEqual(4);
+  }
+  const hud = await page.evaluate(() => __DREAM__.hudRects());
+  const overlaps = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+  expect(overlaps(hud.ring, hud.aura)).toBe(false);
+  expect(overlaps(hud.trial, hud.aura)).toBe(false);
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
