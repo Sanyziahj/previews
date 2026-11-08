@@ -22,6 +22,40 @@ function rng(seed) {
   };
 }
 
+function makeNormal() {
+  const size = 128;
+  const c = document.createElement('canvas');
+  c.width = size;
+  c.height = size;
+  const g = c.getContext('2d');
+  const rand = rng(77);
+  const h = new Float32Array(size * size);
+  for (let i = 0; i < h.length; i++) h[i] = rand();
+  const img = g.createImageData(size, size);
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const i = y * size + x;
+      const l = h[y * size + ((x + size - 1) % size)];
+      const r = h[y * size + ((x + 1) % size)];
+      const d = h[((y + 1) % size) * size + x];
+      const u = h[((y + size - 1) % size) * size + x];
+      const nx = (l - r) * 2;
+      const ny = (u - d) * 2;
+      const nz = 1;
+      const len = Math.hypot(nx, ny, nz) || 1;
+      img.data[i * 4] = (nx / len * 0.5 + 0.5) * 255;
+      img.data[i * 4 + 1] = (ny / len * 0.5 + 0.5) * 255;
+      img.data[i * 4 + 2] = (nz / len * 0.5 + 0.5) * 255;
+      img.data[i * 4 + 3] = 255;
+    }
+  }
+  g.putImageData(img, 0, 0);
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(28, 28);
+  return tex;
+}
+
 function makeNoise(THREE) {
   const c = document.createElement('canvas');
   c.width = 256;
@@ -122,6 +156,8 @@ export function buildWorld(THREE, scene) {
   buildScatter(THREE, scene, mats);
   buildDreamSet(THREE, scene, dreamRoot, mats, neons);
   buildWakeSet(THREE, wakeRoot, mats);
+  buildMountains(THREE, scene, mats);
+  buildDreamMagic(THREE, dreamRoot, mats);
 
   const water = buildWater(THREE);
   scene.add(water);
@@ -171,6 +207,8 @@ function buildTerrain(THREE, noise) {
     if (y < -6) c.lerp(deep, Math.min(1, (-6 - y) / 4));
     const od = Math.hypot(x - TOWN.oasis.x, z - TOWN.oasis.z);
     if (od < 12) c.lerp(wet, (1 - od / 12) * 0.7);
+    const slope = Math.abs(heightAt(x + 2.5, z) - y) + Math.abs(heightAt(x, z + 2.5) - y);
+    if (slope > 0.9) c.multiplyScalar(Math.max(0.55, 1 - slope * 0.12));
     colors[i * 3] = c.r;
     colors[i * 3 + 1] = c.g;
     colors[i * 3 + 2] = c.b;
@@ -179,9 +217,11 @@ function buildTerrain(THREE, noise) {
   geo.computeVertexNormals();
   const mat = new THREE.MeshStandardMaterial({
     map: noise,
+    normalMap: makeNormal(),
+    normalScale: new THREE.Vector2(0.55, 0.55),
     vertexColors: true,
-    roughness: 0.96,
-    metalness: 0.02,
+    roughness: 0.92,
+    metalness: 0.04,
   });
   const mesh = new THREE.Mesh(geo, mat);
   mesh.receiveShadow = true;
@@ -228,11 +268,18 @@ function buildSky(THREE) {
         float halo = pow(max(dot(d, sd), 0.0), 8.0);
         col += sun * halo * 0.18 * (1.0 - dream * 0.5);
         float cell = fract(sin(dot(floor(d * vec3(170.0, 130.0, 90.0)), vec3(12.9898, 78.233, 37.719))) * 43758.5453);
-        float star = step(0.993, cell) * smoothstep(0.05, 0.45, d.y) * dream;
-        col += vec3(0.85, 0.9, 1.0) * star;
+        float star = step(0.992, cell) * smoothstep(0.02, 0.4, d.y);
+        col += vec3(0.9, 0.93, 1.0) * star * mix(0.25, 1.0, dream);
         vec3 moonDir = normalize(vec3(-0.45, 0.52, -0.35));
-        float moon = pow(max(dot(d, moonDir), 0.0), 520.0) * dream;
-        col += vec3(0.9, 0.82, 1.0) * moon * 1.4;
+        float moon = pow(max(dot(d, moonDir), 0.0), 480.0);
+        col += vec3(0.92, 0.9, 0.82) * moon * mix(0.55, 1.3, dream);
+        vec3 moon2 = normalize(vec3(0.55, 0.34, 0.42));
+        float moonB = pow(max(dot(d, moon2), 0.0), 700.0) * dream;
+        col += vec3(1.0, 0.72, 0.9) * moonB * 1.6;
+        float band = exp(-pow((d.y - 0.15) * 3.2, 2.0)) * dream;
+        float aur = 0.5 + 0.5 * sin(d.x * 8.0 + time * 0.4) * sin(d.z * 6.0 - time * 0.3);
+        col += vec3(0.35, 0.9, 0.75) * band * aur * 0.55;
+        col += vec3(0.85, 0.35, 0.95) * band * (1.0 - aur) * 0.4;
         gl_FragColor = vec4(col, 1.0);
       }
     `,
@@ -271,6 +318,13 @@ function buildMesas(THREE, scene, mats, circles) {
     cap.castShadow = true;
     scene.add(cap);
     circles.push({ x: mesa.x, z: mesa.z, r: mesa.r * 0.78 });
+    const bands = [mats.mesaDark, mats.cream, mats.mesa];
+    bands.forEach((band, i) => {
+      const strata = new THREE.Mesh(new THREE.CylinderGeometry(mesa.r * (0.78 - i * 0.04), mesa.r * (0.82 - i * 0.04), 0.35, 10), band);
+      strata.position.set(mesa.x, y + 1.2 + i * (mesa.h * 0.22), mesa.z);
+      strata.castShadow = true;
+      scene.add(strata);
+    });
   }
 }
 
@@ -322,6 +376,13 @@ function buildPour(THREE, scene, mats, colliders, neons) {
   const sign = new THREE.Mesh(new THREE.PlaneGeometry(7.2, 2.4), signMat);
   sign.position.set(0, 6.6, 5.7);
   g.add(sign);
+  const pylon = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.2, 8, 8), mats.chrome);
+  pylon.position.set(9.2, 4, 11);
+  pylon.castShadow = true;
+  g.add(pylon);
+  const roadSign = new THREE.Mesh(new THREE.PlaneGeometry(5.4, 2.1), signMat);
+  roadSign.position.set(9.2, 7.2, 11.15);
+  g.add(roadSign);
   const sideMat = new THREE.MeshStandardMaterial({
     color: 0x041418,
     emissive: 0x7ff6ff,
@@ -737,6 +798,53 @@ function buildDust(THREE) {
   const points = new THREE.Points(geo, mat);
   points.frustumCulled = false;
   return { points, mat };
+}
+
+function buildMountains(THREE, scene, mats) {
+  const rand = rng(53);
+  for (let i = 0; i < 18; i++) {
+    const a = (i / 18) * Math.PI * 2 + rand() * 0.1;
+    const rad = 250 + rand() * 40;
+    const h = 36 + rand() * 48;
+    const peak = new THREE.Mesh(new THREE.ConeGeometry(18 + rand() * 14, h, 6), i % 2 ? mats.mesaDark : mats.mesa);
+    peak.position.set(Math.cos(a) * rad, h * 0.35 - 4, Math.sin(a) * rad);
+    peak.castShadow = false;
+    peak.receiveShadow = false;
+    peak.userData.keep = true;
+    scene.add(peak);
+  }
+}
+
+function buildDreamMagic(THREE, dreamRoot, mats) {
+  const rand = rng(19);
+  const glow = new THREE.MeshStandardMaterial({ color: 0x120818, emissive: 0xc46bff, emissiveIntensity: 1.6, roughness: 0.4 });
+  const flora = new THREE.InstancedMesh(new THREE.ConeGeometry(0.35, 1.8, 5), glow, 36);
+  const dummy = new THREE.Object3D();
+  let n = 0;
+  for (let i = 0; i < 80 && n < 36; i++) {
+    const x = (rand() * 2 - 1) * 150;
+    const z = (rand() * 2 - 1) * 140;
+    if (polyDist(x, z, ROADS) < 6) continue;
+    dummy.position.set(x, heightAt(x, z) + 0.9, z);
+    dummy.scale.set(0.6 + rand(), 0.8 + rand() * 1.4, 0.6 + rand());
+    dummy.rotation.set(0, rand() * 6, 0);
+    dummy.updateMatrix();
+    flora.setMatrixAt(n++, dummy.matrix);
+  }
+  flora.count = n;
+  dreamRoot.add(flora);
+  const orbMat = new THREE.MeshStandardMaterial({ color: 0x160818, emissive: 0x7ef6ff, emissiveIntensity: 1.8, roughness: 0.3 });
+  for (let i = 0; i < 7; i++) {
+    const island = new THREE.Mesh(new THREE.CylinderGeometry(4 + rand() * 3, 3.2, 1.1, 8), mats.mesa);
+    const x = -40 + i * 18;
+    const z = -20 + Math.sin(i) * 30;
+    island.position.set(x, 16 + (i % 3) * 4, z);
+    island.userData.keep = true;
+    dreamRoot.add(island);
+    const orb = new THREE.Mesh(new THREE.SphereGeometry(0.45, 10, 8), orbMat);
+    orb.position.set(x, island.position.y + 2.2, z);
+    dreamRoot.add(orb);
+  }
 }
 
 function mergeByMaterial(root) {

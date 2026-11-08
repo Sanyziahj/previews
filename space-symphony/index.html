@@ -43,7 +43,11 @@ h1{font-family:Impact,"Arial Black",sans-serif;font-weight:400;font-size:clamp(4
 .big.primary{background:var(--gold);color:#2a1408}
 #hud{position:fixed;inset:0;pointer-events:none;z-index:12;display:none}
 body.playing #hud,body.qte #hud{display:block}
-#questbox{position:absolute;left:16px;top:14px;max-width:min(420px,58vw);text-shadow:0 2px 8px #000}
+#questbox{
+  position:absolute;left:16px;top:14px;max-width:min(380px,46vw);
+  background:#140c10ee;border:1px solid #ffe08a55;border-radius:14px;padding:10px 12px 12px;
+  text-shadow:0 2px 8px #000
+}
 #crosses{display:flex;gap:4px;margin-bottom:6px}
 .cross{width:16px;height:16px;position:relative;opacity:.28}
 .cross.on{opacity:1;filter:drop-shadow(0 0 6px #39ff8a)}
@@ -56,11 +60,13 @@ body.playing #hud,body.qte #hud{display:block}
 #qdetail{margin:2px 0 0;font-size:14px;color:#ffe9c8;line-height:1.35}
 #news{margin-top:6px;font-size:12px;letter-spacing:.08em;color:var(--cyan);text-transform:uppercase}
 #realmBadge{
-  position:absolute;top:14px;right:16px;padding:6px 10px;border:1px solid #ffe08a88;border-radius:999px;
-  letter-spacing:.18em;font-size:12px;background:#140c1088
+  display:inline-block;margin:0 0 6px;padding:3px 8px;border:1px solid #ffe08a88;border-radius:999px;
+  letter-spacing:.16em;font-size:11px;background:#140c10aa
 }
-body.touch #realmBadge{left:auto;right:12px;top:122px}
-body.touch #questbox{max-width:62vw}
+#qtoggle{
+  display:none;pointer-events:auto;margin:0 0 4px;padding:4px 8px;border-radius:8px;
+  border:1px solid #ffe08a88;background:#140c10cc;color:var(--gold);font-weight:800;letter-spacing:.08em;font-size:12px
+}
 #miniwrap{
   position:absolute;top:48px;right:16px;width:168px;height:168px;border-radius:50%;
   border:2px solid #ffe08acc;box-shadow:0 0 18px #000a,inset 0 0 12px #ffd56a33;overflow:hidden;background:#1a120ccc
@@ -70,8 +76,9 @@ body.touch #miniwrap{width:104px;height:104px;top:12px;right:10px}
 #prompt{
   position:absolute;left:50%;bottom:28px;transform:translateX(-50%);
   background:#140c10dd;border:1px solid var(--gold);color:var(--gold);
-  padding:8px 14px;border-radius:999px;font-weight:800;letter-spacing:.08em;min-height:36px;
+  padding:8px 14px;border-radius:999px;font-weight:800;letter-spacing:.08em;
 }
+#prompt:empty{display:none}
 body.touch #prompt{bottom:168px}
 #hint{position:absolute;left:16px;bottom:16px;font-size:12px;color:#ffe9c8cc;max-width:46vw}
 body.touch #hint{display:none}
@@ -81,11 +88,21 @@ body.touch #hint{display:none}
   background:rgba(8,4,10,.45);padding:16px
 }
 body.card #card{display:flex}
+body.card .card-inner{animation:cardIn .38s cubic-bezier(.2,.8,.2,1)}
+@keyframes cardIn{
+  from{opacity:0;transform:translateY(28px) scale(.94)}
+  to{opacity:1;transform:none}
+}
 .card-inner{
   width:min(740px,96vw);display:flex;gap:16px;align-items:stretch;
-  background:linear-gradient(180deg,#2a1830,#120c16);border:3px solid var(--gold);
+  background:
+    radial-gradient(circle at 18% 20%, #ff4f9a33, transparent 42%),
+    linear-gradient(180deg,#2a1830,#120c16);
+  border:3px solid var(--gold);
   border-radius:18px;padding:14px;box-shadow:8px 10px 0 #000,0 0 32px #ff4f9a55
 }
+#cardMark{animation:markPulse 1.6s ease-in-out infinite}
+@keyframes markPulse{50%{text-shadow:0 0 12px #ffd56a}}
 #portrait{width:210px;height:280px;flex:none;border-radius:12px;background:#0c0810;border:2px solid #ffd56a88}
 .card-copy{flex:1;min-width:0;display:flex;flex-direction:column}
 #cardName{font-family:Impact,sans-serif;font-size:32px;margin:4px 0;letter-spacing:.03em}
@@ -152,7 +169,15 @@ body.touch.playing #touch,body.touch.qte #touch{display:block}
   position:fixed;left:max(12px,env(safe-area-inset-left));top:max(12px,env(safe-area-inset-top));
   display:flex;gap:8px;z-index:32
 }
-body.touch #questbox{top:64px;max-width:62vw}
+body.touch #questbox{
+  top:58px;max-width:52vw;background:#140c10b0;border-radius:12px;padding:6px 8px
+}
+body.touch #qtoggle{display:inline-block}
+body.touch #questbox:not(.open) #qdetail,
+body.touch #questbox:not(.open) #news,
+body.touch #questbox:not(.open) #lucidity{display:none}
+body.touch #qtitle{font-size:15px;margin:0}
+body.touch #crosses{margin-bottom:2px}
 </style>
 <script type="importmap">
 { "imports": { "three": "./vendor/three/three.module.js" } }
@@ -163,13 +188,14 @@ body.touch #questbox{top:64px;max-width:62vw}
 <div id="flash"></div>
 <div id="hud">
   <div id="questbox">
+    <button id="qtoggle" type="button">QUEST</button>
+    <div id="realmBadge">WAKING</div>
     <div id="crosses" aria-label="Green crosses"></div>
     <div id="lucidity" aria-label="Lucidity"><div id="lucfill"></div></div>
     <div id="qtitle"></div>
     <div id="qdetail"></div>
     <div id="news"></div>
   </div>
-  <div id="realmBadge">WAKING</div>
   <div id="miniwrap"><canvas id="mini" width="168" height="168"></canvas></div>
   <div id="prompt"></div>
   <div id="hint">WASD move · mouse look · E use · Space jump · Shift sprint · Q SHIFT · F ride · M map · J quest</div>
