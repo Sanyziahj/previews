@@ -309,12 +309,33 @@ test('every level completes by scripted run or goal warp', async ({ page }) => {
     expect(v.plats + v.tubes + v.pods + v.ramps, JSON.stringify(v)).toBeGreaterThan(8);
     expect(v.sparks, v.id).toBeGreaterThanOrEqual(4);
   }
-  const hud = await page.evaluate(() => __DREAM__.hudRects());
-  const overlaps = (a, b) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
-  expect(overlaps(hud.ring, hud.aura)).toBe(false);
-  expect(overlaps(hud.trial, hud.aura)).toBe(false);
+  await expectHudClear(page);
   expect(errors, errors.join('\n')).toEqual([]);
 });
+
+function boxesOverlap(a, b) {
+  return a.x < b.x + b.w - 0.5 && a.x + a.w > b.x + 0.5 && a.y < b.y + b.h - 0.5 && a.y + a.h > b.y + 0.5;
+}
+async function expectHudClear(page) {
+  const ids = ['w1-1', 'w1-2', 'w3-2', 'w4-c', 'w5-1', 'w5-c'];
+  for (const id of ids) {
+    const boxes = await page.evaluate((levelId) => {
+      const D = window.__DREAM__;
+      D.warp(levelId);
+      D.give('blast');
+      D.step(1);
+      return D.hudRects();
+    }, id);
+    expect(boxes.some((b) => b.id === 'title'), id).toBe(true);
+    expect(boxes.some((b) => b.id === 'aura'), id).toBe(true);
+    expect(boxes.some((b) => b.id === 'ring'), id).toBe(true);
+    for (let i = 0; i < boxes.length; i++) {
+      for (let j = i + 1; j < boxes.length; j++) {
+        expect(boxesOverlap(boxes[i], boxes[j]), `${id} ${boxes[i].id} vs ${boxes[j].id}`).toBe(false);
+      }
+    }
+  }
+}
 
 test('frame pacing', async ({ page }) => {
   const errors = track(page);
@@ -373,7 +394,9 @@ test('phone portrait controls', async ({ browser }) => {
   const st = await page.evaluate(() => __DREAM__.state());
   expect(st.mode).toBe('pause');
   expect(st.shots).toBe(shots);
+  await expectHudClear(page);
   fs.mkdirSync(ART, { recursive: true });
+  await page.evaluate(() => { __DREAM__.pose('world', 'w1-1'); });
   await page.screenshot({ path: path.join(ART, 'phone-portrait.png') });
   expect(errors, errors.join('\n')).toEqual([]);
   await context.close();
