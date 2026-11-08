@@ -46,6 +46,7 @@ test('aura, blaster, size, buddy, and back', async ({ page }) => {
   const report = await page.evaluate(() => {
     const D = __DREAM__;
     D.warp('w1-1');
+    D.skipStory();
     const base = D.state();
     D.give('cross');
     const aura = D.state();
@@ -62,6 +63,7 @@ test('aura, blaster, size, buddy, and back', async ({ page }) => {
     D.hurt();
     const down = D.state();
     D.warp('w1-1');
+    D.skipStory();
     D.give('blast');
     const foes = D.foes();
     D.parkFoes();
@@ -75,6 +77,7 @@ test('aura, blaster, size, buddy, and back', async ({ page }) => {
     D.step(30);
     const after = D.state();
     D.warp('w1-1');
+    D.skipStory();
     const shotsB = D.state().shots;
     D.press('back', true);
     D.step(1);
@@ -368,11 +371,51 @@ test('phone portrait controls', async ({ browser }) => {
   expect(before.touch).toBe(true);
   expect(before.centerCovered).toBe(false);
   expect(before.onScreen).toBe(true);
-  expect(before.ctrls.map((c) => c.label).sort()).toEqual(['BACK', 'BLAST', 'DOWN', 'JUMP', 'LEFT', 'RIGHT']);
+  expect(before.ctrls.map((c) => c.label).sort()).toEqual(['BACK', 'BLAST', 'JUMP', 'MOVE']);
   for (const c of before.ctrls) {
     expect(c.w, c.id).toBeGreaterThanOrEqual(64);
     expect(c.h, c.id).toBeGreaterThanOrEqual(56);
   }
+  const stickBox = await page.locator('#stick').boundingBox();
+  const knobBefore = await page.locator('#knob').boundingBox();
+  const cx = stickBox.x + stickBox.width / 2;
+  const cy = stickBox.y + stickBox.height / 2;
+  const reach = stickBox.width * 0.34;
+  async function drag(dx, dy, id) {
+    await page.locator('#stick').dispatchEvent('pointerdown', { bubbles: true, clientX: cx + dx, clientY: cy + dy, pointerId: id, pointerType: 'touch', isPrimary: true });
+    await page.locator('#stick').dispatchEvent('pointermove', { bubbles: true, clientX: cx + dx, clientY: cy + dy, pointerId: id, pointerType: 'touch' });
+    return page.evaluate(() => __DREAM__.stick());
+  }
+  await page.evaluate(() => __DREAM__.skipStory());
+  const right = await drag(reach, 0, 11);
+  expect(right.right).toBe(true);
+  expect(right.nx).toBeGreaterThan(0.4);
+  await page.evaluate(() => __DREAM__.step(6));
+  const movedRight = await page.evaluate(() => __DREAM__.state().vx);
+  expect(movedRight).toBeGreaterThan(0.2);
+  const left = await drag(-reach, 0, 11);
+  expect(left.left).toBe(true);
+  expect(left.nx).toBeLessThan(-0.4);
+  const down = await drag(0, reach, 11);
+  expect(down.down).toBe(true);
+  expect(down.ny).toBeGreaterThan(0.4);
+  const diag = await drag(reach, reach, 11);
+  expect(diag.right).toBe(true);
+  expect(diag.down).toBe(true);
+  const knobHot = await page.locator('#knob').boundingBox();
+  expect(knobHot.width).toBeGreaterThan(knobBefore.width * 1.04);
+  await page.locator('[data-act=jump]').dispatchEvent('pointerdown', { bubbles: true, pointerId: 12, pointerType: 'touch', isPrimary: false, clientX: cx, clientY: cy });
+  await page.evaluate(() => __DREAM__.step(2));
+  const both = await page.evaluate(() => __DREAM__.state());
+  expect(both.vx).not.toBe(0);
+  const air = await page.evaluate(() => __DREAM__.stick());
+  expect(air.jump).toBe(true);
+  expect(air.right).toBe(true);
+  await page.locator('#stick').dispatchEvent('pointerup', { bubbles: true, pointerId: 11, pointerType: 'touch' });
+  await page.locator('[data-act=jump]').dispatchEvent('pointerup', { bubbles: true, pointerId: 12, pointerType: 'touch' });
+  const dead = await drag(4, 0, 13);
+  expect(Math.abs(dead.nx)).toBeLessThan(0.05);
+  await page.locator('#stick').dispatchEvent('pointerup', { bubbles: true, pointerId: 13, pointerType: 'touch' });
   const backBefore = before.ctrls.find((c) => c.id === 'back');
   await page.locator('[data-act=jump]').focus();
   const focused = await page.evaluate(() => __DREAM__.layout());
@@ -394,10 +437,20 @@ test('phone portrait controls', async ({ browser }) => {
   const st = await page.evaluate(() => __DREAM__.state());
   expect(st.mode).toBe('pause');
   expect(st.shots).toBe(shots);
+  await page.evaluate(() => __DREAM__.setStick('buttons'));
+  const buttons = await page.evaluate(() => __DREAM__.layout());
+  expect(buttons.ctrls.map((c) => c.label).sort()).toEqual(['BACK', 'BLAST', 'DOWN', 'JUMP', 'LEFT', 'RIGHT']);
+  expect(buttons.centerCovered).toBe(false);
+  expect(buttons.onScreen).toBe(true);
+  await page.reload();
+  await page.waitForFunction(() => window.__DREAM__);
+  expect(await page.evaluate(() => __DREAM__.stick().mode)).toBe('buttons');
+  await page.evaluate(() => { __DREAM__.setManual(true); __DREAM__.setStick('joystick'); });
   await expectHudClear(page);
   fs.mkdirSync(ART, { recursive: true });
   await page.evaluate(() => { __DREAM__.pose('world', 'w1-1'); });
   await page.screenshot({ path: path.join(ART, 'phone-portrait.png') });
+  await page.screenshot({ path: path.join(ART, 'joystick-portrait.png') });
   expect(errors, errors.join('\n')).toEqual([]);
   await context.close();
 });
@@ -418,7 +471,7 @@ test('phone landscape controls', async ({ browser }) => {
   expect(info.touch).toBe(true);
   expect(info.centerCovered).toBe(false);
   expect(info.onScreen).toBe(true);
-  expect(info.ctrls).toHaveLength(6);
+  expect(info.ctrls.map((c) => c.id).sort()).toEqual(['back', 'blast', 'jump', 'stick']);
   for (const c of info.ctrls) {
     expect(c.w, c.id).toBeGreaterThanOrEqual(64);
     expect(c.h, c.id).toBeGreaterThanOrEqual(56);
@@ -427,10 +480,144 @@ test('phone landscape controls', async ({ browser }) => {
     const covers = cx >= c.x && cx <= c.x + c.w && cy >= c.y && cy <= c.y + c.h;
     expect(covers, c.id).toBe(false);
   }
+  await page.evaluate(() => __DREAM__.skipStory());
+  const stickBox = await page.locator('#stick').boundingBox();
+  const cx = stickBox.x + stickBox.width / 2;
+  const cy = stickBox.y + stickBox.height / 2;
+  const reach = stickBox.width * 0.34;
+  async function drag(dx, dy) {
+    await page.locator('#stick').dispatchEvent('pointerdown', { bubbles: true, clientX: cx + dx, clientY: cy + dy, pointerId: 21, pointerType: 'touch', isPrimary: true });
+    await page.locator('#stick').dispatchEvent('pointermove', { bubbles: true, clientX: cx + dx, clientY: cy + dy, pointerId: 21, pointerType: 'touch' });
+    return page.evaluate(() => __DREAM__.stick());
+  }
+  expect((await drag(reach, 0)).right).toBe(true);
+  expect((await drag(-reach, 0)).left).toBe(true);
+  expect((await drag(0, reach)).down).toBe(true);
+  expect((await drag(-reach, reach)).left).toBe(true);
+  expect((await drag(-reach, reach)).down).toBe(true);
+  await page.locator('[data-act=jump]').dispatchEvent('pointerdown', { bubbles: true, pointerId: 22, pointerType: 'touch', isPrimary: false });
+  await page.evaluate(() => __DREAM__.step(3));
+  const moving = await page.evaluate(() => ({ vx: __DREAM__.state().vx, jump: __DREAM__.stick().jump, left: __DREAM__.stick().left }));
+  expect(moving.jump).toBe(true);
+  expect(moving.left).toBe(true);
+  expect(moving.vx).toBeLessThan(0);
+  await page.locator('#stick').dispatchEvent('pointerup', { bubbles: true, pointerId: 21, pointerType: 'touch' });
+  await page.locator('[data-act=jump]').dispatchEvent('pointerup', { bubbles: true, pointerId: 22, pointerType: 'touch' });
   fs.mkdirSync(ART, { recursive: true });
+  await page.evaluate(() => __DREAM__.pose('world', 'w2-1'));
   await page.screenshot({ path: path.join(ART, 'phone-landscape.png') });
+  await page.screenshot({ path: path.join(ART, 'joystick-landscape.png') });
   expect(errors, errors.join('\n')).toEqual([]);
   await context.close();
+});
+
+test('old saves migrate and story cards show once', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('star-punch-save', 'keep');
+    localStorage.setItem('spikes-dreamland.v1', JSON.stringify({
+      v: 1, cleared: { 'w2-1': true }, sparks: 7, lives: 4, node: 'w2-1', aura: true, hero: 'santt', seenIntro: true,
+    }));
+  });
+  const errors = await boot(page);
+  const migrated = await page.evaluate(() => {
+    const save = __DREAM__.getSave();
+    return {
+      save,
+      other: localStorage.getItem('star-punch-save'),
+      keys: Object.keys(localStorage),
+    };
+  });
+  expect(migrated.save.v).toBe(2);
+  expect(migrated.save.cleared['w2-1']).toBe(true);
+  expect(migrated.save.sparks).toBe(7);
+  expect(migrated.save.lives).toBe(4);
+  expect(migrated.save.aura).toBe(true);
+  expect(migrated.save.stick).toBe('joystick');
+  expect(migrated.save.seenCards).toEqual({});
+  expect(migrated.other).toBe('keep');
+  for (const k of migrated.keys) {
+    if (k !== 'star-punch-save') expect(k.startsWith('spikes-dreamland')).toBe(true);
+  }
+  const cards = await page.evaluate(() => {
+    const D = __DREAM__;
+    D.warp('w1-1');
+    const first = D.story();
+    const x0 = D.state().x;
+    D.step(8);
+    const held = { title: D.story() && D.story().title, x: D.state().x };
+    D.press('jump', true);
+    D.step(1);
+    D.press('jump', false);
+    const skipped = D.story();
+    const seen = D.getSave().seenCards['w1-1'];
+    D.warp('w1-1');
+    const again = D.story();
+    const all = D.levelIds().map((id) => ({ id, card: D.storyFor(id) }));
+    const intro = D.introCards();
+    return { first, held, x0, skipped, seen, again, all, intro };
+  });
+  expect(cards.first.title).toBe('Circus Master');
+  expect(cards.first.lines.length).toBeGreaterThanOrEqual(2);
+  expect(cards.held.title).toBe('Circus Master');
+  expect(cards.held.x).toBe(cards.x0);
+  expect(cards.skipped).toBe(null);
+  expect(cards.seen).toBe(true);
+  expect(cards.again).toBe(null);
+  for (const row of cards.all) expect(row.card && row.card.title, row.id).toBeTruthy();
+  expect(cards.intro.map((c) => c.title)).toEqual(['Night Call', 'Mainframe', 'Dream Link', 'Guardian']);
+  expect(cards.intro[0].lines.join(' ')).toContain('Dreams beware');
+  expect(cards.intro[2].lines.join(' ')).toContain('dream parade');
+  expect(cards.intro[2].lines.join(' ')).toContain('more than thoughts');
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test('every foe type spawns, behaves, and can be defeated', async ({ page }) => {
+  const errors = await boot(page);
+  const report = await page.evaluate(() => {
+    const D = __DREAM__;
+    const kinds = D.kinds();
+    D.warp('w1-s');
+    D.skipStory();
+    const bosses = ['sentinel', 'spark', 'frightjr', 'fright'];
+    const rows = kinds.filter((k) => !bosses.includes(k)).map((k) => D.sampleFoe(k));
+    const bossRows = [];
+    for (const [id, kind] of [['w2-c', 'sentinel'], ['w3-c', 'spark'], ['w4-2', 'frightjr'], ['w4-c', 'fright']]) {
+      D.warp(id);
+      D.skipStory();
+      let s = D.state();
+      let guard = 0;
+      while (!s.bossDone && guard++ < 12) s = D.hitBoss();
+      bossRows.push({ id, kind, bossKind: s.bossKind, done: s.bossDone, node: D.getSave().nodes });
+    }
+    D.openLog();
+    return { kinds, rows, bossRows, mode: D.state().mode, book: D.bestiary() };
+  });
+  expect(report.kinds.length).toBeGreaterThanOrEqual(12);
+  for (const row of report.rows) {
+    expect(row.defeated, row.kind).toBe(true);
+    expect(row.logged, row.kind).toBe(true);
+    expect(row.moved || row.hid || row.shot || row.beamed, JSON.stringify(row)).toBeTruthy();
+  }
+  expect(report.rows.find((r) => r.kind === 'puff').babies).toBe(2);
+  expect(report.rows.find((r) => r.kind === 'glitch').hid).toBe(true);
+  expect(report.rows.find((r) => r.kind === 'crater').hid).toBe(true);
+  expect(report.rows.find((r) => r.kind === 'ring').shot).toBe(true);
+  expect(report.rows.find((r) => r.kind === 'moon').shot).toBe(true);
+  expect(report.rows.find((r) => r.kind === 'turret').beamed).toBe(true);
+  for (const boss of report.bossRows) {
+    expect(boss.bossKind).toBe(boss.kind);
+    expect(boss.done).toBe(true);
+  }
+  expect(report.bossRows.find((b) => b.kind === 'sentinel').node['2']).toBe(true);
+  expect(report.bossRows.find((b) => b.kind === 'spark').node['3']).toBe(true);
+  expect(report.bossRows.find((b) => b.kind === 'fright').node['4']).toBe(true);
+  expect(report.mode).toBe('log');
+  expect(report.book.length).toBe(report.kinds.length);
+  for (const entry of report.book) {
+    expect(entry.known, entry.kind).toBe(true);
+    expect(entry.line.length).toBeGreaterThan(8);
+  }
+  expect(errors, errors.join('\n')).toEqual([]);
 });
 
 test('screenshots and posters', async ({ page }) => {
@@ -440,6 +627,8 @@ test('screenshots and posters', async ({ page }) => {
     await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => r())));
     await page.locator('canvas').screenshot({ path: path.join(ART, name + '.png') });
   }
+  await page.evaluate(() => __DREAM__.pose('story', 'w1-1'));
+  await shot('story-card');
   await page.evaluate(() => __DREAM__.pose('title'));
   await shot('title');
   await page.evaluate(() => __DREAM__.pose('tent'));
@@ -462,6 +651,12 @@ test('screenshots and posters', async ({ page }) => {
   await shot('board');
   await page.evaluate(() => __DREAM__.pose('fright'));
   await shot('boss-fright');
+  await page.evaluate(() => __DREAM__.pose('junior'));
+  await shot('fright-jr');
+  await page.evaluate(() => __DREAM__.pose('spark'));
+  await shot('spark');
+  await page.evaluate(() => __DREAM__.pose('log'));
+  await shot('bestiary');
   await page.evaluate(() => { __DREAM__.warp('w4-c'); __DREAM__.reachGoal(false); __DREAM__.pose('headsetOff'); });
   await shot('headset-off');
   await page.evaluate(() => __DREAM__.pose('hall'));
