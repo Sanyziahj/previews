@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#1a0e08">
+<meta name="description" content="Space Symphony — a free-roam ride through the Pioneer Pour, awake and in the dream. Let's Ride!">
+<title>Space Symphony</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect rx='10' width='64' height='64' fill='%23140c10'/%3E%3Cpath d='M8 40h48l-6-14H14z' fill='%23ff6840'/%3E%3Ctext x='32' y='36' text-anchor='middle' font-size='9' fill='%23ffe08a' font-family='Impact,sans-serif'%3EPOUR%3C/text%3E%3C/svg%3E">
+<style>
+:root{
+  --ink:#140c10; --cream:#fff3df; --gold:#ffd56a; --pink:#ff4f9a; --cyan:#7ef6ff;
+  --amber:#ffb03a; --panel:#1c1220ee;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--ink);color:var(--cream);
+  font-family:"Trebuchet MS",Arial,sans-serif;user-select:none;touch-action:none}
+#view{position:fixed;inset:0}
+canvas{width:100%;height:100%;display:block;touch-action:none}
+#booterr{position:fixed;inset:auto 16px 16px 16px;background:#2a1020;color:#fff;padding:14px 16px;border:2px solid var(--pink);display:none;z-index:80}
+button,input,select{font-family:inherit;color:inherit}
+#title{
+  position:fixed;inset:0;z-index:40;display:flex;align-items:flex-end;justify-content:center;
+  background:linear-gradient(180deg,rgba(12,6,10,0.05),rgba(12,6,10,0.72) 70%);
+  padding:24px 16px calc(28px + env(safe-area-inset-bottom));pointer-events:none;
+}
+body.live #title{display:none}
+.title-card{pointer-events:auto;width:min(520px,94vw);text-align:center}
+.eyebrow{letter-spacing:.42em;font-size:12px;color:var(--cyan);margin:0 0 6px}
+h1{font-family:Impact,"Arial Black",sans-serif;font-weight:400;font-size:clamp(46px,8vw,84px);
+  margin:0;letter-spacing:.02em;line-height:.9;
+  background:linear-gradient(180deg,#fff6d8,#ffb03a 55%,#ff6840);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 6px 0 #3a1020)}
+.tag{margin:10px 0 18px;font-size:16px;color:#ffe9c4}
+.row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.big{
+  appearance:none;border:2px solid var(--gold);background:#2a160c;color:var(--gold);
+  font-weight:800;letter-spacing:.08em;font-size:18px;padding:14px 22px;border-radius:14px;min-height:56px;min-width:160px;
+  cursor:pointer;transform:scale(1)
+}
+.big:hover,.big:focus-visible,.big.hot{transform:scale(1.06);box-shadow:0 0 18px #ffd56a88;outline:none}
+.big.primary{background:var(--gold);color:#2a1408}
+#hud{position:fixed;inset:0;pointer-events:none;z-index:12;display:none}
+body.playing #hud,body.qte #hud{display:block}
+#questbox{position:absolute;left:16px;top:14px;max-width:min(420px,58vw);text-shadow:0 2px 8px #000}
+#crosses{display:flex;gap:4px;margin-bottom:6px}
+.cross{width:16px;height:16px;position:relative;opacity:.28}
+.cross.on{opacity:1;filter:drop-shadow(0 0 6px #39ff8a)}
+.cross:before,.cross:after{content:"";position:absolute;background:#39ff8a;border-radius:2px}
+.cross:before{left:6px;top:1px;width:4px;height:14px}
+.cross:after{left:1px;top:6px;width:14px;height:4px}
+#lucidity{width:min(220px,40vw);height:10px;border:1px solid #ffe08a88;border-radius:99px;overflow:hidden;background:#0006}
+#lucfill{height:100%;width:60%;background:linear-gradient(90deg,#7ef6ff,#ffd56a);box-shadow:0 0 10px #7ef6ff}
+#qtitle{margin:8px 0 0;font-family:Impact,sans-serif;letter-spacing:.04em;font-size:20px;color:var(--gold)}
+#qdetail{margin:2px 0 0;font-size:14px;color:#ffe9c8;line-height:1.35}
+#news{margin-top:6px;font-size:12px;letter-spacing:.08em;color:var(--cyan);text-transform:uppercase}
+#realmBadge{
+  position:absolute;top:14px;right:16px;padding:6px 10px;border:1px solid #ffe08a88;border-radius:999px;
+  letter-spacing:.18em;font-size:12px;background:#140c1088
+}
+body.touch #realmBadge{left:auto;right:12px;top:122px}
+body.touch #questbox{max-width:62vw}
+#miniwrap{
+  position:absolute;top:48px;right:16px;width:168px;height:168px;border-radius:50%;
+  border:2px solid #ffe08acc;box-shadow:0 0 18px #000a,inset 0 0 12px #ffd56a33;overflow:hidden;background:#1a120ccc
+}
+body.touch #miniwrap{width:104px;height:104px;top:12px;right:10px}
+#mini{width:100%;height:100%;display:block}
+#prompt{
+  position:absolute;left:50%;bottom:28px;transform:translateX(-50%);
+  background:#140c10dd;border:1px solid var(--gold);color:var(--gold);
+  padding:8px 14px;border-radius:999px;font-weight:800;letter-spacing:.08em;min-height:36px;
+}
+body.touch #prompt{bottom:168px}
+#hint{position:absolute;left:16px;bottom:16px;font-size:12px;color:#ffe9c8cc;max-width:46vw}
+body.touch #hint{display:none}
+#flash{position:fixed;inset:0;background:#fff8e8;opacity:0;pointer-events:none;z-index:11;transition:opacity .18s linear}
+#card{
+  position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;
+  background:rgba(8,4,10,.45);padding:16px
+}
+body.card #card{display:flex}
+.card-inner{
+  width:min(740px,96vw);display:flex;gap:16px;align-items:stretch;
+  background:linear-gradient(180deg,#2a1830,#120c16);border:3px solid var(--gold);
+  border-radius:18px;padding:14px;box-shadow:8px 10px 0 #000,0 0 32px #ff4f9a55
+}
+#portrait{width:210px;height:280px;flex:none;border-radius:12px;background:#0c0810;border:2px solid #ffd56a88}
+.card-copy{flex:1;min-width:0;display:flex;flex-direction:column}
+#cardName{font-family:Impact,sans-serif;font-size:32px;margin:4px 0;letter-spacing:.03em}
+#cardCouplet{font-family:Georgia,serif;font-style:italic;font-size:18px;line-height:1.35;color:#fff6e4;margin:0}
+#cardMark{color:var(--gold);letter-spacing:.14em;font-weight:800;margin:8px 0}
+#cardBody{margin:0;line-height:1.4;color:#f0e0cc;font-size:15px}
+#cardNext{margin-top:auto;align-self:flex-start}
+@media(max-width:720px){
+  .card-inner{flex-direction:column;align-items:center}
+  #portrait{width:min(180px,50vw);height:auto;aspect-ratio:3/4}
+}
+#qte{
+  position:fixed;left:50%;top:18%;transform:translateX(-50%);z-index:16;display:none;
+  text-align:center;pointer-events:none
+}
+body.qte #qte{display:block}
+#qteWord{
+  font-family:Impact,sans-serif;font-size:64px;letter-spacing:.12em;color:#ffffff22;
+  text-shadow:0 0 18px #ff4f9a
+}
+#qteWord.on{color:var(--gold);transform:scale(1.08);text-shadow:0 0 24px #ffd56a}
+#log,#mapov,#pause{
+  position:fixed;inset:0;z-index:28;display:none;align-items:center;justify-content:center;
+  background:rgba(8,4,10,.55);padding:16px
+}
+body.log #log,body.map #mapov,body.paused #pause{display:flex}
+.panel{
+  width:min(640px,96vw);max-height:min(80vh,720px);overflow:auto;
+  background:var(--panel);border:2px solid var(--gold);border-radius:16px;padding:16px 16px 20px;
+  box-shadow:0 16px 50px #000a
+}
+.panel h2{font-family:Impact,sans-serif;letter-spacing:.06em;margin:0 0 8px;color:var(--gold)}
+.qitem{padding:8px 0;border-top:1px solid #ffffff22}
+.qitem b{color:#fff}
+.qitem em{color:var(--cyan);font-style:normal;font-size:12px;letter-spacing:.08em}
+#mapcv{width:min(560px,86vw);height:min(560px,62vh);background:#1a120c;border-radius:12px;display:block}
+.set{display:flex;justify-content:space-between;gap:12px;align-items:center;margin:8px 0}
+.set input[type=range]{width:160px}
+#touch{display:none}
+body.touch.playing #touch,body.touch.qte #touch{display:block}
+#stick{
+  position:fixed;left:max(14px,env(safe-area-inset-left));bottom:max(18px,env(safe-area-inset-bottom));
+  width:124px;height:124px;border-radius:50%;z-index:32;touch-action:none;
+  border:2px solid #9ee7ff;background:radial-gradient(circle at 50% 45%,#24344a,#10141ccc 70%)
+}
+#knob{
+  position:absolute;left:50%;top:50%;width:58px;height:58px;margin:-29px 0 0 -29px;border-radius:50%;
+  background:#2a4a70;border:2px solid #e7f8ff;transform:translate(var(--kx,0px),var(--ky,0px)) scale(1)
+}
+#stick.hot #knob{transform:translate(var(--kx,0px),var(--ky,0px)) scale(1.12);box-shadow:0 0 16px #7ef6ff}
+#lookcatch{position:fixed;left:46%;top:0;right:0;bottom:150px;z-index:14;touch-action:none}
+#tbtns{
+  position:fixed;right:max(10px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));
+  width:min(250px,54vw);display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;z-index:32
+}
+.ctl{
+  appearance:none;border:2px solid #9ee7ff;background:#162033ee;color:var(--cream);
+  font-weight:800;letter-spacing:.06em;border-radius:16px;min-width:76px;min-height:64px;padding:8px 10px;
+  touch-action:none;transform:scale(1);transform-origin:center
+}
+.ctl.hot,.ctl:focus-visible{transform:scale(1.08);box-shadow:0 0 16px #7ef6ff,inset 0 0 10px #7ef6ff66;border-color:#fff;outline:none}
+.ctl.small{min-height:44px;min-width:64px;font-size:12px}
+#topTouch{
+  position:fixed;left:max(12px,env(safe-area-inset-left));top:max(12px,env(safe-area-inset-top));
+  display:flex;gap:8px;z-index:32
+}
+body.touch #questbox{top:64px;max-width:62vw}
+</style>
+<script type="importmap">
+{ "imports": { "three": "./vendor/three/three.module.js" } }
+</script>
+</head>
+<body>
+<div id="view"><canvas id="c"></canvas></div>
+<div id="flash"></div>
+<div id="hud">
+  <div id="questbox">
+    <div id="crosses" aria-label="Green crosses"></div>
+    <div id="lucidity" aria-label="Lucidity"><div id="lucfill"></div></div>
+    <div id="qtitle"></div>
+    <div id="qdetail"></div>
+    <div id="news"></div>
+  </div>
+  <div id="realmBadge">WAKING</div>
+  <div id="miniwrap"><canvas id="mini" width="168" height="168"></canvas></div>
+  <div id="prompt"></div>
+  <div id="hint">WASD move · mouse look · E use · Space jump · Shift sprint · Q SHIFT · F ride · M map · J quest</div>
+</div>
+<div id="title">
+  <div class="title-card">
+    <p class="eyebrow">UNLISTED PREVIEW</p>
+    <h1>SPACE<br>SYMPHONY</h1>
+    <p class="tag">The Pioneer Pour is the crossroads. Wake, then dream. Let's Ride!</p>
+    <div class="row">
+      <button class="big primary" id="playBtn" type="button">LET'S RIDE!</button>
+      <button class="big" id="continueBtn" type="button" hidden>CONTINUE</button>
+    </div>
+  </div>
+</div>
+<div id="card" role="dialog" aria-modal="true">
+  <div class="card-inner">
+    <canvas id="portrait" width="420" height="560"></canvas>
+    <div class="card-copy">
+      <div id="cardName"></div>
+      <p id="cardCouplet"></p>
+      <div id="cardMark"></div>
+      <p id="cardBody"></p>
+      <button class="big primary" id="cardNext" type="button">CONTINUE</button>
+    </div>
+  </div>
+</div>
+<div id="qte"><div id="qteWord">WAIT</div><div id="qteHint">Press USE on NOW · three times</div></div>
+<div id="log"><div class="panel"><h2>QUEST LOG</h2><div id="logBody"></div><button class="big" id="logClose" type="button">CLOSE</button></div></div>
+<div id="mapov"><div class="panel"><h2>FRONTIER MAP</h2><canvas id="mapcv" width="560" height="560"></canvas><div style="height:8px"></div><button class="big" id="mapClose" type="button">CLOSE</button></div></div>
+<div id="pause"><div class="panel">
+  <h2>PAUSED</h2>
+  <div class="set"><span>Quality</span><select id="quality"><option value="low">Low</option><option value="med">Med</option><option value="high">High</option></select></div>
+  <div class="set"><span>Graphics API</span><select id="apiSel"><option value="webgl">WebGL2</option><option value="webgpu">WebGPU</option></select></div>
+  <div class="set"><span>Volume</span><input id="volume" type="range" min="0" max="1" step="0.05"></div>
+  <div class="set"><span>Look</span><input id="sens" type="range" min="0.0008" max="0.006" step="0.0002"></div>
+  <div class="set"><span>Invert look</span><input id="invert" type="checkbox"></div>
+  <p id="pauseStats" style="color:#cbb">WASD, mouse, gamepad. Q shifts the realm in place. Enemies are freed into light. BACK never strikes.</p>
+  <div class="row"><button class="big primary" id="resumeBtn" type="button">RESUME</button><button class="big" id="titleBtn" type="button">TITLE</button></div>
+</div></div>
+<div id="touch">
+  <div id="topTouch">
+    <button class="ctl small" type="button" data-act="map">MAP</button>
+    <button class="ctl small" type="button" data-act="quest">LOG</button>
+  </div>
+  <div id="stick" aria-label="MOVE"><div id="knob"></div></div>
+  <div id="lookcatch" aria-label="LOOK"></div>
+  <div id="tbtns">
+    <button class="ctl" type="button" data-act="jump">JUMP</button>
+    <button class="ctl" type="button" data-act="shift">SHIFT</button>
+    <button class="ctl" type="button" data-act="use">USE</button>
+    <button class="ctl" type="button" data-act="ride">RIDE</button>
+    <button class="ctl" type="button" data-act="back">BACK</button>
+  </div>
+</div>
+<div id="booterr"></div>
+<script type="module" src="./js/main.js"></script>
+</body>
+</html>
