@@ -31,6 +31,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
 #gw{position:relative}#dport{position:absolute;left:2.8125%;top:71.43%;width:13.125%;height:18.75%;box-sizing:border-box;border:2px solid #ffcc33;border-radius:4px;overflow:hidden;background:#1a1630;pointer-events:none}#dport img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .08s}#dport.talk img{transform:scale(1.06) translateY(-2%)}
 #help{font-size:12px;opacity:.75;margin-top:8px;text-align:center}
 @media (max-width:400px){#stick{width:122px;height:122px}#knob{width:52px;height:52px;margin:-26px 0 0 -26px}.big{width:66px;height:60px}.sm{width:56px}#pad{gap:6px}}
+@media (pointer:fine){#pad{display:none!important}}
 </style></head><body><div id="wrap">
 <div id="gw"><canvas id="game" width="320" height="224" tabindex="0"></canvas><div id="dport" hidden><img id="dpimg" alt=""></div></div>
 <div id="pad">
@@ -17384,7 +17385,158 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
     }
     let Rt = "",
       bt = !1;
+    function nearInteract() {
+      if (!w || A.state !== "play" || A.paused || q || ue || Ae) return !1;
+      for (let f of Ta)
+        if (f.vis && f.alpha > 0.5 && f.leave <= 0 && ae(d.x, d.y, f.x, f.y) < 36) return !0;
+      for (let i of w.chests || [])
+        if (lt(i) && !Z("chest_" + i.id) && ae(d.x, d.y, p(i.x), p(i.y)) < 28) return !0;
+      for (let i of w.signs || []) if (ae(d.x, d.y, p(i.x), p(i.y)) < 28) return !0;
+      return !1;
+    }
+    function touchRows() {
+      if (A.state === "stories")
+        return STORY_ROWS.map((r, i) => ({
+          label: r.name + (r.play ? "" : "  SOON"),
+          enabled: !!r.play,
+          on: A.menu === i,
+        }));
+      if (A.state === "title")
+        return [
+          { label: "NEW GAME", enabled: !0, on: A.menu === 0 },
+          { label: "CONTINUE", enabled: !!A.hasSave, on: A.menu === 1 },
+        ];
+      if (A.state === "talego") {
+        let confirm = A.talePhase === "confirm";
+        return (confirm ? ["YES, START OVER", "NO, KEEP IT"] : ["CONTINUE", "START OVER"]).map(
+          (label, i) => ({ label, enabled: !0, on: A.menu === i }),
+        );
+      }
+      if (A.choice && CHOICES[A.choice.id])
+        return CHOICES[A.choice.id].opts.map((o, i) => ({
+          label: o[0],
+          enabled: !0,
+          on: A.choice.sel === i,
+        }));
+      if (A.state === "play" && A.paused && A.story === "ros") {
+        let page = A.rosPage || 0,
+          tabs = ["MAP", "QUESTS", "GEAR"].map((label, i) => ({
+            label,
+            enabled: !0,
+            on: page === i,
+          }));
+        if (page === 2) {
+          let gear = [
+            ["lasers", "TWIN LASERS"],
+            ["justice", "JUSTICE SHOT"],
+            ["lasso", "ROPE"],
+            ["brand", "STAR BRAND"],
+            ["dust", "DUST DEVIL"],
+            ["hopper", "MESA HOPPER"],
+            ["skimmer", "SAND SKIMMER"],
+          ];
+          return tabs.concat(
+            gear.map((g, i) => ({
+              label:
+                g[1] +
+                (d.wep === g[0] ? "  ARMED" : d.tool === g[0] ? "  HELD" : d.boardId === g[0] ? "  ON" : ""),
+              enabled: rosOwned(g[0]),
+              on: (A.gearSel || 0) === i,
+            })),
+          );
+        }
+        if (page === 1)
+          return tabs.concat(
+            rosQuestRows().map((r, i) => ({
+              label: (Z(r[1]) ? "OK  " : "--  ") + r[0],
+              enabled: !0,
+              on: (A.gearSel || 0) === i,
+            })),
+          );
+        return tabs;
+      }
+      if (A.state === "play" && A.paused)
+        return ownedItems().map((id, i) => ({
+          label: slotName(id) + (d.wep === id ? "  ARMED" : d.tool === id ? "  HELD" : ""),
+          enabled: !0,
+          on: (A.gearSel || 0) === i,
+        }));
+      return [];
+    }
+    function touchPick(i) {
+      if (A.state === "stories") {
+        let row = STORY_ROWS[i];
+        if (!row || !row.play) return;
+        ((A.menu = i), M(), ht(), enterStory(row.id));
+        return;
+      }
+      if (A.state === "title") {
+        ((A.menu = i), M(), ht(), (i === 1 && A.hasSave && Bt()) || (i === 0 && Et()));
+        return;
+      }
+      if (A.state === "talego") {
+        ((A.menu = i), (U.attackE = !0), taleGoInput(), (U.attackE = !1));
+        return;
+      }
+      if (A.choice && CHOICES[A.choice.id]) {
+        ((A.choice.sel = i), (U.talkE = !0), choiceInput(), (U.talkE = !1));
+        return;
+      }
+      if (A.state === "play" && A.paused && A.story === "ros") {
+        if (i < 3) {
+          ((A.rosPage = i), (A.gearSel = 0));
+          return;
+        }
+        let row = i - 3;
+        A.gearSel = row;
+        if ((A.rosPage || 0) === 2) {
+          let ids = ["lasers", "justice", "lasso", "brand", "dust", "hopper", "skimmer"];
+          equipGear(ids[row]);
+        }
+        return;
+      }
+      if (A.state === "play" && A.paused) {
+        let id = ownedItems()[i];
+        id && (weaponish(id) ? (d.wep = id) : (d.tool = id), splitHands(), D.sel(), xe());
+      }
+    }
+    function touchContext() {
+      let dialog = !!(q || ue || Ae || A.choice || le),
+        mode = "title";
+      A.state === "play" && A.paused
+        ? (mode = "pause")
+        : A.state === "play" && dialog
+          ? (mode = "dialog")
+          : A.state === "play"
+            ? (mode = "play")
+            : A.state === "flash" ||
+                A.state === "endcard" ||
+                A.state === "credits" ||
+                A.state === "gameover" ||
+                A.state === "poster"
+              ? (mode = "dialog")
+              : A.state === "title" || A.state === "talego"
+                ? (mode = "back")
+                : (mode = "title");
+      A.choice && (mode = "choice");
+      let tools = 0;
+      try {
+        tools = ownedTools().length;
+      } catch (e) {
+        tools = 0;
+      }
+      let root = document.documentElement;
+      ((root.dataset.touch = mode),
+        (root.dataset.item = mode === "play" && tools > 0 ? "1" : "0"),
+        (root.dataset.swap = mode === "play" && tools > 1 ? "1" : "0"),
+        (root.dataset.talk = mode === "play" && nearInteract() ? "1" : "0"),
+        (root.dataset.board = d.boardId || ""));
+      ((window.__SQ_PICK = touchPick),
+        (window.__SQ_TOUCH = { mode, rows: touchRows(), tools }),
+        window.__SRML_LAYOUT && window.__SRML_LAYOUT());
+    }
     function Es() {
+      touchContext();
       publishLive();
       if (A.state === "stories") {
         ((Rt = ""),
@@ -19553,10 +19705,11 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
               ? (Qe = !0)
               : ((A.menu = i), D.sel())
             : i < 0 && (Qe = !0);
-        } else
-          A.state === "play" && (q || ue)
-            ? (U.talkE = !0)
-            : A.state !== "play" && (Qe = !0);
+        } else if (A.state === "play" && A.paused) {
+          /* rows are real buttons */
+        } else if (q || ue || Ae || A.choice || A.state === "flash" || A.state === "endcard" || A.state === "credits" || A.state === "gameover")
+          U.talkE = !0;
+        else A.state !== "play" && (Qe = !0);
       };
     if (
       (window.addEventListener("keydown", Sn),
@@ -19937,75 +20090,119 @@ var SRC = (function () {
 
 </script><!--/SRSTAMP-->
 <script>window.__SRML={"ok": "talk", "back": "back", "startAlias": "map"};</script>
-<!--SR-MOBILE-LAYER v1: phone layout (upright: panel under screen; sideways: max screen, buttons in side gutters). Desktop untouched.-->
+<!--SR-MOBILE-LAYER v2: one control set per screen, relaid out on rotate.-->
 <style id="srml-css">
 @media (pointer:coarse){
-html.srml,html.srml body{height:100%;overflow:hidden;overscroll-behavior:none;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-text-size-adjust:100%}
-html.srml #wrap{max-width:none!important;width:100%;height:100vh;height:100dvh;margin:0!important;padding:6px!important;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;overflow:hidden}
-html.srml #srml-scr{width:100%;flex:none;position:relative}
+html.srml{--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);--sal:env(safe-area-inset-left,0px);--sar:env(safe-area-inset-right,0px)}
+html.srml,html.srml body{height:100%;overflow:hidden;overscroll-behavior:none;touch-action:none;-webkit-user-select:none;user-select:none}
+html.srml #wrap{max-width:none!important;width:100%;height:100dvh;margin:0!important;padding:0!important;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;overflow:hidden;min-height:0}
+html.srml #srml-scr{flex:none;position:relative}
 html.srml #srml-scr canvas{width:100%!important;height:auto!important;display:block}
-html.srml #pad{display:none!important}
-html.srml #help{display:none}
-html.srml #srml-menu{display:flex;gap:8px;justify-content:flex-end;width:100%;margin-top:8px;flex:none;padding-right:max(0px,env(safe-area-inset-right))}
-html.srml #srml-pad{display:flex;justify-content:space-between;align-items:flex-end;width:100%;margin-top:8px;gap:12px;flex:none;touch-action:none;padding-left:max(0px,env(safe-area-inset-left));padding-right:max(0px,env(safe-area-inset-right));padding-bottom:max(0px,env(safe-area-inset-bottom))}
-html.srml .srml-b{box-sizing:border-box!important;margin:0!important;display:flex!important;align-items:center;justify-content:center;border-radius:14px!important;font-weight:800!important;font-family:system-ui,sans-serif!important;-webkit-tap-highlight-color:transparent;touch-action:none;user-select:none;-webkit-user-select:none;cursor:pointer;color:#e9eef8;background:#141a2e;border:2px solid #3a3f55;position:relative}
-html.srml #srml-menu .srml-b{flex:none;width:64px!important;height:48px!important;max-width:none;font-size:12px!important;letter-spacing:.5px}
-html.srml #srml-menu .srml-ok{border-color:#5cff8a!important}
-html.srml #srml-menu .srml-bk{border-color:#ff8a5c!important}
-html.srml #srml-menu .srml-st{border-color:#ffe650!important}
-html.srml .srml-b{transition:transform .08s,box-shadow .08s,filter .08s}html.srml .srml-b.on,html.srml .srml-b:hover{background:#2a3456!important;transform:translateY(-2px)!important;box-shadow:0 0 14px 4px rgba(255,230,80,.75)!important;filter:brightness(1.25);z-index:2}
-html.srml #srml-dir{flex:none;display:flex;align-items:flex-end}
-html.srml #stick{width:136px!important;height:136px!important;margin:0!important;position:relative;flex:none}
-html.srml #knob{width:52px!important;height:52px!important;margin:-26px 0 0 -26px!important}
-html.srml .srml-ar{position:absolute;color:#ffe650;font-size:16px;line-height:1;pointer-events:none;opacity:.9;font-family:system-ui,sans-serif}
-html.srml #srml-act{display:grid;grid-template-columns:48px 72px;grid-template-areas:"swap item" "atk atk";gap:8px;justify-content:end;align-content:end}
-html.srml #srml-act [data-b=swap]{grid-area:swap;width:48px!important;height:48px!important;font-size:11px!important}
-html.srml #srml-act [data-b=item]{grid-area:item;width:72px!important;height:64px!important;font-size:13px!important}
-html.srml #srml-act [data-b=attack]{grid-area:atk;width:128px!important;height:76px!important;font-size:15px!important}
+html.srml #pad,html.srml #help{display:none!important}
+html.srml .srml-b{box-sizing:border-box;margin:0;display:none;align-items:center;justify-content:center;border-radius:16px;font-weight:800;font-family:system-ui,sans-serif;touch-action:none;user-select:none;color:#e9eef8;background:#141a2e;border:2px solid #3a3f55;position:fixed;z-index:6}
+html.srml .srml-b.on{background:#2a3456;transform:translateY(-1px);box-shadow:0 0 12px 3px rgba(255,230,80,.7);filter:brightness(1.2)}
+html.srml #stick{display:none;position:fixed;z-index:6;margin:0;touch-action:none}
+html.srml #srml-rows{display:none;width:min(440px,calc(100% - 24px));margin:10px auto 0;padding:0 0 12px;box-sizing:border-box;overflow:auto;flex:1 1 auto;min-height:0;z-index:5}
+html.srml[data-touch=title] #srml-rows,html.srml[data-touch=back] #srml-rows,html.srml[data-touch=pause] #srml-rows,html.srml[data-touch=choice] #srml-rows{display:flex;flex-direction:column;gap:10px}
+html.srml #srml-rows .srml-b{position:relative;display:flex;width:100%;height:52px;flex:none;font-size:15px}
+html.srml #srml-rows .srml-b:disabled{opacity:.4}
+html.srml #srml-rows .srml-b.on{border-color:#ffcc33}
 html.srml #prize:not([hidden]),html.srml #share:not([hidden]){position:fixed;inset:0;z-index:50;overflow:auto;background:rgba(3,2,10,.96);padding:14px;margin:0!important;max-width:none!important;touch-action:pan-y}
 html.srml #srml-shx{display:none}
 html.srml #share:not([hidden]) #srml-shx{display:inline-block}
 }
-@media (pointer:coarse) and (orientation:landscape){
-html.srml #wrap{justify-content:center;padding:0!important}
-html.srml #srml-scr{width:min(calc(100vw - 2*var(--srml-side) - 8px),calc(100dvh * var(--srml-ar)))}
-html.srml #srml-menu,html.srml #srml-pad{margin:0;max-width:none}
-html.srml #srml-menu{position:fixed;right:max(8px,env(safe-area-inset-right));top:max(6px,env(safe-area-inset-top));left:auto;width:auto;flex-direction:column;align-items:flex-end;gap:8px;z-index:6}
-html.srml #srml-menu .srml-b{width:72px!important;height:48px!important}
-html.srml #srml-pad{position:fixed;inset:0;pointer-events:none;z-index:4}
-html.srml #srml-dir,html.srml #srml-act{pointer-events:auto;position:fixed;bottom:max(8px,env(safe-area-inset-bottom))}
-html.srml #srml-dir{left:max(8px,env(safe-area-inset-left));width:auto}
-html.srml #stick{width:120px!important;height:120px!important}
-html.srml #srml-act{right:max(8px,env(safe-area-inset-right));width:auto}
-}
 </style>
 <script id="srml-js">(function(){
-var C=window.__SRML||{};if(!(window.matchMedia&&matchMedia("(pointer:coarse)").matches))return;
+var coarse=window.matchMedia&&matchMedia("(pointer:coarse)").matches;
+if(!coarse)return;
 var R=document.documentElement;R.classList.add("srml");
 var cv=document.getElementById("game"),wrap=document.getElementById("wrap"),pad=document.getElementById("pad");if(!cv||!wrap||!pad)return;
 var vm=document.querySelector("meta[name=viewport]");if(!vm){vm=document.createElement("meta");vm.name="viewport";document.head.appendChild(vm);}vm.content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover";
-R.style.setProperty("--srml-ar",(cv.width/cv.height).toFixed(4));R.style.setProperty("--srml-side",(C.side||136)+"px");
 var host=document.getElementById("gw")||cv,scr=document.createElement("div");scr.id="srml-scr";host.parentNode.insertBefore(scr,host);scr.appendChild(host);
-if(host!==cv){host.style.width="100%";}
-var all=[].slice.call(pad.querySelectorAll("[data-b]")),by={};all.forEach(function(e){by[e.dataset.b]=e;e.classList.add("srml-b");});
-var menu=document.createElement("div");menu.id="srml-menu";var P=document.createElement("div");P.id="srml-pad";
-var dir=document.createElement("div");dir.id="srml-dir";var act=document.createElement("div");act.id="srml-act";
-function alias(label,cls,target){var b=document.createElement("div");b.className="srml-b "+cls;b.textContent=label;b.setAttribute("role","button");b.dataset.srml=label.toLowerCase();
- var T=by[target];var fire=function(t){if(T)T.dispatchEvent(new PointerEvent(t,{bubbles:true,cancelable:true,pointerId:99,pointerType:"touch"}));};
- b.addEventListener("pointerdown",function(e){e.preventDefault();b.classList.add("on");fire("pointerdown");});
- var up=function(e){e.preventDefault();if(!b.classList.contains("on"))return;b.classList.remove("on");fire("pointerup");};
- b.addEventListener("pointerup",up);b.addEventListener("pointerleave",up);b.addEventListener("pointercancel",up);b.addEventListener("contextmenu",function(e){e.preventDefault();});return b;}
-if(C.back)menu.appendChild(alias("BACK","srml-bk",C.back));
-if(by.start){by.start.classList.add("srml-st");by.start.textContent=C.startLabel||"START";menu.appendChild(by.start);}else if(C.startAlias){menu.appendChild(alias("START","srml-st",C.startAlias));}
-["talk","roll"].forEach(function(k){if(by[k])menu.appendChild(by[k]);});
-var st=document.getElementById("stick");
-if(st){dir.appendChild(st);[["\u25B2","left:50%;top:6px;transform:translateX(-50%)"],["\u25BC","left:50%;bottom:6px;transform:translateX(-50%)"],["\u25C0","left:7px;top:50%;transform:translateY(-50%)"],["\u25B6","right:7px;top:50%;transform:translateY(-50%)"]].forEach(function(a){var s=document.createElement("span");s.className="srml-ar";s.textContent=a[0];s.style.cssText=a[1];st.appendChild(s);});}
-["swap","item","attack"].forEach(function(k){if(by[k])act.appendChild(by[k]);});
-var n=act.children.length;R.style.setProperty("--srml-cols",n<=4?2:3);
-P.appendChild(dir);P.appendChild(act);scr.parentNode.insertBefore(menu,scr.nextSibling);menu.parentNode.insertBefore(P,menu.nextSibling);
+var rows=document.createElement("div");rows.id="srml-rows";wrap.appendChild(rows);
+var by={};[].slice.call(pad.querySelectorAll("[data-b]")).forEach(function(e){by[e.dataset.b]=e;e.classList.add("srml-b");document.body.appendChild(e);});
+var stick=document.getElementById("stick");
+if(stick){document.body.appendChild(stick);[["\u25B2","left:50%;top:8px;transform:translateX(-50%)"],["\u25BC","left:50%;bottom:8px;transform:translateX(-50%)"],["\u25C0","left:8px;top:50%;transform:translateY(-50%)"],["\u25B6","right:8px;top:50%;transform:translateY(-50%)"]].forEach(function(a){var s=document.createElement("span");s.className="srml-ar";s.textContent=a[0];s.style.cssText="position:absolute;color:#ffe650;font-size:16px;pointer-events:none;"+a[1];stick.appendChild(s);});}
+function px(name){return parseFloat(getComputedStyle(R).getPropertyValue(name))||0;}
+function hide(el){if(el)el.style.display="none";}
+function show(el,x,y,w,h,label){if(!el)return;el.style.display="flex";el.style.position="fixed";el.style.left=Math.round(x)+"px";el.style.top=Math.round(y)+"px";el.style.width=Math.round(w)+"px";el.style.height=Math.round(h)+"px";el.style.right="auto";el.style.bottom="auto";if(label&&el.dataset.label!==label){el.dataset.label=label;el.textContent=label;}}
+function renderRows(list){
+  var sig=(list||[]).map(function(r){return r.label+"|"+(r.on?1:0)+"|"+(r.enabled?1:0);}).join("\n");
+  if(rows.dataset.sig===sig)return;
+  rows.dataset.sig=sig;rows.innerHTML="";
+  (list||[]).forEach(function(r,i){
+    var b=document.createElement("button");b.type="button";b.className="srml-b"+(r.on?" on":"");b.textContent=r.label;b.disabled=!r.enabled;
+    b.addEventListener("pointerdown",function(e){e.preventDefault();e.stopPropagation();if(!b.disabled&&window.__SQ_PICK)window.__SQ_PICK(i);});
+    rows.appendChild(b);
+  });
+}
+function layout(){
+  var W=window.innerWidth,H=window.innerHeight,land=W>H;
+  R.dataset.land=land?"1":"0";
+  var mode=R.dataset.touch||"title";
+  var sat=px("--sat"),sab=px("--sab"),sal=px("--sal"),sar=px("--sar");
+  var play=mode==="play";
+  var menu=mode==="title"||mode==="back"||mode==="pause"||mode==="choice";
+  ["attack","item","swap","roll","talk","map","back"].forEach(function(k){hide(by[k]);});
+  hide(stick);
+  var top=sat+8,bot=sab+10,left=sal+10,right=W-sar-10;
+  if(menu){
+    var head=mode==="title"?top+4:top+60;
+    var banner=Math.max(110,Math.min(land?H*0.42:H*0.3,H-head-220));
+    scr.style.width=Math.min(W-24,banner*(320/224))+"px";
+    scr.style.marginTop=head+"px";
+    if(mode==="pause"){scr.style.height="auto";scr.style.overflow="visible";}
+    else{scr.style.overflow="hidden";scr.style.height=Math.max(48,Math.round(parseFloat(scr.style.width)*(36/320)))+"px";}
+    if(mode!=="title"&&by.back)show(by.back,right-104,top,104,52,"BACK");
+  }else if(mode==="dialog"){
+    scr.style.height="auto";scr.style.overflow="visible";
+    var dw=Math.min(W-16, (H-sat-sab-16)*(320/224));
+    scr.style.width=dw+"px";
+    scr.style.marginTop=Math.max(8,sat+8)+"px";
+  }else if(play){
+    var gutter=land?Math.max(136,Math.min(176,W*0.2)):0;
+    var band=land?0:Math.max(300,Math.min(360,H*0.4));
+    var head=land?Math.max(8,sat):top+58;
+    var maxH=H-head-(land?sab+8:band);
+    var maxW=land?W-gutter*2-12:W-16;
+    var cw=Math.max(160,Math.min(maxW,maxH*(320/224)));
+    scr.style.width=cw+"px";
+    scr.style.marginTop=(land?Math.max(head,(H-cw*(224/320))/2):head)+"px";
+    scr.style.height="auto";scr.style.overflow="visible";
+    var atkW=Math.min(land?132:156,Math.max(112,right-left-150)),atkH=76;
+    var ax=right-atkW,ay=H-bot-atkH;
+    show(by.attack,ax,ay,atkW,atkH,"ATTACK");
+    var cursor=ay;
+    if(R.dataset.item==="1"){
+      var ih=56;
+      cursor=ay-10-ih;
+      if(R.dataset.swap==="1"){
+        show(by.swap,ax,cursor+(ih-48)/2,52,48,"SWAP");
+        show(by.item,ax+62,cursor,atkW-62,ih,"ITEM");
+      }else show(by.item,ax,cursor,atkW,ih,"ITEM");
+    }
+    var rh=52;
+    cursor=cursor-10-rh;
+    var rollLabel=R.dataset.board==="hopper"?"HOP":"ROLL";
+    show(by.roll,ax,cursor,atkW,rh,rollLabel);
+    if(R.dataset.talk==="1"){cursor=cursor-10-rh;show(by.talk,ax,cursor,atkW,rh,"TALK");}
+    var stickS=Math.max(96,Math.min(land?132:148,land?H-sat-sab-70:band-36));
+    if(stick)show(stick,left,H-bot-stickS,stickS,stickS);
+    if(by.map)show(by.map,right-64,top,64,48,"PAUSE");
+  }else{
+    scr.style.width=Math.min(W-16,(H-sat-sab-16)*(320/224))+"px";
+    scr.style.marginTop=(sat+8)+"px";
+    scr.style.height="auto";scr.style.overflow="visible";
+  }
+  var info=window.__SQ_TOUCH;
+  if(menu&&info)renderRows(info.rows||[]);else{rows.dataset.sig="";rows.innerHTML="";}
+}
+window.__SRML_LAYOUT=layout;
+window.addEventListener("resize",layout);
+window.addEventListener("orientationchange",function(){setTimeout(layout,60);});
+layout();
 var sh=document.getElementById("share");if(sh){var x=document.createElement("button");x.id="srml-shx";x.className="btn2";x.textContent="Close";x.style.marginTop="10px";x.onclick=function(){sh.hidden=true;};var pb=sh.querySelector(".pb");(pb||sh).appendChild(x);}
-document.addEventListener("touchmove",function(e){var t=e.target;if(!(t.closest&&t.closest("#prize,#share")))e.preventDefault();},{passive:false});
+document.addEventListener("touchmove",function(e){var t=e.target;if(!(t.closest&&t.closest("#prize,#share,#srml-rows")))e.preventDefault();},{passive:false});
 document.addEventListener("gesturestart",function(e){e.preventDefault();});
-var dbl=0;document.addEventListener("touchend",function(e){var t=Date.now();if(t-dbl<350&&!(e.target.closest&&e.target.closest("#prize,#share,a,button")))e.preventDefault();dbl=t;},{passive:false});
 })();</script>
 </body></html>
