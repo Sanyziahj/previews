@@ -1090,57 +1090,6 @@ test('active play frame work stays inside a 60fps budget', async ({ page }) => {
   expect(report.workAvg).toBeLessThan(16);
 });
 
-async function phoneLayout(page, file) {
-  const errors = track(page);
-  await page.addInitScript(() => { window.__SQ_DEBUG = true; });
-  await page.goto(GAME);
-  await page.waitForFunction(() => document.documentElement.classList.contains('srml'));
-  await page.waitForTimeout(300);
-  const layout = await page.evaluate(() => {
-    const canvas = document.querySelector('#game').getBoundingClientRect();
-    const buttons = [...document.querySelectorAll('#srml-menu .srml-b, #srml-act .srml-b')].map((el) => {
-      const r = el.getBoundingClientRect();
-      return { label: (el.textContent || '').trim(), x: r.x, y: r.y, w: r.width, h: r.height };
-    });
-    const overlap = buttons.filter((b) => {
-      const ix = Math.min(b.x + b.w, canvas.right) - Math.max(b.x, canvas.left);
-      const iy = Math.min(b.y + b.h, canvas.bottom) - Math.max(b.y, canvas.top);
-      return ix > 8 && iy > 8;
-    });
-    return {
-      labels: buttons.map((b) => b.label).join(' '),
-      min: Math.min(...buttons.map((b) => Math.min(b.w, b.h))),
-      overlap: overlap.map((b) => b.label),
-    };
-  });
-  expect(layout.labels).toContain('BACK');
-  expect(layout.labels).toContain('ATTACK');
-  expect(layout.min).toBeGreaterThanOrEqual(48);
-  expect(layout.overlap).toEqual([]);
-  const back = page.locator('#srml-menu .srml-bk');
-  await back.dispatchEvent('pointerdown');
-  const pressed = await back.evaluate((el) => ({ on: el.classList.contains('on'), transform: getComputedStyle(el).transform }));
-  expect(pressed.on).toBe(true);
-  expect(pressed.transform).not.toBe('none');
-  await back.dispatchEvent('pointerup');
-  const attack = await page.evaluate(() => !!(window.__SQ && __SQ.I && (__SQ.I.attack || __SQ.I.roll)));
-  expect(attack).toBe(false);
-  await page.evaluate(() => {
-    const S = __SQ;
-    S.setManual(true);
-    S.G.state = 'play';
-    S.G.story = 'ros';
-    S.P.items.blasters = true;
-    S.P.pri = 'lasers';
-    S.P.sec = 'lasso';
-    S.P.items.lasso = true;
-    S.warp('ros_desert', 16, 8, 3);
-    S.step(40);
-  });
-  await page.screenshot({ path: file, fullPage: true });
-  expect(errors, errors.join('\n')).toEqual([]);
-}
-
 test.describe('phone stick leaves SuperNova', () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
   test('dragging the stick moves ROS after the door', async ({ page }) => {
@@ -1152,6 +1101,9 @@ test.describe('phone stick leaves SuperNova', () => {
       S.P.items.blasters = true;
       S.warp('ros_club', 10, 11, 0);
       S.step(4);
+      for (let i = 0; i < 8 && (S.script || S.dlg); i++) {
+        S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
+      }
       S.press('down', true);
       for (let i = 0; i < 90 && S.A.id === 'ros_club'; i++) S.step(1);
       S.press('down', false);
@@ -1173,69 +1125,164 @@ test.describe('phone stick leaves SuperNova', () => {
   });
 });
 
-function movementClear(page) {
+
+const LAYOUT = '/agent/repos/previews/skippys-quest/docs/layout';
+const SIZES = [[390, 844], [844, 390], [360, 640], [640, 360], [768, 1024]];
+
+function controlAudit(page) {
   return page.evaluate(() => {
-    const zone = document.querySelector('#srml-dir').getBoundingClientRect();
-    const buttons = [...document.querySelectorAll('#srml-menu .srml-b, #srml-act .srml-b')].map((el) => {
+    const canvas = (document.querySelector('#srml-scr') || document.querySelector('#game')).getBoundingClientRect();
+    const els = [...document.querySelectorAll('.srml-b, #stick')].filter((el) => {
       const r = el.getBoundingClientRect();
-      const ix = Math.min(r.right, zone.right) - Math.max(r.left, zone.left);
-      const iy = Math.min(r.bottom, zone.bottom) - Math.max(r.top, zone.top);
-      return {
-        label: (el.textContent || '').trim(),
-        w: r.width,
-        h: r.height,
-        hit: ix > 0 && iy > 0,
-        onLeft: r.left < zone.right && r.right > zone.left,
-      };
+      return getComputedStyle(el).display !== 'none' && r.width > 1 && r.height > 1;
+    }).map((el) => {
+      const r = el.getBoundingClientRect();
+      return { label: (el.textContent || '').trim().slice(0, 28), x: r.x, y: r.y, w: r.width, h: r.height, stick: el.id === 'stick' };
     });
-    const labels = buttons.map((b) => b.label);
-    const attack = buttons.find((b) => b.label === 'ATTACK');
-    const item = buttons.find((b) => b.label === 'ITEM');
-    const swap = buttons.find((b) => b.label === 'SWAP');
+    const hits = [];
+    const gaps = [];
+    for (let i = 0; i < els.length; i++) {
+      for (let j = i + 1; j < els.length; j++) {
+        const a = els[i], b = els[j];
+        const ix = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
+        const iy = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
+        if (ix > 0.5 && iy > 0.5) hits.push(a.label + ' / ' + b.label);
+        const horiz = a.y < b.y + b.h && b.y < a.y + a.h;
+        const vert = a.x < b.x + b.w && b.x < a.x + a.w;
+        if (horiz && ix <= 0) gaps.push(Math.max(a.x, b.x) - Math.min(a.x + a.w, b.x + b.w));
+        if (vert && iy <= 0) gaps.push(Math.max(a.y, b.y) - Math.min(a.y + a.h, b.y + b.h));
+      }
+    }
+    const onCanvas = els.filter((b) => {
+      const ix = Math.min(b.x + b.w, canvas.right) - Math.max(b.x, canvas.left);
+      const iy = Math.min(b.y + b.h, canvas.bottom) - Math.max(b.y, canvas.top);
+      return ix > 1 && iy > 1;
+    }).map((b) => b.label);
+    const small = els.filter((b) => Math.min(b.w, b.h) < 48).map((b) => b.label);
     return {
-      labels: labels.join(' '),
-      min: Math.min(...buttons.map((b) => Math.min(b.w, b.h))),
-      blocked: buttons.filter((b) => b.hit).map((b) => b.label),
-      attack: attack ? Math.min(attack.w, attack.h) : 0,
-      item: !!item,
-      swap: !!swap,
-      extras: labels.filter((l) => ['Q PRI', 'TAB SEC', 'TOOL'].includes(l)),
+      mode: document.documentElement.dataset.touch,
+      labels: els.map((e) => e.label),
+      hits, onCanvas, small,
+      tight: gaps.filter((g) => g < 8 && g >= 0),
     };
   });
 }
 
-for (const [w, h] of [[390, 844], [844, 390], [360, 640], [768, 1024]]) {
-  test.describe(`movement ${w}x${h}`, () => {
-    test.use({ viewport: { width: w, height: h }, hasTouch: true, isMobile: true });
-    test('no button sits on the stick', async ({ page }) => {
-      const errors = await boot(page);
-      await page.waitForFunction(() => document.documentElement.classList.contains('srml'));
-      await page.waitForTimeout(200);
-      const box = await movementClear(page);
-      expect(box.labels, JSON.stringify(box)).toContain('ATTACK');
-      expect(box.labels).toContain('ITEM');
-      expect(box.labels).toContain('SWAP');
-      expect(box.labels).toContain('BACK');
-      expect(box.extras).toEqual([]);
-      expect(box.min).toBeGreaterThanOrEqual(48);
-      expect(box.attack).toBeGreaterThanOrEqual(64);
-      expect(box.blocked).toEqual([]);
-      await page.screenshot({ path: `${ART}/after-${w}x${h}.png`, fullPage: true });
-      expect(errors, errors.join('\n')).toEqual([]);
-    });
-  });
-}
-
-test.describe('phone 390x844', () => {
+test.describe('context touch layouts', () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
-  test('controls sit off the action', async ({ page }) => {
-    await phoneLayout(page, `${ART}/ros-phone-390x844.png`);
-  });
-});
+  test('each screen shows only its own controls', async ({ page }) => {
+    const errors = await boot(page);
+    await page.waitForFunction(() => document.documentElement.classList.contains('srml'));
+    fs.mkdirSync(LAYOUT, { recursive: true });
+    for (const [w, h] of SIZES) {
+      await page.setViewportSize({ width: w, height: h });
+      await page.evaluate(() => { __SQ.G.paused = false; __SQ.G.state = 'stories'; __SQ.step(2); });
+      const title = await controlAudit(page);
+      expect(title.mode, JSON.stringify(title)).toBe('title');
+      expect(title.labels.join(' ')).not.toMatch(/ATTACK|ITEM|SWAP|ROLL|TALK|PAUSE/);
+      expect(title.labels.join(' ')).toContain('SKIPPY');
+      expect(title.hits, JSON.stringify(title)).toEqual([]);
+      expect(title.onCanvas, JSON.stringify(title)).toEqual([]);
+      expect(title.small, JSON.stringify(title)).toEqual([]);
+      await page.screenshot({ path: `${LAYOUT}/title-${w}x${h}.png` });
 
-test.describe('phone 844x390', () => {
-  test.use({ viewport: { width: 844, height: 390 }, hasTouch: true, isMobile: true });
-  test('side gutters keep buttons off the screen', async ({ page }) => {
-    await phoneLayout(page, `${ART}/ros-phone-844x390.png`);
+      await page.evaluate(() => {
+        const S = __SQ;
+        S.G.state = 'play';
+        S.G.story = 'ros';
+        S.G.paused = false;
+        S.flag('lasso_got', false);
+        S.flag('brand_got', false);
+        S.P.items = { blasters: true };
+        S.P.wep = 'lasers';
+        S.P.tool = '';
+        S.P.pri = 'lasers';
+        S.P.sec = '';
+        S.warp('ros_desert', 18, 4, 1);
+        S.step(2);
+        for (let i = 0; i < 8 && (S.script || S.dlg); i++) {
+          S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
+        }
+        S.step(1);
+      });
+      const play = await controlAudit(page);
+      expect(play.mode, JSON.stringify(play)).toBe('play');
+      expect(play.labels).toContain('ATTACK');
+      expect(play.labels).toContain('ROLL');
+      expect(play.labels).toContain('PAUSE');
+      expect(play.labels.join(' ')).not.toMatch(/ITEM|SWAP|TALK|BACK/);
+      expect(play.hits, JSON.stringify(play)).toEqual([]);
+      expect(play.onCanvas, JSON.stringify(play)).toEqual([]);
+      expect(play.small, JSON.stringify(play)).toEqual([]);
+      expect(play.tight, JSON.stringify(play)).toEqual([]);
+      await page.screenshot({ path: `${LAYOUT}/play-${w}x${h}.png` });
+
+      await page.evaluate(() => {
+        const S = __SQ;
+        S.P.items.lasso = true;
+        S.P.items.brand = true;
+        S.flag('lasso_got');
+        S.flag('brand_got');
+        S.P.tool = 'lasso';
+        S.P.sec = 'lasso';
+        S.warp('ros_pour', 7, 6, 2);
+        S.step(2);
+        for (let i = 0; i < 10 && (S.script || S.dlg); i++) {
+          S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
+        }
+        S.step(1);
+      });
+      const npc = await controlAudit(page);
+      expect(npc.labels, JSON.stringify(npc)).toEqual(expect.arrayContaining(['ATTACK', 'ITEM', 'SWAP', 'ROLL', 'TALK', 'PAUSE']));
+      expect(npc.labels.join(' ')).not.toContain('BACK');
+      expect(npc.hits, JSON.stringify(npc)).toEqual([]);
+      expect(npc.onCanvas, JSON.stringify(npc)).toEqual([]);
+      expect(npc.small, JSON.stringify(npc)).toEqual([]);
+      await page.screenshot({ path: `${LAYOUT}/npc-${w}x${h}.png` });
+
+      await page.evaluate(() => { __SQ.say('al', 'THE ROPE LOCKER IS ON THE EAST WALL.'); __SQ.step(2); });
+      const dialog = await controlAudit(page);
+      expect(dialog.mode, JSON.stringify(dialog)).toBe('dialog');
+      expect(dialog.labels.join(' '), JSON.stringify(dialog)).not.toMatch(/ATTACK|ITEM|SWAP|ROLL|TALK|PAUSE|BACK/);
+      expect(dialog.hits).toEqual([]);
+      await page.screenshot({ path: `${LAYOUT}/dialog-${w}x${h}.png` });
+
+      await page.evaluate(() => {
+        const S = __SQ;
+        S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(2);
+        for (let i = 0; i < 6 && (S.script || S.dlg); i++) {
+          S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
+        }
+        S.G.paused = true;
+        S.G.rosPage = 0;
+        S.step(2);
+      });
+      const pause = await controlAudit(page);
+      expect(pause.mode, JSON.stringify(pause)).toBe('pause');
+      expect(pause.labels).toContain('BACK');
+      expect(pause.labels.join(' ')).not.toMatch(/ATTACK|ITEM|SWAP|ROLL|TALK|PAUSE/);
+      expect(pause.hits, JSON.stringify(pause)).toEqual([]);
+      expect(pause.onCanvas, JSON.stringify(pause)).toEqual([]);
+      expect(pause.small, JSON.stringify(pause)).toEqual([]);
+      await page.screenshot({ path: `${LAYOUT}/pause-${w}x${h}.png` });
+
+      await page.evaluate(() => { __SQ.G.rosPage = 2; __SQ.step(1); });
+      const gear = await controlAudit(page);
+      expect(gear.labels.join(' '), JSON.stringify(gear)).toContain('TWIN LASERS');
+      expect(gear.labels.join(' ')).not.toMatch(/ATTACK|SWAP|ROLL/);
+      expect(gear.hits, JSON.stringify(gear)).toEqual([]);
+      expect(gear.onCanvas, JSON.stringify(gear)).toEqual([]);
+      expect(gear.small, JSON.stringify(gear)).toEqual([]);
+      await page.screenshot({ path: `${LAYOUT}/gear-${w}x${h}.png` });
+    }
+    const before = await page.evaluate(() => ({ w: innerWidth, land: document.documentElement.dataset.land, mode: document.documentElement.dataset.touch }));
+    await page.setViewportSize({ width: before.w > 500 ? 390 : 844, height: before.w > 500 ? 844 : 390 });
+    await page.evaluate(() => { __SQ.G.paused = false; __SQ.step(2); });
+    const turned = await controlAudit(page);
+    expect(turned.mode).toBe('play');
+    expect(turned.labels).toContain('ATTACK');
+    expect(turned.hits, JSON.stringify(turned)).toEqual([]);
+    expect(turned.onCanvas, JSON.stringify(turned)).toEqual([]);
+    expect(errors, errors.join('\n')).toEqual([]);
   });
 });
