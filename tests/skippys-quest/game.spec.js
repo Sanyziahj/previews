@@ -878,7 +878,7 @@ test('the Brand sleeps four seconds and then wakes', async ({ page }) => {
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
-test('each slot cycles on its own and fires only itself', async ({ page }) => {
+test('swap cycles items and attack stays a weapon', async ({ page }) => {
   const errors = await boot(page);
   const out = await page.evaluate(() => {
     const S = __SQ;
@@ -888,127 +888,99 @@ test('each slot cycles on its own and fires only itself', async ({ page }) => {
     S.step(3);
     S.ents.forEach((e) => { e.dead = true; });
     S.P.items = { blasters: true };
+    S.P.wep = 'lasers';
+    S.P.tool = '';
     S.P.pri = 'lasers';
     S.P.sec = '';
     S.P.cds = {};
     function edge(name) {
       S.press(name, true); S.step(2); S.press(name, false); S.step(1);
     }
-    edge('pri');
-    edge('sec');
+    edge('swap');
     const one = S.slots();
     S.shots.length = 0;
     edge('item');
-    const itemQuiet = S.shots.length === 0 && (S.G.toast || '').indexOf('NONE') >= 0;
+    const itemQuiet = S.shots.length === 0 && (S.G.toast || '').indexOf('NO ITEM') >= 0;
     S.shots.length = 0;
     edge('attack');
     const lasers = S.shots.filter((s) => s.kind === 'stun').length;
-    S.P.items.justice = true;
     S.P.items.lasso = true;
     S.P.items.brand = true;
-    S.flag('justice_got');
+    S.P.items.justice = true;
     S.flag('lasso_got');
     S.flag('brand_got');
-    S.P.pri = 'lasers';
+    S.flag('justice_got');
+    S.P.tool = 'lasso';
     S.P.sec = 'lasso';
-    const priOrder = ['lasers'];
-    for (let i = 0; i < 3; i++) {
-      edge('pri');
-      priOrder.push(S.slots().pri);
-    }
-    const secOrder = ['lasso'];
-    for (let i = 0; i < 3; i++) {
-      edge('sec');
-      secOrder.push(S.slots().sec);
-    }
-    const same = S.slots().pri !== S.slots().sec;
-    S.G.paused = true;
-    S.step(1);
-    const wait = performance.now() + 300;
-    while (performance.now() < wait) {}
-    S.G.rosPage = 2;
-    S.G.gearSel = 0;
+    S.P.wep = 'lasers';
     S.P.pri = 'lasers';
-    S.P.sec = 'brand';
-    edge('sec');
-    const swapped = S.slots();
-    S.G.paused = false;
-    function fire(which, id) {
-      S.P.pri = which === 'attack' ? id : 'lasers';
-      S.P.sec = which === 'item' ? id : 'brand';
-      if (S.P.pri === S.P.sec) S.P.sec = id === 'lasers' ? 'brand' : 'lasers';
-      S.P.cds = {};
-      S.P.brandCd = 0;
-      S.P.charge = 0;
-      S.P.arrowCd = 0;
-      S.shots.length = 0;
-      if (id === 'justice') {
-        S.press(which, true); S.step(40); S.press(which, false); S.step(2);
-        return S.shots.some((s) => s.kind === 'justice');
-      }
-      edge(which);
-      if (id === 'lasers') return S.shots.some((s) => s.kind === 'stun');
-      if (id === 'brand') return (S.G.toast || '').indexOf('STAR BRAND') >= 0;
-      return (S.G.toast || '').indexOf('ROPE') >= 0 || (S.G.toast || '').indexOf('LASSO') >= 0;
+    const order = ['lasso'];
+    for (let i = 0; i < 2; i++) {
+      edge('swap');
+      order.push(S.slots().sec);
     }
-    const otherQuiet = (() => {
-      S.P.pri = 'lasers';
-      S.P.sec = 'brand';
-      S.P.cds = {};
-      S.P.brandCd = 0;
-      S.shots.length = 0;
-      edge('attack');
-      return (S.G.toast || '').indexOf('STAR BRAND') < 0 && S.shots.some((s) => s.kind === 'stun');
-    })();
-    return {
-      one, itemQuiet, lasers, priOrder, secOrder, same, swapped, otherQuiet,
-      fired: {
-        lasers: fire('attack', 'lasers'),
-        justice: fire('item', 'justice'),
-        lasso: fire('item', 'lasso'),
-        brand: fire('item', 'brand'),
-      },
-    };
+    S.P.cds = {};
+    S.shots.length = 0;
+    edge('attack');
+    const attackStill = S.shots.filter((s) => s.kind === 'stun').length;
+    const weaponUntouched = S.slots().pri;
+    S.P.tool = 'brand';
+    S.P.sec = 'brand';
+    S.P.brandCd = 0;
+    S.P.cds = {};
+    S.shots.length = 0;
+    edge('item');
+    const brand = (S.G.toast || '').indexOf('STAR BRAND') >= 0;
+    const noLaserFromItem = S.shots.filter((s) => s.kind === 'stun').length === 0;
+    S.P.wep = 'justice';
+    S.P.pri = 'justice';
+    S.P.charge = 0;
+    S.shots.length = 0;
+    S.press('attack', true); S.step(40); S.press('attack', false); S.step(2);
+    const justice = S.shots.some((s) => s.kind === 'justice');
+    const itemNotJustice = (S.G.toast || '').indexOf('JUSTICE') < 0;
+    return { one, itemQuiet, lasers, order, attackStill, weaponUntouched, brand, noLaserFromItem, justice, itemNotJustice, same: S.slots().pri !== S.slots().sec };
   });
   expect(out.one).toEqual({ pri: 'lasers', sec: '' });
   expect(out.itemQuiet, JSON.stringify(out)).toBe(true);
   expect(out.lasers).toBeGreaterThan(0);
-  expect(out.priOrder).toEqual(['lasers', 'justice', 'brand', 'lasers']);
-  expect(out.secOrder).toEqual(['lasso', 'brand', 'justice', 'lasso']);
+  expect(out.order).toEqual(['lasso', 'brand', 'lasso']);
+  expect(out.attackStill).toBeGreaterThan(0);
+  expect(out.weaponUntouched).toBe('lasers');
+  expect(out.brand).toBe(true);
+  expect(out.noLaserFromItem).toBe(true);
+  expect(out.justice).toBe(true);
   expect(out.same).toBe(true);
-  expect(out.swapped).toEqual({ pri: 'brand', sec: 'lasers' });
-  expect(out.otherQuiet).toBe(true);
-  expect(out.fired.lasers).toBe(true);
-  expect(out.fired.justice).toBe(true);
-  expect(out.fired.lasso).toBe(true);
-  expect(out.fired.brand).toBe(true);
   const skippy = await page.evaluate(() => {
     const S = __SQ;
     S.G.story = 'skippy';
     S.G.paused = false;
-    S.P.items = { bow: true, raygun: true, baton: true, lasso: true };
+    S.flag('brand_got', false);
+    S.flag('justice_got', false);
+    S.flag('lasso_got', false);
+    S.P.items = { bow: true, raygun: true, baton: true, lasso: true, missile: true };
     S.P.arrows = 5;
-    S.P.pri = 'bow';
+    S.P.wep = 'raygun';
+    S.P.tool = 'lasso';
+    S.P.pri = 'raygun';
     S.P.sec = 'lasso';
     S.P.cds = {};
     function edge(name) {
       S.press(name, true); S.step(2); S.press(name, false); S.step(1);
     }
-    const pri = ['bow'];
-    for (let i = 0; i < 3; i++) { edge('pri'); pri.push(S.slots().pri); }
+    edge('swap');
+    const after = S.slots();
     S.shots.length = 0;
     edge('attack');
-    const bow = S.shots.some((s) => s.kind === 'arrow');
-    const kept = !!(S.P.items.bow && S.P.items.raygun && S.P.items.baton && S.P.items.lasso);
-    const distinct = S.slots().pri !== S.slots().sec;
-    return { pri, bow, kept, distinct, slots: S.slots() };
+    const ray = S.shots.some((s) => s.kind === 'ray');
+    edge('swap');
+    return { after, ray, back: S.slots(), kept: !!(S.P.items.bow && S.P.items.raygun && S.P.items.lasso && S.P.items.missile) };
   });
   expect(skippy.kept).toBe(true);
-  expect(skippy.distinct).toBe(true);
-  expect(skippy.pri[0]).toBe('bow');
-  expect(skippy.pri[1]).not.toBe('lasso');
-  expect(skippy.pri[skippy.pri.length - 1]).toBe('bow');
-  expect(skippy.bow).toBe(true);
+  expect(skippy.after).toEqual({ pri: 'raygun', sec: 'missile' });
+  expect(skippy.back.sec).toBe('lasso');
+  expect(skippy.back.pri).toBe('raygun');
+  expect(skippy.ray).toBe(true);
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
@@ -1143,7 +1115,7 @@ async function phoneLayout(page, file) {
   });
   expect(layout.labels).toContain('BACK');
   expect(layout.labels).toContain('ATTACK');
-  expect(layout.min).toBeGreaterThan(40);
+  expect(layout.min).toBeGreaterThanOrEqual(48);
   expect(layout.overlap).toEqual([]);
   const back = page.locator('#srml-menu .srml-bk');
   await back.dispatchEvent('pointerdown');
@@ -1201,60 +1173,58 @@ test.describe('phone stick leaves SuperNova', () => {
   });
 });
 
-function expectSlotButtons(page) {
+function movementClear(page) {
   return page.evaluate(() => {
-    const canvas = document.querySelector('#game').getBoundingClientRect();
-    const all = [...document.querySelectorAll('.srml-b, [data-b]')].map((el) => {
+    const zone = document.querySelector('#srml-dir').getBoundingClientRect();
+    const buttons = [...document.querySelectorAll('#srml-menu .srml-b, #srml-act .srml-b')].map((el) => {
       const r = el.getBoundingClientRect();
-      return { label: (el.textContent || '').trim(), x: r.x, y: r.y, w: r.width, h: r.height, r };
+      const ix = Math.min(r.right, zone.right) - Math.max(r.left, zone.left);
+      const iy = Math.min(r.bottom, zone.bottom) - Math.max(r.top, zone.top);
+      return {
+        label: (el.textContent || '').trim(),
+        w: r.width,
+        h: r.height,
+        hit: ix > 0 && iy > 0,
+        onLeft: r.left < zone.right && r.right > zone.left,
+      };
     });
-    const want = ['Q PRI', 'TAB SEC'];
-    const found = want.map((label) => all.find((b) => b.label === label));
-    function hits(a, b) {
-      if (!a || !b) return false;
-      const ix = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
-      const iy = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
-      return ix > 8 && iy > 8;
-    }
-    const overlapCanvas = found.filter((b) => b && hits(b, { x: canvas.left, y: canvas.top, w: canvas.width, h: canvas.height }));
+    const labels = buttons.map((b) => b.label);
+    const attack = buttons.find((b) => b.label === 'ATTACK');
+    const item = buttons.find((b) => b.label === 'ITEM');
+    const swap = buttons.find((b) => b.label === 'SWAP');
     return {
-      found: found.every(Boolean),
-      min: Math.min(...found.filter(Boolean).map((b) => Math.min(b.w, b.h))),
-      overlap: overlapCanvas.map((b) => b.label),
-      eachOther: found[0] && found[1] ? hits(found[0], found[1]) : true,
-      back: found.some((b) => b && b.label === 'BACK'),
+      labels: labels.join(' '),
+      min: Math.min(...buttons.map((b) => Math.min(b.w, b.h))),
+      blocked: buttons.filter((b) => b.hit).map((b) => b.label),
+      attack: attack ? Math.min(attack.w, attack.h) : 0,
+      item: !!item,
+      swap: !!swap,
+      extras: labels.filter((l) => ['Q PRI', 'TAB SEC', 'TOOL'].includes(l)),
     };
   });
 }
 
-test.describe('phone tool 390x844', () => {
-  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
-  test('cycle buttons are large and off the picture', async ({ page }) => {
-    const errors = await boot(page);
-    await page.waitForFunction(() => document.documentElement.classList.contains('srml'));
-    const box = await expectSlotButtons(page);
-    expect(box.found).toBe(true);
-    expect(box.min).toBeGreaterThan(40);
-    expect(box.overlap).toEqual([]);
-    expect(box.eachOther).toBe(false);
-    expect(box.back).toBe(false);
-    expect(errors, errors.join('\n')).toEqual([]);
+for (const [w, h] of [[390, 844], [844, 390], [360, 640], [768, 1024]]) {
+  test.describe(`movement ${w}x${h}`, () => {
+    test.use({ viewport: { width: w, height: h }, hasTouch: true, isMobile: true });
+    test('no button sits on the stick', async ({ page }) => {
+      const errors = await boot(page);
+      await page.waitForFunction(() => document.documentElement.classList.contains('srml'));
+      await page.waitForTimeout(200);
+      const box = await movementClear(page);
+      expect(box.labels, JSON.stringify(box)).toContain('ATTACK');
+      expect(box.labels).toContain('ITEM');
+      expect(box.labels).toContain('SWAP');
+      expect(box.labels).toContain('BACK');
+      expect(box.extras).toEqual([]);
+      expect(box.min).toBeGreaterThanOrEqual(48);
+      expect(box.attack).toBeGreaterThanOrEqual(64);
+      expect(box.blocked).toEqual([]);
+      await page.screenshot({ path: `${ART}/after-${w}x${h}.png`, fullPage: true });
+      expect(errors, errors.join('\n')).toEqual([]);
+    });
   });
-});
-
-test.describe('phone tool 844x390', () => {
-  test.use({ viewport: { width: 844, height: 390 }, hasTouch: true, isMobile: true });
-  test('cycle buttons stay off the picture in landscape', async ({ page }) => {
-    const errors = await boot(page);
-    await page.waitForFunction(() => document.documentElement.classList.contains('srml'));
-    const box = await expectSlotButtons(page);
-    expect(box.found).toBe(true);
-    expect(box.min).toBeGreaterThan(40);
-    expect(box.overlap).toEqual([]);
-    expect(box.eachOther).toBe(false);
-    expect(errors, errors.join('\n')).toEqual([]);
-  });
-});
+}
 
 test.describe('phone 390x844', () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
