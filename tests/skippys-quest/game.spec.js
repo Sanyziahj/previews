@@ -528,6 +528,189 @@ test('BACK cancels and does not roll or attack', async ({ page }) => {
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
+const DONE_SKIPPY = JSON.stringify({
+  z: 'bow', v: 1, area: 'desert', x: 200, y: 140, dir: 3,
+  hp: 6, maxHp: 6, pieces: 0, coins: 42, arrows: 3,
+  items: { baton: true }, keys: {}, bigKeys: {},
+  flags: { woke: true, ch9_done: true, santt_met: true, macho_seen: true },
+  party: [], shards: 7, time: 900,
+  visited: { desert: true, home: true },
+});
+
+async function enterContinue(page) {
+  await page.evaluate(() => __SQ.step(25));
+  await tap(page, 'attack');
+  await page.evaluate(() => __SQ.step(25));
+  await tap(page, 'attack');
+  await page.waitForFunction(() => __SQ.G.state === 'play');
+}
+
+async function advanceTalk(page) {
+  await page.evaluate(() => {
+    const S = __SQ;
+    if (S.dlg) { S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(2); }
+    else if (S.getPop) { S.step(40); S.press('talk', true); S.step(1); S.press('talk', false); S.step(2); }
+    else S.step(3);
+  });
+}
+
+async function reachTaleChoice(page) {
+  await page.evaluate(() => { __SQ.warp('desert', 32, 8, 3); __SQ.step(6); });
+  for (let i = 0; i < 24; i++) {
+    const st = await page.evaluate(() => {
+      const d = __SQ.dlg;
+      const text = d ? d.pages.map((p) => p.join(' ')).join(' ') : '';
+      return { choice: !!__SQ.G.choice, text, obj: __SQ.objective(), area: __SQ.A.id };
+    });
+    if (st.choice) return st;
+    if (st.text.includes('TALES OF THE OUTLAW')) {
+      await page.evaluate(() => { __SQ.skipText(); __SQ.step(1); });
+      await page.screenshot({ path: `${ART}/tale-mirage.png` });
+    }
+    await advanceTalk(page);
+  }
+  return page.evaluate(() => ({ choice: !!__SQ.G.choice, obj: __SQ.objective(), area: __SQ.A.id, text: '' }));
+}
+
+test('finished Skippy hears the tale and wakes as ROS', async ({ page }) => {
+  const errors = await boot(page, { save: { skippy: DONE_SKIPPY } });
+  await enterContinue(page);
+  const obj = await page.evaluate(() => __SQ.objective());
+  expect(obj).toContain('PIONEER POUR');
+  const arrived = await reachTaleChoice(page);
+  expect(arrived.choice, JSON.stringify(arrived)).toBe(true);
+  await page.screenshot({ path: `${ART}/tale-choice.png` });
+  await page.evaluate(() => { __SQ.press('talk', true); __SQ.step(2); __SQ.press('talk', false); __SQ.step(2); });
+  for (let i = 0; i < 12 && await page.evaluate(() => __SQ.G.state === 'play'); i++) await advanceTalk(page);
+  await page.waitForFunction(() => __SQ.G.state === 'flash' || __SQ.G.state === 'play' && __SQ.story() === 'ros');
+  if (await page.evaluate(() => __SQ.G.state === 'flash')) {
+    await page.screenshot({ path: `${ART}/tale-flash.png` });
+    const card = await page.locator('#sr-live').innerText();
+    expect(card).toContain('CHAPTER 2');
+    expect(card).toContain('THE ROGUE OUTLAW SHERIFF');
+    await page.evaluate(() => { __SQ.step(30); __SQ.press('talk', true); __SQ.step(2); __SQ.press('talk', false); __SQ.step(8); });
+  }
+  await page.waitForFunction(() => __SQ.G.state === 'play' && __SQ.story() === 'ros');
+  const ride = await page.evaluate(() => ({
+    area: __SQ.A.id,
+    hero: __SQ.PID(),
+    skippy: JSON.parse(localStorage.getItem('sq_save_v1')),
+    ros: JSON.parse(localStorage.getItem('sq_save_ros_v1')),
+  }));
+  expect(ride.area).toBe('ros_yard');
+  expect(ride.hero).toBe('ros');
+  expect(ride.skippy.coins).toBe(42);
+  expect(ride.skippy.flags.ch9_done).toBe(true);
+  expect(ride.skippy.shards).toBe(7);
+  expect(ride.ros.flags.tale_from).toBe('ros');
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test('declining the tale leaves both roads where they were', async ({ page }) => {
+  const errors = await boot(page, { save: { skippy: DONE_SKIPPY } });
+  await enterContinue(page);
+  const arrived = await reachTaleChoice(page);
+  expect(arrived.choice).toBe(true);
+  await page.evaluate(() => { __SQ.press('back', true); __SQ.step(2); __SQ.press('back', false); __SQ.step(6); });
+  for (let i = 0; i < 8; i++) {
+    if (await page.evaluate(() => !__SQ.script && !__SQ.dlg && !__SQ.G.choice)) break;
+    await advanceTalk(page);
+  }
+  const left = await page.evaluate(() => ({
+    story: __SQ.story(),
+    area: __SQ.A.id,
+    heard: !!__SQ.flags.tale_ros,
+    ros: localStorage.getItem('sq_save_ros_v1'),
+    coins: JSON.parse(localStorage.getItem('sq_save_v1')).coins,
+  }));
+  expect(left.story).toBe('skippy');
+  expect(left.area).toBe('desert');
+  expect(left.heard).toBe(false);
+  expect(left.ros).toBe(null);
+  expect(left.coins).toBe(42);
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test('an existing ROS save can continue, and start-over asks first', async ({ page }) => {
+  const oldRos = JSON.stringify({
+    z: 'bow', v: 1, area: 'ros_pour', x: 160, y: 120, dir: 1,
+    hp: 8, maxHp: 8, pieces: 0, coins: 0, arrows: 0,
+    items: { blasters: true, lasso: true }, keys: {}, bigKeys: {},
+    flags: { nuke_joined: true, proof1: true, yard_clear: true, woke: true },
+    party: ['nuke'], shards: 0, time: 40, visited: { ros_pour: true }, wanted: 1,
+    wep: 'lasers', tool: 'lasso', boardId: 'dust',
+  });
+  const errors = await boot(page, { save: { skippy: DONE_SKIPPY, ros: oldRos } });
+  await enterContinue(page);
+  await reachTaleChoice(page);
+  await page.evaluate(() => { __SQ.press('talk', true); __SQ.step(2); __SQ.press('talk', false); __SQ.step(2); });
+  for (let i = 0; i < 16 && await page.evaluate(() => __SQ.G.state !== 'talego'); i++) {
+    if (await page.evaluate(() => __SQ.G.state === 'flash')) {
+      await page.evaluate(() => { __SQ.press('talk', true); __SQ.step(2); __SQ.press('talk', false); __SQ.step(4); });
+    } else await advanceTalk(page);
+  }
+  expect(await page.evaluate(() => __SQ.G.state)).toBe('talego');
+  await page.waitForTimeout(300);
+  await page.evaluate(() => { __SQ.press('down', true); __SQ.step(2); __SQ.press('down', false); __SQ.step(2); });
+  await page.waitForTimeout(300);
+  await page.evaluate(() => { __SQ.press('talk', true); __SQ.step(2); __SQ.press('talk', false); __SQ.step(2); });
+  const asked = await page.evaluate(() => ({
+    phase: __SQ.G.talePhase,
+    ros: localStorage.getItem('sq_save_ros_v1'),
+  }));
+  expect(asked.phase).toBe('confirm');
+  expect(JSON.parse(asked.ros).flags.proof1).toBe(true);
+  await page.evaluate(() => { __SQ.press('back', true); __SQ.step(2); __SQ.press('back', false); __SQ.step(2); });
+  expect(await page.evaluate(() => __SQ.G.talePhase)).toBe('pick');
+  expect(JSON.parse(await page.evaluate(() => localStorage.getItem('sq_save_ros_v1'))).flags.proof1).toBe(true);
+  await page.waitForTimeout(300);
+  await page.evaluate(() => {
+    __SQ.press('up', false); __SQ.press('down', false); __SQ.press('talk', false);
+    __SQ.G.menu = 0;
+    __SQ.step(2);
+    __SQ.press('talk', true); __SQ.step(3); __SQ.press('talk', false); __SQ.step(8);
+  });
+  const kept = await page.evaluate(() => ({
+    story: __SQ.story(),
+    state: __SQ.G.state,
+    phase: __SQ.G.talePhase,
+    menu: __SQ.G.menu,
+    taleId: __SQ.G.taleId,
+    area: __SQ.A.id,
+    proof: !!__SQ.flags.proof1,
+    nuke: __SQ.party.includes('nuke'),
+    skippy: JSON.parse(localStorage.getItem('sq_save_v1')),
+  }));
+  expect(kept.story, JSON.stringify(kept)).toBe('ros');
+  expect(kept.area).toBe('ros_pour');
+  expect(kept.proof).toBe(true);
+  expect(kept.nuke).toBe(true);
+  expect(kept.skippy.coins).toBe(42);
+  expect(kept.skippy.flags.ch9_done).toBe(true);
+  await page.evaluate(() => { __SQ.G.state = 'endcard'; __SQ.G.st = 3; __SQ.G.story = 'ros'; });
+  await page.evaluate(() => { __SQ.press('attack', true); __SQ.step(3); __SQ.press('attack', false); __SQ.step(8); });
+  for (let i = 0; i < 8; i++) {
+    if (await page.evaluate(() => __SQ.story() === 'skippy' && __SQ.A.id === 'desert')) break;
+    await advanceTalk(page);
+  }
+  const home = await page.evaluate(() => ({
+    story: __SQ.story(),
+    area: __SQ.A.id,
+    heard: !!__SQ.flags.tale_ros,
+    text: __SQ.dlg ? __SQ.dlg.pages.map((p) => p.join(' ')).join(' ') : '',
+    skippy: JSON.parse(localStorage.getItem('sq_save_v1')),
+    ros: JSON.parse(localStorage.getItem('sq_save_ros_v1')),
+  }));
+  expect(home.story).toBe('skippy');
+  expect(home.area).toBe('desert');
+  expect(home.heard).toBe(true);
+  expect(home.text.includes('EMPTY CHAIR') || home.text.includes('TALE IS TOLD')).toBe(true);
+  expect(home.ros.flags.proof1).toBe(true);
+  expect(home.ros.flags.tale_from).toBe('ros');
+  expect(home.skippy.coins).toBe(42);
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
 test('active play frame work stays inside a 60fps budget', async ({ page }) => {
   await boot(page);
   await page.evaluate(() => {

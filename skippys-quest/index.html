@@ -825,6 +825,15 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
             show: "macho_here",
           },
           {
+            id: "tale_macho",
+            look: "macho",
+            x: 34,
+            y: 9.2,
+            dir: 2,
+            talk: "tale_ros_talk",
+            show: "tale_macho",
+          },
+          {
             id: "wizard",
             x: 26,
             y: 7,
@@ -892,6 +901,15 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
             script: "macho_mirage",
             once: "macho_seen",
             need: "santt_met",
+          },
+          {
+            x: 30,
+            y: 7,
+            w: 8,
+            h: 4,
+            script: "tale_ros_arrive",
+            once: "tale_ros_met",
+            need: "ch9_done",
           },
         ],
       },
@@ -1374,6 +1392,41 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         { t: "flag", f: "macho_seen" },
       ],
       macho_again: [h("macho", "...")],
+      tale_ros_arrive: [
+        { t: "sfx", m: "mirage" },
+        { t: "flag", f: "tale_macho" },
+        { t: "show", who: "tale_macho" },
+        { t: "wait", s: 0.7 },
+        h("skippy", "THE AIR IS SHIMMERING. A STRAW HAT. HE IS NOT QUITE STANDING ON THE SAND."),
+        h("macho", "HAVE YOU HEARD THE TALES OF THE OUTLAW SHERIFF?"),
+        h("macho", "I'LL TELL YOU A TALE. SIT A MOMENT. THE SAND KEEPS THE REST."),
+        { t: "choice", a: "tale_ros_choice", tale: "ros" },
+      ],
+      tale_ros_again: [
+        h("macho", "HAVE YOU HEARD THE TALES OF THE OUTLAW SHERIFF?"),
+        h("macho", "I'LL TELL YOU A TALE, WHEN YOU WANT IT."),
+        { t: "choice", a: "tale_ros_choice", tale: "ros" },
+      ],
+      tale_ros_choice_yes: [
+        h("macho", "THEN CLOSE YOUR EYES. THE HAT IS OLDER THAN THE PAPER."),
+        { t: "fn", f: "taleYes" },
+      ],
+      tale_ros_choice_no: [
+        h("macho", "THE TALE WILL KEEP. THE POUR IS STILL THAT WAY."),
+        { t: "flag", f: "tale_ros_wait" },
+        { t: "save" },
+      ],
+      tale_ros_keep: [h("macho", "THE TALE WILL KEEP. RIDE WHEN YOU WANT THE REST.")],
+      tale_ros_after: [
+        h("macho", "YOU HEARD IT. THE EMPTY CHAIR IS HIS. THE OPEN ROAD IS YOURS."),
+      ],
+      tale_ros_close: [
+        h("macho", "THE TALE IS TOLD."),
+        h("macho", "THE CHAIR IN THAT TALE IS STILL EMPTY. YOURS IS NOT. RIDE YOUR OWN ROAD, SKIPPY."),
+        h("skippy", "I'LL REMEMBER THE HAT. AND THE EMPTY CHAIR."),
+        { t: "flag", f: "tale_ros" },
+        { t: "save" },
+      ],
       wizard: [
         h(
           "wizard",
@@ -4786,6 +4839,10 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
     santt_gate: [{ need: "cgate_open", s: "santt_gate2" }, { s: "santt_gate" }],
     king_talk: [{ s: "king_after" }],
     santt_end: [{ s: "santt_end" }],
+    tale_ros_talk: [
+      { need: "tale_ros", s: "tale_ros_after" },
+      { s: "tale_ros_again" },
+    ],
   });
   Object.assign(oa, {
     cash_n9: [
@@ -4799,6 +4856,10 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       h(
         "wizard",
         "THE RED KING IS HOME, AND THE REALMS ARE SINGING. YOU CAN RIDE ANYWHERE NOW, SKIPPY. ANYWHERE AT ALL.",
+      ),
+      h(
+        "wizard",
+        "RIDE THE DESERT AGAIN. EAST OF YOUR HOUSE, BY THE PIONEER POUR, THE HEAT HAS BEEN KEEPING A STORY.",
       ),
     ],
     nexus_open9: [
@@ -5996,6 +6057,9 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       case "sombrero":
         (g(0, -9, 4.4, 3.4, n.hatC),
           b(-4.4, -7.6, 8.8, 1.2, n.hatC2),
+          b(-3.4, -7.5, 1.2, 1, "#2f9a45"),
+          b(-0.8, -7.6, 1.1, 1, "#2f9a45"),
+          b(1.6, -7.5, 1.2, 1, "#2f9a45"),
           g(0, -5.2, 13, 2, n.hatC),
           g(0, -5.8, 11, 1, "#c8a050"));
         break;
@@ -7726,7 +7790,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       [-1, 0],
       [1, 0],
     ],
-    Kn = ["macho", "wizard", "santt_h"];
+    Kn = ["macho", "tale_macho", "wizard", "santt_h"];
   // RIDER CHAPTERS
   // Add the next rider by appending a STORY_ROWS entry and a data bag
   // like the ROS block below (CHARS via Ge, PARTY via sa, ITEMS via Ea,
@@ -8754,6 +8818,35 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
     { id: "ramshackle", name: "RAMSHACKLE", sub: "SOON", play: !1, who: "ramshackle" },
     { id: "santt", name: "SANTT", sub: "SOON", play: !1, who: "santt" },
   ];
+  var TALES = [
+    {
+      id: "ros",
+      n: 2,
+      title: "THE ROGUE OUTLAW SHERIFF",
+      teller: "macho",
+      hero: "ros",
+      save: "sq_save_ros_v1",
+      need: "ch9_done",
+      heard: "tale_ros",
+      area: "desert",
+      x: 32,
+      y: 10,
+      face: 3,
+      objective: "EAST DESERT: MIRAGE BY THE PIONEER POUR",
+      close: "THE CHAIR IN THAT TALE IS STILL EMPTY. YOURS IS NOT.",
+    },
+  ];
+  var CHOICES = {
+    tale_ros_choice: {
+      tale: "ros",
+      who: "macho",
+      back: "tale_ros_choice_no",
+      opts: [
+        ["HEAR THE TALE", "tale_ros_choice_yes"],
+        ["NOT YET", "tale_ros_choice_no"],
+      ],
+    },
+  };
   Object.assign(Ge, {
     partner: {
       name: "PARTNER",
@@ -10305,6 +10398,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         (Fa = ce.length > 0),
         (Ta = (w.npcs || []).map((E) => ({
           id: E.id,
+          look: E.look || E.id,
           x: p(E.x),
           y: p(E.y),
           dir: E.dir,
@@ -10409,7 +10503,8 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         (A.trans = null),
         (A.fade = 0),
         (A.fadeTo = 0),
-        (A.paused = !1));
+        (A.paused = !1),
+        (A.choice = null));
     }
     function Et() {
       if (A.story === "ros") {
@@ -10595,7 +10690,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       let t = Nn(a, 40),
         i = [];
       for (let s = 0; s < t.length; s += 3) i.push(t.slice(s, s + 3));
-      q = { who: e, pages: i, page: 0, n: 0 };
+      ((A.toastT = 0), (q = { who: e, pages: i, page: 0, n: 0 }));
     }
     function za(e) {
       for (let a of Ta) if (a.id === e) return a;
@@ -10701,6 +10796,11 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         }
         case "shop":
           le = { sel: 0, id: t.m || "pour" };
+          break;
+        case "choice":
+          ((A.toastT = 0),
+            A.choice || (A.choice = { id: t.a, sel: 0, tale: t.tale || "" }),
+            (i = !1));
           break;
         case "bj":
           xr();
@@ -11625,6 +11725,17 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         (jt() && A.st > 2.5 && Or(), Ze());
         return;
       }
+      if (A.state === "flash") {
+        A.st += e;
+        let skip = (U.attackE || U.talkE || U.mapE) && A.st > 0.4;
+        U.backE ? cancelTale() : (skip || A.st > 3.2) && openTaleGate();
+        Ze();
+        return;
+      }
+      if (A.state === "talego") {
+        (!Vt() && taleGoInput(), (U.upE = U.downE = !1), Ze());
+        return;
+      }
       if (A.state === "poster") {
         ((U.mapE || Qe) &&
           A.st > 0.5 &&
@@ -11663,6 +11774,10 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       }
       if (U.mapE && !q && !le && !ue && !Ae) {
         ((A.paused = !0), D.sel(), Ze());
+        return;
+      }
+      if (A.choice) {
+        (choiceInput(), (U.upE = U.downE = !1), Ze());
         return;
       }
       if (A.ev) {
@@ -11925,9 +12040,125 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         D.sel(),
         Q("Z ITEM: " + Gr[d.z], 1.4));
     }
+    function taleById(id) {
+      for (let i = 0; i < TALES.length; i++) if (TALES[i].id === id) return TALES[i];
+      return TALES[0];
+    }
+    function taleHeard(id) {
+      try {
+        let raw = localStorage.getItem("sq_save_v1");
+        if (!raw) return !1;
+        let s = JSON.parse(raw);
+        return !!(s.flags && s.flags["tale_" + id]);
+      } catch (e) {
+        return !1;
+      }
+    }
+    function skippyPostgame() {
+      try {
+        let raw = localStorage.getItem("sq_save_v1");
+        if (!raw) return !1;
+        let s = JSON.parse(raw);
+        return !!(s.flags && s.flags.ch9_done);
+      } catch (e) {
+        return !1;
+      }
+    }
+    function activeTale() {
+      if (A.story !== "skippy") return null;
+      for (let i = 0; i < TALES.length; i++) {
+        let t = TALES[i];
+        if (Z(t.need) && !Z(t.heard)) return t;
+      }
+      return null;
+    }
+    function skippyObjective() {
+      let t = activeTale();
+      return t ? t.objective : "";
+    }
+    function rowSub(i) {
+      return i.id && taleHeard(i.id) ? "THE TALE IS TOLD" : i.sub;
+    }
+    function choiceInput() {
+      let spec = CHOICES[A.choice.id];
+      if (!spec) {
+        A.choice = null;
+        return;
+      }
+      if (U.upE) A.choice.sel = (A.choice.sel + spec.opts.length - 1) % spec.opts.length;
+      if (U.downE) A.choice.sel = (A.choice.sel + 1) % spec.opts.length;
+      if (U.backE) {
+        A.choice = null;
+        ye(spec.back);
+        return;
+      }
+      if (U.talkE || U.attackE) {
+        let go = spec.opts[A.choice.sel][1];
+        spec.tale && (A.taleId = spec.tale);
+        A.choice = null;
+        ye(go);
+      }
+    }
+    function taleYes() {
+      let tale = taleById(A.taleId || "ros");
+      ((ee.tale_macho = !0),
+        xe(),
+        (A.taleId = tale.id),
+        (A.state = "flash"),
+        (A.st = 0),
+        Ke(""));
+    }
+    function openTaleGate() {
+      let tale = taleById(A.taleId || "ros"),
+        has = !1;
+      try {
+        has = !!localStorage.getItem(tale.save);
+      } catch (e) {}
+      has
+        ? ((A.state = "talego"), (A.talePhase = "pick"), (A.menu = 0), (A.st = 0))
+        : beginToldTale(!0);
+    }
+    function beginToldTale(overwrite) {
+      let tale = taleById(A.taleId || "ros");
+      ((A.story = tale.hero || tale.id), (Mt = tale.save), (A.taleFrom = tale.id));
+      if (overwrite || !localStorage.getItem(tale.save)) {
+        (EtRos(), (ee.tale_from = tale.id), xe());
+        return;
+      }
+      Bt() ? ((ee.tale_from = tale.id), xe()) : (EtRos(), (ee.tale_from = tale.id), xe());
+    }
+    function cancelTale() {
+      ((A.state = "play"), (A.st = 0), (A.talePhase = ""), ye("tale_" + (A.taleId || "ros") + "_keep"));
+    }
+    function taleGoInput() {
+      if (A.talePhase === "confirm") {
+        if (U.upE || U.downE) ((A.menu = A.menu ? 0 : 1), D.sel());
+        if (U.backE) ((A.talePhase = "pick"), (A.menu = 1), (A.st = 0));
+        else if (U.attackE || U.talkE) A.menu === 0 ? beginToldTale(!0) : ((A.talePhase = "pick"), (A.menu = 1));
+        return;
+      }
+      if (U.upE || U.downE) ((A.menu = A.menu ? 0 : 1), D.sel());
+      if (U.backE) cancelTale();
+      else if (U.attackE || U.talkE)
+        A.menu === 0 ? beginToldTale(!1) : ((A.talePhase = "confirm"), (A.menu = 0), (A.st = 0));
+    }
+    function returnToPresent() {
+      let tale = taleById(ee.tale_from || A.taleFrom || "ros");
+      ((A.story = "skippy"), (Mt = "sq_save_v1"), (A.taleFrom = ""));
+      if (!Bt()) {
+        ((A.state = "stories"), (A.menu = 0), (A.st = 0), Ke("title"));
+        return;
+      }
+      ((ee[tale.heard] = !0),
+        (ee.tale_macho = !0),
+        ba(tale.area, tale.x, tale.y, tale.face),
+        ye("tale_" + tale.id + "_close"),
+        xe());
+    }
     function Or() {
       if (A.story === "ros") {
-        ((A.state = "stories"), (A.menu = 1), (A.st = 0), Ke("title"));
+        if (ee.tale_from || skippyPostgame()) returnToPresent();
+        else ((A.state = "stories"), (A.menu = 1), (A.st = 0), Ke("title"));
         return;
       }
       if (A.chap >= ke.length) {
@@ -13929,7 +14160,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       );
       v(
         n,
-        STORY_ROWS[A.menu] ? STORY_ROWS[A.menu].sub : "",
+        STORY_ROWS[A.menu] ? rowSub(STORY_ROWS[A.menu]) : "",
         160,
         214,
         "#fff6d8",
@@ -14031,12 +14262,79 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           n,
           "LET'S RIDE!",
           160,
-          204,
+          188,
           Math.floor(A.t * 3) % 2 ? "#ff4fd8" : "#ffffff",
           2,
           "center",
           "#000",
+        ),
+        (Z("tale_from") || skippyPostgame()) &&
+          v(n, "THE PRESENT IS WAITING", 160, 210, "#ffe0a0", 1, "center", "#000"));
+    }
+    function flashCard() {
+      let tale = taleById(A.taleId || "ros");
+      ((n.fillStyle = "#c4a06a"), n.fillRect(0, 0, 320, 224));
+      for (let i = 0; i < 48; i++) {
+        let x = (i * 53 + A.st * 36) % 320,
+          y = (i * 37 + A.st * 8) % 224;
+        I(x, y, i % 3 ? 2 : 1, i % 3 ? 2 : 1, i % 2 ? "#f0e0b0" : "#8a5a30");
+      }
+      ((n.fillStyle = "rgba(90,48,16,0.38)"),
+        n.fillRect(0, 0, 320, 224),
+        v(n, "CHAPTER " + tale.n, 160, 64, "#3a2010", 1, "center", "#f0d8a0"),
+        v(n, tale.title, 160, 92, "#2a1408", 2, "center", "#f0d8a0"),
+        v(n, "A TALE TOLD IN THE DESERT", 160, 128, "#6a3818", 1, "center", "#f0d8a0"),
+        v(n, "X CONTINUES   BACK CANCELS", 160, 200, "#3a2010", 1, "center", ""));
+    }
+    function taleGoScreen() {
+      let tale = taleById(A.taleId || "ros"),
+        confirm = A.talePhase === "confirm",
+        rows = confirm ? ["YES", "NO"] : ["CONTINUE", "START OVER"];
+      ((n.fillStyle = "#c4a06a"),
+        n.fillRect(0, 0, 320, 224),
+        I(24, 28, 272, 168, "#2a1408"),
+        v(n, tale.title, 160, 44, "#ffcc33", 1, "center", "#000"),
+        v(
+          n,
+          confirm ? "START THE TALE OVER?" : "THIS TALE ALREADY HAS A RIDE.",
+          160,
+          72,
+          "#ffffff",
+          1,
+          "center",
+          "#000",
+        ),
+        v(
+          n,
+          confirm ? "THE OLD RIDE WILL BE REPLACED." : "CONTINUE KEEPS IT.",
+          160,
+          88,
+          "#f0d8a0",
+          1,
+          "center",
+          "#000",
         ));
+      rows.forEach((label, i) => {
+        let y = 120 + i * 18,
+          on = A.menu === i;
+        (on && I(70, y - 3, 180, 14, "#6a3818"),
+          v(n, (on ? "> " : "  ") + label, 160, y, on ? "#ffcc33" : "#ffffff", 1, "center", "#000"));
+      });
+      v(n, "BACK CANCELS", 160, 176, "#c8b090", 1, "center", "#000");
+    }
+    function drawChoice() {
+      if (!A.choice) return;
+      let spec = CHOICES[A.choice.id];
+      if (!spec) return;
+      (I(36, 48, 248, 128, "#140c08"),
+        v(n, "THE TALE", 160, 60, "#ffcc33", 1, "center", "#000"));
+      spec.opts.forEach((row, i) => {
+        let y = 88 + i * 18,
+          on = A.choice.sel === i;
+        (on && I(56, y - 3, 208, 14, "#3a2818"),
+          v(n, (on ? "> " : "  ") + row[0], 160, y, on ? "#ffcc33" : "#ffffff", 1, "center", "#000"));
+      });
+      v(n, "X CHOOSES   BACK CANCELS", 160, 156, "#c8b090", 1, "center", "#000");
     }
     function publishLive() {
       let e = document.getElementById("sr-live");
@@ -14051,7 +14349,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       if (A.state === "stories")
         e.textContent =
           "RIDER CHAPTERS\n" +
-          STORY_ROWS.map((a) => a.name + (a.play ? "" : " SOON")).join("\n") +
+          STORY_ROWS.map((a) => a.name + " " + rowSub(a) + (a.play ? "" : " SOON")).join("\n") +
           "\nmenu " +
           A.menu;
       else if (A.state === "title")
@@ -14059,8 +14357,21 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           (A.story === "ros" ? "THE ROGUE OUTLAW SHERIFF" : "SKIPPY'S QUEST") +
           "\nNEW GAME\nCONTINUE\nmenu " +
           A.menu;
+      else if (A.state === "flash") {
+        let tale = taleById(A.taleId || "ros");
+        e.textContent = "CHAPTER " + tale.n + "\n" + tale.title;
+      } else if (A.state === "talego")
+        e.textContent =
+          (A.talePhase === "confirm"
+            ? "START THE TALE OVER?\nYES\nNO"
+            : "CONTINUE\nSTART OVER") +
+          "\nmenu " +
+          A.menu;
       else if (A.state === "endcard" && A.story === "ros")
         e.textContent = "THE SLUGGER IS NOT HOME\nLET'S RIDE!";
+      else if (A.choice)
+        e.textContent =
+          CHOICES[A.choice.id].opts.map((a) => a[0]).join("\n") + "\nsel " + A.choice.sel;
       else if (A.state === "play")
         e.textContent =
           (w ? w.name : "") +
@@ -14071,7 +14382,8 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           " WANTED " +
           Math.ceil(A.wanted || 0) +
           " nuke " +
-          (_.on && _.id === "nuke" ? "yes" : "no");
+          (_.on && _.id === "nuke" ? "yes" : "no") +
+          (skippyObjective() ? "\n" + skippyObjective() : "");
       else e.textContent = A.state || "";
     }
     function sandVeil() {
@@ -14591,7 +14903,8 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       }),
       (Ia.checkProofs = () => {
         Z("proof1") && Z("proof3") && Z("truce") && (ee.ros_ready = !0);
-      });
+      }),
+      (Ia.taleYes = () => taleYes());
     Le.shadowd = {
       init: () => {
         ((ee.shadow_nocont = !0),
@@ -15475,7 +15788,14 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           !A.paused &&
           !A.ev &&
           v(n, rosObjective(), 160, 208, "#ffe0a0", 1, "center", "#000"),
+        A.story === "skippy" &&
+          !A.paused &&
+          !A.choice &&
+          !q &&
+          skippyObjective() &&
+          v(n, skippyObjective(), 160, 208, "#ffe0a0", 1, "center", "#000"),
         A.ev && drawEvidence(),
+        A.choice && drawChoice(),
         A.saveT > 0 &&
           v(
             n,
@@ -15649,15 +15969,15 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
                   ? -(1 - f.leave) * (1 - f.leave) * 140
                   : 0,
             y =
-              f.id === "macho" || f.id === "wizard"
+              (f.look || f.id) === "macho" || f.id === "wizard"
                 ? (f.leave > 0 ? f.leave : f.alpha) *
-                  (f.id === "macho" ? 0.55 + Math.sin(A.t * 6) * 0.15 : 1)
+                  ((f.look || f.id) === "macho" ? 0.55 + Math.sin(A.t * 6) * 0.15 : 1)
                 : 1;
           f.ghost && (y *= 0.62);
           E.push({
             y: f.y,
             f: () => {
-              if ((Je(i(f.x), s(f.y) + 1, 6), f.id === "macho")) {
+              if ((Je(i(f.x), s(f.y) + 1, 6), (f.look || f.id) === "macho")) {
                 let N = Math.sin(A.t * 9) * 1.5;
                 n.globalAlpha = y;
                 for (let k = 0; k < 31; k += 3)
@@ -16355,8 +16675,10 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
               "center",
               "",
             )),
-        Math.floor(A.t * 2) % 2 &&
-          v(n, "ENTER TO CLOSE", 160, 208, "#ffcc33", 1, "center", ""));
+        skippyObjective()
+          ? v(n, skippyObjective(), 160, 208, "#ffe0a0", 1, "center", "#000")
+          : Math.floor(A.t * 2) % 2 &&
+            v(n, "ENTER TO CLOSE", 160, 208, "#ffcc33", 1, "center", ""));
     }
     function Ua(e) {
       let a = n.createLinearGradient(0, 0, 0, 224);
@@ -16534,6 +16856,14 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       }
       if (A.state === "endcard") {
         ds();
+        return;
+      }
+      if (A.state === "flash") {
+        flashCard();
+        return;
+      }
+      if (A.state === "talego") {
+        taleGoScreen();
         return;
       }
       if (A.state === "credits") {
@@ -18780,7 +19110,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         frames: () => window.__SQ_FRAMES.slice(),
         work: () => (window.__SQ_WORK || []).slice(),
         gear: () => ({ wep: d.wep, tool: d.tool, board: d.boardId }),
-        objective: () => (A.story === "ros" ? rosObjective() : ""),
+        objective: () => (A.story === "ros" ? rosObjective() : skippyObjective()),
         quests: () => (A.story === "ros" ? rosQuestRows() : []),
 
       };
