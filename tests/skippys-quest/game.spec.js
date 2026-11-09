@@ -1283,20 +1283,33 @@ function controlAudit(page) {
       return getComputedStyle(el).display !== 'none' && r.width > 1 && r.height > 1;
     }).map((el) => {
       const r = el.getBoundingClientRect();
-      return { label: (el.textContent || '').trim().slice(0, 28), x: r.x, y: r.y, w: r.width, h: r.height, stick: el.id === 'stick' };
+      const round = el.id === 'stick' || el.classList.contains('atk') || el.classList.contains('itm') || el.classList.contains('rol') || el.classList.contains('tlk') || el.dataset.b === 'swap' || el.dataset.b === 'map';
+      return {
+        label: (el.textContent || '').trim().slice(0, 28) || (el.id === 'stick' ? 'STICK' : ''),
+        x: r.x, y: r.y, w: r.width, h: r.height,
+        cx: r.x + r.width / 2, cy: r.y + r.height / 2, rad: Math.min(r.width, r.height) / 2,
+        round, stick: el.id === 'stick',
+      };
     });
     const hits = [];
     const gaps = [];
     for (let i = 0; i < els.length; i++) {
       for (let j = i + 1; j < els.length; j++) {
         const a = els[i], b = els[j];
-        const ix = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
-        const iy = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
-        if (ix > 0.5 && iy > 0.5) hits.push(a.label + ' / ' + b.label);
-        const horiz = a.y < b.y + b.h && b.y < a.y + a.h;
-        const vert = a.x < b.x + b.w && b.x < a.x + a.w;
-        if (horiz && ix <= 0) gaps.push(Math.max(a.x, b.x) - Math.min(a.x + a.w, b.x + b.w));
-        if (vert && iy <= 0) gaps.push(Math.max(a.y, b.y) - Math.min(a.y + a.h, b.y + b.h));
+        if (a.round && b.round) {
+          const dist = Math.hypot(a.cx - b.cx, a.cy - b.cy);
+          const gap = dist - a.rad - b.rad;
+          if (gap < -0.5) hits.push(a.label + ' / ' + b.label);
+          else gaps.push(gap);
+        } else {
+          const ix = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
+          const iy = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
+          if (ix > 0.5 && iy > 0.5) hits.push(a.label + ' / ' + b.label);
+          const horiz = a.y < b.y + b.h && b.y < a.y + a.h;
+          const vert = a.x < b.x + b.w && b.x < a.x + a.w;
+          if (horiz && ix <= 0) gaps.push(Math.max(a.x, b.x) - Math.min(a.x + a.w, b.x + b.w));
+          if (vert && iy <= 0) gaps.push(Math.max(a.y, b.y) - Math.min(a.y + a.h, b.y + b.h));
+        }
       }
     }
     const onCanvas = els.filter((b) => {
@@ -1362,11 +1375,41 @@ test.describe('context touch layouts', () => {
       expect(play.small, JSON.stringify(play)).toEqual([]);
       expect(play.tight, JSON.stringify(play)).toEqual([]);
       await page.screenshot({ path: `${LAYOUT}/play-${w}x${h}.png` });
+      await page.screenshot({ path: `${LAYOUT}/arcade-ros-${w}x${h}.png` });
 
       await page.evaluate(() => {
         const S = __SQ;
-        S.P.items.lasso = true;
-        S.P.items.brand = true;
+        S.G.state = 'play';
+        S.G.story = 'skippy';
+        S.G.paused = false;
+        S.P.items = { raygun: true, lasso: true, missile: true };
+        S.P.wep = 'raygun';
+        S.P.tool = 'lasso';
+        S.P.pri = 'raygun';
+        S.P.sec = 'lasso';
+        S.warp('desert', 18, 4, 1);
+        S.step(2);
+        for (let i = 0; i < 8 && (S.script || S.dlg); i++) {
+          S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
+        }
+        S.step(1);
+      });
+      const skippy = await controlAudit(page);
+      expect(skippy.mode, JSON.stringify(skippy)).toBe('play');
+      expect(skippy.labels, JSON.stringify(skippy)).toEqual(expect.arrayContaining(['ATTACK', 'ITEM', 'SWAP', 'ROLL', 'PAUSE']));
+      expect(skippy.labels.join(' ')).not.toMatch(/TALK|BACK/);
+      expect(skippy.hits, JSON.stringify(skippy)).toEqual([]);
+      expect(skippy.onCanvas, JSON.stringify(skippy)).toEqual([]);
+      expect(skippy.small, JSON.stringify(skippy)).toEqual([]);
+      expect(skippy.tight, JSON.stringify(skippy)).toEqual([]);
+      await page.screenshot({ path: `${LAYOUT}/arcade-skippy-${w}x${h}.png` });
+
+      await page.evaluate(() => {
+        const S = __SQ;
+        S.G.story = 'ros';
+        S.P.items = { blasters: true, lasso: true, brand: true };
+        S.P.wep = 'lasers';
+        S.P.pri = 'lasers';
         S.flag('lasso_got');
         S.flag('brand_got');
         S.P.tool = 'lasso';
@@ -1379,7 +1422,8 @@ test.describe('context touch layouts', () => {
         S.step(1);
       });
       const npc = await controlAudit(page);
-      expect(npc.labels, JSON.stringify(npc)).toEqual(expect.arrayContaining(['ATTACK', 'ITEM', 'SWAP', 'ROLL', 'TALK', 'PAUSE']));
+      expect(npc.labels, JSON.stringify(npc)).toEqual(expect.arrayContaining(['ITEM', 'SWAP', 'ROLL', 'TALK', 'PAUSE']));
+      expect(npc.labels, JSON.stringify(npc)).not.toContain('ATTACK');
       expect(npc.labels.join(' ')).not.toContain('BACK');
       expect(npc.hits, JSON.stringify(npc)).toEqual([]);
       expect(npc.onCanvas, JSON.stringify(npc)).toEqual([]);
@@ -1423,7 +1467,12 @@ test.describe('context touch layouts', () => {
     }
     const before = await page.evaluate(() => ({ w: innerWidth, land: document.documentElement.dataset.land, mode: document.documentElement.dataset.touch }));
     await page.setViewportSize({ width: before.w > 500 ? 390 : 844, height: before.w > 500 ? 844 : 390 });
-    await page.evaluate(() => { __SQ.G.paused = false; __SQ.step(2); });
+    await page.evaluate(() => {
+      __SQ.G.paused = false;
+      __SQ.G.story = 'ros';
+      __SQ.warp('ros_desert', 18, 4, 1);
+      __SQ.step(2);
+    });
     const turned = await controlAudit(page);
     expect(turned.mode).toBe('play');
     expect(turned.labels).toContain('ATTACK');
