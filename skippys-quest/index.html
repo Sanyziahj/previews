@@ -9107,7 +9107,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         { id: "kal", x: 14, y: 6, dir: 2, talk: "kal_truce" },
       ],
       signs: [{ x: 6, y: 8, text: "EVIDENCE TABLE", kind: "sign", script: "ev_open" }],
-      warps: [{ x: 10, y: 13, w: 2, h: 1, to: "ros_desert", tx: 10, ty: 8, dir: 1 }],
+      warps: [{ x: 10, y: 13, w: 2, h: 1, to: "ros_desert", tx: 6, ty: 13, dir: 1 }],
     },
     ros_moon: {
       id: "ros_moon", name: "MOON COLONY", theme: "moon", realm: "outlaw", music: "moonw",
@@ -10431,8 +10431,42 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         (he.x = Ee(d.x - 320 / 2, 0, Math.max(0, we * 16 - 320))),
         (he.y = Ee(d.y - 200 / 2, 0, Math.max(0, ve * 16 - 200))),
         Fr(),
+        spawnClear(),
         w.onEnter && !ee["oe_" + e] && ((ee["oe_" + e] = !0), ye(w.onEnter)),
         (Z("woke") || A.story === "ros") && e !== "dream" && xe());
+    }
+    function inWarp(x, y) {
+      for (let C of w.warps || [])
+        if (
+          x > C.x * 16 &&
+          x < (C.x + C.w) * 16 &&
+          y - 3 > C.y * 16 &&
+          y - 3 < (C.y + C.h) * 16
+        )
+          return !0;
+      return !1;
+    }
+    function spawnClear() {
+      let blocked = (x, y) => ja(x, y, 5, 5, 2, !1, Ut()) || inWarp(x, y);
+      if (!blocked(d.x, d.y)) return;
+      for (let r = 1; r <= 12; r++)
+        for (let dy = -r; dy <= r; dy++)
+          for (let dx = -r; dx <= r; dx++) {
+            if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
+            let nx = d.x + dx * 8,
+              ny = d.y + dy * 8;
+            if (!blocked(nx, ny)) {
+              ((d.x = nx), (d.y = ny), (d.safeX = nx), (d.safeY = ny));
+              return;
+            }
+          }
+    }
+    function releaseStaleLocks() {
+      let scene = !!(Ae || q || le || ue || z || K || A.choice || A.trans || A.paused);
+      if (scene || A.state !== "play") return;
+      (A.ev && !(w && w.peace) && (A.ev = null),
+        Ha > 1.5 && (Ha = 0),
+        d.sit && w.id !== "dream" && A.story === "ros" && (d.sit = !1));
     }
     function dt(e, a, t, i) {
       A.trans || (A.trans = { t: 0, area: e, x: a, y: t, dir: i, done: !1 });
@@ -11776,6 +11810,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         ((A.paused = !0), D.sel(), Ze());
         return;
       }
+      releaseStaleLocks();
       if (A.choice) {
         (choiceInput(), (U.upE = U.downE = !1), Ze());
         return;
@@ -14890,7 +14925,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         w.peace && (A.ev = { on: !0, sel: 0, pick: [] });
       }),
       (Ia.clubEject = () => {
-        ((A.ev = null), (A.breaks = 0), dt("ros_desert", 8, 12, 1));
+        ((A.ev = null), (A.breaks = 0), (A.choice = null), dt("ros_desert", 6, 13, 1));
       }),
       (Ia.shadowArm = () => {
         ee.shadow_nocont = !0;
@@ -19052,6 +19087,37 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           return ze;
         },
         warp: (a, t, i, s = 0) => ba(a, t, i, s),
+        stick: (a, t) => Gs(a, t),
+        auditLandings: () => {
+          let bad = [];
+          for (let id in Ie) {
+            let area = Ie[id];
+            for (let warp of area.warps || []) {
+              let rows = Zs[warp.to];
+              if (!rows) {
+                bad.push({ from: id, to: warp.to, tx: warp.tx, ty: warp.ty, tile: "missing" });
+                continue;
+              }
+              let px = (Number(warp.tx) + 0.5) * 16,
+                py = (Number(warp.ty) + 0.5) * 16,
+                x0 = Math.floor((px - 5) / 16),
+                x1 = Math.floor((px + 5 - 0.01) / 16),
+                y0 = Math.floor((py - 5) / 16),
+                y1 = Math.floor((py + 2 - 0.01) / 16),
+                hit = "";
+              for (let y = y0; y <= y1 && !hit; y++)
+                for (let x = x0; x <= x1; x++) {
+                  let ch = y < 0 || x < 0 || y >= rows.length || x >= rows[0].length ? "#" : rows[y][x];
+                  if (ch === "q" || o0.indexOf(ch) >= 0) {
+                    hit = ch;
+                    break;
+                  }
+                }
+              hit && bad.push({ from: id, to: warp.to, tx: warp.tx, ty: warp.ty, tile: hit });
+            }
+          }
+          return bad;
+        },
         flag: (a, t = !0) => {
           ee[a] = t;
         },
