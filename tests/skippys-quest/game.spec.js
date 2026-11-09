@@ -711,6 +711,128 @@ test('an existing ROS save can continue, and start-over asks first', async ({ pa
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
+test('leaving SuperNova never sticks ROS', async ({ page }) => {
+  const errors = await boot(page);
+  const doors = await page.evaluate(() => {
+    const S = __SQ;
+    function rosBoot() {
+      S.G.state = 'play';
+      S.G.story = 'ros';
+      S.P.items.blasters = true;
+      S.P.items.lasso = true;
+      S.P.z = 'lasso';
+      S.P.tool = 'lasso';
+      S.flag('accused_done');
+    }
+    function shift(key) {
+      const x0 = S.P.x, y0 = S.P.y;
+      S.press(key, true); S.step(24); S.press(key, false); S.step(1);
+      const dist = Math.hypot(S.P.x - x0, S.P.y - y0);
+      S.P.x = x0; S.P.y = y0;
+      return dist;
+    }
+    function walkOut(board, truce) {
+      rosBoot();
+      if (truce) S.flag('truce');
+      S.P.boardId = board;
+      S.warp('ros_club', 10, 11, 0);
+      S.step(4);
+      S.press('down', true);
+      for (let i = 0; i < 90 && S.A.id === 'ros_club'; i++) S.step(1);
+      S.press('down', false);
+      S.step(6);
+      const tile = S.tile(Math.floor(S.P.x / 16), Math.floor((S.P.y - 4) / 16));
+      return {
+        board, truce: !!truce, area: S.A.id, tile,
+        up: shift('up'), left: shift('left'), right: shift('right'),
+      };
+    }
+    const rows = [];
+    for (const board of ['', 'dust', 'hopper', 'skimmer']) rows.push(walkOut(board, false));
+    rows.push(walkOut('dust', true));
+    rosBoot(S);
+    S.party.push('nuke');
+    S.flag('nuke_joined');
+    S.warp('ros_club', 10, 11, 0);
+    S.step(4);
+    S.press('down', true);
+    for (let i = 0; i < 90 && S.A.id === 'ros_club'; i++) S.step(1);
+    S.press('down', false);
+    S.step(6);
+    const withNuke = {
+      area: S.A.id,
+      nuke: !!(S.comp.on && S.comp.id === 'nuke'),
+      up: shift('up'),
+    };
+    rosBoot(S);
+    S.warp('ros_club', 8, 8, 0);
+    S.step(2);
+    S.run('truce_broke');
+    for (let i = 0; i < 30; i++) {
+      if (S.dlg) { S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(2); }
+      else S.step(4);
+      if (S.A.id === 'ros_desert' && !S.G.trans) break;
+    }
+    const ejected = { area: S.A.id, tile: S.tile(Math.floor(S.P.x / 16), Math.floor((S.P.y - 4) / 16)), up: shift('up') };
+    const yStick = S.P.y;
+    S.stick(0, -1); S.step(20); S.stick(0, 0); S.step(1);
+    const stick = yStick - S.P.y;
+    return { rows, withNuke, ejected, stick, bad: S.auditLandings() };
+  });
+  for (const row of doors.rows) {
+    expect(row.area, JSON.stringify(row)).toBe('ros_desert');
+    expect(row.tile, JSON.stringify(row)).not.toBe('o');
+    expect(row.up, JSON.stringify(row)).toBeGreaterThan(8);
+    expect(row.left, JSON.stringify(row)).toBeGreaterThan(8);
+  }
+  expect(doors.withNuke.nuke, JSON.stringify(doors.withNuke)).toBe(true);
+  expect(doors.withNuke.up, JSON.stringify(doors.withNuke)).toBeGreaterThan(8);
+  expect(doors.ejected.area).toBe('ros_desert');
+  expect(doors.ejected.tile).not.toBe('o');
+  expect(doors.ejected.up).toBeGreaterThan(8);
+  expect(doors.stick).toBeGreaterThan(4);
+  expect(doors.bad).toEqual([]);
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test('a save standing on the SuperNova rock can walk again', async ({ page }) => {
+  const stuck = JSON.stringify({
+    z: 'lasso', v: 1, area: 'ros_desert', x: 168, y: 136, dir: 1,
+    hp: 8, maxHp: 8, pieces: 0, coins: 0, arrows: 0,
+    items: { blasters: true, lasso: true }, keys: {}, bigKeys: {},
+    flags: { woke: true, nuke_joined: true, accused_done: true },
+    party: ['nuke'], shards: 0, time: 30,
+    visited: { ros_desert: true }, wanted: 1,
+    wep: 'lasers', tool: 'lasso', boardId: 'dust',
+  });
+  const errors = await boot(page, { save: { ros: stuck } });
+  await page.evaluate(() => __SQ.step(25));
+  await tap(page, 'down');
+  await tap(page, 'attack');
+  await page.evaluate(() => __SQ.step(25));
+  await tap(page, 'attack');
+  await page.waitForFunction(() => __SQ.G.state === 'play');
+  const freed = await page.evaluate(() => {
+    const S = __SQ;
+    for (let i = 0; i < 12; i++) {
+      if (!S.script && !S.dlg) break;
+      S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(2);
+    }
+    const tile = S.tile(Math.floor(S.P.x / 16), Math.floor((S.P.y - 4) / 16));
+    const wanted = S.wanted();
+    const y0 = S.P.y;
+    S.P.boardId = '';
+    S.press('up', true); S.step(24); S.press('up', false); S.step(1);
+    return { area: S.A.id, tile, dy: y0 - S.P.y, wanted, nuke: S.party.includes('nuke') };
+  });
+  expect(freed.area).toBe('ros_desert');
+  expect(freed.tile).not.toBe('o');
+  expect(freed.dy).toBeGreaterThan(8);
+  expect(freed.wanted).toBe(1);
+  expect(freed.nuke).toBe(true);
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
 test('active play frame work stays inside a 60fps budget', async ({ page }) => {
   await boot(page);
   await page.evaluate(() => {
@@ -778,6 +900,38 @@ async function phoneLayout(page, file) {
   await page.screenshot({ path: file, fullPage: true });
   expect(errors, errors.join('\n')).toEqual([]);
 }
+
+test.describe('phone stick leaves SuperNova', () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+  test('dragging the stick moves ROS after the door', async ({ page }) => {
+    const errors = await boot(page);
+    await page.evaluate(() => {
+      const S = __SQ;
+      S.G.state = 'play';
+      S.G.story = 'ros';
+      S.P.items.blasters = true;
+      S.warp('ros_club', 10, 11, 0);
+      S.step(4);
+      S.press('down', true);
+      for (let i = 0; i < 90 && S.A.id === 'ros_club'; i++) S.step(1);
+      S.press('down', false);
+      S.step(6);
+    });
+    const box = await page.locator('#stick').boundingBox();
+    expect(box).toBeTruthy();
+    const y0 = await page.evaluate(() => __SQ.P.y);
+    await page.locator('#stick').dispatchEvent('pointerdown', {
+      clientX: box.x + box.width / 2,
+      clientY: box.y + 12,
+      pointerId: 1,
+      bubbles: true,
+    });
+    await page.evaluate(() => __SQ.step(24));
+    const y1 = await page.evaluate(() => __SQ.P.y);
+    expect(y0 - y1).toBeGreaterThan(6);
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+});
 
 test.describe('phone 390x844', () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
