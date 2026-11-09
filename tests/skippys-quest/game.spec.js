@@ -6,337 +6,558 @@ const GAME = '/skippys-quest/index.html';
 fs.mkdirSync(ART, { recursive: true });
 
 const SKIPPY_SAVE = JSON.stringify({
-  z: 'bow',
-  v: 1,
-  area: 'home',
-  x: 160,
-  y: 160,
-  dir: 0,
-  hp: 6,
-  maxHp: 6,
-  pieces: 0,
-  coins: 42,
-  arrows: 3,
-  items: { baton: true },
-  keys: {},
-  bigKeys: {},
-  flags: { woke: true, santt_met: true },
-  party: [],
-  shards: 1,
-  time: 88,
-  visited: { home: true, desert: true },
+  z: 'bow', v: 1, area: 'home', x: 160, y: 160, dir: 0,
+  hp: 6, maxHp: 6, pieces: 0, coins: 42, arrows: 3,
+  items: { baton: true }, keys: {}, bigKeys: {},
+  flags: { woke: true }, party: [], shards: 1, time: 88,
+  visited: { home: true },
 });
 
 function track(page) {
   const errors = [];
   page.on('pageerror', (e) => errors.push('pageerror: ' + e.message));
-  page.on('console', (m) => {
-    if (m.type() === 'error') errors.push('console: ' + m.text());
-  });
+  page.on('console', (m) => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
   return errors;
 }
 
-async function boot(page, { save } = {}) {
+async function boot(page, { save, ros } = {}) {
   await page.addInitScript((payload) => {
     window.__SQ_DEBUG = true;
-    if (payload) localStorage.setItem('sq_save_v1', payload);
+    if (payload && payload.skippy) localStorage.setItem('sq_save_v1', payload.skippy);
+    if (payload && payload.ros) localStorage.setItem('sq_save_ros_v1', payload.ros);
   }, save || null);
   const errors = track(page);
   await page.goto(GAME);
   await page.waitForFunction(() => window.__SQ && document.getElementById('sr-live'));
-  await page.evaluate(() => __SQ.setManual(true));
-  await page.evaluate(() => __SQ.step(8));
+  await page.evaluate(() => { __SQ.setManual(true); __SQ.step(8); });
   return errors;
-}
-
-async function live(page) {
-  return page.locator('#sr-live').innerText();
 }
 
 async function tap(page, key) {
   await page.evaluate((k) => {
-    __SQ.press(k, true);
-    __SQ.step(2);
-    __SQ.press(k, false);
-    __SQ.step(2);
+    __SQ.press(k, true); __SQ.step(2); __SQ.press(k, false); __SQ.step(2);
   }, key);
   await page.waitForTimeout(280);
 }
 
-async function mashIntro(page) {
+async function closeTalk(page) {
   await page.evaluate(() => {
     const S = __SQ;
-    for (let i = 0; i < 90; i++) {
-      S.skipText();
-      S.press('talk', true);
-      S.step(2);
-      S.press('talk', false);
-      S.step(3);
-      if (S.party.includes('nuke') && !S.script) break;
-    }
+    S.skipText();
+    S.press('talk', true); S.step(2); S.press('talk', false); S.step(3);
   });
 }
 
-async function startRos(page) {
-  await page.evaluate(() => __SQ.step(25));
-  await tap(page, 'down');
-  await tap(page, 'attack');
-  await page.evaluate(() => __SQ.step(25));
-  await tap(page, 'attack');
-  await mashIntro(page);
-}
-
-test('chapter select lists Skippy, ROS, and SOON riders', async ({ page }) => {
+test('chapter select keeps Santt last and the page unlisted', async ({ page }) => {
   const errors = await boot(page);
-  const text = await live(page);
-  expect(text).toContain("SKIPPY'S QUEST");
-  expect(text).toContain('THE ROGUE OUTLAW SHERIFF');
-  expect(text).toContain('SANTT');
-  expect(text).toContain('SPIKE');
-  expect(text).toContain('DRILL SERGEANT');
-  expect(text).toContain('RONIN');
-  expect(text).toContain('RAMSHACKLE');
+  const text = await page.locator('#sr-live').innerText();
+  const order = ['SKIPPY\'S QUEST', 'THE ROGUE OUTLAW SHERIFF', 'SPIKE', 'DRILL SERGEANT', 'RONIN', 'RAMSHACKLE', 'SANTT'];
+  let at = -1;
+  for (const name of order) {
+    const i = text.indexOf(name);
+    expect(i, name).toBeGreaterThan(at);
+    at = i;
+  }
   expect(text).toContain('SOON');
   expect(await page.locator('meta[name="robots"]').getAttribute('content')).toBe('noindex,nofollow');
-  const state = await page.evaluate(() => __SQ.G.state);
-  expect(state).toBe('stories');
+  const html = await page.content();
+  expect(html).not.toContain('NEXT: SANTT');
   await page.screenshot({ path: `${ART}/ros-chapter-select.png` });
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
-test('ROS chapter starts, Nuke follows, wanted meter and a dungeon work', async ({ page }) => {
+test('main yard, lasers, and coming home to the order', async ({ page }) => {
   const errors = await boot(page);
-  await startRos(page);
-  const started = await page.evaluate(() => ({
-    story: __SQ.story(),
-    state: __SQ.G.state,
-    hero: __SQ.PID(),
-    area: __SQ.A.id,
-    nuke: __SQ.party.includes('nuke'),
-    comp: __SQ.comp.id,
-    on: __SQ.comp.on,
-    script: __SQ.script,
+  await page.evaluate(() => __SQ.step(20));
+  await tap(page, 'down');
+  await tap(page, 'attack');
+  await page.evaluate(() => __SQ.step(20));
+  await tap(page, 'attack');
+  const yard = await page.evaluate(() => ({
+    state: __SQ.G.state, area: __SQ.A.id, hero: __SQ.PID(), wep: __SQ.gear().wep,
   }));
-  expect(started.story).toBe('ros');
-  expect(started.hero).toBe('ros');
-  expect(started.state).toBe('play');
-  expect(started.area).toBe('ros_square');
-  expect(started.nuke).toBe(true);
-  expect(started.comp).toBe('nuke');
-  expect(started.on).toBe(true);
-  expect(started.script).toBe(false);
-
-  const follow = await page.evaluate(() => {
+  expect(yard.state).toBe('play');
+  expect(yard.area).toBe('ros_yard');
+  expect(yard.hero).toBe('ros');
+  expect(yard.wep).toBe('lasers');
+  const shots = await page.evaluate(() => {
     const S = __SQ;
-    const before = Math.abs(S.comp.x - S.P.x);
-    S.press('right', true);
-    S.step(50);
-    S.press('right', false);
-    S.step(40);
-    return {
-      before,
-      after: Math.hypot(S.comp.x - S.P.x, S.comp.y - S.P.y),
-      moved: Math.abs(S.P.x - 0) > 0,
-    };
+    for (let i = 0; i < 6; i++) { S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(2); }
+    S.press('attack', true); S.step(2); S.press('attack', false); S.step(4);
+    return S.shots.filter((s) => s.kind === 'stun').length;
   });
-  expect(follow.after).toBeLessThan(70);
-
-  const sniff = await page.evaluate(() => {
-    const S = __SQ;
-    S.warp('ros_desert', 4, 14, 0);
-    S.step(20);
-    return { clue: !!S.flags.clue_hench, area: S.A.id };
-  });
-  expect(sniff.area).toBe('ros_desert');
-  expect(sniff.clue).toBe(true);
-
-  const wanted = await page.evaluate(() => {
+  expect(shots).toBeGreaterThanOrEqual(2);
+  await page.evaluate(() => {
     const S = __SQ;
     for (let i = 0; i < 8; i++) {
-      S.skipText();
-      S.press('talk', true);
-      S.step(2);
-      S.press('talk', false);
-      S.step(3);
-      if (!S.script) break;
+      if (!S.script && !S.dlg) break;
+      S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(2);
     }
-    S.warp('ros_desert', 22, 8, 3);
+    for (const e of S.ents.filter((en) => !en.dead)) {
+      S.P.x = e.x - 18; S.P.y = e.y + 4; S.P.dir = 3; S.P.arrowCd = 0;
+      S.press('attack', true); S.step(2); S.press('attack', false); S.step(12);
+    }
     S.step(8);
-    const start = S.wanted();
-    S.step(200);
-    const spotted = S.wanted();
-    return {
-      start,
-      spotted,
-      script: S.script,
-      live: document.getElementById('sr-live').textContent,
-    };
   });
-  expect(wanted.script).toBe(false);
-  expect(wanted.spotted).toBeGreaterThan(wanted.start);
-  expect(wanted.spotted).toBeGreaterThan(0.8);
-  expect(wanted.live).toContain('WANTED');
-  expect(wanted.live).toMatch(/WANTED [1-9]/);
-  await page.screenshot({ path: `${ART}/ros-desert-desktop.png` });
-  const hidden = await page.evaluate(() => {
-    const S = __SQ;
-    S.warp('ros_desert', 9, 6, 0);
-    S.step(220);
-    return S.wanted();
-  });
-  expect(hidden).toBeLessThan(wanted.spotted);
-
-  const dungeon = await page.evaluate(() => {
-    const S = __SQ;
-    S.warp('rs1', 10, 9, 1);
-    S.step(8);
-    return {
-      id: S.A.id,
-      dungeon: S.A.dungeon,
-      name: S.A.name,
-      foes: S.ents.filter((e) => !e.dead).length,
-    };
-  });
-  expect(dungeon.id).toBe('rs1');
-  expect(dungeon.dungeon).toBe('storm');
-  expect(dungeon.name).toContain('SANDSTORM');
-  expect(dungeon.foes).toBeGreaterThan(0);
-  await page.screenshot({ path: `${ART}/ros-dungeon.png` });
-
-  await page.evaluate(() => {
-    __SQ.warp('ros_keys', 15, 8, 1);
-    __SQ.step(8);
-  });
-  const keys = await live(page);
-  expect(keys).toContain('LIME KEYS');
-  await page.screenshot({ path: `${ART}/ros-lime-keys.png` });
+  const cleared = await page.evaluate(() => __SQ.flags.yard_clear);
+  expect(cleared).toBe(true);
+  await page.evaluate(() => { __SQ.warp('ros_pour', 8, 8, 0); __SQ.step(4); });
+  for (let i = 0; i < 40; i++) {
+    const done = await page.evaluate(() => __SQ.party.includes('nuke') && !__SQ.script && !__SQ.dlg);
+    if (done) break;
+    await page.evaluate(() => {
+      const S = __SQ;
+      if (S.dlg) { S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(2); }
+      else S.step(2);
+    });
+  }
+  const home = await page.evaluate(() => ({
+    nuke: __SQ.party.includes('nuke'),
+    obj: __SQ.objective(),
+    area: __SQ.A.id,
+  }));
+  expect(home.nuke).toBe(true);
+  expect(home.area).toBe('ros_pour');
+  expect(home.obj.length).toBeGreaterThan(8);
+  await page.screenshot({ path: `${ART}/ros-pour-order.png` });
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
-test('saves stay separate and Skippy save is untouched', async ({ page }) => {
-  const errors = await boot(page, { save: SKIPPY_SAVE });
-  await startRos(page);
+test('weapons and boards do different work', async ({ page }) => {
+  const errors = await boot(page);
   await page.evaluate(() => {
-    __SQ.warp('ros_desert', 12, 8, 0);
-    __SQ.step(5);
-    __SQ.save();
+    const S = __SQ;
+    S.G.state = 'play'; S.G.story = 'ros';
+    S.warp('ros_desert', 8, 8, 3);
+    S.P.items.blasters = true; S.P.items.justice = true; S.P.items.lasso = true; S.P.items.brand = true;
+    S.P.wep = 'justice'; S.P.tool = 'lasso'; S.P.z = 'lasso';
+    S.step(5);
   });
-  const keys = await page.evaluate((original) => {
+  const justice = await page.evaluate(() => {
+    const S = __SQ;
+    S.G.paused = false;
+    S.ents.forEach((e) => { e.dead = true; });
+    S.P.x = 200; S.P.y = 160; S.P.dir = 3;
+    S.shots.length = 0;
+    S.press('attack', true);
+    S.step(40);
+    S.press('attack', false);
+    S.step(1);
+    return S.shots.filter((s) => s.kind === 'justice').length;
+  });
+  expect(justice).toBe(1);
+  await page.evaluate(() => { __SQ.P.arrowCd = 0; __SQ.G.paused = false; });
+  const lasers = await page.evaluate(() => {
+    const S = __SQ;
+    S.P.wep = 'lasers';
+    S.shots.length = 0;
+    S.press('attack', true); S.step(2); S.press('attack', false); S.step(3);
+    return S.shots.filter((s) => s.kind === 'stun').length;
+  });
+  expect(lasers).toBeGreaterThanOrEqual(2);
+  await page.evaluate(() => { __SQ.G.paused = true; __SQ.G.rosPage = 2; __SQ.step(1); });
+  await page.screenshot({ path: `${ART}/ros-gear.png` });
+  await page.evaluate(() => { __SQ.G.paused = false; });
+  const brand = await page.evaluate(() => {
+    const S = __SQ;
+    S.warp('ros_yard', 6, 5, 0);
+    S.step(2);
+    for (let i = 0; i < 8; i++) {
+      if (!S.script) break;
+      S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(2);
+    }
+    S.P.tool = 'brand';
+    S.P.items.brand = true;
+    S.P.arrowCd = 0;
+    const foe = S.ents.find((e) => !e.dead);
+    if (foe) { S.P.x = foe.x; S.P.y = foe.y; }
+    const before = S.ents.filter((e) => !e.dead).length;
+    S.press('item', true); S.step(2); S.press('item', false); S.step(24);
+    return { before, after: S.ents.filter((e) => !e.dead).length };
+  });
+  expect(brand.after).toBeLessThan(brand.before);
+  const speed = await page.evaluate(() => {
+    const S = __SQ;
+    S.warp('ros_desert', 6, 4, 3);
+    S.step(3);
+    function run(board) {
+      S.P.boardId = board;
+      S.P.x = 120; S.P.y = 80;
+      S.press('right', true); S.step(30); S.press('right', false); S.step(2);
+      return S.P.x - 120;
+    }
+    return { dust: run('dust'), walk: run(''), skim: run('skimmer') };
+  });
+  expect(speed.dust).toBeGreaterThan(speed.walk + 8);
+  expect(speed.walk).toBeGreaterThan(speed.skim);
+  const hop = await page.evaluate(() => {
+    const S = __SQ;
+    S.warp('ros_mesa', 14, 6, 3);
+    S.step(2);
+    const x0 = S.P.x;
+    S.P.boardId = '';
+    S.press('roll', true); S.step(8); S.press('roll', false); S.step(4);
+    const walked = S.P.x;
+    S.warp('ros_mesa', 14, 6, 3);
+    S.P.boardId = 'hopper';
+    S.P.roll = 0; S.P.rollCd = 0;
+    S.press('roll', true); S.step(4); S.press('roll', false); S.step(2);
+    return { x0, walked, hopped: S.P.x };
+  });
+  expect(hop.hopped).toBeGreaterThan(hop.walked + 20);
+  await page.screenshot({ path: `${ART}/ros-mesa-hop.png` });
+  const wanted = await page.evaluate(() => {
+    const S = __SQ;
+    function watch(board) {
+      S.warp('ros_storm', 16, 8, 1);
+      S.step(2);
+      const coat = S.ents.find((e) => e.k === 'redcoat');
+      const cx = coat ? coat.x : 200, cy = coat ? coat.y : 160;
+      S.G.wanted = 0; S.P.boardId = board; S.P.x = cx; S.P.y = cy + 36;
+      for (let i = 0; i < 180; i++) {
+        if (coat) { coat.dir = 0; coat.x = cx; coat.y = cy; coat.stun = 1; coat.dead = false; }
+        S.P.x = cx; S.P.y = cy + 36;
+        S.step(1);
+      }
+      return S.wanted();
+    }
+    return { skim: watch('skimmer'), dust: watch('dust') };
+  });
+  expect(wanted.skim).toBeLessThan(0.2);
+  expect(wanted.dust).toBeGreaterThan(0.5);
+  await page.screenshot({ path: `${ART}/ros-desert-desktop.png` });
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test('side journeys: noodles, evidence, dream posters', async ({ page }) => {
+  const errors = await boot(page);
+  await page.evaluate(() => { __SQ.G.state = 'play'; __SQ.G.story = 'ros'; });
+  const noodle = await page.evaluate(() => {
+    const S = __SQ;
+    function close() {
+      S.skipText(); S.press('talk', true); S.step(2); S.press('talk', false); S.step(3);
+    }
+    S.warp('ros_noodle', 4, 6, 0); S.step(2);
+    S.run('noodle_p'); S.step(2); close();
+    const wrong = S.flags.noodle_step || 0;
+    S.run('noodle_f'); S.step(2); close();
+    const one = S.flags.noodle_step;
+    S.run('noodle_n'); S.step(2); close();
+    S.run('noodle_p'); S.step(2);
+    for (let i = 0; i < 12; i++) {
+      close();
+      if (S.flags.noodle_done && !S.script) break;
+    }
+    return { wrong, one, done: !!S.flags.noodle_done };
+  });
+  expect(noodle.wrong).toBe(0);
+  expect(noodle.one).toBe(1);
+  expect(noodle.done).toBe(true);
+  await page.screenshot({ path: `${ART}/ros-noodle.png` });
+
+  const truce = await page.evaluate(() => {
+    const S = __SQ;
+    S.flag('proof1'); S.flag('bots_done');
+    S.warp('ros_club', 8, 8, 0); S.step(2);
+    S.run('ev_open'); S.step(3);
+    // toggle the three signature pages, not the ping
+    S.press('attack', true); S.step(2); S.press('attack', false); S.step(2);
+    S.press('down', true); S.step(2); S.press('down', false); S.step(2);
+    S.press('attack', true); S.step(2); S.press('attack', false); S.step(2);
+    S.press('down', true); S.step(2); S.press('down', false); S.step(2);
+    S.press('attack', true); S.step(2); S.press('attack', false); S.step(2);
+    S.press('talk', true); S.step(3); S.press('talk', false); S.step(3);
+    for (let i = 0; i < 12; i++) {
+      S.skipText(); S.press('talk', true); S.step(2); S.press('talk', false); S.step(2);
+      if (S.flags.truce) break;
+    }
+    return { truce: !!S.flags.truce, obj: S.objective() };
+  });
+  expect(truce.truce).toBe(true);
+  await page.screenshot({ path: `${ART}/ros-supernova.png` });
+
+  const dream = await page.evaluate(() => {
+    const S = __SQ;
+    S.warp('ros_dream', 4, 5, 0);
+    S.step(2);
+    for (let i = 0; i < 8; i++) {
+      if (!S.script) break;
+      S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(2);
+    }
+    S.P.tool = 'lasso'; S.P.items.lasso = true; S.P.z = 'lasso';
+    function pull(tx, ty) {
+      S.warp('ros_dream', tx, ty, 1);
+      S.ents.forEach((e) => { e.stun = 9; e.x = 16; e.y = 16; });
+      S.press('left', false); S.press('right', false); S.press('up', false); S.press('down', false);
+      S.P.x = (tx + 0.5) * 16; S.P.y = (ty + 0.5) * 16; S.P.tool = 'lasso'; S.P.z = 'lasso';
+      S.P.arrowCd = 0;
+      S.press('item', true); S.step(2); S.press('item', false); S.step(2);
+    }
+    pull(4, 5);
+    const one = !!S.flags.p1;
+    pull(8, 6);
+    pull(12, 5);
+    pull(10, 9);
+    for (let i = 0; i < 12; i++) {
+      if (S.flags.dream_win && S.A.id === 'ros_pour' && !S.script) break;
+      if (S.dlg) { S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(2); }
+      else S.step(2);
+    }
+    return { one, win: !!S.flags.dream_win, area: S.A.id, p2: !!S.flags.p2, p3: !!S.flags.p3, p4: !!S.flags.p4, toast: S.G.toast };
+  });
+  expect(dream.one).toBe(true);
+  expect(dream.win, JSON.stringify(dream)).toBe(true);
+  expect(dream.area).toBe('ros_pour');
+  await page.screenshot({ path: `${ART}/ros-dream.png` });
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test('campaign routes pay off', async ({ page }) => {
+  const errors = await boot(page);
+  const out = await page.evaluate(() => {
+    const S = __SQ;
+    function closeAll(n) {
+      for (let i = 0; i < n; i++) {
+        if (!S.dlg && !S.script && !S.getPop) break;
+        if (S.dlg) { S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(2); }
+        else if (S.getPop) { S.step(40); S.press('talk', true); S.step(1); S.press('talk', false); S.step(2); }
+        else S.step(1);
+      }
+    }
+    function mash(flag, n) {
+      for (let i = 0; i < n; i++) {
+        if (S.flags[flag] && !S.script && !S.dlg && !S.getPop) return;
+        if (S.dlg) { S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(2); }
+        else if (S.getPop) { S.step(40); S.press('talk', true); S.step(1); S.press('talk', false); S.step(2); }
+        else S.step(2);
+      }
+    }
+    S.G.state = 'play'; S.G.story = 'ros';
+    S.P.god = true; S.P.hp = 12; S.P.maxHp = 12;
+    S.P.items.blasters = true; S.P.wep = 'lasers';
+    S.P.items.lasso = true; S.P.z = 'lasso'; S.flag('lasso_got');
+
+    S.warp('ros_canyon', 8, 5, 3); S.step(2);
+    S.G.wanted = 5;
+    S.run('canyon_check'); S.step(3); closeAll(6);
+    const hot = !S.flags.dust_got;
+    S.G.wanted = 0;
+    S.run('canyon_check'); S.step(3); mash('dust_got', 12);
+
+    S.run('storm_try'); S.step(3); mash('storm_open', 8);
+
+    S.warp('rs3', 10, 8, 1);
+    for (let i = 0; i < 800 && S.B.state !== 'fight'; i++) {
+      if (S.dlg) { S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); }
+      S.step(1);
+    }
+    const sent = { state: S.B.state, kind: S.B.kind, hp: S.B.hp, log: [] };
+    sent.log.push([S.B.state, S.B.hp]);
+    S.bossHurt(4);
+    sent.log.push([S.B.state, S.B.hp]);
+    for (let i = 0; i < 20 && S.B.state === 'fight'; i++) S.bossHurt(4);
+    sent.log.push([S.B.state, S.B.hp, !!S.flags.boss_sentinel]);
+    for (let i = 0; i < 500 && !S.flags.proof1; i++) {
+      if (S.dlg) { S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); }
+      S.step(1);
+    }
+    mash('proof1', 16);
+    sent.after = { state: S.B.state, hp: S.B.hp, dead: !!S.flags.boss_sentinel, proof: !!S.flags.proof1, script: S.script, dlg: !!S.dlg, play: S.G.state };
+
+    closeAll(12);
+    S.warp('ros_bots', 4, 8, 1); S.step(2);
+    S.killAll();
+    for (let i = 0; i < 80 && !S.flags.bots_done; i++) {
+      if (S.dlg) { S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); }
+      S.step(1);
+    }
+    mash('bots_done', 12);
+
+    closeAll(12);
+    S.warp('cv2', 8, 6, 1); S.step(2); closeAll(8);
+    S.run('cv_west'); S.step(4); closeAll(6);
+    S.run('cv_east'); S.step(4); mash('cv2_clear', 10);
+    S.warp('cv3', 4, 8, 3); S.step(2);
+    S.killAll();
+    for (let i = 0; i < 80 && !S.flags.cv_ping; i++) S.step(1);
+    mash('cv_ping', 12);
+
+    S.flag('accused_done');
+    S.warp('ros_pour', 8, 8, 0); S.step(2); closeAll(24);
+    S.run('booth_enter');
+    for (let i = 0; i < 80 && S.A.id !== 'ros_moon'; i++) S.step(1);
+    const moon = S.A.id;
+    const gate = S.tile(23, 7);
+    S.P.x = 348; S.P.y = 120; S.P.dir = 3;
+    const x0 = S.P.x;
+    S.press('right', true); S.step(40); S.press('right', false); S.step(2);
+    const crossed = S.A.id === 'rc1' || S.P.x > x0 + 12;
+
+    S.warp('ros_track', 4, 8, 3);
+    for (let i = 0; i < 500 && S.B.state !== 'fight'; i++) S.step(1);
+    for (let i = 0; i < 20 && S.B.state === 'fight'; i++) S.bossHurt(5);
+    for (let i = 0; i < 400 && !S.flags.shadow_under; i++) S.step(1);
+    mash('shadow_under', 16);
+
+    S.warp('rc3', 8, 8, 1);
+    for (let i = 0; i < 600 && S.B.state !== 'fight'; i++) S.step(1);
+    for (let i = 0; i < 24 && S.B.state === 'fight'; i++) S.bossHurt(4);
+    for (let i = 0; i < 500 && !S.flags.proof3; i++) S.step(1);
+    mash('proof3', 20);
+
+    S.flag('dream_win');
+    S.warp('ros_pour', 16, 6, 1); S.step(2); closeAll(8);
+    S.run('rusty_chair');
+    for (let i = 0; i < 40 && S.G.state !== 'endcard'; i++) {
+      if (S.dlg) { S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(2); }
+      else S.step(2);
+    }
     return {
-      skippy: localStorage.getItem('sq_save_v1'),
-      ros: localStorage.getItem('sq_save_ros_v1'),
-      original,
+      hot,
+      dust: !!S.flags.dust_got && S.gear().board === 'dust',
+      storm: !!S.flags.storm_open,
+      hollow: !!S.flags.proof1 && !!S.P.items.justice,
+      bots: !!S.flags.bots_done,
+      order: !!S.flags.cv2_clear,
+      ping: !!S.flags.cv_ping,
+      moon, gate, crossed,
+      shadow: !!S.flags.shadow_under,
+      cell: !!S.flags.proof3,
+      end: S.G.state,
+      boss: S.B.state,
+      sent,
     };
-  }, SKIPPY_SAVE);
-  expect(keys.skippy).toBe(SKIPPY_SAVE);
-  expect(keys.ros).toBeTruthy();
-  const rosSave = JSON.parse(keys.ros);
-  expect(rosSave.area.startsWith('ros_') || rosSave.area.startsWith('r')).toBe(true);
-  expect(rosSave.coins).toBe(0);
+  });
+  expect(out.hot, JSON.stringify(out)).toBe(true);
+  expect(out.dust, JSON.stringify(out)).toBe(true);
+  expect(out.storm, JSON.stringify(out)).toBe(true);
+  expect(out.hollow, JSON.stringify(out)).toBe(true);
+  expect(out.bots, JSON.stringify(out)).toBe(true);
+  expect(out.order, JSON.stringify(out)).toBe(true);
+  expect(out.ping, JSON.stringify(out)).toBe(true);
+  expect(out.moon, JSON.stringify(out)).toBe('ros_moon');
+  expect(out.gate, JSON.stringify(out)).toBe('j');
+  expect(out.crossed, JSON.stringify(out)).toBe(true);
+  expect(out.shadow, JSON.stringify(out)).toBe(true);
+  expect(out.cell, JSON.stringify(out)).toBe(true);
+  expect(out.end, JSON.stringify(out)).toBe('endcard');
+  await page.screenshot({ path: `${ART}/ros-ending.png` });
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test('saves migrate and Skippy is untouched', async ({ page }) => {
+  const oldRos = JSON.stringify({
+    z: 'bow', v: 1, area: 'ros_nowhere', x: 80, y: 80, dir: 1,
+    hp: 8, maxHp: 8, pieces: 0, coins: 0, arrows: 0,
+    items: { blasters: true, board: true, lasso: true },
+    keys: {}, bigKeys: {},
+    flags: { nuke_joined: true, proof1: true, woke: true },
+    party: ['nuke'], shards: 0, time: 40, visited: {}, wanted: 2,
+  });
+  const errors = await boot(page, { save: { skippy: SKIPPY_SAVE, ros: oldRos } });
+  expect(await page.evaluate(() => localStorage.getItem('sq_save_v1'))).toBe(SKIPPY_SAVE);
+  await page.evaluate(() => __SQ.step(20));
+  await tap(page, 'down');
+  await tap(page, 'attack');
+  await page.evaluate(() => __SQ.step(20));
+  await tap(page, 'attack');
+  const back = await page.evaluate(() => ({
+    area: __SQ.A.id,
+    board: __SQ.gear().board,
+    blasters: !!__SQ.P.items.blasters,
+    nuke: __SQ.party.includes('nuke'),
+    proof: !!__SQ.flags.proof1,
+    wanted: __SQ.wanted(),
+    skippy: localStorage.getItem('sq_save_v1'),
+  }));
+  expect(back.area).toBe('ros_pour');
+  expect(back.board).toBe('dust');
+  expect(back.blasters).toBe(true);
+  expect(back.nuke).toBe(true);
+  expect(back.proof).toBe(true);
+  expect(back.wanted).toBe(2);
+  expect(back.skippy).toBe(SKIPPY_SAVE);
 
   await page.reload();
   await page.waitForFunction(() => window.__SQ);
-  await page.evaluate(() => {
-    __SQ.setManual(true);
-    __SQ.step(25);
-  });
+  await page.evaluate(() => { __SQ.setManual(true); __SQ.step(20); });
   await tap(page, 'attack');
-  await page.evaluate(() => __SQ.step(25));
+  await page.evaluate(() => __SQ.step(20));
   await tap(page, 'attack');
   const skippy = await page.evaluate(() => ({
-    story: __SQ.story(),
-    state: __SQ.G.state,
-    area: __SQ.A.id,
-    hero: __SQ.PID(),
-    coins: __SQ.P.coins,
-    save: localStorage.getItem('sq_save_v1'),
+    story: __SQ.story(), state: __SQ.G.state, area: __SQ.A.id, hero: __SQ.PID(),
   }));
   expect(skippy.story).toBe('skippy');
   expect(skippy.state).toBe('play');
   expect(skippy.area).toBe('home');
   expect(skippy.hero).toBe('skippy');
-  expect(skippy.coins).toBe(42);
-  expect(JSON.parse(skippy.save).coins).toBe(42);
-  expect(JSON.parse(skippy.save).items.baton).toBe(true);
-  expect(JSON.parse(skippy.save).area).toBe('home');
-
-  await page.reload();
-  await page.waitForFunction(() => window.__SQ);
-  await page.evaluate(() => {
-    __SQ.setManual(true);
-    __SQ.step(25);
-  });
-  await tap(page, 'down');
-  await tap(page, 'attack');
-  await page.evaluate(() => __SQ.step(25));
-  await tap(page, 'attack');
-  const again = await page.evaluate((original) => ({
-    story: __SQ.story(),
-    area: __SQ.A.id,
-    hero: __SQ.PID(),
-    skippy: localStorage.getItem('sq_save_v1'),
-    original,
-  }), SKIPPY_SAVE);
-  expect(again.story).toBe('ros');
-  expect(again.hero).toBe('ros');
-  expect(again.area.startsWith('ros_') || again.area.startsWith('r')).toBe(true);
-  const againSave = JSON.parse(again.skippy);
-  expect(againSave.coins).toBe(42);
-  expect(againSave.items.baton).toBe(true);
-  expect(againSave.area).toBe('home');
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
-test('Skippy new game is unchanged', async ({ page }) => {
+test('Skippy new game still opens on the dream', async ({ page }) => {
   const errors = await boot(page);
-  await page.evaluate(() => __SQ.step(25));
+  await page.evaluate(() => __SQ.step(20));
   await tap(page, 'attack');
-  await page.evaluate(() => __SQ.step(25));
+  await page.evaluate(() => __SQ.step(20));
   await tap(page, 'attack');
   const skippy = await page.evaluate(() => ({
-    story: __SQ.story(),
-    state: __SQ.G.state,
-    area: __SQ.A.id,
-    hero: __SQ.PID(),
-    name: __SQ.A.name,
-    script: __SQ.script,
+    story: __SQ.story(), state: __SQ.G.state, area: __SQ.A.id, hero: __SQ.PID(), script: __SQ.script,
   }));
   expect(skippy.story).toBe('skippy');
   expect(skippy.state).toBe('play');
   expect(skippy.area).toBe('dream');
   expect(skippy.hero).toBe('skippy');
   expect(skippy.script).toBe(true);
-  expect(skippy.name).toContain('BOOT');
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
-test('frame time stays near a 60fps step', async ({ page }) => {
+test('BACK cancels and does not roll or attack', async ({ page }) => {
+  const errors = await boot(page);
+  await page.evaluate(() => __SQ.step(20));
+  await tap(page, 'attack');
+  await page.evaluate(() => __SQ.step(20));
+  const left = await page.evaluate(() => {
+    const S = __SQ;
+    S.press('back', true); S.step(3); S.press('back', false); S.step(2);
+    return { state: S.G.state, roll: !!S.I.roll, attack: !!S.I.attack, rollAmt: S.P.roll || 0 };
+  });
+  expect(left.state).toBe('stories');
+  expect(left.roll).toBe(false);
+  expect(left.attack).toBe(false);
+  expect(left.rollAmt).toBe(0);
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test('active play frame work stays inside a 60fps budget', async ({ page }) => {
   await boot(page);
-  await page.evaluate(() => __SQ.setManual(false));
-  await page.waitForTimeout(2500);
-  const frames = await page.evaluate(() => __SQ.frames());
-  const avg = frames.reduce((a, b) => a + b, 0) / frames.length;
-  const sorted = frames.slice().sort((a, b) => a - b);
-  const p95 = sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * 0.95))];
-  fs.writeFileSync(
-    `${ART}/frame-timings.json`,
-    JSON.stringify({ samples: frames.length, avgMs: avg, p95Ms: p95, maxMs: sorted[sorted.length - 1] }, null, 2),
-  );
-  expect(frames.length).toBeGreaterThan(30);
-  expect(avg).toBeLessThan(34);
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.G.state = 'play';
+    S.G.story = 'ros';
+    S.warp('ros_desert', 10, 8, 3);
+    S.setManual(false);
+  });
+  await page.waitForTimeout(2200);
+  const report = await page.evaluate(() => {
+    const work = __SQ.work();
+    const raf = __SQ.frames();
+    const avg = (xs) => xs.reduce((a, b) => a + b, 0) / Math.max(1, xs.length);
+    return { workN: work.length, workAvg: avg(work), workMax: Math.max(...work, 0), rafAvg: avg(raf) };
+  });
+  fs.writeFileSync(`${ART}/frame-timings.json`, JSON.stringify(report, null, 2));
+  expect(report.workN).toBeGreaterThan(20);
+  expect(report.workAvg).toBeLessThan(16);
 });
 
 async function phoneLayout(page, file) {
   const errors = track(page);
-  await page.addInitScript(() => {
-    window.__SQ_DEBUG = true;
-  });
+  await page.addInitScript(() => { window.__SQ_DEBUG = true; });
   await page.goto(GAME);
   await page.waitForFunction(() => document.documentElement.classList.contains('srml'));
-  await page.waitForTimeout(400);
+  await page.waitForTimeout(300);
   const layout = await page.evaluate(() => {
     const canvas = document.querySelector('#game').getBoundingClientRect();
-    const buttons = [...document.querySelectorAll('#srml-menu .srml-b, #srml-act .srml-b, #stick')].map((el) => {
+    const buttons = [...document.querySelectorAll('#srml-menu .srml-b, #srml-act .srml-b')].map((el) => {
       const r = el.getBoundingClientRect();
       return { label: (el.textContent || '').trim(), x: r.x, y: r.y, w: r.width, h: r.height };
     });
@@ -346,35 +567,30 @@ async function phoneLayout(page, file) {
       return ix > 8 && iy > 8;
     });
     return {
-      canvas: { x: canvas.x, y: canvas.y, w: canvas.width, h: canvas.height },
-      labels: buttons.map((b) => b.label),
-      sizes: buttons.map((b) => Math.round(Math.min(b.w, b.h))),
+      labels: buttons.map((b) => b.label).join(' '),
+      min: Math.min(...buttons.map((b) => Math.min(b.w, b.h))),
       overlap: overlap.map((b) => b.label),
     };
   });
-  expect(layout.labels.join(' ')).toContain('BACK');
-  expect(layout.labels.join(' ')).toContain('ATTACK');
-  expect(layout.labels.join(' ')).toContain('TALK');
-  expect(Math.min(...layout.sizes.filter((n) => n > 0))).toBeGreaterThan(40);
+  expect(layout.labels).toContain('BACK');
+  expect(layout.labels).toContain('ATTACK');
+  expect(layout.min).toBeGreaterThan(40);
   expect(layout.overlap).toEqual([]);
   const back = page.locator('#srml-menu .srml-bk');
   await back.dispatchEvent('pointerdown');
-  const pressed = await back.evaluate((el) => ({
-    on: el.classList.contains('on'),
-    transform: getComputedStyle(el).transform,
-  }));
+  const pressed = await back.evaluate((el) => ({ on: el.classList.contains('on'), transform: getComputedStyle(el).transform }));
   expect(pressed.on).toBe(true);
   expect(pressed.transform).not.toBe('none');
   await back.dispatchEvent('pointerup');
-  const attack = await page.evaluate(() => !!(window.__SQ && __SQ.I && __SQ.I.attack));
+  const attack = await page.evaluate(() => !!(window.__SQ && __SQ.I && (__SQ.I.attack || __SQ.I.roll)));
   expect(attack).toBe(false);
   await page.evaluate(() => {
     const S = __SQ;
     S.setManual(true);
     S.G.state = 'play';
     S.G.story = 'ros';
-    S.warp('ros_desert', 22, 8, 3);
-    S.step(180);
+    S.warp('ros_desert', 16, 8, 3);
+    S.step(40);
   });
   await page.screenshot({ path: file, fullPage: true });
   expect(errors, errors.join('\n')).toEqual([]);
@@ -382,7 +598,7 @@ async function phoneLayout(page, file) {
 
 test.describe('phone 390x844', () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
-  test('controls sit off the action and BACK does not attack', async ({ page }) => {
+  test('controls sit off the action', async ({ page }) => {
     await phoneLayout(page, `${ART}/ros-phone-390x844.png`);
   });
 });
