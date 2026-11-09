@@ -833,6 +833,190 @@ test('a save standing on the SuperNova rock can walk again', async ({ page }) =>
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
+test('the Brand sleeps four seconds and then wakes', async ({ page }) => {
+  const errors = await boot(page);
+  const out = await page.evaluate(() => {
+    const S = __SQ;
+    S.G.state = 'play';
+    S.G.story = 'ros';
+    S.P.items.blasters = true;
+    S.P.items.brand = true;
+    S.P.act = 'brand';
+    S.P.tool = 'brand';
+    S.warp('ros_yard', 4, 8, 3);
+    S.step(2);
+    for (let i = 0; i < 8 && (S.script || S.dlg); i++) {
+      S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(2);
+    }
+    S.press('attack', true); S.step(2); S.press('attack', false); S.step(2);
+    const first = (S.G.toast || '').indexOf('STAR BRAND') >= 0 || (S.G.brands || []).length > 0;
+    const sleeping = S.P.brandCd > 3;
+    S.press('attack', true); S.step(2); S.press('attack', false); S.step(1);
+    const refused = (S.G.toast || '').indexOf('SLEEPING') >= 0;
+    S.G.paused = true;
+    const held = S.P.brandCd;
+    S.step(90);
+    const paused = Math.abs(S.P.brandCd - held) < 0.02;
+    S.G.paused = false;
+    S.step(260);
+    const ready = S.P.brandCd === 0 && (S.G.toast || '').indexOf('BRAND READY') >= 0;
+    S.press('attack', true); S.step(2); S.press('attack', false); S.step(2);
+    const again = (S.G.toast || '').indexOf('STAR BRAND') >= 0;
+    return { first, sleeping, refused, paused, ready, again, cd: S.P.brandCd };
+  });
+  expect(out.first, JSON.stringify(out)).toBe(true);
+  expect(out.sleeping, JSON.stringify(out)).toBe(true);
+  expect(out.refused, JSON.stringify(out)).toBe(true);
+  expect(out.paused, JSON.stringify(out)).toBe(true);
+  expect(out.ready, JSON.stringify(out)).toBe(true);
+  expect(out.again, JSON.stringify(out)).toBe(true);
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test('TOOL cycles every owned item and each one fires', async ({ page }) => {
+  const errors = await boot(page);
+  const out = await page.evaluate(() => {
+    const S = __SQ;
+    S.G.state = 'play';
+    S.G.story = 'ros';
+    S.warp('ros_desert', 6, 8, 3);
+    S.step(3);
+    S.P.items.blasters = true;
+    S.P.act = 'lasers';
+    S.P.wep = 'lasers';
+    const one = S.kit().slice();
+    S.press('tool', true); S.step(2); S.press('tool', false); S.step(1);
+    const oneStay = S.gear().act;
+    S.shots.length = 0;
+    S.press('attack', true); S.step(2); S.press('attack', false); S.step(3);
+    const lasers = S.shots.filter((s) => s.kind === 'stun').length;
+    S.P.items.lasso = true;
+    S.flag('lasso_got');
+    S.P.arrowCd = 0;
+    S.press('swap', true); S.step(2); S.press('swap', false); S.step(1);
+    const toRope = S.gear().act;
+    S.press('tool', true); S.step(2); S.press('tool', false); S.step(1);
+    const wrap = S.gear().act;
+    S.P.items.justice = true;
+    S.P.items.brand = true;
+    S.flag('justice_got');
+    S.flag('brand_got');
+    S.P.act = 'lasers';
+    const order = ['lasers'];
+    for (let i = 0; i < 4; i++) {
+      S.press('tool', true); S.step(2); S.press('tool', false); S.step(1);
+      order.push(S.gear().act);
+    }
+    function fire(id) {
+      S.P.act = id;
+      S.P.wep = id === 'justice' || id === 'lasers' ? id : S.P.wep;
+      S.P.tool = id === 'lasso' || id === 'brand' ? id : S.P.tool;
+      S.P.arrowCd = 0;
+      S.P.brandCd = 0;
+      S.P.charge = 0;
+      S.shots.length = 0;
+      if (id === 'justice') {
+        S.press('attack', true); S.step(40); S.press('attack', false); S.step(2);
+        return S.shots.some((s) => s.kind === 'justice');
+      }
+      S.press('attack', true); S.step(2); S.press('attack', false); S.step(2);
+      if (id === 'lasers') return S.shots.some((s) => s.kind === 'stun');
+      if (id === 'brand') return (S.G.toast || '').indexOf('STAR BRAND') >= 0;
+      return (S.G.toast || '').indexOf('ROPE') >= 0 || (S.G.toast || '').indexOf('LASSO') >= 0;
+    }
+    return {
+      one, oneStay, lasers,
+      toRope, wrap, order,
+      kit: S.kit(),
+      fired: {
+        lasers: fire('lasers'),
+        justice: fire('justice'),
+        lasso: fire('lasso'),
+        brand: fire('brand'),
+      },
+    };
+  });
+  expect(out.one).toEqual(['lasers']);
+  expect(out.oneStay).toBe('lasers');
+  expect(out.lasers).toBeGreaterThan(0);
+  expect(out.toRope).toBe('lasso');
+  expect(out.wrap).toBe('lasers');
+  expect(out.order).toEqual(['lasers', 'justice', 'lasso', 'brand', 'lasers']);
+  expect(out.kit).toEqual(['lasers', 'justice', 'lasso', 'brand']);
+  expect(out.fired.lasers).toBe(true);
+  expect(out.fired.justice).toBe(true);
+  expect(out.fired.lasso).toBe(true);
+  expect(out.fired.brand).toBe(true);
+  const skippy = await page.evaluate(() => {
+    const S = __SQ;
+    S.G.story = 'skippy';
+    S.P.items = { bow: true, raygun: true, baton: true };
+    S.P.z = 'bow';
+    S.press('tool', true); S.step(2); S.press('tool', false); S.step(1);
+    const a = S.P.z;
+    S.press('swap', true); S.step(2); S.press('swap', false); S.step(1);
+    const b = S.P.z;
+    return { a, b, bow: !!S.P.items.bow, ray: !!S.P.items.raygun, baton: !!S.P.items.baton };
+  });
+  expect(skippy.bow && skippy.ray && skippy.baton).toBe(true);
+  expect(skippy.a).toBe('raygun');
+  expect(skippy.b).toBe('bow');
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test('the rope locker is labeled and an old kit migrates', async ({ page }) => {
+  const old = JSON.stringify({
+    z: 'lasso', v: 1, area: 'ros_pour', x: 160, y: 120, dir: 1,
+    hp: 8, maxHp: 8, pieces: 0, coins: 0, arrows: 0,
+    items: { blasters: true, lasso: true }, keys: {}, bigKeys: {},
+    flags: { woke: true, yard_clear: true, accused_done: true, lasso_got: true },
+    brandCd: 9,
+    party: [], shards: 0, time: 10, visited: { ros_pour: true },
+    wanted: 0, wep: 'lasers', tool: 'lasso', boardId: '',
+  });
+  const errors = await boot(page, { save: { ros: old } });
+  await page.evaluate(() => __SQ.step(25));
+  await tap(page, 'down');
+  await tap(page, 'attack');
+  await page.evaluate(() => __SQ.step(25));
+  await tap(page, 'attack');
+  await page.waitForFunction(() => __SQ.G.state === 'play');
+  const migrated = await page.evaluate(() => ({
+    kit: __SQ.kit(),
+    cd: __SQ.P.brandCd || 0,
+    act: __SQ.gear().act,
+  }));
+  expect(migrated.kit).toEqual(expect.arrayContaining(['lasers', 'lasso', 'brand']));
+  expect(migrated.cd).toBe(0);
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.flag('lasso_got', false);
+    S.P.items.lasso = false;
+    S.P.items.brand = false;
+    S.flag('brand_got', false);
+    S.flag('yard_clear');
+    S.flag('accused_done');
+    S.warp('ros_pour', 17, 8, 3);
+    S.step(2);
+    for (let i = 0; i < 16 && (S.script || S.dlg); i++) {
+      S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(2);
+    }
+  });
+  const obj = await page.evaluate(() => __SQ.objective());
+  expect(obj).toContain('LOCKER');
+  await page.screenshot({ path: `${ART}/ros-rope-locker.png` });
+  await page.evaluate(() => { __SQ.press('talk', true); __SQ.step(3); __SQ.press('talk', false); __SQ.step(4); });
+  const got = await page.evaluate(() => ({
+    lasso: !!__SQ.P.items.lasso,
+    lasers: !!__SQ.P.items.blasters,
+    flag: !!__SQ.flags.lasso_got,
+  }));
+  expect(got.lasso).toBe(true);
+  expect(got.lasers).toBe(true);
+  expect(got.flag).toBe(true);
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
 test('active play frame work stays inside a 60fps budget', async ({ page }) => {
   await boot(page);
   await page.evaluate(() => {
@@ -929,6 +1113,51 @@ test.describe('phone stick leaves SuperNova', () => {
     await page.evaluate(() => __SQ.step(24));
     const y1 = await page.evaluate(() => __SQ.P.y);
     expect(y0 - y1).toBeGreaterThan(6);
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+});
+
+function expectToolButton(page) {
+  return page.evaluate(() => {
+    const canvas = document.querySelector('#game').getBoundingClientRect();
+    const el = [...document.querySelectorAll('[data-b="tool"], .srml-b')].find((n) => (n.textContent || '').trim() === 'TOOL');
+    if (!el) return { found: false };
+    const r = el.getBoundingClientRect();
+    const ix = Math.min(r.right, canvas.right) - Math.max(r.left, canvas.left);
+    const iy = Math.min(r.bottom, canvas.bottom) - Math.max(r.top, canvas.top);
+    return {
+      found: true,
+      w: r.width,
+      h: r.height,
+      overlap: ix > 8 && iy > 8,
+      back: (el.textContent || '').trim() === 'BACK',
+    };
+  });
+}
+
+test.describe('phone tool 390x844', () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+  test('TOOL is large and off the picture', async ({ page }) => {
+    const errors = await boot(page);
+    await page.waitForFunction(() => document.documentElement.classList.contains('srml'));
+    const box = await expectToolButton(page);
+    expect(box.found).toBe(true);
+    expect(Math.min(box.w, box.h)).toBeGreaterThan(40);
+    expect(box.overlap).toBe(false);
+    expect(box.back).toBe(false);
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+});
+
+test.describe('phone tool 844x390', () => {
+  test.use({ viewport: { width: 844, height: 390 }, hasTouch: true, isMobile: true });
+  test('TOOL stays off the picture in landscape', async ({ page }) => {
+    const errors = await boot(page);
+    await page.waitForFunction(() => document.documentElement.classList.contains('srml'));
+    const box = await expectToolButton(page);
+    expect(box.found).toBe(true);
+    expect(Math.min(box.w, box.h)).toBeGreaterThan(40);
+    expect(box.overlap).toBe(false);
     expect(errors, errors.join('\n')).toEqual([]);
   });
 });
