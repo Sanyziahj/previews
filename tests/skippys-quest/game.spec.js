@@ -704,7 +704,7 @@ test('an existing ROS save can continue, and start-over asks first', async ({ pa
   expect(home.story).toBe('skippy');
   expect(home.area).toBe('desert');
   expect(home.heard).toBe(true);
-  expect(home.text.includes('EMPTY CHAIR') || home.text.includes('TALE IS TOLD')).toBe(true);
+  expect(home.text.includes('EMPTY CHAIR') || home.text.includes('TALE IS TOLD') || home.text.includes('TALE OF THE OUTLAW SHERIFF')).toBe(true);
   expect(home.ros.flags.proof1).toBe(true);
   expect(home.ros.flags.tale_from).toBe('ros');
   expect(home.skippy.coins).toBe(42);
@@ -1088,6 +1088,152 @@ test('active play frame work stays inside a 60fps budget', async ({ page }) => {
   fs.writeFileSync(`${ART}/frame-timings.json`, JSON.stringify(report, null, 2));
   expect(report.workN).toBeGreaterThan(20);
   expect(report.workAvg).toBeLessThan(16);
+});
+
+test('the chair ends the tale and the road home stays open', async ({ page }) => {
+  const errors = await boot(page, { save: { skippy: DONE_SKIPPY } });
+  await page.evaluate(() => { __SQ.G.state = 'stories'; __SQ.G.menu = 1; __SQ.G.st = 1; __SQ.step(2); });
+  await page.waitForTimeout(320);
+  await page.evaluate(() => { __SQ.press('attack', true); __SQ.step(2); __SQ.press('attack', false); __SQ.step(2); });
+  await page.waitForTimeout(320);
+  await page.evaluate(() => { __SQ.G.menu = 0; __SQ.G.st = 1; __SQ.press('attack', true); __SQ.step(4); __SQ.press('attack', false); __SQ.step(4); });
+  const setup = await page.evaluate(() => {
+    const S = __SQ;
+    S.P.items.blasters = true;
+    ['yard_clear', 'accused_done', 'lasso_got', 'dust_got', 'proof1', 'cv_ping', 'truce', 'proof3', 'dream_win'].forEach((f) => S.flag(f));
+    S.warp('ros_pour', 8, 8, 0);
+    S.step(2);
+    for (let i = 0; i < 12 && (S.script || S.dlg); i++) {
+      S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
+    }
+    const obj = S.objective();
+    S.run('pk_shelter');
+    for (let i = 0; i < 16 && (S.script || S.dlg); i++) {
+      S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
+    }
+    return { obj, state: S.G.state, sheltered: !!S.flags.ros_done, home: !!S.flags.ros_home_end };
+  });
+  expect(setup.obj).toContain('FINAL');
+  expect(setup.obj).toContain('RUSTY');
+  expect(setup.state).toBe('play');
+  expect(setup.sheltered).toBe(true);
+  expect(setup.home).toBe(false);
+
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.run('rusty_chair');
+    for (let i = 0; i < 40 && S.G.state !== 'endcard'; i++) {
+      if (S.dlg) { S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(2); }
+      else S.step(2);
+    }
+    S.G.st = 3;
+    S.step(1);
+  });
+  expect(await page.evaluate(() => __SQ.G.state)).toBe('endcard');
+  await page.screenshot({ path: '/agent/repos/previews/skippys-quest/docs/layout/finale-endcard.png' });
+  await page.evaluate(() => { __SQ.press('attack', true); __SQ.step(3); __SQ.press('attack', false); __SQ.step(6); });
+  for (let i = 0; i < 8; i++) {
+    if (await page.evaluate(() => __SQ.story() === 'skippy' && __SQ.dlg)) break;
+    await page.evaluate(() => __SQ.step(4));
+  }
+  await page.screenshot({ path: '/agent/repos/previews/skippys-quest/docs/layout/macho-outro.png' });
+  const back = await page.evaluate(() => ({
+    story: __SQ.story(),
+    area: __SQ.A.id,
+    text: __SQ.dlg ? __SQ.dlg.pages.map((p) => p.join(' ')).join(' ') : '',
+    heard: !!__SQ.flags.tale_ros,
+    coins: JSON.parse(localStorage.getItem('sq_save_v1')).coins,
+    ros: JSON.parse(localStorage.getItem('sq_save_ros_v1')).flags.ros_home_end,
+  }));
+  expect(back.story).toBe('skippy');
+  expect(back.area).toBe('desert');
+  expect(back.text).toContain('TALE OF THE OUTLAW SHERIFF');
+  expect(back.heard).toBe(true);
+  expect(back.coins).toBe(42);
+  expect(back.ros).toBe(true);
+
+  await page.evaluate(() => {
+    for (let i = 0; i < 8 && (__SQ.script || __SQ.dlg); i++) {
+      __SQ.skipText(); __SQ.press('talk', true); __SQ.step(1); __SQ.press('talk', false); __SQ.step(1);
+    }
+    __SQ.G.state = 'stories';
+    __SQ.G.st = 1;
+    __SQ.step(2);
+  });
+  const listed = await page.evaluate(() => __SQ.chapters().find((c) => c.id === 'ros'));
+  expect(listed.status).toBe('COMPLETE');
+  expect(listed.sub).toBe('THE TALE IS TOLD');
+
+  await page.evaluate(() => { __SQ.G.menu = 1; __SQ.G.st = 1; __SQ.step(1); });
+  await page.waitForTimeout(300);
+  await page.evaluate(() => { __SQ.press('attack', true); __SQ.step(2); __SQ.press('attack', false); __SQ.step(2); });
+  await page.waitForTimeout(300);
+  await page.evaluate(() => { __SQ.G.menu = 1; __SQ.G.st = 1; __SQ.press('attack', true); __SQ.step(3); __SQ.press('attack', false); __SQ.step(4); });
+  const riding = await page.evaluate(() => ({ story: __SQ.story(), home: !!__SQ.flags.ros_home_end, area: __SQ.A.id }));
+  expect(riding.story).toBe('ros');
+  expect(riding.home).toBe(true);
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.G.paused = true;
+    S.G.rosPage = 0;
+    S.G.rosLeave = 1;
+    S.G.menu = 0;
+    S.step(1);
+  });
+  await page.screenshot({ path: '/agent/repos/previews/skippys-quest/docs/layout/pause-return.png' });
+  await page.waitForTimeout(320);
+  await page.evaluate(() => { __SQ.press('attack', true); __SQ.step(3); __SQ.press('attack', false); __SQ.step(4); });
+  const returned = await page.evaluate(() => ({
+    story: __SQ.story(),
+    coins: JSON.parse(localStorage.getItem('sq_save_v1')).coins,
+    ros: JSON.parse(localStorage.getItem('sq_save_ros_v1')).flags.ros_home_end,
+    toast: __SQ.G.toast || '',
+  }));
+  expect(returned.story).toBe('skippy');
+  expect(returned.coins).toBe(42);
+  expect(returned.ros).toBe(true);
+  expect(returned.toast).toContain('TALE KEEPS');
+
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.G.story = 'skippy';
+    S.flag('tale_ros');
+    S.run('tale_ros_told');
+    for (let i = 0; i < 10 && !S.G.choice; i++) {
+      S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
+    }
+  });
+  expect(await page.evaluate(() => !!__SQ.G.choice)).toBe(true);
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test('a tale with no Skippy save returns to the chapter list', async ({ page }) => {
+  const errors = await boot(page);
+  await page.evaluate(() => { __SQ.G.state = 'stories'; __SQ.G.menu = 1; __SQ.G.st = 1; __SQ.step(2); });
+  await page.waitForTimeout(320);
+  await page.evaluate(() => { __SQ.press('attack', true); __SQ.step(2); __SQ.press('attack', false); __SQ.step(2); });
+  await page.waitForTimeout(320);
+  await page.evaluate(() => { __SQ.G.menu = 0; __SQ.G.st = 1; __SQ.press('attack', true); __SQ.step(4); __SQ.press('attack', false); __SQ.step(4); });
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.flag('dream_win');
+    S.run('rusty_chair');
+    for (let i = 0; i < 30 && S.G.state !== 'endcard'; i++) {
+      if (S.dlg) { S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1); }
+      else S.step(2);
+    }
+    S.G.st = 3;
+    S.press('attack', true); S.step(3); S.press('attack', false); S.step(4);
+  });
+  const landed = await page.evaluate(() => ({
+    state: __SQ.G.state,
+    note: __SQ.G.note || '',
+    ros: !!(JSON.parse(localStorage.getItem('sq_save_ros_v1') || 'null') || {}).flags?.ros_home_end,
+  }));
+  expect(landed.state).toBe('stories');
+  expect(landed.note).toContain('NO SKIPPY RIDE');
+  expect(landed.ros).toBe(true);
+  expect(errors, errors.join('\n')).toEqual([]);
 });
 
 test.describe('phone stick leaves SuperNova', () => {

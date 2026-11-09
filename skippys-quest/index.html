@@ -1423,11 +1423,16 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         h("macho", "YOU HEARD IT. THE EMPTY CHAIR IS HIS. THE OPEN ROAD IS YOURS."),
       ],
       tale_ros_close: [
-        h("macho", "THE TALE IS TOLD."),
-        h("macho", "THE CHAIR IN THAT TALE IS STILL EMPTY. YOURS IS NOT. RIDE YOUR OWN ROAD, SKIPPY."),
+        h("macho", "AND THAT IS THE TALE OF THE OUTLAW SHERIFF."),
+        h("macho", "THE CHAIR IN THAT TALE IS STILL EMPTY. YOURS IS NOT."),
+        h("macho", "THE RED KING'S ROAD IS STILL YOURS, SKIPPY. RIDE IT."),
         h("skippy", "I'LL REMEMBER THE HAT. AND THE EMPTY CHAIR."),
         { t: "flag", f: "tale_ros" },
         { t: "save" },
+      ],
+      tale_ros_told: [
+        h("macho", "THE TALE IS TOLD. HEAR IT AGAIN, OR RIDE YOUR OWN ROAD."),
+        { t: "choice", a: "tale_ros_choice", tale: "ros" },
       ],
       wizard: [
         h(
@@ -4842,7 +4847,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
     king_talk: [{ s: "king_after" }],
     santt_end: [{ s: "santt_end" }],
     tale_ros_talk: [
-      { need: "tale_ros", s: "tale_ros_after" },
+      { need: "tale_ros", s: "tale_ros_told" },
       { s: "tale_ros_again" },
     ],
     al_home: [
@@ -8525,13 +8530,18 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
     pk_partial: [h("pirateking", "ONE PAGE IS A RUMOR. BRING THE REST. I ALREADY TOLD THE CREW TO LOOK THE OTHER WAY.")],
     pk_shelter: [
       h("pirateking", "THREE PAGES. THE ORDER, THE DEED, THE EMPTY CELL. YOU WERE FRAMED. I STILL DO NOT KNOW WHO HOLDS THE SLUGGER. NEITHER DO YOU."),
-      h("pirateking", "SANTT ASKED. THAT IS ENOUGH. THIS DECK IS YOURS. THE HUNT CAN CHOKE ON THE TIDE."),
-      h("santt", "I ASKED QUIETLY. I WILL GO BACK TO THE ROAD AS A RIDER, NOT A KING. LET'S RIDE."),
-      h("ros", "THE PROOF IS MINE. THE SLUGGER IS NOT HOME. WE ARE NOT DONE, BOY."),
+      h("pirateking", "SANTT ASKED. THIS DECK IS YOURS. THE HUNT CAN CHOKE ON THE TIDE. I AM NOT THE END OF IT."),
+      h("santt", "I ASKED QUIETLY. THE LAST WORD IS NOT ON THIS DECK."),
+      h("ros", "THE PROOF IS MINE. THE SLUGGER IS NOT HOME. RUSTY KEPT THE CHAIR. I AM GOING HOME."),
       { t: "flag", f: "ros_done" },
       { t: "save" },
-      { t: "end", n: 1 },
     ],
+    tale_door: [
+      h("sys", "A DOOR IN THE DUST. IT OPENS ON SKIPPY'S PRESENT. YOUR RIDE HERE IS SAVED."),
+      { t: "choice", a: "ros_return" },
+    ],
+    ros_return_yes: [{ t: "fn", f: "returnSkippy" }],
+    ros_return_no: [h("ros", "NOT YET. THE TALE STILL HAS ROAD.")],
     pk_done: [h("pirateking", "YOU ARE SHELTERED. THE NEXT RIDER IS NOT ON MY MANIFEST. REST, THEN RIDE.")],
     sentinel_down: [
       h("ros", "THE VOID EYE IN THE CORE GOES DARK. THE LOG IS KAL'S ORDER AND SILAS'S DEED, WRITTEN THE SAME HOUR. IT DOES NOT NAME THE HAND THAT TOOK THE SLUGGER."),
@@ -8852,6 +8862,13 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         ["NOT YET", "tale_ros_choice_no"],
       ],
     },
+    ros_return: {
+      back: "ros_return_no",
+      opts: [
+        ["RETURN TO SKIPPY", "ros_return_yes"],
+        ["STAY IN THE TALE", "ros_return_no"],
+      ],
+    },
   };
   Object.assign(Ge, {
     partner: {
@@ -8944,6 +8961,8 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         { x: 18, y: 6, text: "BED", kind: "sign", script: "bed_sleep" },
         { x: 4, y: 10, text: "HARBOR NOTE", kind: "sign", script: "harbor_note" },
         { x: 12, y: 2, text: "WANTED: OUTLAW SHERIFF", kind: "wanted" },
+        { x: 15, y: 4, text: "FINAL: THE EMPTY CHAIR. TALK TO RUSTY.", kind: "chair" },
+        { x: 10, y: 11, text: "TALE DOOR. RETURN TO SKIPPY.", kind: "portal", script: "tale_door" },
       ],
       warps: [
         { x: 10, y: 13, w: 2, h: 1, to: "ros_desert", tx: 14, ty: 2, dir: 0 },
@@ -12177,8 +12196,26 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       let t = activeTale();
       return t ? t.objective : "";
     }
+    function chapterStatus(id) {
+      try {
+        if (id === "skippy") {
+          let s = JSON.parse(localStorage.getItem("sq_save_v1") || "null");
+          if (s && s.flags && s.flags.ch9_done) return "COMPLETE";
+          if (s) return "RIDING";
+        }
+        if (id === "ros") {
+          let s = JSON.parse(localStorage.getItem("sq_save_ros_v1") || "null");
+          if (s && s.flags && s.flags.ros_home_end) return "COMPLETE";
+          if (s) return "RIDING";
+        }
+      } catch (e) {}
+      return "";
+    }
     function rowSub(i) {
-      return i.id && taleHeard(i.id) ? "THE TALE IS TOLD" : i.sub;
+      if (i.id === "ros" && (taleHeard("ros") || chapterStatus("ros") === "COMPLETE"))
+        return "THE TALE IS TOLD";
+      let st = chapterStatus(i.id);
+      return st || i.sub;
     }
     function choiceInput() {
       let spec = CHOICES[A.choice.id];
@@ -12243,23 +12280,37 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       else if (U.attackE || U.talkE)
         A.menu === 0 ? beginToldTale(!1) : ((A.talePhase = "confirm"), (A.menu = 0), (A.st = 0));
     }
-    function returnToPresent() {
-      let tale = taleById(ee.tale_from || A.taleFrom || "ros");
-      ((A.story = "skippy"), (Mt = "sq_save_v1"), (A.taleFrom = ""));
+    function backToSkippy(outro) {
+      (A.state === "play" && xe(),
+        (A.story = "skippy"),
+        (Mt = "sq_save_v1"),
+        (A.taleFrom = ""),
+        (A.paused = !1),
+        (A.rosLeave = 0),
+        (A.choice = null));
       if (!Bt()) {
-        ((A.state = "stories"), (A.menu = 0), (A.st = 0), Ke("title"));
+        ((A.state = "stories"),
+          (A.menu = 0),
+          (A.st = 0),
+          (A.note = "NO SKIPPY RIDE SAVED. THE TALE WAITS IN THE CHAPTER LIST."),
+          Ke("title"));
         return;
       }
-      ((ee[tale.heard] = !0),
-        (ee.tale_macho = !0),
-        ba(tale.area, tale.x, tale.y, tale.face),
-        ye("tale_" + tale.id + "_close"),
-        xe());
+      if (outro) {
+        let tale = taleById("ros");
+        ((ee.tale_ros = !0),
+          (ee.tale_macho = !0),
+          ba(tale.area, tale.x, tale.y, tale.face),
+          ye("tale_ros_close"),
+          xe());
+      } else Q("BACK IN YOUR OWN SADDLE. THE TALE KEEPS.", 2.4);
+    }
+    function returnToPresent() {
+      backToSkippy(!0);
     }
     function Or() {
       if (A.story === "ros") {
-        if (ee.tale_from || skippyPostgame()) returnToPresent();
-        else ((A.state = "stories"), (A.menu = 1), (A.st = 0), Ke("title"));
+        returnToPresent();
         return;
       }
       if (A.chap >= ke.length) {
@@ -14056,6 +14107,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       }
       ((A.state = "title"),
         (A.st = 0),
+        (A.note = ""),
         (A.menu = A.hasSave ? 1 : 0),
         Ke(row.id === "ros" ? "west" : "title"));
     }
@@ -14248,8 +14300,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           v(n, i.name, 160, s, f, 1, "center", "#000"),
           !i.play && v(n, "SOON", 286, s, "#6a6478", 1, "right", ""),
           i.play &&
-            storyHas(i.id) &&
-            v(n, "SAVE", 46, s, "#3dff6a", 1, "", ""),
+            v(n, chapterStatus(i.id) || "NEW", 286, s, "#3dff6a", 1, "right", ""),
           E &&
             Math.floor(A.t * 4) % 2 &&
             v(n, ">", 34, s, "#ffcc33", 1, "", ""));
@@ -14266,7 +14317,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       );
       v(
         n,
-        STORY_ROWS[A.menu] ? rowSub(STORY_ROWS[A.menu]) : "",
+        A.note || (STORY_ROWS[A.menu] ? rowSub(STORY_ROWS[A.menu]) : ""),
         160,
         214,
         "#fff6d8",
@@ -14374,8 +14425,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           "center",
           "#000",
         ),
-        (Z("tale_from") || skippyPostgame()) &&
-          v(n, "THE PRESENT IS WAITING", 160, 210, "#ffe0a0", 1, "center", "#000"));
+        v(n, "PRESS X: BACK TO SKIPPY", 160, 210, "#ffe0a0", 1, "center", "#000"));
     }
     function flashCard() {
       let tale = taleById(A.taleId || "ros");
@@ -14513,7 +14563,8 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       }),
       (Ia.easeHunt = () => {
         A.wanted = Math.max(0, (A.wanted || 0) - 2);
-      });
+      }),
+      (Ia.returnSkippy = () => backToSkippy(!1));
     Le.sentinel = {
       init: () => {
         ((r.hp = r.max = 16),
@@ -14704,8 +14755,9 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           : "PAGES FOR THE TABLE: NOODLE RECEIPT AND THE BOT LOG";
       if (!Z("proof3")) return "POUR BOOTH: THE PING OPENS THE MOON";
       if (!Z("dream_win")) return "POUR: SLEEP. SPIKE IS IN THE DREAM";
-      if (!Z("ros_home_end")) return "HOME: THE EMPTY CHAIR";
-      return "THE SLUGGER IS NOT HOME";
+      if (Z("ros_ready") && !Z("ros_done")) return "HARBOR: THE KING'S DECK. THEN GO HOME";
+      if (!Z("ros_home_end")) return "FINAL: GO HOME TO THE POUR. TALK TO RUSTY.";
+      return "THE TALE IS TOLD. PAUSE: RETURN TO SKIPPY.";
     }
     function rosQuestRows() {
       return [
@@ -14723,7 +14775,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         ["THE CELL", "proof3", "Signal cut. Transmission lost."],
         ["THE DREAM", "dream_win", "Lasso the posters. Lasers feed them."],
         ["HARBOR", "harbor_copy", "The king holds a copy. Not the man."],
-        ["HOME", "ros_home_end", "The empty chair."],
+        ["HOME", "ros_home_end", "Final. The Pour. Talk to Rusty."],
       ];
     }
     function equipGear(id) {
@@ -14793,8 +14845,17 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           );
         }
       }
-      v(n, "X SETS THE ROW. Q SWAPS THE ITEM.", 160, 190, "#ffe0a0", 1, "center", "#000");
-      v(n, "LEFT RIGHT PAGE. BACK CLOSES.", 160, 204, "#ffe0c0", 1, "center", "#000");
+      if (A.rosLeave) {
+        (I(16, 118, 288, 96, "#140c08"),
+          v(n, "RETURN TO SKIPPY?", 160, 132, "#ffcc33", 1, "center", "#000"),
+          v(n, (A.menu ? "  " : "> ") + "YES. SAVE AND GO.", 36, 152, "#ffffff", 1, "", ""),
+          v(n, (A.menu ? "> " : "  ") + "NO. STAY IN THE TALE.", 36, 170, "#ffffff", 1, "", ""),
+          v(n, "X CHOOSES. BACK CANCELS.", 160, 196, "#ffe0c0", 1, "center", "#000"));
+        return;
+      }
+      (v(n, "X SETS THE ROW. Q SWAPS THE ITEM.", 160, 186, "#ffe0a0", 1, "center", "#000"),
+        v(n, "MAP PAGE: X RETURNS TO SKIPPY.", 160, 198, "#c8b090", 1, "center", "#000"),
+        v(n, "LEFT RIGHT PAGE. BACK CLOSES.", 160, 210, "#ffe0c0", 1, "center", "#000"));
     }
     function setSkippyRow(id) {
       if (!ownedItem(id)) return;
@@ -14821,6 +14882,15 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       U.attackE && setSkippyRow(rows[(A.gearSel || 0) % rows.length]);
     }
     function rosPauseInput() {
+      if (A.rosLeave) {
+        if (U.backE) {
+          ((A.rosLeave = 0), D.sel());
+          return;
+        }
+        if (U.upE || U.downE) A.menu = A.menu ? 0 : 1;
+        if (U.attackE || U.talkE) A.menu === 0 ? backToSkippy(!1) : (A.rosLeave = 0);
+        return;
+      }
       if (U.backE || U.mapE || Qe) {
         ((A.paused = !1), D.sel());
         return;
@@ -14828,7 +14898,10 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       if (U.left && !A.wasL) A.rosPage = ((A.rosPage || 0) + 2) % 3;
       if (U.right && !A.wasR) A.rosPage = ((A.rosPage || 0) + 1) % 3;
       ((A.wasL = U.left), (A.wasR = U.right));
-      if ((A.rosPage || 0) === 0) return;
+      if ((A.rosPage || 0) === 0) {
+        if (U.attackE || U.talkE) ((A.rosLeave = 1), (A.menu = 0));
+        return;
+      }
       let nRows = (A.rosPage || 0) === 1 ? rosQuestRows().length : 7;
       if (U.upE) A.gearSel = ((A.gearSel || 0) + nRows - 1) % nRows;
       if (U.downE) A.gearSel = ((A.gearSel || 0) + 1) % nRows;
@@ -16453,6 +16526,16 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           S = s(f.y * 16);
         f.kind === "sign"
           ? E.push({ y: p(f.y), f: () => n.drawImage(O.icon.sign, c, S) })
+          : f.kind === "chair" || f.kind === "portal"
+            ? E.push({
+                y: p(f.y),
+                f: () => {
+                  let glow = f.kind === "portal" || (Z("dream_win") && !Z("ros_home_end"));
+                  (I(c + 2, S + 2, 12, 12, glow ? "#ffcc33" : "#6a5848"),
+                    v(n, f.kind === "portal" ? "DOOR" : "CHAIR", c + 8, S - 8, "#fff6c0", 1, "center", "#000"),
+                    glow && I(c + 6, S - 4 + Math.sin(A.t * 6) * 2, 4, 4, "#ffcc33"));
+                },
+              })
           : f.kind === "striker"
             ? E.push({ y: p(f.y) + 6, f: () => Ps(c, S) })
             : f.kind === "kiosk"
@@ -17397,7 +17480,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
     function touchRows() {
       if (A.state === "stories")
         return STORY_ROWS.map((r, i) => ({
-          label: r.name + (r.play ? "" : "  SOON"),
+          label: r.name + (r.play ? "  " + (chapterStatus(r.id) || "NEW") : "  SOON"),
           enabled: !!r.play,
           on: A.menu === i,
         }));
@@ -17418,6 +17501,11 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           enabled: !0,
           on: A.choice.sel === i,
         }));
+      if (A.state === "play" && A.paused && A.story === "ros" && A.rosLeave)
+        return [
+          { label: "YES. SAVE AND RETURN TO SKIPPY", enabled: !0, on: !A.menu },
+          { label: "NO. STAY IN THE TALE", enabled: !0, on: !!A.menu },
+        ];
       if (A.state === "play" && A.paused && A.story === "ros") {
         let page = A.rosPage || 0,
           tabs = ["MAP", "QUESTS", "GEAR"].map((label, i) => ({
@@ -17425,6 +17513,8 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
             enabled: !0,
             on: page === i,
           }));
+        if (page === 0)
+          return tabs.concat([{ label: "RETURN TO SKIPPY", enabled: !0, on: !1 }]);
         if (page === 2) {
           let gear = [
             ["lasers", "TWIN LASERS"],
@@ -17482,7 +17572,15 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         ((A.choice.sel = i), (U.talkE = !0), choiceInput(), (U.talkE = !1));
         return;
       }
+      if (A.state === "play" && A.paused && A.story === "ros" && A.rosLeave) {
+        i === 0 ? backToSkippy(!1) : (A.rosLeave = 0);
+        return;
+      }
       if (A.state === "play" && A.paused && A.story === "ros") {
+        if ((A.rosPage || 0) === 0 && i === 3) {
+          ((A.rosLeave = 1), (A.menu = 0));
+          return;
+        }
         if (i < 3) {
           ((A.rosPage = i), (A.gearSel = 0));
           return;
@@ -19862,6 +19960,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         kit: () => ownedItems(),
         slots: () => ({ pri: d.pri || "", sec: d.sec || "" }),
         objective: () => (A.story === "ros" ? rosObjective() : skippyObjective()),
+        chapters: () => STORY_ROWS.map((r) => ({ id: r.id, status: chapterStatus(r.id), sub: rowSub(r) })),
         quests: () => (A.story === "ros" ? rosQuestRows() : []),
 
       };
