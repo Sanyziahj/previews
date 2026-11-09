@@ -841,17 +841,21 @@ test('the Brand sleeps four seconds and then wakes', async ({ page }) => {
     S.G.story = 'ros';
     S.P.items.blasters = true;
     S.P.items.brand = true;
-    S.P.act = 'brand';
-    S.P.tool = 'brand';
+    S.P.pri = 'lasers';
+    S.P.sec = 'brand';
+    S.P.cds = {};
     S.warp('ros_yard', 4, 8, 3);
     S.step(2);
     for (let i = 0; i < 8 && (S.script || S.dlg); i++) {
       S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(2);
     }
-    S.press('attack', true); S.step(2); S.press('attack', false); S.step(2);
+    S.press('item', true); S.step(2); S.press('item', false); S.step(2);
     const first = (S.G.toast || '').indexOf('STAR BRAND') >= 0 || (S.G.brands || []).length > 0;
     const sleeping = S.P.brandCd > 3;
-    S.press('attack', true); S.step(2); S.press('attack', false); S.step(1);
+    S.shots.length = 0;
+    S.press('attack', true); S.step(2); S.press('attack', false); S.step(2);
+    const stun = S.shots.filter((s) => s.kind === 'stun').length;
+    S.press('item', true); S.step(2); S.press('item', false); S.step(1);
     const refused = (S.G.toast || '').indexOf('SLEEPING') >= 0;
     S.G.paused = true;
     const held = S.P.brandCd;
@@ -860,9 +864,9 @@ test('the Brand sleeps four seconds and then wakes', async ({ page }) => {
     S.G.paused = false;
     S.step(260);
     const ready = S.P.brandCd === 0 && (S.G.toast || '').indexOf('BRAND READY') >= 0;
-    S.press('attack', true); S.step(2); S.press('attack', false); S.step(2);
+    S.press('item', true); S.step(2); S.press('item', false); S.step(2);
     const again = (S.G.toast || '').indexOf('STAR BRAND') >= 0;
-    return { first, sleeping, refused, paused, ready, again, cd: S.P.brandCd };
+    return { first, sleeping, refused, paused, ready, again, cd: S.P.brandCd, lasersWhileSleeping: stun };
   });
   expect(out.first, JSON.stringify(out)).toBe(true);
   expect(out.sleeping, JSON.stringify(out)).toBe(true);
@@ -870,10 +874,11 @@ test('the Brand sleeps four seconds and then wakes', async ({ page }) => {
   expect(out.paused, JSON.stringify(out)).toBe(true);
   expect(out.ready, JSON.stringify(out)).toBe(true);
   expect(out.again, JSON.stringify(out)).toBe(true);
+  expect(out.lasersWhileSleeping, JSON.stringify(out)).toBeGreaterThan(0);
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
-test('TOOL cycles every owned item and each one fires', async ({ page }) => {
+test('each slot cycles on its own and fires only itself', async ({ page }) => {
   const errors = await boot(page);
   const out = await page.evaluate(() => {
     const S = __SQ;
@@ -881,68 +886,98 @@ test('TOOL cycles every owned item and each one fires', async ({ page }) => {
     S.G.story = 'ros';
     S.warp('ros_desert', 6, 8, 3);
     S.step(3);
-    S.P.items.blasters = true;
-    S.P.act = 'lasers';
-    S.P.wep = 'lasers';
-    const one = S.kit().slice();
-    S.press('tool', true); S.step(2); S.press('tool', false); S.step(1);
-    const oneStay = S.gear().act;
+    S.ents.forEach((e) => { e.dead = true; });
+    S.P.items = { blasters: true };
+    S.P.pri = 'lasers';
+    S.P.sec = '';
+    S.P.cds = {};
+    function edge(name) {
+      S.press(name, true); S.step(2); S.press(name, false); S.step(1);
+    }
+    edge('pri');
+    edge('sec');
+    const one = S.slots();
     S.shots.length = 0;
-    S.press('attack', true); S.step(2); S.press('attack', false); S.step(3);
+    edge('item');
+    const itemQuiet = S.shots.length === 0 && (S.G.toast || '').indexOf('NONE') >= 0;
+    S.shots.length = 0;
+    edge('attack');
     const lasers = S.shots.filter((s) => s.kind === 'stun').length;
-    S.P.items.lasso = true;
-    S.flag('lasso_got');
-    S.P.arrowCd = 0;
-    S.press('swap', true); S.step(2); S.press('swap', false); S.step(1);
-    const toRope = S.gear().act;
-    S.press('tool', true); S.step(2); S.press('tool', false); S.step(1);
-    const wrap = S.gear().act;
     S.P.items.justice = true;
+    S.P.items.lasso = true;
     S.P.items.brand = true;
     S.flag('justice_got');
+    S.flag('lasso_got');
     S.flag('brand_got');
-    S.P.act = 'lasers';
-    const order = ['lasers'];
-    for (let i = 0; i < 4; i++) {
-      S.press('tool', true); S.step(2); S.press('tool', false); S.step(1);
-      order.push(S.gear().act);
+    S.P.pri = 'lasers';
+    S.P.sec = 'lasso';
+    const priOrder = ['lasers'];
+    for (let i = 0; i < 3; i++) {
+      edge('pri');
+      priOrder.push(S.slots().pri);
     }
-    function fire(id) {
-      S.P.act = id;
-      S.P.wep = id === 'justice' || id === 'lasers' ? id : S.P.wep;
-      S.P.tool = id === 'lasso' || id === 'brand' ? id : S.P.tool;
-      S.P.arrowCd = 0;
+    const secOrder = ['lasso'];
+    for (let i = 0; i < 3; i++) {
+      edge('sec');
+      secOrder.push(S.slots().sec);
+    }
+    const same = S.slots().pri !== S.slots().sec;
+    S.G.paused = true;
+    S.step(1);
+    const wait = performance.now() + 300;
+    while (performance.now() < wait) {}
+    S.G.rosPage = 2;
+    S.G.gearSel = 0;
+    S.P.pri = 'lasers';
+    S.P.sec = 'brand';
+    edge('sec');
+    const swapped = S.slots();
+    S.G.paused = false;
+    function fire(which, id) {
+      S.P.pri = which === 'attack' ? id : 'lasers';
+      S.P.sec = which === 'item' ? id : 'brand';
+      if (S.P.pri === S.P.sec) S.P.sec = id === 'lasers' ? 'brand' : 'lasers';
+      S.P.cds = {};
       S.P.brandCd = 0;
       S.P.charge = 0;
+      S.P.arrowCd = 0;
       S.shots.length = 0;
       if (id === 'justice') {
-        S.press('attack', true); S.step(40); S.press('attack', false); S.step(2);
+        S.press(which, true); S.step(40); S.press(which, false); S.step(2);
         return S.shots.some((s) => s.kind === 'justice');
       }
-      S.press('attack', true); S.step(2); S.press('attack', false); S.step(2);
+      edge(which);
       if (id === 'lasers') return S.shots.some((s) => s.kind === 'stun');
       if (id === 'brand') return (S.G.toast || '').indexOf('STAR BRAND') >= 0;
       return (S.G.toast || '').indexOf('ROPE') >= 0 || (S.G.toast || '').indexOf('LASSO') >= 0;
     }
+    const otherQuiet = (() => {
+      S.P.pri = 'lasers';
+      S.P.sec = 'brand';
+      S.P.cds = {};
+      S.P.brandCd = 0;
+      S.shots.length = 0;
+      edge('attack');
+      return (S.G.toast || '').indexOf('STAR BRAND') < 0 && S.shots.some((s) => s.kind === 'stun');
+    })();
     return {
-      one, oneStay, lasers,
-      toRope, wrap, order,
-      kit: S.kit(),
+      one, itemQuiet, lasers, priOrder, secOrder, same, swapped, otherQuiet,
       fired: {
-        lasers: fire('lasers'),
-        justice: fire('justice'),
-        lasso: fire('lasso'),
-        brand: fire('brand'),
+        lasers: fire('attack', 'lasers'),
+        justice: fire('item', 'justice'),
+        lasso: fire('item', 'lasso'),
+        brand: fire('item', 'brand'),
       },
     };
   });
-  expect(out.one).toEqual(['lasers']);
-  expect(out.oneStay).toBe('lasers');
+  expect(out.one).toEqual({ pri: 'lasers', sec: '' });
+  expect(out.itemQuiet, JSON.stringify(out)).toBe(true);
   expect(out.lasers).toBeGreaterThan(0);
-  expect(out.toRope).toBe('lasso');
-  expect(out.wrap).toBe('lasers');
-  expect(out.order).toEqual(['lasers', 'justice', 'lasso', 'brand', 'lasers']);
-  expect(out.kit).toEqual(['lasers', 'justice', 'lasso', 'brand']);
+  expect(out.priOrder).toEqual(['lasers', 'justice', 'brand', 'lasers']);
+  expect(out.secOrder).toEqual(['lasso', 'brand', 'justice', 'lasso']);
+  expect(out.same).toBe(true);
+  expect(out.swapped).toEqual({ pri: 'brand', sec: 'lasers' });
+  expect(out.otherQuiet).toBe(true);
   expect(out.fired.lasers).toBe(true);
   expect(out.fired.justice).toBe(true);
   expect(out.fired.lasso).toBe(true);
@@ -950,17 +985,30 @@ test('TOOL cycles every owned item and each one fires', async ({ page }) => {
   const skippy = await page.evaluate(() => {
     const S = __SQ;
     S.G.story = 'skippy';
-    S.P.items = { bow: true, raygun: true, baton: true };
-    S.P.z = 'bow';
-    S.press('tool', true); S.step(2); S.press('tool', false); S.step(1);
-    const a = S.P.z;
-    S.press('swap', true); S.step(2); S.press('swap', false); S.step(1);
-    const b = S.P.z;
-    return { a, b, bow: !!S.P.items.bow, ray: !!S.P.items.raygun, baton: !!S.P.items.baton };
+    S.G.paused = false;
+    S.P.items = { bow: true, raygun: true, baton: true, lasso: true };
+    S.P.arrows = 5;
+    S.P.pri = 'bow';
+    S.P.sec = 'lasso';
+    S.P.cds = {};
+    function edge(name) {
+      S.press(name, true); S.step(2); S.press(name, false); S.step(1);
+    }
+    const pri = ['bow'];
+    for (let i = 0; i < 3; i++) { edge('pri'); pri.push(S.slots().pri); }
+    S.shots.length = 0;
+    edge('attack');
+    const bow = S.shots.some((s) => s.kind === 'arrow');
+    const kept = !!(S.P.items.bow && S.P.items.raygun && S.P.items.baton && S.P.items.lasso);
+    const distinct = S.slots().pri !== S.slots().sec;
+    return { pri, bow, kept, distinct, slots: S.slots() };
   });
-  expect(skippy.bow && skippy.ray && skippy.baton).toBe(true);
-  expect(skippy.a).toBe('raygun');
-  expect(skippy.b).toBe('bow');
+  expect(skippy.kept).toBe(true);
+  expect(skippy.distinct).toBe(true);
+  expect(skippy.pri[0]).toBe('bow');
+  expect(skippy.pri[1]).not.toBe('lasso');
+  expect(skippy.pri[skippy.pri.length - 1]).toBe('bow');
+  expect(skippy.bow).toBe(true);
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
@@ -984,10 +1032,12 @@ test('the rope locker is labeled and an old kit migrates', async ({ page }) => {
   const migrated = await page.evaluate(() => ({
     kit: __SQ.kit(),
     cd: __SQ.P.brandCd || 0,
-    act: __SQ.gear().act,
+    slots: __SQ.slots(),
   }));
   expect(migrated.kit).toEqual(expect.arrayContaining(['lasers', 'lasso', 'brand']));
   expect(migrated.cd).toBe(0);
+  expect(migrated.slots.pri).toBe('lasers');
+  expect(migrated.slots.sec).toBe('lasso');
   await page.evaluate(() => {
     const S = __SQ;
     S.flag('lasso_got', false);
@@ -1014,6 +1064,36 @@ test('the rope locker is labeled and an old kit migrates', async ({ page }) => {
   expect(got.lasso).toBe(true);
   expect(got.lasers).toBe(true);
   expect(got.flag).toBe(true);
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test('an old Skippy item lands on the slot that fits', async ({ page }) => {
+  const skippy = JSON.stringify({
+    z: 'lasso', v: 1, area: 'home', x: 160, y: 160, dir: 0,
+    hp: 6, maxHp: 6, pieces: 0, coins: 3, arrows: 4,
+    items: { baton: true, bow: true, raygun: true, lasso: true },
+    keys: {}, bigKeys: {},
+    flags: { woke: true }, party: [], shards: 1, time: 20,
+    visited: { home: true },
+  });
+  const errors = await boot(page, { save: { skippy } });
+  await page.evaluate(() => __SQ.step(20));
+  await tap(page, 'attack');
+  await page.evaluate(() => __SQ.step(20));
+  await tap(page, 'attack');
+  await page.waitForFunction(() => __SQ.G.state === 'play');
+  const got = await page.evaluate(() => ({
+    slots: __SQ.slots(),
+    bow: !!__SQ.P.items.bow,
+    baton: !!__SQ.P.items.baton,
+    ray: !!__SQ.P.items.raygun,
+    lasso: !!__SQ.P.items.lasso,
+    area: __SQ.A.id,
+  }));
+  expect(got.area).toBe('home');
+  expect(got.bow && got.baton && got.ray && got.lasso).toBe(true);
+  expect(got.slots.pri).toBe('raygun');
+  expect(got.slots.sec).toBe('lasso');
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
@@ -1078,6 +1158,10 @@ async function phoneLayout(page, file) {
     S.setManual(true);
     S.G.state = 'play';
     S.G.story = 'ros';
+    S.P.items.blasters = true;
+    S.P.pri = 'lasers';
+    S.P.sec = 'lasso';
+    S.P.items.lasso = true;
     S.warp('ros_desert', 16, 8, 3);
     S.step(40);
   });
@@ -1117,33 +1201,42 @@ test.describe('phone stick leaves SuperNova', () => {
   });
 });
 
-function expectToolButton(page) {
+function expectSlotButtons(page) {
   return page.evaluate(() => {
     const canvas = document.querySelector('#game').getBoundingClientRect();
-    const el = [...document.querySelectorAll('[data-b="tool"], .srml-b')].find((n) => (n.textContent || '').trim() === 'TOOL');
-    if (!el) return { found: false };
-    const r = el.getBoundingClientRect();
-    const ix = Math.min(r.right, canvas.right) - Math.max(r.left, canvas.left);
-    const iy = Math.min(r.bottom, canvas.bottom) - Math.max(r.top, canvas.top);
+    const all = [...document.querySelectorAll('.srml-b, [data-b]')].map((el) => {
+      const r = el.getBoundingClientRect();
+      return { label: (el.textContent || '').trim(), x: r.x, y: r.y, w: r.width, h: r.height, r };
+    });
+    const want = ['Q PRI', 'TAB SEC'];
+    const found = want.map((label) => all.find((b) => b.label === label));
+    function hits(a, b) {
+      if (!a || !b) return false;
+      const ix = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
+      const iy = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
+      return ix > 8 && iy > 8;
+    }
+    const overlapCanvas = found.filter((b) => b && hits(b, { x: canvas.left, y: canvas.top, w: canvas.width, h: canvas.height }));
     return {
-      found: true,
-      w: r.width,
-      h: r.height,
-      overlap: ix > 8 && iy > 8,
-      back: (el.textContent || '').trim() === 'BACK',
+      found: found.every(Boolean),
+      min: Math.min(...found.filter(Boolean).map((b) => Math.min(b.w, b.h))),
+      overlap: overlapCanvas.map((b) => b.label),
+      eachOther: found[0] && found[1] ? hits(found[0], found[1]) : true,
+      back: found.some((b) => b && b.label === 'BACK'),
     };
   });
 }
 
 test.describe('phone tool 390x844', () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
-  test('TOOL is large and off the picture', async ({ page }) => {
+  test('cycle buttons are large and off the picture', async ({ page }) => {
     const errors = await boot(page);
     await page.waitForFunction(() => document.documentElement.classList.contains('srml'));
-    const box = await expectToolButton(page);
+    const box = await expectSlotButtons(page);
     expect(box.found).toBe(true);
-    expect(Math.min(box.w, box.h)).toBeGreaterThan(40);
-    expect(box.overlap).toBe(false);
+    expect(box.min).toBeGreaterThan(40);
+    expect(box.overlap).toEqual([]);
+    expect(box.eachOther).toBe(false);
     expect(box.back).toBe(false);
     expect(errors, errors.join('\n')).toEqual([]);
   });
@@ -1151,13 +1244,14 @@ test.describe('phone tool 390x844', () => {
 
 test.describe('phone tool 844x390', () => {
   test.use({ viewport: { width: 844, height: 390 }, hasTouch: true, isMobile: true });
-  test('TOOL stays off the picture in landscape', async ({ page }) => {
+  test('cycle buttons stay off the picture in landscape', async ({ page }) => {
     const errors = await boot(page);
     await page.waitForFunction(() => document.documentElement.classList.contains('srml'));
-    const box = await expectToolButton(page);
+    const box = await expectSlotButtons(page);
     expect(box.found).toBe(true);
-    expect(Math.min(box.w, box.h)).toBeGreaterThan(40);
-    expect(box.overlap).toBe(false);
+    expect(box.min).toBeGreaterThan(40);
+    expect(box.overlap).toEqual([]);
+    expect(box.eachOther).toBe(false);
     expect(errors, errors.join('\n')).toEqual([]);
   });
 });
