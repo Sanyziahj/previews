@@ -108,18 +108,36 @@ test("hub, one lesson in each class, and the art studio", async ({ page }) => {
   await page.getByRole("button", { name: "Art", exact: true }).click();
   await page.getByRole("button", { name: /Color In/ }).click();
   await page.locator('[data-page="skippy-close"]').click();
-  await page.locator('[data-pot="blue"]').click();
   await page.waitForFunction(() => {
     const c = document.getElementById("art");
     return c && c.width > 10 && window.__AC.clientPoint;
   });
-  const before = await page.evaluate(() => Object.keys(__AC.fills()).length);
+  await shot(page, "skippy-close-uncolored-844x390");
+  await page.locator('[data-pot="blue"]').click();
   const pt = await page.evaluate(() => __AC.clientPoint("head"));
   await page.mouse.click(pt.x, pt.y);
-  await page.waitForFunction((n) => Object.keys(__AC.fills()).length > n, before);
+  await page.waitForFunction(() => __AC.fills().head === "#2f6bff");
+  const fills = await page.evaluate(() => __AC.fills());
+  expect(fills.beanie).toBeUndefined();
+  expect(fills.cuff).toBeUndefined();
+  expect(fills.cheekL).toBeUndefined();
+  expect(fills.cheekR).toBeUndefined();
+  await shot(page, "skippy-head-filled-844x390");
   await shot(page, "art-844x390");
   await page.locator('[data-act="home"]').click();
   await page.locator('[data-act="leave"]').click();
+
+  for (const who of ["spike", "santt", "ros"]) {
+    await page.getByRole("button", { name: "Art", exact: true }).click();
+    await page.getByRole("button", { name: /Color In/ }).click();
+    await page.locator(`[data-page="${who}-close"]`).click();
+    await page.waitForFunction(() => {
+      const c = document.getElementById("art");
+      return c && c.width > 10;
+    });
+    await shot(page, `${who}-close-844x390`);
+    await page.locator('[data-act="home"]').click();
+  }
 
   await page.getByRole("button", { name: "Art", exact: true }).click();
   await page.getByRole("button", { name: /Color Mix/ }).click();
@@ -141,9 +159,9 @@ test("hub, one lesson in each class, and the art studio", async ({ page }) => {
   await expect(page.locator("#step-title")).toHaveText("Circle head");
   const ink = page.locator("#ink");
   const box = await ink.boundingBox();
-  await page.mouse.move(box.x + 30, box.y + 40);
+  await page.mouse.move(box.x + box.width * 0.55, box.y + box.height * 0.45);
   await page.mouse.down();
-  await page.mouse.move(box.x + 90, box.y + 70);
+  await page.mouse.move(box.x + box.width * 0.75, box.y + box.height * 0.6);
   await page.mouse.up();
   expect(await page.evaluate(() => __AC.strokeCount())).toBeGreaterThan(0);
   for (let i = 0; i < 8; i++) {
@@ -163,9 +181,9 @@ test("hub, one lesson in each class, and the art studio", async ({ page }) => {
   const view = page.locator("#view");
   await expect(view).toBeVisible();
   const vb = await view.boundingBox();
-  await page.mouse.move(vb.x + 40, vb.y + 50);
+  await page.mouse.move(vb.x + vb.width * 0.55, vb.y + vb.height * 0.45);
   await page.mouse.down();
-  await page.mouse.move(vb.x + 120, vb.y + 80);
+  await page.mouse.move(vb.x + vb.width * 0.75, vb.y + vb.height * 0.62);
   await page.mouse.up();
   await page.locator('[data-stamp="board"]').click();
   await page.mouse.click(vb.x + vb.width * 0.62, vb.y + vb.height * 0.45);

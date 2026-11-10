@@ -187,14 +187,20 @@
     .hero .note { display: none; }
     .hello { font-size: 14px; }
     .bust { width: 64px; height: 64px; }
-    .door { justify-content: center; }
-    .door small, .door .kicker { display: none; }
+    .door { justify-content: flex-end; padding: 8px; }
+    .door b { font-size: 22px; }
+    .door small, .door .kicker { display: block; font-size: 11px; line-height: 1.15; }
     .doors { grid-template-columns: repeat(5, 1fr); }
     .lesson { display: flex; flex-direction: column; height: 100%; overflow: auto; }
     .qbox { width: 100%; }
     .choices { grid-template-columns: 1fr 1fr; }
     .belt { grid-template-columns: 1.2fr 0.8fr; }
-    .tipbar { min-height: 36px; }
+    .play { position: relative; }
+    .tipbar {
+      position: absolute; z-index: 2; left: 8px; top: 8px;
+      max-width: min(440px, 54%); border-radius: 12px;
+      background: #1a1030ee;
+    }
     #tip { font-size: 13px; }
     .pot span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
     .pot { min-width: 46px; min-height: 46px; }

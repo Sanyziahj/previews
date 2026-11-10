@@ -234,9 +234,9 @@
 
   function metrics(spec, flavor, W, H) {
     if (flavor === "close" || flavor === "icon") {
-      const hr = flavor === "icon" ? Math.min(W, H) * 0.26 : W * 0.26;
-      const cy = flavor === "icon" ? H * 0.62 : H * 0.44;
-      return { hr: hr, cx: W / 2, cy: cy, foot: H * 0.92, full: false, neon: false };
+      const hr = flavor === "icon" ? Math.min(W, H) * 0.2 : Math.min(W, H) * 0.34;
+      const cy = flavor === "icon" ? H * 0.62 : H * 0.56;
+      return { hr: hr, cx: W / 2, cy: cy, foot: H * 0.94, full: false, neon: false };
     }
     const neon = flavor === "neon";
     const hr = (neon ? 0.15 : 0.112) * Math.min(W, H) * (spec.young ? 1.08 : 1);
@@ -403,12 +403,14 @@
       add(page, "hoodie", "Hoodie", spec.suit, rr(cx - hr * 1.05, neckY, hr * 2.1, hr * 1.2, hr * 0.3), cx, neckY + hr * 0.55, lw);
     }
     if (spec.extra.indexOf("poncho") >= 0) {
+      const ponchoBot = full ? hip + hr * 0.15 : neckY + hr * 0.72;
+      const flare = full ? hr * 1.45 : hr * 1.25;
       add(page, "poncho", "Poncho", "#a56b3c", poly([
-        cx - hr * 0.5, neckY + hr * 0.05,
-        cx + hr * 0.5, neckY + hr * 0.05,
-        cx + hr * 1.45, hip + hr * 0.15,
-        cx - hr * 1.45, hip + hr * 0.15,
-      ]), cx, neckY + hr * 0.6, lw);
+        cx - hr * 0.55, neckY + hr * 0.02,
+        cx + hr * 0.55, neckY + hr * 0.02,
+        cx + flare, ponchoBot,
+        cx - flare, ponchoBot,
+      ]), cx, neckY + hr * 0.35, lw);
     }
     if (spec.extra.indexOf("accent") >= 0) {
       add(page, "stripe", "Red stripe", "#e0282e", rr(cx - hr * 0.7, neckY + hr * 0.55, hr * 0.28, hr * 0.55, 3), cx - hr * 0.56, neckY + hr * 0.8, lw * 0.5);
@@ -469,18 +471,7 @@
       add(page, "blaster", "Holstered blaster", "#e6c15a", rr(cx + hr * 0.85, hip, hr * 0.36, hr * 0.26, 5), cx + hr * 1.02, hip + hr * 0.12, lw * 0.5);
     }
 
-    if (spec.hat === "beanie") {
-      const brimY = cy - hr * 0.48;
-      add(page, "beanie", "Beanie", spec.hatC, function (p) {
-        const rx = hr * 0.78;
-        const ry = hr * 0.5;
-        p.moveTo(cx - rx, brimY);
-        p.ellipse(cx, brimY, rx, ry, 0, Math.PI, Math.PI * 2, false);
-        p.closePath();
-      }, cx, brimY - hr * 0.28, lw);
-    }
-
-    add(page, "head", "Head", spec.head, ell(cx, cy, hr, hr), cx, cy - hr * 0.15, lw * 1.05);
+    add(page, "head", "Head", spec.head, ell(cx, cy, hr, hr), cx, cy, Math.max(8, hr * 0.055));
 
     if (spec.extra.indexOf("collar") >= 0) {
       add(page, "collar", "Collar", "#ff8ad0", rr(cx - hr * 0.55, cy + hr * 0.72, hr * 1.1, hr * 0.2, 4), cx, cy + hr * 0.82, lw * 0.6);
@@ -491,44 +482,57 @@
     }
 
     if (spec.hat === "beanie") {
-      const brimY = cy - hr * 0.48;
-      add(page, "cuff", "Cuff", spec.hatC2, rr(cx - hr * 0.8, brimY - hr * 0.02, hr * 1.6, hr * 0.18, 5), cx, brimY + hr * 0.06, lw * 0.7);
-      add(page, "patch", "SR patch", "#f4f6fb", rr(cx + hr * 0.22, brimY - hr * 0.01, hr * 0.34, hr * 0.14, 3), cx + hr * 0.39, brimY + hr * 0.06, lw * 0.4);
+      const base = cy - hr * 0.78;
+      const top = cy - hr * 1.5;
+      add(page, "beanie", "Beanie", spec.hatC, function (p) {
+        p.moveTo(cx - hr * 0.66, base);
+        p.quadraticCurveTo(cx - hr * 0.98, cy - hr * 1.05, cx - hr * 0.22, top + hr * 0.16);
+        p.quadraticCurveTo(cx, top, cx + hr * 0.22, top + hr * 0.16);
+        p.quadraticCurveTo(cx + hr * 0.98, cy - hr * 1.05, cx + hr * 0.66, base);
+        p.closePath();
+      }, cx, cy - hr * 1.15, Math.max(6, hr * 0.045));
+      add(page, "cuff", "Cuff", spec.hatC2, rr(cx - hr * 0.82, base - hr * 0.02, hr * 1.64, hr * 0.24, 6), cx, base + hr * 0.1, Math.max(5, hr * 0.04));
+      add(page, "patch", "SR patch", "#f7f7fb", rr(cx + hr * 0.22, base, hr * 0.46, hr * 0.18, 3), cx + hr * 0.45, base + hr * 0.09, Math.max(3, hr * 0.03));
     } else if (spec.hat === "mohawk") {
-      add(page, "mohawk", "Mohawk", spec.hatC, rr(cx - hr * 0.18, cy - hr * 1.55, hr * 0.36, hr * 0.85, 4), cx, cy - hr * 1.15, lw);
+      add(page, "mohawk", "Mohawk", spec.hatC, rr(cx - hr * 0.2, cy - hr * 1.7, hr * 0.4, hr * 1.02, 4), cx, cy - hr * 1.2, Math.max(6, hr * 0.045));
     } else if (spec.hat === "spikes") {
-      add(page, "spikeBack", "Back spike", spec.hatC, rr(cx - hr * 0.06, cy - hr * 1.95, hr * 0.12, hr * 0.22, 2), cx, cy - hr * 1.84, Math.max(3, lw * 0.28));
-      add(page, "spikeMid", "Middle spike", spec.hatC, rr(cx - hr * 0.07, cy - hr * 1.58, hr * 0.14, hr * 0.26, 2), cx, cy - hr * 1.45, Math.max(3, lw * 0.3));
-      add(page, "spikeFront", "Front spike", spec.hatC, rr(cx - hr * 0.07, cy - hr * 1.18, hr * 0.14, hr * 0.28, 2), cx, cy - hr * 1.04, Math.max(3, lw * 0.3));
+      add(page, "spikeBack", "Back spike", spec.hatC, rr(cx - hr * 0.07, cy - hr * 1.78, hr * 0.14, hr * 0.9, 3), cx, cy - hr * 1.33, Math.max(4, hr * 0.03));
+      add(page, "spikeMid", "Middle spike", spec.hatC, rr(cx - hr * 0.09, cy - hr * 1.52, hr * 0.18, hr * 0.7, 3), cx, cy - hr * 1.17, Math.max(4, hr * 0.032));
+      add(page, "spikeFront", "Front spike", spec.hatC, rr(cx - hr * 0.08, cy - hr * 1.24, hr * 0.16, hr * 0.5, 3), cx, cy - hr * 0.99, Math.max(4, hr * 0.032));
     } else if (spec.hat === "sheriff") {
-      add(page, "crown", "Hat crown", spec.hatC, rr(cx - hr * 0.42, cy - hr * 1.45, hr * 0.84, hr * 0.7, 6), cx, cy - hr * 1.1, lw);
-      add(page, "band", "Hat band", spec.hatC2, rr(cx - hr * 0.42, cy - hr * 0.82, hr * 0.84, hr * 0.16, 3), cx, cy - hr * 0.74, lw * 0.5);
-      add(page, "brim", "Hat brim", spec.hatC, ell(cx, cy - hr * 0.7, hr * 1.2, hr * 0.2), cx, cy - hr * 0.7, lw);
-      add(page, "platehat", "SR plate", "#d5dbe6", rr(cx - hr * 0.16, cy - hr * 1.25, hr * 0.32, hr * 0.26, 3), cx, cy - hr * 1.12, lw * 0.45);
+      add(page, "crown", "Hat crown", spec.hatC, rr(cx - hr * 0.4, cy - hr * 1.62, hr * 0.8, hr * 0.78, 5), cx, cy - hr * 1.22, Math.max(6, hr * 0.04));
+      add(page, "band", "Hat band", spec.hatC2, rr(cx - hr * 0.4, cy - hr * 0.92, hr * 0.8, hr * 0.14, 3), cx, cy - hr * 0.85, Math.max(4, hr * 0.03));
+      add(page, "brim", "Hat brim", spec.hatC, ell(cx, cy - hr * 0.86, hr * 1.5, hr * 0.13), cx, cy - hr * 0.86, Math.max(5, hr * 0.035));
+      add(page, "platehat", "SR plate", "#d5dbe6", rr(cx - hr * 0.16, cy - hr * 1.38, hr * 0.32, hr * 0.28, 3), cx, cy - hr * 1.24, Math.max(3, hr * 0.03));
     } else if (spec.hat === "wizard") {
-      add(page, "cone", "Wizard hat", spec.hatC, poly([
-        cx - hr * 0.55, cy - hr * 0.55,
-        cx + hr * 0.7, cy - hr * 0.5,
-        cx + hr * 0.25, cy - hr * 1.85,
-      ]), cx, cy - hr * 1.1, lw);
-      add(page, "brim", "Brim", spec.hatC, ell(cx, cy - hr * 0.55, hr * 1.05, hr * 0.2), cx, cy - hr * 0.55, lw);
-      add(page, "patchw", "Hat patch", spec.hatC2, ell(cx - hr * 0.05, cy - hr * 1.1, hr * 0.12, hr * 0.1), cx, cy - hr * 1.1, lw * 0.4);
+      add(page, "cone", "Wizard hat", spec.hatC, function (p) {
+        p.moveTo(cx - hr * 0.2, cy - hr * 0.78);
+        p.quadraticCurveTo(cx - hr * 0.05, cy - hr * 1.25, cx + hr * 0.55, cy - hr * 1.72);
+        p.quadraticCurveTo(cx + hr * 0.15, cy - hr * 1.2, cx + hr * 0.62, cy - hr * 0.7);
+        p.closePath();
+      }, cx + hr * 0.15, cy - hr * 1.2, Math.max(6, hr * 0.04));
+      add(page, "brim", "Brim", spec.hatC, ell(cx, cy - hr * 0.74, hr * 1.2, hr * 0.14), cx, cy - hr * 0.74, Math.max(5, hr * 0.035));
+      add(page, "patchw", "Hat patch", spec.hatC2, ell(cx + hr * 0.2, cy - hr * 1.15, hr * 0.12, hr * 0.1), cx + hr * 0.2, cy - hr * 1.15, Math.max(3, hr * 0.03));
     } else if (spec.hat === "viking") {
-      add(page, "helm", "Helmet", spec.hatC, ell(cx, cy - hr * 0.55, hr * 0.95, hr * 0.62), cx, cy - hr * 0.75, lw);
-      add(page, "hband", "Helmet band", "#7a7c88", rr(cx - hr * 0.9, cy - hr * 0.35, hr * 1.8, hr * 0.16, 4), cx, cy - hr * 0.27, lw * 0.6);
+      add(page, "helm", "Helmet", spec.hatC, function (p) {
+        p.moveTo(cx - hr * 0.78, cy - hr * 0.55);
+        p.ellipse(cx, cy - hr * 0.55, hr * 0.78, hr * 0.7, 0, Math.PI, Math.PI * 2, false);
+        p.closePath();
+      }, cx, cy - hr * 0.95, Math.max(6, hr * 0.04));
+      add(page, "hband", "Helmet band", "#7a7c88", rr(cx - hr * 0.82, cy - hr * 0.62, hr * 1.64, hr * 0.14, 4), cx, cy - hr * 0.55, Math.max(4, hr * 0.03));
       add(page, "hornL", "Horn", spec.hatC2, poly([
-        cx - hr * 0.7, cy - hr * 0.7,
-        cx - hr * 1.35, cy - hr * 1.45,
-        cx - hr * 0.85, cy - hr * 0.85,
-      ]), cx - hr * 1.0, cy - hr * 1.05, lw * 0.7);
+        cx - hr * 0.55, cy - hr * 0.85,
+        cx - hr * 1.25, cy - hr * 1.55,
+        cx - hr * 0.35, cy - hr * 0.7,
+      ]), cx - hr * 0.75, cy - hr * 1.1, Math.max(5, hr * 0.04));
       add(page, "hornR", "Horn", spec.hatC2, poly([
-        cx + hr * 0.7, cy - hr * 0.7,
-        cx + hr * 1.35, cy - hr * 1.45,
-        cx + hr * 0.85, cy - hr * 0.85,
-      ]), cx + hr * 1.0, cy - hr * 1.05, lw * 0.7);
+        cx + hr * 0.55, cy - hr * 0.85,
+        cx + hr * 1.25, cy - hr * 1.55,
+        cx + hr * 0.35, cy - hr * 0.7,
+      ]), cx + hr * 0.75, cy - hr * 1.1, Math.max(5, hr * 0.04));
     } else if (spec.hat === "headband") {
-      add(page, "band", "Headband", spec.hatC, rr(cx - hr * 0.95, cy - hr * 0.42, hr * 1.9, hr * 0.24, 4), cx, cy - hr * 0.3, lw * 0.7);
-      add(page, "platehat", "SR plate", spec.hatC2, rr(cx - hr * 0.18, cy - hr * 0.4, hr * 0.36, hr * 0.2, 3), cx, cy - hr * 0.3, lw * 0.45);
+      add(page, "band", "Headband", spec.hatC, rr(cx - hr * 0.92, cy - hr * 0.72, hr * 1.84, hr * 0.2, 4), cx, cy - hr * 0.62, Math.max(5, hr * 0.035));
+      add(page, "platehat", "SR plate", spec.hatC2, rr(cx - hr * 0.18, cy - hr * 0.7, hr * 0.36, hr * 0.16, 3), cx, cy - hr * 0.62, Math.max(3, hr * 0.03));
     } else if (spec.hat === "onihorns") {
       add(page, "hornL", "Horn", spec.hatC, poly([
         cx - hr * 0.55, cy - hr * 0.65,
@@ -560,8 +564,8 @@
       ]), cx, cy - hr * 0.5, lw * 0.45);
     }
 
-    const eyeY = cy - hr * 0.1;
-    const ex = hr * 0.34;
+    const eyeY = cy - hr * 0.06;
+    const ex = hr * 0.36;
     if (spec.eyes === "slit") {
       add(page, "eyeL", "Eye", "#1a1a22", ell(cx - ex, eyeY, hr * 0.16, hr * 0.2), cx - ex, eyeY, lw * 0.55);
       add(page, "eyeR", "Eye", "#1a1a22", ell(cx + ex, eyeY, hr * 0.16, hr * 0.2), cx + ex, eyeY, lw * 0.55);
@@ -578,18 +582,18 @@
       add(page, "eyeR", "Eye", col, ell(cx + ex, eyeY, rx, ry), cx + ex, eyeY, lw * 0.55);
     } else if (spec.eyes === "shades") {
       add(page, "shadeL", "Shade", "#ff4fd8", poly([
-        cx - ex - hr * 0.22, eyeY - hr * 0.12,
-        cx - ex + hr * 0.22, eyeY - hr * 0.16,
-        cx - ex + hr * 0.18, eyeY + hr * 0.1,
-        cx - ex - hr * 0.2, eyeY + hr * 0.08,
-      ]), cx - ex, eyeY, lw * 0.55);
+        cx - ex - hr * 0.28, eyeY - hr * 0.16,
+        cx - ex + hr * 0.26, eyeY - hr * 0.22,
+        cx - ex + hr * 0.22, eyeY + hr * 0.14,
+        cx - ex - hr * 0.24, eyeY + hr * 0.1,
+      ]), cx - ex, eyeY, Math.max(5, hr * 0.04));
       add(page, "shadeR", "Shade", "#ff4fd8", poly([
-        cx + ex - hr * 0.22, eyeY - hr * 0.16,
-        cx + ex + hr * 0.22, eyeY - hr * 0.12,
-        cx + ex + hr * 0.2, eyeY + hr * 0.08,
-        cx + ex - hr * 0.18, eyeY + hr * 0.1,
-      ]), cx + ex, eyeY, lw * 0.55);
-      add(page, "bridge", "Bridge", "#ff4fd8", rr(cx - hr * 0.1, eyeY - hr * 0.04, hr * 0.2, hr * 0.08, 2), cx, eyeY, lw * 0.4);
+        cx + ex - hr * 0.26, eyeY - hr * 0.22,
+        cx + ex + hr * 0.28, eyeY - hr * 0.16,
+        cx + ex + hr * 0.24, eyeY + hr * 0.1,
+        cx + ex - hr * 0.22, eyeY + hr * 0.14,
+      ]), cx + ex, eyeY, Math.max(5, hr * 0.04));
+      add(page, "bridge", "Bridge", "#ff4fd8", rr(cx - hr * 0.12, eyeY - hr * 0.06, hr * 0.24, hr * 0.1, 2), cx, eyeY, Math.max(3, hr * 0.03));
     } else if (spec.eyes === "three") {
       add(page, "eyeL", "Eye", "#e020b0", ell(cx - ex, eyeY, hr * 0.16, hr * 0.1), cx - ex, eyeY, lw * 0.5);
       add(page, "eyeR", "Eye", "#e020b0", ell(cx + ex, eyeY, hr * 0.16, hr * 0.1), cx + ex, eyeY, lw * 0.5);
@@ -597,14 +601,14 @@
     }
 
     if (spec.eyes !== "shades" && spec.mouth !== "oni") {
-      add(page, "cheekL", "Cheek", spec.cheek, ell(cx - hr * 0.5, cy + hr * 0.34, hr * 0.14, hr * 0.14), cx - hr * 0.5, cy + hr * 0.34, lw * 0.45);
-      add(page, "cheekR", "Cheek", spec.cheek, ell(cx + hr * 0.5, cy + hr * 0.34, hr * 0.14, hr * 0.14), cx + hr * 0.5, cy + hr * 0.34, lw * 0.45);
+      add(page, "cheekL", "Cheek", spec.cheek, ell(cx - hr * 0.58, cy + hr * 0.18, hr * 0.15, hr * 0.15), cx - hr * 0.58, cy + hr * 0.18, Math.max(4, hr * 0.035));
+      add(page, "cheekR", "Cheek", spec.cheek, ell(cx + hr * 0.58, cy + hr * 0.18, hr * 0.15, hr * 0.15), cx + hr * 0.58, cy + hr * 0.18, Math.max(4, hr * 0.035));
     }
 
     if (spec.mouth === "grin" || spec.mouth === "smile") {
-      add(page, "mouth", "Mouth", "#1a1a22", ell(cx, cy + hr * 0.46, hr * 0.42, hr * 0.26), cx, cy + hr * 0.5, lw * 0.5);
-      add(page, "tooth", "Tooth bar", "#ffffff", rr(cx - hr * 0.24, cy + hr * 0.38, hr * 0.48, hr * 0.09, 2), cx, cy + hr * 0.42, lw * 0.28);
-      add(page, "tooth2", "Tooth bar", "#ffffff", rr(cx - hr * 0.18, cy + hr * 0.5, hr * 0.36, hr * 0.08, 2), cx, cy + hr * 0.54, lw * 0.28);
+      add(page, "mouth", "Mouth", "#1a1a22", ell(cx, cy + hr * 0.5, hr * 0.46, hr * 0.28), cx, cy + hr * 0.52, Math.max(5, hr * 0.04));
+      add(page, "tooth", "Tooth bar", "#ffffff", rr(cx - hr * 0.28, cy + hr * 0.4, hr * 0.56, hr * 0.1, 2), cx, cy + hr * 0.45, Math.max(3, hr * 0.025));
+      add(page, "tooth2", "Tooth bar", "#ffffff", rr(cx - hr * 0.22, cy + hr * 0.54, hr * 0.44, hr * 0.09, 2), cx, cy + hr * 0.58, Math.max(3, hr * 0.025));
     } else if (spec.mouth === "line") {
       add(page, "mouth", "Mouth", "#1a1a22", rr(cx - hr * 0.22, cy + hr * 0.42, hr * 0.44, hr * 0.08, 3), cx, cy + hr * 0.46, lw * 0.45);
     } else if (spec.mouth === "oh") {
@@ -712,8 +716,8 @@
       ctx.fillText("SR", cx, neckY + hr * 0.42);
       if (spec.hat === "beanie") {
         ctx.fillStyle = "#1a1a22";
-        ctx.font = "700 " + Math.round(hr * 0.1) + "px Trebuchet MS, DejaVu Sans, sans-serif";
-        ctx.fillText("SR", cx + hr * 0.46, cy - hr * 0.14);
+        ctx.font = "700 " + Math.round(hr * 0.12) + "px Trebuchet MS, DejaVu Sans, sans-serif";
+        ctx.fillText("SR", cx + hr * 0.45, cy - hr * 0.68);
       }
       ctx.restore();
     });
@@ -765,18 +769,19 @@
   function build(meta) {
     const key = meta.id;
     if (builtCache.has(key)) return builtCache.get(key);
-    const page = new Page(PAGE_W, PAGE_H, meta.flavor);
+    const close = meta.flavor === "close";
+    const page = new Page(close ? 960 : PAGE_W, close ? 700 : PAGE_H, meta.flavor);
     if (meta.flavor === "mix") {
       addMixLab(page, PAGE_W, PAGE_H);
     } else {
       const spec = CAST.filter(function (c) { return c.id === meta.who; })[0];
-      const m = metrics(spec, meta.flavor, PAGE_W, PAGE_H);
+      const m = metrics(spec, meta.flavor, page.w, page.h);
       if (meta.flavor === "neon") {
-        add(page, "sky", "Starfield", "#070814", rr(0, 0, PAGE_W, PAGE_H, 0), PAGE_W / 2, PAGE_H / 2, 4);
+        add(page, "sky", "Starfield", "#070814", rr(0, 0, page.w, page.h, 0), page.w / 2, page.h / 2, 4);
       } else if (meta.flavor === "scene") {
-        addScene(page, spec, PAGE_W, PAGE_H);
+        addScene(page, spec, page.w, page.h);
       } else {
-        add(page, "paper", "Page", "#fffdf8", rr(0, 0, PAGE_W, PAGE_H, 0), PAGE_W / 2, PAGE_H / 2, 2);
+        add(page, "paper", "Page", "#fffdf8", rr(0, 0, page.w, page.h, 0), page.w / 2, page.h / 2, 2);
       }
       addRider(page, spec, m);
       page.hint = spec.hint;
@@ -888,9 +893,11 @@
         c.arc(cx + s * 0.48, headY + s * 0.32, s * 0.14, 0, Math.PI * 2);
       });
       ink(3, function (c) {
-        c.ellipse(cx, headY - s * 0.75, s * 0.85, s * 0.5, 0, Math.PI, 0);
-        c.moveTo(cx - s * 0.8, headY - s * 0.2);
-        c.lineTo(cx + s * 0.8, headY - s * 0.2);
+        c.moveTo(cx - s * 0.62, headY - s * 0.7);
+        c.quadraticCurveTo(cx - s * 0.9, headY - s * 1.15, cx, headY - s * 1.4);
+        c.quadraticCurveTo(cx + s * 0.9, headY - s * 1.15, cx + s * 0.62, headY - s * 0.7);
+        c.closePath();
+        c.rect(cx - s * 0.78, headY - s * 0.78, s * 1.56, s * 0.22);
       });
       ink(4, function (c) {
         c.ellipse(cx - s * 0.32, headY - s * 0.05, s * 0.14, s * 0.18, 0, 0, Math.PI * 2);
