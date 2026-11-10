@@ -39,7 +39,7 @@ async function advance(page, n = 6) {
 test('version, home, and Cash leave the lanes clear', async ({ page }) => {
   const errors = await bootLive(page);
   const build = await page.evaluate(() => __SQ.build());
-  expect(build).toBe('b32');
+  expect(build).toBe('b33');
   const sub = await page.evaluate(() => __SQ.chapters().find((c) => c.id === 'skippy').sub);
   expect(sub).toContain('MAIN');
   await page.evaluate(() => {
@@ -138,7 +138,11 @@ test('Cash and the portals keep their own space', async ({ page }) => {
       expect(desk.portals).toBe(0);
     } else {
       expect(desk.cash, area).toBe(true);
-      expect(desk.labels.join(' '), area).toContain('CASH');
+      if (area === 'nexus') {
+        expect(desk.labels.join(' '), area).toContain('DESERT');
+        expect(desk.labels.join(' '), area).toContain('COSMOS');
+        expect(desk.labels.join(' '), area).not.toContain('CASH');
+      } else expect(desk.labels, area).toEqual([]);
       expect(desk.portals).toBeGreaterThan(3);
     }
     if (area === 'nexus') expect(desk.portals).toBeGreaterThanOrEqual(10);
@@ -456,8 +460,11 @@ async function fightBoss(page, area, file) {
     S.G.story = 'drill';
     S.G.paused = false;
     S.P.items = { blast: true };
+    S.P.melee = '';
     S.P.pri = 'blast';
-    S.P.wep = 'blast';
+    S.P.sec = 'blast';
+    S.P.tool = 'blast';
+    S.P.wep = '';
     S.P.sec = '';
     S.P.hp = 10;
     S.P.maxHp = 10;
@@ -472,7 +479,7 @@ async function fightBoss(page, area, file) {
   await page.locator('#game').screenshot({ path: `${ART}/${file}.png` });
   let hurt = false;
   for (let i = 0; i < 18; i++) {
-    await press(page, 'KeyX');
+    await press(page, 'KeyZ');
     await page.waitForTimeout(180);
     const snap = await page.evaluate(() => ({ hp: __SQ.B.hp, state: __SQ.B.state, max: __SQ.B.max }));
     if (snap.hp < snap.max) hurt = true;
@@ -579,10 +586,11 @@ test('Drill Sergeant walks the memories and gifts the heavy blaster', async ({ p
   }
   await page.evaluate(() => {
     const S = __SQ;
-    S.P.pri = 'heavy';
-    S.P.wep = 'heavy';
-    S.P.sec = 'lasso';
-    S.P.tool = 'lasso';
+    S.P.melee = '';
+    S.P.wep = '';
+    S.P.pri = 'lasso';
+    S.P.sec = 'heavy';
+    S.P.tool = 'heavy';
     S.P.cds = {};
     S.flag('oe_moon');
     S.warp('moon', 10, 8, 3);
@@ -597,9 +605,20 @@ test('Drill Sergeant walks the memories and gifts the heavy blaster', async ({ p
   await page.locator('#game').screenshot({ path: `${ART}/ds-skippy-blaster.png` });
   await press(page, 'KeyX');
   await page.waitForTimeout(200);
+  const attackMiss = await page.evaluate(() => __SQ.shots.some((s) => s.kind === 'heavy'));
+  expect(attackMiss).toBe(false);
+  await press(page, 'KeyZ');
+  await page.waitForTimeout(200);
   const shotX = await page.evaluate(() => __SQ.shots.some((s) => s.kind === 'heavy'));
   expect(shotX).toBe(true);
-  await page.evaluate(() => { __SQ.P.pri = 'raygun'; __SQ.P.wep = 'raygun'; __SQ.P.sec = 'heavy'; __SQ.P.tool = 'heavy'; __SQ.P.cds = {}; });
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.P.items = { lasso: true, raygun: true, heavy: true };
+    S.P.pri = 'lasso';
+    S.P.sec = 'heavy';
+    S.P.tool = 'heavy';
+    S.P.cds = {};
+  });
   await press(page, 'KeyZ');
   await page.waitForTimeout(200);
   const shotZ = await page.evaluate(() => __SQ.shots.filter((s) => s.kind === 'heavy').length);
@@ -657,8 +676,11 @@ test.describe('phone blaster and flashback', () => {
       S.G.story = 'drill';
       S.G.paused = false;
       S.P.items = { blast: true };
+      S.P.melee = '';
       S.P.pri = 'blast';
-      S.P.wep = 'blast';
+      S.P.sec = 'blast';
+      S.P.tool = 'blast';
+      S.P.wep = '';
       S.P.hp = 10;
       S.P.maxHp = 10;
       S.P.cds = {};
@@ -670,9 +692,14 @@ test.describe('phone blaster and flashback', () => {
     await page.waitForFunction(() => __SQ.B.state === 'fight', null, { timeout: 8000 });
     await page.screenshot({ path: `${ART}/ds-flash-phone.png` });
     const attack = page.locator('[data-b="attack"]');
+    const item = page.locator('[data-b="item"]');
+    await attack.tap();
+    await page.waitForTimeout(200);
+    const attackShot = await page.evaluate(() => __SQ.shots.some((s) => s.kind === 'blast' || s.kind === 'heavy'));
+    expect(attackShot).toBe(false);
     let hurt = false;
     for (let i = 0; i < 8; i++) {
-      await attack.tap();
+      await item.tap();
       await page.waitForTimeout(220);
       const snap = await page.evaluate(() => ({ hp: __SQ.B.hp, max: __SQ.B.max }));
       if (snap.hp < snap.max) hurt = true;
@@ -685,9 +712,11 @@ test.describe('phone blaster and flashback', () => {
       const S = __SQ;
       S.G.story = 'skippy';
       S.P.items = { heavy: true, raygun: true };
-      S.P.pri = 'heavy';
-      S.P.wep = 'heavy';
-      S.P.sec = '';
+      S.P.melee = '';
+      S.P.wep = '';
+      S.P.pri = 'raygun';
+      S.P.sec = 'heavy';
+      S.P.tool = 'heavy';
       S.P.cds = {};
       S.flag('heavy_got');
       S.flag('oe_moon');
@@ -696,6 +725,10 @@ test.describe('phone blaster and flashback', () => {
     await page.waitForTimeout(250);
     await page.screenshot({ path: `${ART}/ds-blaster-phone.png` });
     await attack.tap();
+    await page.waitForTimeout(250);
+    const swungHeavy = await page.evaluate(() => __SQ.shots.some((s) => s.kind === 'heavy'));
+    expect(swungHeavy).toBe(false);
+    await item.tap();
     await page.waitForTimeout(250);
     const shot = await page.evaluate(() => __SQ.shots.some((s) => s.kind === 'heavy'));
     expect(shot).toBe(true);
@@ -1074,7 +1107,8 @@ test('Cash court sits downstairs of the Pour, and the heavy case opens', async (
   expect(court.cash).toBe(true);
   expect(court.portals).toBeGreaterThanOrEqual(10);
   expect(court.labels.join(' ')).toContain('COSMOS');
-  expect(court.labels.join(' ')).toContain('CASH');
+  expect(court.labels.join(' ')).toContain('DESERT');
+  expect(court.labels.join(' ')).not.toContain('CASH');
   await page.locator('#game').screenshot({ path: `${ART}/b29-cash-court.png` });
 
   await page.evaluate(() => {
@@ -1082,8 +1116,11 @@ test('Cash court sits downstairs of the Pour, and the heavy case opens', async (
     S.warp('saloon', 8, 6, 1);
     for (let i = 0; i < 4; i++) { S.skipText(); S.step(1); }
     S.P.items.raygun = true;
+    S.P.melee = 'baton';
     S.P.pri = 'raygun';
-    S.P.wep = 'raygun';
+    S.P.sec = 'raygun';
+    S.P.tool = 'raygun';
+    S.P.wep = 'baton';
     S.P.x = 8.5 * 16 + 8;
     S.P.y = 5.6 * 16;
     S.P.dir = 1;
@@ -1091,7 +1128,7 @@ test('Cash court sits downstairs of the Pour, and the heavy case opens', async (
     S.flag('pour_box', false);
   });
   await page.waitForTimeout(100);
-  await press(page, 'KeyX');
+  await press(page, 'KeyZ');
   await page.waitForTimeout(400);
   const tough = await page.evaluate(() => ({
     open: !!__SQ.flags.court_box,
@@ -1105,17 +1142,18 @@ test('Cash court sits downstairs of the Pour, and the heavy case opens', async (
     const S = __SQ;
     S.P.items.heavy = true;
     S.flag('heavy_got');
-    S.P.pri = 'heavy';
-    S.P.wep = 'heavy';
-    S.P.sec = 'raygun';
-    S.P.tool = 'raygun';
+    S.P.melee = 'baton';
+    S.P.pri = 'raygun';
+    S.P.sec = 'heavy';
+    S.P.tool = 'heavy';
+    S.P.wep = 'baton';
     S.P.x = 8.5 * 16 + 8;
     S.P.y = 5.6 * 16;
     S.P.dir = 1;
     S.P.cds = {};
   });
   await page.waitForTimeout(100);
-  await press(page, 'KeyX');
+  await press(page, 'KeyZ');
   await page.waitForTimeout(500);
   const broke = await page.evaluate(() => ({
     open: !!__SQ.flags.court_box,
@@ -1393,8 +1431,11 @@ test('the main road skips the tales, and gear, bosses, and labels stay honest', 
     S.G.state = 'play';
     S.G.story = 'drill';
     S.P.items = { blast: true };
+    S.P.melee = '';
     S.P.pri = 'blast';
-    S.P.wep = 'blast';
+    S.P.sec = 'blast';
+    S.P.tool = 'blast';
+    S.P.wep = '';
     S.P.hp = 12;
     S.P.maxHp = 12;
     S.flag('oe_ds_moonboss');
@@ -1409,7 +1450,7 @@ test('the main road skips the tales, and gear, bosses, and labels stay honest', 
   await page.waitForFunction(() => __SQ.B && __SQ.B.state === 'fight', null, { timeout: 8000 });
   await page.locator('#game').click();
   for (let i = 0; i < 4; i++) {
-    await press(page, 'KeyX');
+    await press(page, 'KeyZ');
     await page.waitForTimeout(220);
     if (await page.evaluate(() => __SQ.B.hp < __SQ.B.max)) break;
   }

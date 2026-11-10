@@ -3,7 +3,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script>window.__SQ_BUILD="b32";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b32(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b32");location.replace(u.href);}</script>
+<script>window.__SQ_BUILD="b33";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b33(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b33");location.replace(u.href);}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Space Riders: Skippy's Quest</title><link rel="icon" href="data:,">
 <meta name="description" content="Space Riders: Skippy's Quest - a free 16-bit top-down action adventure browser game. The Red King is missing. Ride with ROS through the Sand Dungeon, take Cash's portals to the Seaport and Ramshackle the Viking, win Ronin's flaming sword, beat the house at the Andromeda Casino and stop the Overlord on the Moon, survive the meteor shower with Blaze and earn your space board at the Crossroad and cross the mirror into the Dark World, then storm Fright's castle and bring the Red King home. Chapters 1-9 (Complete) out now.">
@@ -187,13 +187,15 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
   function Ya(m, u) {
     return m.length * 6 * u - u;
   }
+  let worldCap = null;
   function v(m, u, l, T, n, O, x, H) {
-    let b = u.toUpperCase(),
+    let b = String(u || "").toUpperCase(),
       g = Ya(b, O),
       V = x === "center" ? Math.round(l - g / 2) : x === "right" ? l - g : l;
     V = Math.round(V);
-    let j = Math.round(T),
-      M = (J, F, W) => {
+    let j = Math.round(T);
+    worldCap && b && worldCap.push({ t: b, x: V, y: j });
+    let M = (J, F, W) => {
         m.fillStyle = W;
         for (let G = 0; G < b.length; G++) {
           let se = Dt[b[G]] || Dt[" "];
@@ -7277,7 +7279,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           9,
           u.style === "neon" ? "#1a1024" : "#f0e0b0",
         ),
-        v(O, u.sign, l / 2, x + 5, u.signC, 1, "center", ""),
+        o(O, l / 2 - 8, x + 7, 16, 2, u.signC),
         u.style === "neon" &&
           (o(O, l / 2 - H / 2, x + 3, H, 1, "#4ff0ff"),
           o(O, l / 2 - H / 2, x + 13, H, 1, "#4ff0ff")));
@@ -7335,7 +7337,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         o(n, 30, 0, 4, 3, "#3a3a46"),
         o(n, 10, 70, 44, 4, "#ffcc33"),
         o(n, 14, 74, 36, 3, "#ff9a3d"),
-        v(n, "HAULER", 32, 56, "#2a1408", 1, "center", ""),
+        o(n, 14, 54, 36, 8, "#2a1408"),
         fe(T, !0)
       );
     }
@@ -12462,32 +12464,39 @@ ram_mem_amulet: [
       v(n, text, lx + w / 2, ly + 1, color || "#fff6c0", 1, "center", ""));
   }
   function flushLabels() {
-    A.lab = [];
-    window.__SQ_LABELS = A.lab;
-    if (!w || (w.id !== "home" && w.id !== "nexus" && w.id !== "cosmos")) return;
-    let sx = (x) => x - Math.round(he.x),
-      sy = (y) => y - Math.round(he.y) + 24;
-    for (let prop of w.props || []) {
-      if (prop.k !== "portal") continue;
-      if (prop.need && !Z(prop.need) && !prop.ghost) continue;
-      let locked = prop.need && !Z(prop.need),
-        name = locked ? "LOCKED" : prop.label || "PORTAL";
-      placeLabel(sx(p(prop.x)), sy(p(prop.y)), name, locked ? "#8a8aa8" : "#ffcc33");
-    }
-    for (let npc of Ta || []) {
-      if (!npc.vis || npc.alpha < 0.4 || npc.leave > 0) continue;
-      let who = (Ge[npc.look || npc.id] && Ge[npc.look || npc.id].name) || String(npc.id || "").toUpperCase();
-      placeLabel(sx(npc.x), sy(npc.y) - 18, who, "#fff6c0");
-    }
-    for (let chest of w.chests || []) {
-      if (!lt(chest) || Z("chest_" + chest.id)) continue;
-      let name = (Ea[chest.item] && Ea[chest.item].name) || "CHEST";
-      placeLabel(sx(p(chest.x)), sy(p(chest.y)), name, "#ffe070");
-    }
-    for (let sign of w.signs || []) placeLabel(sx(p(sign.x)), sy(p(sign.y)), "SIGN", "#c8e0ff");
-    if (w.id === "cosmos")
-      for (let warp of w.warps || [])
-        placeLabel(sx((warp.x + warp.w / 2) * 16), sy((warp.y + 0.5) * 16), "SKY LANE", "#9ff0ea");
+    window.__SQ_LABELS = A.lab || [];
+  }
+  function signIsHolo() {
+    if (!w) return !1;
+    let id = w.id || "",
+      theme = w.theme || "";
+    if (id === "nexus" || id === "court_vault" || id === "cosmos") return !0;
+    if (id === "home" || id === "desert" || id === "saloon" || id === "village" || id === "ros_pour" || id === "ros_desert")
+      return !1;
+    if (theme === "wood" && id.indexOf("ac_") !== 0 && id.indexOf("ds_") !== 0 && id.indexOf("cosmos") !== 0)
+      return !1;
+    if (theme === "station" || theme === "cosmos" || theme === "neon" || theme === "tech" || theme === "nexus")
+      return !0;
+    if (w.realm === "cosmos" || w.realm === "moon" || w.realm === "nexus") return !0;
+    if (id.indexOf("ac_") === 0 || id.indexOf("cosmos") === 0 || id.indexOf("ds_") === 0 || id.indexOf("lane_") === 0)
+      return !0;
+    if (id.indexOf("station") >= 0) return !0;
+    return /^st\d/.test(id);
+  }
+  function drawHoloSign(c, S) {
+    (I(c + 3, S + 8, 10, 4, "#14081c"),
+      I(c + 6, S + 6, 4, 3, "#ff4fd8"),
+      I(c + 7, S + 7, 2, 1, "#ffffff"),
+      (n.fillStyle = "rgba(79,240,255,0.28)"),
+      n.fillRect(c + 6, S - 4, 4, 10),
+      (n.fillStyle = "rgba(79,240,255,0.22)"),
+      n.fillRect(c - 4, S - 18, 24, 14),
+      I(c - 4, S - 18, 24, 1, "#4ff0ff"),
+      I(c - 4, S - 5, 24, 1, "#ff4fd8"),
+      I(c - 4, S - 18, 1, 14, "#7ef0ff"),
+      I(c + 19, S - 18, 1, 14, "#ff4fd8"),
+      I(c + 2, S - 14, 12, 1, "#d8ffff"),
+      I(c + 2, S - 11, 8, 1, "#ffd0f4"));
   }
   function drawMemory() {
     A.radioInk = null;
@@ -12601,24 +12610,20 @@ ram_mem_amulet: [
         dt("cosmos", 14, 11, 1));
     }
   }
+  function arenaLit() {
+    return !!(w && w.boss);
+  }
   function cosmosDark() {
-    if (!w.dark) return;
+    if (!w.dark || arenaLit() || (d.lantern || 0) > 0) return;
     let x = d.x - he.x,
       y = d.y - he.y - 12,
-      rad = (d.lantern || 0) > 0 ? 86 : 28;
-    (n.save(),
-      n.beginPath(),
-      n.rect(0, 0, 320, 224),
-      n.arc(x, y, rad, 0, 6.283, !0),
-      (n.fillStyle = "rgba(6,0,14,0.86)"),
-      n.fill("evenodd"),
-      n.restore());
+      glow = n.createRadialGradient(x, y, 80, x, y, 190);
+    (glow.addColorStop(0, "rgba(0,0,0,0)"),
+      glow.addColorStop(1, "rgba(0,0,0,0.4)"),
+      (n.fillStyle = glow),
+      n.fillRect(0, 24, 320, 200));
   }
-  function cosmosRankLabel(f, ix, sy) {
-    if (!f.def || !f.def.rank) return;
-    (v(n, f.def.rank, ix(f.x), sy(f.y) - f.def.h - 10, "#ff4fd8", 1, "center", "#14081f"),
-      f.def.trait && v(n, f.def.trait, ix(f.x), sy(f.y) - f.def.h - 18, "#c9a0ff", 1, "center", "#14081f"));
-  }
+  function cosmosRankLabel() {}
   function cosmosProp(e, a, t, i) {
     if (e.k === "ring") {
       let s = t(p(e.x)),
@@ -12640,9 +12645,9 @@ ram_mem_amulet: [
           (I(s, E, 64, 40, "#1a0828"),
             I(s, E, 64, 3, "#ff4fd8"),
             I(s, E + 37, 64, 3, "#c9a0ff"),
-            v(n, "JAZZ V", s + 32, E + 6, "#ff4fd8", 1, "center", ""),
-            v(n, "LET'S RIDE", s + 32, E + 18, "#ffffff", 1, "center", ""),
-            ee.jazz_tag && v(n, "TAGGED", s + 32, E + 28, "#c9a0ff", 1, "center", ""));
+            I(s + 8, E + 12, 48, 2, "#ff4fd8"),
+            I(s + 12, E + 20, 40, 2, "#ffffff"),
+            ee.jazz_tag && I(s + 20, E + 28, 24, 2, "#c9a0ff"));
         },
       });
     }
@@ -13619,6 +13624,7 @@ ram_mem_amulet: [
         act: A.story === "ros" ? d.act || "" : void 0,
         pri: slotsOn() ? d.pri || "" : void 0,
         sec: slotsOn() ? d.sec || "" : void 0,
+        melee: d.melee || "",
         boardId: A.story === "ros" ? d.boardId || "" : void 0,
         cosmos: cosmosSave(),
       };
@@ -13672,9 +13678,11 @@ ram_mem_amulet: [
         (d.maxHp = 10),
         (d.items.blast = !0),
         (d.wep = "blast"),
+        (d.melee = ""),
         (d.pri = "blast"),
         (d.sec = ""),
         (d.tool = ""),
+        settleHands(),
         (d.cds = {}),
         (ee.ds_board = !0),
         (ee.space_board = !0),
@@ -13690,10 +13698,12 @@ ram_mem_amulet: [
       (Kt(),
         (d.coins = 0),
         (d.items.hatchet = !0),
+        (d.melee = "hatchet"),
         (d.wep = "hatchet"),
         (d.tool = ""),
-        (d.pri = "hatchet"),
+        (d.pri = ""),
         (d.sec = ""),
+        settleHands(),
         (d.cds = {}),
         (d.shield = 0),
         (d.rune = 0),
@@ -13758,6 +13768,7 @@ ram_mem_amulet: [
             bigKeys: e.bigKeys,
             shards: e.shards,
           }),
+          (d.melee = e.melee || ""),
           (ee = e.flags),
           (Xe = e.party),
           (ua = e.visited || {}),
@@ -13837,7 +13848,7 @@ ram_mem_amulet: [
             (ee[w.boss && Se[w.boss] ? Se[w.boss].contFlag : "cont_got"] = !0));
           break;
         case "axe":
-          ((d.items.axe = !0), (ee.axe_got = !0), (d.wep = "axe"), (d.pri = "axe"), splitHands(), ye("mem_axe_go"));
+          ((d.items.axe = !0), (ee.axe_got = !0), (d.melee = "axe"), (d.wep = "axe"), settleHands(), ye("mem_axe_go"));
           break;
         case "shield":
           ((d.items.shield = !0),
@@ -14158,12 +14169,15 @@ ram_mem_amulet: [
           return;
         }
         if (C.k === "vine" && !Z("vine_" + (C.id || "a"))) {
-          if (d.items.axe || d.items.hatchet || Z("tale_ram")) {
+          let hand = meleeNow();
+          if (hand === "axe" || hand === "hatchet" || d.items.axe || d.items.hatchet || Z("tale_ram")) {
             ((ee["vine_" + (C.id || "a")] = !0),
               C.gift && _e(C.gift, 1, !1),
               ne(p(C.x), p(C.y), 10, ["#c8a060", "#fff6c0", "#ffffff"], 24),
               Q("THE AXE OPENS THE THICKET."));
-          } else Q("THICK WOOD. AN AXE WOULD CUT IT.");
+          } else if (ownedItem("axe") || ownedItem("hatchet") || Z("tale_ram"))
+            Q("EQUIP THE AXE. ATTACK CUTS THE THICKET.");
+          else Q("THICK WOOD. AN AXE WOULD CUT IT.");
           return;
         }
       }
@@ -14400,100 +14414,7 @@ ram_mem_amulet: [
         d.holdT > 0 && !ue && (d.holdT = 0),
         !E && !d.sit)
       ) {
-        if (slotsOn()) slotCombat(e);
-        else {
-        let rosAct = A.story === "ros" && d.act && rosOwned(d.act) ? d.act : "";
-        if (rosAct === "justice")
-          if (U.attack || U.item) d.charge = Math.min(1, (d.charge || 0) + e);
-          else if ((d.charge || 0) >= 0.45) (fireJustice(), (d.charge = 0));
-          else d.charge = 0;
-        else if (
-          !rosAct &&
-          A.story === "ros" &&
-          d.wep === "justice" &&
-          (d.items.justice || Z("justice_got"))
-        )
-          if (U.attack) d.charge = Math.min(1, (d.charge || 0) + e);
-          else if ((d.charge || 0) >= 0.45) (fireJustice(), (d.charge = 0));
-          else d.charge = 0;
-        if (
-          rosAct &&
-          rosAct !== "justice" &&
-          (U.attackE || U.itemE) &&
-          d.atk <= 0 &&
-          d.roll <= 0
-        )
-          useRosAct(rosAct);
-        else if (!rosAct && U.attackE && d.atk <= 0 && d.roll <= 0)
-          if (d.items.blasters && (d.wep || "lasers") !== "justice") fireLasers();
-          else if (d.items.baton || d.items.sword) {
-            if (
-              ((d.atk = 0.26),
-              (ft = []),
-              (it = !1),
-              D.swing(),
-              d.items.sword && (D.fire(), d.hp >= d.maxHp && d.beamCd <= 0))
-            ) {
-              let C = Ne[d.dir];
-              (Oe.push({
-                x: d.x + C[0] * 10,
-                y: d.y - 8 + C[1] * 8,
-                vx: C[0] * 210,
-                vy: C[1] * 210,
-                t: 0,
-                kind: "fire",
-                dir: d.dir,
-              }),
-                (d.beamCd = 0.45));
-            }
-          } else Q("NOTHING TO SWING YET.");
-        if ((U.swapE || U.toolE) && A.story !== "ros") mr();
-        if (!rosAct && U.itemE && d.roll <= 0 && d.atk <= 0) {
-          if (A.story === "ros" && (d.items.lasso || d.items.brand)) {
-            if ((d.arrowCd || 0) <= 0) (rosTool(), (d.arrowCd = 0.4));
-          } else if (d.z === "lasso" && d.items.lasso) {
-            if (d.arrowCd <= 0) (lassoUse(), (d.arrowCd = 0.45));
-          } else {
-          let C = d.z === "raygun" && d.items.raygun;
-          if (d.z === "missile" && d.items.missile) wr();
-          else if (C) {
-            if (d.arrowCd <= 0) {
-              let te = Ne[d.dir];
-              (Oe.push({
-                x: d.x + te[0] * 8,
-                y: d.y - 7 + te[1] * 6,
-                vx: te[0] * 320,
-                vy: te[1] * 320,
-                t: 0,
-                kind: "ray",
-                dir: d.dir,
-              }),
-                (d.arrowCd = 0.32),
-                (d.atk = 0.12),
-                D.ray());
-            }
-          } else if (!(d.items.bow || d.items.tbow))
-            Q("NO ITEM YET. EARN ONE, RIDER!");
-          else if (d.arrows <= 0) (Q("OUT OF ARROWS!"), D.nope());
-          else if (d.arrowCd <= 0) {
-            let te = Ne[d.dir];
-            (Oe.push({
-              x: d.x + te[0] * 8,
-              y: d.y - 6 + te[1] * 6,
-              vx: te[0] * 230,
-              vy: te[1] * 230,
-              t: 0,
-              kind: "arrow",
-              dir: d.dir,
-            }),
-              d.arrows--,
-              (d.arrowCd = 0.3),
-              (d.atk = 0.12),
-              D.arrow());
-          }
-          }
-        }
-        }
+        slotCombat(e);
         if (U.boardE && d.roll <= 0 && d.rollCd <= 0 && d.atk <= 0) boardUse();
         if (U.rollE && !hasSpaceBoard() && d.roll <= 0 && d.rollCd <= 0 && d.atk <= 0) {
           let C = Math.hypot(t, i),
@@ -14595,15 +14516,9 @@ ram_mem_amulet: [
         (_.on &&
           (d.x !== S || d.y !== y) &&
           (_.trail.push(d.x, d.y), _.trail.length > 60 && _.trail.splice(0, 2)),
-        d.atk > 0.04 &&
-          d.atk <
-            (weaponNow() === "axe" || weaponNow() === "hatchet" ? 0.3 : 0.22) &&
-          (d.items.baton ||
-            d.items.sword ||
-            weaponNow() === "hatchet" ||
-            weaponNow() === "axe" ||
-            weaponNow() === "plasma") &&
-          (weaponNow() === "axe" || weaponNow() === "hatchet" || d.arrowCd < 0.2))
+        d.swingKind === "melee" &&
+          d.atk > 0.04 &&
+          d.atk < (weaponNow() === "axe" || weaponNow() === "hatchet" ? 0.3 : 0.22))
       ) {
         let axeHand = weaponNow() === "axe" || weaponNow() === "hatchet",
           C = axeHand ? axeBox() : fr(),
@@ -14639,7 +14554,25 @@ ram_mem_amulet: [
                 ne(p(pe), p(de), 10, ["#c87a50", "#8a4a2a"], 50),
                 ct(p(pe), p(de)))
               : et === "z" && te && Zt(pe, de);
+            et === "T" &&
+              (meleeNow() === "axe" || meleeNow() === "hatchet") &&
+              ((De[de][pe] = "."),
+              D.kill(),
+              ne(p(pe), p(de), 8, ["#3a8a3a", "#6ac86a", "#c8a060"], 30));
           }
+        if ((meleeNow() === "axe" || meleeNow() === "hatchet") && w && w.props)
+          for (let prop of w.props)
+            if (prop.k === "vine" && !Z("vine_" + (prop.id || "a"))) {
+              let px = p(prop.x),
+                py = p(prop.y);
+              px > C[0] &&
+                px < C[2] &&
+                py > C[1] &&
+                py < C[3] &&
+                ((ee["vine_" + (prop.id || "a")] = !0),
+                prop.gift && _e(prop.gift, 1, !1),
+                Q("THE AXE OPENS THE THICKET."));
+            }
         if (r.state === "fight" && !it) {
           if (r.kind === "stormeye" && eyeTouched(C))
             ((it = !0), Le.stormeye.hit([d.x, d.y, 12], kind, te ? 2 : 1));
@@ -15705,9 +15638,9 @@ ram_mem_amulet: [
     }
     function grantHeavy() {
       ((d.items.heavy = !0), (ee.heavy_got = !0));
-      if (!d.pri || !ownedItem(d.pri)) ((d.pri = "heavy"), (d.wep = "heavy"));
-      else if (d.pri !== "heavy") ((d.sec = "heavy"), (d.tool = "heavy"));
-      d.act = d.pri || "";
+      if (!d.sec || isMelee(d.sec) || !ownedItem(d.sec)) d.sec = "heavy";
+      else if (d.pri !== "heavy") d.pri = "heavy";
+      settleHands();
     }
     function throughDrill() {
       ((Mt = "sq_save_ds_v1"), (ee.ds_home_end = !0), (ee.ds_ready = !0));
@@ -17815,7 +17748,7 @@ ram_mem_amulet: [
       for (let a = 0; a < 16; a++)
         I((a * 23) % 320, 20 + ((a * 17) % 70), 2, 2, "#fff2c8");
       (v(n, "SPACE RIDERS", 160, 8, "#ff4fd8", 2, "center", "#2a0a14"),
-        v(n, window.__SQ_BUILD || "b32", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
+        v(n, window.__SQ_BUILD || "b33", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
         v(n, "SIDE QUESTS COME HOME", 160, 28, "#ffcc33", 1, "center", "#2a0a14"));
       let a = 58;
       for (let t = 0; t < STORY_ROWS.length; t++) {
@@ -18393,7 +18326,6 @@ ram_mem_amulet: [
               I(i - 6, s - 26, 12, 4, "#0a0a12"),
               r.eye && I(i - 4, s - 25, 8, 2, "#ff4fd8"),
               I(i - 4, s - 16, 8, 4, "#2a4ab8"),
-              v(n, "029", i, s - 12, "#1a1a22", 1, "center", ""),
               r.w > 0 && I(i - 46, s + 8, 92, 3, "#ff4fd888"));
           },
         });
@@ -18533,9 +18465,9 @@ ram_mem_amulet: [
         (D.nope(), Q("NOT EARNED."));
         return;
       }
-      if (weaponish(id)) d.wep = id;
+      if (isMelee(id)) d.melee = id;
       else d.tool = id;
-      (splitHands(), D.sel(), Q((weaponish(id) ? "ATTACK " : "ITEM ") + slotName(id)), xe());
+      (settleHands(), D.sel(), Q((isMelee(id) ? "ATTACK " : "ITEM ") + slotName(id)), xe());
     }
     function rosPause() {
       let page = A.rosPage || 0,
@@ -18598,9 +18530,9 @@ ram_mem_amulet: [
     }
     function setSkippyRow(id) {
       if (!ownedItem(id)) return;
-      if (weaponish(id)) d.wep = id;
-      else d.tool = id;
-      (splitHands(), D.sel(), Q((weaponish(id) ? "ATTACK " : "ITEM ") + slotName(id)), xe());
+      if (isMelee(id)) d.melee = id;
+      else ((d.sec = id), d.pri === id && (d.pri = ""));
+      (settleHands(), D.sel(), Q((isMelee(id) ? "ATTACK " : "ITEM ") + slotName(id)), xe());
     }
     function skippyPauseInput() {
       if (U.right && !A.wasR) ((A.skipPage = ((A.skipPage || 0) + 1) % 5), (A.gearSel = 0));
@@ -18637,12 +18569,12 @@ ram_mem_amulet: [
         return;
       }
       if ((A.skipPage || 0) !== 1) return;
-      let rows = ownedItems();
+      let rows = pauseChoices();
       if (!rows.length) return;
       if (U.upE) A.gearSel = ((A.gearSel || 0) + rows.length - 1) % rows.length;
       if (U.downE) A.gearSel = ((A.gearSel || 0) + 1) % rows.length;
       U.swapE && cycleTool();
-      U.attackE && setSkippyRow(rows[(A.gearSel || 0) % rows.length]);
+      U.attackE && setSkippyRow(rows[(A.gearSel || 0) % rows.length].id);
     }
     function rosPauseInput() {
       if (A.rosLeave) {
@@ -18774,15 +18706,7 @@ ram_mem_amulet: [
       return !1;
     }
     function ownedItems() {
-      let ids =
-        A.story === "ros"
-          ? ["lasers", "justice", "lasso", "brand"]
-          : A.story === "ramshackle"
-            ? ["hatchet", "axe", "shield", "amulet"]
-            : A.story === "drill"
-              ? ["blast"]
-              : ["baton", "sword", "bow", "raygun", "missile", "lasso", "heavy", "plasma", "disc", "axe", "hatchet"];
-      return ids.filter(ownedItem);
+      return ownedMelee().concat(ownedGear());
     }
     function slotName(id, short) {
       let full = {
@@ -18872,28 +18796,22 @@ ram_mem_amulet: [
       else if (z.indexOf(d.sec) >= 0) d.z = d.sec;
     }
     function defaultPrimary() {
-      let prefer =
-        A.story === "ros"
-          ? ["lasers", "justice", "bow", "raygun", "sword", "baton", "lasso", "brand", "missile"]
-          : ["raygun", "bow", "sword", "baton", "missile", "lasso"];
-      for (let id of prefer) if (ownedItem(id)) return id;
-      let all = ownedItems();
-      return all.length ? all[0] : "";
+      let gear = ownedGear();
+      return gear.length ? gear[0] : "";
     }
     function defaultSecondary(pri) {
-      let prefer =
-        A.story === "ros"
-          ? ["lasso", "brand", "missile", "justice", "lasers"]
-          : ["lasso", "missile", "bow", "raygun", "sword", "baton"];
-      for (let id of prefer) if (ownedItem(id) && id !== pri) return id;
-      for (let id of ownedItems()) if (id !== pri) return id;
+      for (let id of ownedGear()) if (id !== pri) return id;
       return "";
     }
     function weaponish(id) {
-      return ["lasers", "justice", "bow", "raygun", "sword", "baton", "hatchet", "axe", "blast", "heavy", "plasma"].indexOf(id) >= 0;
+      return isMelee(id);
     }
     function toolish(id) {
-      return ["lasso", "brand", "missile", "shield", "amulet", "heavy", "disc"].indexOf(id) >= 0;
+      return (
+        ["lasers", "justice", "lasso", "brand", "bow", "raygun", "missile", "shield", "amulet", "blast", "heavy", "disc"].indexOf(
+          id,
+        ) >= 0
+      );
     }
     function migrateSlots(e) {
       if (e && typeof e.pri === "string") {
@@ -19014,9 +18932,8 @@ ram_mem_amulet: [
     }
     function armEye() {
       if (A.story !== "ramshackle" || !w || w.id !== "ram_eye" || !ownedItem("axe")) return;
-      if (d.pri === "axe" && d.wep === "axe") return;
-      let sec = ownedItem("amulet") ? "amulet" : ownedItem("shield") ? "shield" : "";
-      ((d.pri = "axe"), (d.wep = "axe"), (d.sec = sec), (d.tool = sec), Q("THE AXE IS IN YOUR HAND."));
+      if (d.melee === "axe") return;
+      ((d.melee = "axe"), settleHands(), Q("THE AXE IS IN YOUR HAND."));
     }
     function axeBox() {
       let e = d.x,
@@ -19127,6 +19044,7 @@ ram_mem_amulet: [
       }),
         d.arrows--,
         spend("bow", 0.3),
+        (d.swingKind = ""),
         (d.atk = 0.12),
         D.arrow());
     }
@@ -19143,6 +19061,7 @@ ram_mem_amulet: [
         dir: d.dir,
       }),
         spend(kind, kind === "heavy" ? 0.36 : 0.34),
+        (d.swingKind = ""),
         (d.atk = 0.12),
         (A.shake = 0.1),
         D.boom(),
@@ -19161,12 +19080,13 @@ ram_mem_amulet: [
         dir: d.dir,
       }),
         spend("raygun", 0.32),
+        (d.swingKind = ""),
         (d.atk = 0.12),
         D.ray());
     }
     function swingItem(id) {
       if (itemLeft(id) > 0) return;
-      ((d.atk = 0.26), (ft = []), (it = !1), D.swing(), spend(id, 0.26));
+      ((d.swingKind = "melee"), (d.atk = 0.26), (ft = []), (it = !1), D.swing(), spend(id, 0.26));
       if (id === "sword" && d.hp >= d.maxHp && (d.beamCd || 0) <= 0) {
         let C = Ne[d.dir];
         (D.fire(),
@@ -19182,81 +19102,128 @@ ram_mem_amulet: [
           (d.beamCd = 0.45));
       }
     }
-    function ownedWeapons() {
+    function isMelee(id) {
+      return id === "baton" || id === "sword" || id === "hatchet" || id === "axe" || id === "plasma";
+    }
+    function ownedMelee() {
       let ids =
-        A.story === "ros"
-          ? ["lasers", "justice"]
-            : A.story === "ramshackle"
-              ? ownedItem("axe")
-                ? ["axe"]
-                : ["hatchet"]
-              : A.story === "drill"
-                ? ["blast"]
-                : ["heavy", "raygun", "bow", "sword", "baton"];
+        A.story === "ramshackle"
+          ? ["axe", "hatchet"]
+          : A.story === "drill"
+            ? []
+            : ["plasma", "axe", "sword", "hatchet", "baton"];
       return ids.filter((id) => ownedItem(id));
     }
-    function ownedTools() {
-      if (A.story === "ramshackle") return ["shield", "amulet"].filter((id) => ownedItem(id));
-      return ["lasso", "brand", "missile", "heavy"].filter((id) => ownedItem(id));
+    function ownedGear() {
+      let ids =
+        A.story === "ros"
+          ? ["lasers", "justice", "lasso", "brand"]
+          : A.story === "ramshackle"
+            ? ["shield", "amulet"]
+            : A.story === "drill"
+              ? ["blast"]
+              : ["raygun", "bow", "missile", "lasso", "heavy", "disc", "blast"];
+      return ids.filter((id) => ownedItem(id) && !isMelee(id));
     }
-    function defaultWeapon() {
-      let list = ownedWeapons();
+    function ownedWeapons() {
+      return ownedMelee();
+    }
+    function ownedTools() {
+      return ownedGear();
+    }
+    function meleeNow() {
+      if (isMelee(d.melee) && ownedItem(d.melee)) return d.melee;
+      if (isMelee(d.wep) && ownedItem(d.wep)) return d.wep;
+      let list = ownedMelee();
       return list.length ? list[0] : "";
     }
-    function defaultTool(weapon) {
-      for (let id of ownedTools()) if (id !== weapon) return id;
-      return "";
+    function heldItem() {
+      if (d.sec && !isMelee(d.sec) && ownedItem(d.sec)) return d.sec;
+      if (d.pri && !isMelee(d.pri) && ownedItem(d.pri)) return d.pri;
+      if (d.tool && !isMelee(d.tool) && ownedItem(d.tool)) return d.tool;
+      let list = ownedGear();
+      return list.length ? list[0] : "";
     }
     function weaponNow() {
-      if (weaponish(d.wep) && ownedItem(d.wep)) return d.wep;
-      if (weaponish(d.pri) && ownedItem(d.pri)) return d.pri;
-      if (weaponish(d.sec) && ownedItem(d.sec)) return d.sec;
-      return defaultWeapon();
+      return meleeNow();
     }
     function toolNow() {
-      let w = weaponNow(),
-        id = toolish(d.tool) && ownedItem(d.tool) ? d.tool : toolish(d.sec) && ownedItem(d.sec) ? d.sec : toolish(d.pri) && ownedItem(d.pri) ? d.pri : "";
-      return id && id !== w ? id : "";
+      return heldItem();
     }
-    function splitHands() {
-      let w = weaponNow(),
-        t = toolNow() || defaultTool(w);
-      if (t === w) t = "";
-      ((d.wep = w || d.wep || ""),
-        (d.tool = t || ""),
-        (d.pri = w || ""),
-        (d.sec = t || ""),
-        (d.act = d.pri));
+    function settleHands() {
+      let melee = "";
+      if (isMelee(d.melee) && ownedItem(d.melee)) melee = d.melee;
+      else if (isMelee(d.wep) && ownedItem(d.wep)) melee = d.wep;
+      else if (isMelee(d.pri) && ownedItem(d.pri)) melee = d.pri;
+      else if (isMelee(d.sec) && ownedItem(d.sec)) melee = d.sec;
+      else melee = ownedMelee()[0] || "";
+      let items = [];
+      for (let id of [d.pri, d.sec, d.tool, d.wep])
+        if (id && !isMelee(id) && ownedItem(id) && items.indexOf(id) < 0) items.push(id);
+      for (let id of ownedGear()) if (items.indexOf(id) < 0 && items.length < 2) items.push(id);
+      ((d.melee = melee),
+        (d.wep = melee),
+        (d.pri = items[0] || ""),
+        (d.sec = items[1] || ""),
+        (d.tool = d.sec || d.pri || ""),
+        (d.act = d.tool || d.pri || ""));
       let z = ["bow", "raygun", "missile", "lasso"];
       if (z.indexOf(d.tool) >= 0) d.z = d.tool;
-      else if (z.indexOf(d.wep) >= 0) d.z = d.wep;
+      else if (z.indexOf(d.pri) >= 0) d.z = d.pri;
     }
-    function cycleTool() {
-      let w = weaponNow(),
-        tools = ownedTools().filter((id) => id !== w);
-      if (!tools.length) {
-        ((d.tool = ""), (d.sec = ""), Q(A.story === "ros" ? "NO ITEM YET. THE ROPE LOCKER IS ON THE EAST WALL." : "NO ITEM YET."));
+    function splitHands() {
+      settleHands();
+    }
+    function swingMelee(id) {
+      if (d.atk > 0 || d.roll > 0) return;
+      d.swingKind = "melee";
+      if (id === "axe") throwAxe();
+      else if (id === "plasma") ((d.plasma = 0.3), swingItem("sword"));
+      else if (id === "baton" || id === "sword" || id === "hatchet") swingItem(id);
+      else ((d.atk = 0.26), (ft = []), (it = !1), D.swing());
+    }
+    function cycleMelee() {
+      let list = ownedMelee();
+      if (!list.length) {
+        Q("NO MELEE YET.");
         return;
       }
-      let cur = toolNow(),
-        i = tools.indexOf(cur),
-        next = tools[(i + 1) % tools.length];
-      ((d.tool = next), (d.sec = next), (d.wep = w), (d.pri = w), D.sel(), Q(slotName(next)), xe());
+      let i = list.indexOf(meleeNow()),
+        next = list[(i + 1) % list.length];
+      ((d.melee = next), settleHands(), D.sel(), Q("ATTACK " + slotName(next)), xe());
+    }
+    function cycleTool() {
+      let gear = ownedGear();
+      if (!gear.length) {
+        Q(A.story === "ros" ? "NO ITEM YET. THE ROPE LOCKER IS ON THE EAST WALL." : "NO ITEM YET.");
+        return;
+      }
+      if (!d.pri || isMelee(d.pri) || !ownedItem(d.pri)) d.pri = gear[0];
+      let rest = gear.filter((id) => id !== d.pri);
+      if (!rest.length) {
+        ((d.sec = ""), (d.tool = d.pri), D.sel(), Q(slotName(d.pri)), xe());
+        return;
+      }
+      let cur = rest.indexOf(d.sec) >= 0 ? d.sec : rest[0],
+        next = rest[(rest.indexOf(cur) + 1) % rest.length];
+      ((d.sec = next), (d.tool = next), D.sel(), Q(slotName(next)), xe());
     }
     function slotCombat(e) {
-      let wpn = weaponNow(),
-        tool = toolNow();
-      if (wpn === "justice")
-        if (U.attack) d.charge = Math.min(1, (d.charge || 0) + e);
+      let it = heldItem();
+      if (it === "justice")
+        if (U.item) d.charge = Math.min(1, (d.charge || 0) + e);
         else if ((d.charge || 0) >= 0.45) (fireJustice(), (d.charge = 0));
         else d.charge = 0;
-      (U.attackE &&
-          d.roll <= 0 &&
-          (wpn && wpn !== "justice" ? useItem(wpn) : tool === "shield" && useItem("shield")),
-        U.itemE && d.roll <= 0 && tool && useItem(tool),
-        U.itemE && d.roll <= 0 && !tool && (wpn === "heavy" || wpn === "blast") && useItem(wpn),
-        U.itemE && d.roll <= 0 && !tool && wpn !== "heavy" && wpn !== "blast" && Q("NO ITEM."),
+      else d.charge = 0;
+      (U.attackE && d.roll <= 0 && d.atk <= 0 && swingMelee(meleeNow()),
+        U.itemE && d.roll <= 0 && it && it !== "justice" && !isMelee(it) && useItem(it),
+        U.itemE && d.roll <= 0 && !it && Q("NO ITEM."),
         (U.swapE || U.priE) && cycleTool());
+    }
+    function pauseChoices() {
+      return ownedMelee()
+        .map((id) => ({ id: id, melee: !0 }))
+        .concat(ownedGear().map((id) => ({ id: id, melee: !1 })));
     }
     function useRosAct(id) {
       if (id === "lasers") fireLasers();
@@ -19315,7 +19282,7 @@ ram_mem_amulet: [
           dir: d.dir,
         });
       }
-      (spend("lasers", 0.22), (d.atk = 0.1), (A.shake = 0.05), D.laser());
+      ((d.swingKind = ""), spend("lasers", 0.22), (d.atk = 0.1), (A.shake = 0.05), D.laser());
     }
     function fireJustice() {
       if (w.peace) {
@@ -19611,10 +19578,7 @@ ram_mem_amulet: [
               n.restore(),
               (n.globalAlpha = 1),
               r.eye === 1 && R(n, s, E - 44 + f, 6, 6, "#ffe06688"),
-              r.w === 5 &&
-                ge.warn > 0 &&
-                Math.floor(A.t * 14) % 2 &&
-                v(n, "!", s, E - 80, "#ff4fd8", 2, "center", X),
+              r.w === 5 && ge.warn > 0 && I(s - 1, E - 80, 3, 8, "#ff4fd8"),
               Math.random() < 0.3 &&
                 oe(
                   r.x + (Math.random() - 0.5) * 30,
@@ -20298,8 +20262,8 @@ ram_mem_amulet: [
         x += 38;
       }
       if (slotsOn()) {
-        let xl = "X " + slotName(weaponNow(), !0),
-          zl = "Z " + slotName(toolNow(), !0),
+        let xl = "X " + (meleeNow() ? slotName(meleeNow(), !0) : "STRIKE"),
+          zl = "Z " + (heldItem() ? slotName(heldItem(), !0) : "NONE"),
           sx = Math.max(x, 132),
           cap = 246,
           gap = 10;
@@ -20383,7 +20347,7 @@ ram_mem_amulet: [
         I(sx - 7, sy - 14, 14, 16, open ? "#2a1a0c" : "#c4894a"),
         I(sx - 7, sy - 14, 14, 3, "#8a5a2a"),
         I(sx - 1, sy - 6, 2, 4, "#ffcc33"),
-        v(n, "ROPE", sx, sy - 22, "#fff6c0", 1, "center", "#000"));
+        I(sx - 5, sy - 20, 10, 2, "#fff6c0"));
       if (!open && ae(d.x, d.y, wx, wy) < 72) {
         let bob = Math.sin(A.t * 6) * 3;
         ((n.fillStyle = "rgba(255,210,60,0.35)"),
@@ -20534,12 +20498,10 @@ ram_mem_amulet: [
           } else if (f.k === "mirror") {
             (I(c - 6, S - 14, 12, 16, "#d8f4ff"),
               I(c - 6, S - 14, 12, 2, "#ffffff"),
-              I(c - 1, S + 2, 2, 6, "#8a8a92"),
-              v(n, String(f.n || ""), c, S - 18, "#1a2040", 1, "center", ""));
+              I(c - 1, S + 2, 2, 6, "#8a8a92"));
           } else if (f.k === "pad") {
             (R(n, c, S, 8, 5, col),
-              R(n, c, S, 4, 2, "#ffffff"),
-              v(n, String(f.n || ""), c, S - 10, "#fff6c0", 1, "center", "#000"));
+              R(n, c, S, 4, 2, "#ffffff"));
           } else if (f.k === "booth") {
             (I(c - 12, S - 10, 24, 12, col),
               I(c - 10, S - 8, 20, 4, "#fff6e0"),
@@ -20595,14 +20557,12 @@ ram_mem_amulet: [
                   (I(c - 10, S - 2, 20, 14, "#2a1a10"),
                     I(c - 8, S, 16, 2, "#c8a060"),
                     I(c - 8, S + 4, 16, 2, "#7a5030"),
-                    I(c - 8, S + 8, 16, 2, "#c8a060"),
-                    v(n, "DOWN", c, S - 12, "#ffe070", 1, "center", "#000"));
+                    I(c - 8, S + 8, 16, 2, "#c8a060"));
                   return;
                 }
                 (I(c - 10, S - 12, 20, 14, "#8a6a3a"),
                   I(c - 10, S - 12, 20, 3, "#c8a060"),
-                  I(c - 2, S - 8, 4, 4, "#3a2a14"),
-                  v(n, "CASE", c, S - 18, "#fff6c0", 1, "center", "#000"));
+                  I(c - 2, S - 8, 4, 4, "#3a2a14"));
               },
             });
           } else if (f.k === "stairs") {
@@ -20641,16 +20601,21 @@ ram_mem_amulet: [
       for (let f of w.signs || []) {
         let c = i(f.x * 16),
           S = s(f.y * 16);
-        f.kind === "sign"
-          ? E.push({ y: p(f.y), f: () => n.drawImage(O.icon.sign, c, S) })
+        f.kind === "sign" || f.kind === "holo"
+          ? E.push({
+              y: p(f.y),
+              f: () =>
+                f.kind === "holo" || signIsHolo()
+                  ? drawHoloSign(Math.round(c), Math.round(S))
+                  : n.drawImage(O.icon.sign, Math.round(c), Math.round(S)),
+            })
           : f.kind === "chair" || f.kind === "portal"
             ? E.push({
                 y: p(f.y),
                 f: () => {
                   let glow = f.kind === "portal" || (Z("dream_win") && !Z("ros_rift"));
                   (I(c + 2, S + 2, 12, 12, glow ? "#ffcc33" : "#6a5848"),
-                    v(n, f.kind === "portal" ? "DOOR" : "CHAIR", c + 8, S - 8, "#fff6c0", 1, "center", "#000"),
-                    glow && I(c + 6, S - 4 + Math.sin(A.t * 6) * 2, 4, 4, "#ffcc33"));
+                    glow && I(c + 6, S - 4, 4, 4, "#ffcc33"));
                 },
               })
           : f.kind === "striker"
@@ -20658,17 +20623,8 @@ ram_mem_amulet: [
             : f.kind === "kiosk"
               ? E.push({ y: p(f.y) + 6, f: () => Cs(c, S) })
               : (f.kind === "missing" || f.kind === "wanted") &&
-                (I(c + 1, S + 1, 14, 14, "#f0e0b0"),
-                v(
-                  n,
-                  f.kind === "missing" ? "?" : "!",
-                  c + 8,
-                  S + 2,
-                  "#8a1e1e",
-                  1,
-                  "center",
-                  "",
-                ),
+                (                I(c + 1, S + 1, 14, 14, "#f0e0b0"),
+                I(c + 6, S + 3, 4, 4, "#8a1e1e"),
                 f.kind === "missing"
                   ? n.drawImage(
                       da("redking", !1),
@@ -20979,13 +20935,7 @@ ram_mem_amulet: [
         ((n.globalAlpha = Ee(f.life / f.max, 0, 1)),
           I(i(f.x), s(f.y), f.s, f.s, f.c));
       drawLightning(i, s);
-      if (((n.globalAlpha = 1), w.dark)) {
-        let f = n.createRadialGradient(i(d.x), s(d.y), 40, i(d.x), s(d.y), 230);
-        (f.addColorStop(0, "#00000000"),
-          f.addColorStop(1, "#000000aa"),
-          (n.fillStyle = f),
-          n.fillRect(0, 24, 320, 200));
-      }
+      n.globalAlpha = 1;
       Ws();
     }
     function drawLightning(i, s) {
@@ -21278,26 +21228,8 @@ ram_mem_amulet: [
             2,
             Math.floor(A.t * 6 + k) % 2 ? "#ff4fd8" : "#ffe066",
           );
-        (v(
-          n,
-          "ATTACK OF THE",
-          s + f / 2,
-          E + c - 22,
-          "#ffe066",
-          1,
-          "center",
-          "#000",
-        ),
-          v(
-            n,
-            "SAUCER MEN",
-            s + f / 2,
-            E + c - 12,
-            "#ffe066",
-            1,
-            "center",
-            "#000",
-          ));
+        (I(s + 8, E + c - 20, f - 16, 2, "#ffe066"),
+          I(s + 16, E + c - 12, f - 32, 2, "#ffe066"));
       } else if (A.tv === "static")
         for (let S = 0; S < 900; S++) {
           let y = Math.floor(Math.random() * 255);
@@ -21308,16 +21240,7 @@ ram_mem_amulet: [
         I(s, E, f, c, "#12204a");
         for (let N = 0; N < 8; N++) I(s, E + N * 14, f, 1, "#1a2c66");
         (I(s, E + 4, f, 14, "#c8202a"),
-          v(
-            n,
-            "SR NEWS NETWORK  * BREAKING *",
-            s + f / 2,
-            E + 8,
-            "#ffffff",
-            1,
-            "center",
-            "",
-          ),
+          I(s + 8, E + 9, f - 16, 2, "#ffffff"),
           A.tv === "news"
             ? (n.drawImage(
                 da("kal", q ? Math.floor(A.t * 8) % 2 === 0 : !1),
@@ -21327,28 +21250,14 @@ ram_mem_amulet: [
                 64,
               ),
               I(s + 6, E + 84, 120, 6, "#1a1a22"),
-              v(n, "CMDR KAL", s + 10, E + 84, "#ffcc33", 1, "", ""),
               I(s + 90, E + 30, 90, 50, "#000000"),
               n.drawImage(O.critter[0], s + 104, E + 40, 32, 32),
               n.drawImage(O.vov[0][0], s + 140, E + 36, 30, 38),
-              v(n, "SIGHTINGS?", s + 135, E + 70, "#ff4fd8", 1, "center", ""))
+              I(s + 100, E + 72, 70, 2, "#ff4fd8"))
             : (n.drawImage(da("redking", !1), s + f / 2 - 36, E + 22, 72, 72),
-              I(s + 30, E + 78, f - 60, 12, "#c8202a"),
-              v(
-                n,
-                "THE RED KING IS MISSING",
-                s + f / 2,
-                E + 81,
-                "#ffffff",
-                1,
-                "center",
-                "",
-              )),
-          I(s, E + c - 10, f, 10, "#000000"));
-        let S =
-            "  RARE OCCURRENCES ACROSS THE REALMS * RUMORS OF ALIENS AND MONSTERS * THE RED KING IS MISSING *",
-          y = (A.t * 40) % (S.length * 6);
-        v(n, S + S, s - y, E + c - 9, "#ffe066", 1, "", "");
+              I(s + 30, E + 78, f - 60, 12, "#c8202a")),
+          I(s, E + c - 10, f, 10, "#000000"),
+          I(s + 4, E + c - 7, f - 8, 2, "#ffe066"));
       }
       for (let S = E; S < E + c; S += 2) I(s, S, f, 1, "#00000033");
       n.restore();
@@ -21677,26 +21586,29 @@ ram_mem_amulet: [
     function drawPauseItems() {
       A.pauseBoxes = [];
       I(0, 0, 320, 224, "#0c1020");
-      pt("ITEMS", 160, 10, 2, "center", "#ffcc33");
-      pt("X  " + slotName(slotsOn() ? d.pri : ""), 16, 38, 1, "", "#ffcc33");
-      pt("Z  " + slotName(slotsOn() ? d.sec : ""), 16, 52, 1, "", "#4ff0ff");
-      let rows = ownedItems(),
+      pt("ITEMS", 160, 8, 2, "center", "#ffcc33");
+      pt("MELEE", 16, 30, 1, "", "#ff9ae8");
+      pt(meleeNow() ? slotName(meleeNow()) : "NONE", 64, 30, 1, "", "#fff6c0");
+      pt("ITEMS", 16, 46, 1, "", "#7ef0ff");
+      pt("X  " + slotName(d.pri || ""), 64, 46, 1, "", "#ffcc33");
+      pt("Z  " + slotName(d.sec || ""), 190, 46, 1, "", "#4ff0ff");
+      let rows = pauseChoices(),
         sel = Math.min(A.gearSel || 0, Math.max(0, rows.length - 1)),
-        start = Math.max(0, sel - 4);
-      for (let i = 0; i < 6 && start + i < rows.length; i++) {
-        let id = rows[start + i],
-          on = start + i === sel;
+        start = Math.max(0, sel - 5);
+      for (let i = 0; i < 7 && start + i < rows.length; i++) {
+        let row = rows[start + i],
+          on = start + i === sel,
+          mark = row.melee ? (meleeNow() === row.id ? "  ATK" : "") : d.pri === row.id ? "  X" : d.sec === row.id ? "  Z" : "";
         pt(
-          (on ? "> " : "  ") + slotName(id) + (d.pri === id ? "  X" : d.sec === id ? "  Z" : ""),
+          (on ? "> " : "  ") + (row.melee ? "MELEE  " : "ITEM  ") + slotName(row.id) + mark,
           16,
-          74 + i * 14,
+          66 + i * 14,
           1,
           "",
-          on ? "#fff6c0" : "#c9d1e3",
+          on ? "#fff6c0" : row.melee ? "#ffd0ea" : "#c9d1e3",
         );
       }
-      pt("SHARDS  " + (d.shards || 0) + "/7", 16, 170, 1, "", "#ffe0a0");
-      pt("PIECES  " + (d.pieces || 0) + "/2", 16, 186, 1, "", "#ffe0a0");
+      pt("HOLD ATTACK TO SWITCH MELEE", 160, 190, 1, "center", "#c9d1e3");
       pt("RIGHT  JOURNAL", 160, 206, 1, "center", "#c9d1e3");
     }
     function drawPauseJournal() {
@@ -21749,7 +21661,7 @@ ram_mem_amulet: [
       let e = A.t;
       (v(n, "SPACE RIDERS", 160, 14, "#ff4fd8", 3, "center", "#2a0a3a"),
         v(n, "SKIPPY'S QUEST", 160, 42, "#ffcc33", 2, "center", "#2a0a3a"),
-        v(n, window.__SQ_BUILD || "b32", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
+        v(n, window.__SQ_BUILD || "b33", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
       let a = (s, E, f, c, S) => {
         let y = Ue(s, S, 0);
         n.drawImage(
@@ -22118,8 +22030,11 @@ ram_mem_amulet: [
           );
         if ((A.skipPage || 0) === 1)
           return tabs.concat(
-            ownedItems().map((id, i) => ({
-              label: slotName(id) + (d.wep === id ? "  ARMED" : d.tool === id ? "  HELD" : ""),
+            pauseChoices().map((row, i) => ({
+              label:
+                (row.melee ? "MELEE  " : "ITEM  ") +
+                slotName(row.id) +
+                (row.melee ? (meleeNow() === row.id ? "  ATK" : "") : d.pri === row.id ? "  X" : d.sec === row.id ? "  Z" : ""),
               enabled: !0,
               on: (A.gearSel || 0) === i,
             })),
@@ -22215,8 +22130,8 @@ ram_mem_amulet: [
           return;
         }
         if ((A.skipPage || 0) === 1) {
-          let id = ownedItems()[row];
-          id && (weaponish(id) ? (d.wep = id) : (d.tool = id), splitHands(), D.sel(), xe());
+          let rowPick = pauseChoices()[row];
+          rowPick && setSkippyRow(rowPick.id);
         }
       }
     }
@@ -22342,7 +22257,7 @@ ram_mem_amulet: [
         drawRace();
         return;
       }
-      if ((I(0, 0, 320, 224, "#000000"), ts(), flushLabels(), drawMemory(), as(), r.state === "upload")) {
+      if ((I(0, 0, 320, 224, "#000000"), (worldCap = []), (A.lab = []), (window.__SQ_LABELS = A.lab), ts(), (A.worldInk = worldCap), (worldCap = null), flushLabels(), drawMemory(), as(), r.state === "upload")) {
         let e = Ee(r.st / 3.2, 0, 1),
           a = Math.random() < 0.2 ? (Math.random() - 0.5) * 6 : 0;
         (v(
@@ -23035,12 +22950,17 @@ ram_mem_amulet: [
             "#ff9ae8",
             1.5,
           ),
-        e.label && w && w.id !== "home" && w.id !== "nexus" && w.id !== "cosmos")
+        w && w.id === "nexus")
       ) {
-        let c = E && !(e.need && !Z(e.need)) ? "SOON" : f ? "LOCKED" : e.label,
-          S = Ya(c, 1) + 6;
-        (I(i - S / 2, s - 22, S, 10, "#0d0a1acc"),
-          v(n, c, i, s - 21, f ? "#6a6a8a" : "#ffcc33", 1, "center", ""));
+        let name = f ? "LOCKED" : e.label || "";
+        if (name) {
+          let tx = Math.round(i),
+            ty = Math.round(s - 20),
+            tw = Ya(name, 1);
+          v(n, name, tx, ty, f ? "#8a8aa8" : "#ffcc33", 1, "center", "#000");
+          (A.lab || (A.lab = [])).push({ x: tx - tw / 2, y: ty, w: tw, h: 8, text: name });
+          window.__SQ_LABELS = A.lab;
+        }
       }
     }
     function Os(e, a, t, i) {
@@ -23447,10 +23367,7 @@ ram_mem_amulet: [
                   6.283,
                 ),
                 n.stroke()),
-              r.sub === "deejay" &&
-                r.w === 1 &&
-                Math.floor(A.t * 12) % 2 &&
-                v(n, "!", a(r.x), t(r.y) - 56, "#ff9a3d", 2, "center", X),
+              r.sub === "deejay" && r.w === 1 && I(a(r.x) - 1, t(r.y) - 56, 3, 8, "#ff9a3d"),
               r.sub === "deejay" && r.w === 4)
             )
               for (let S = 0; S < 3; S++) {
@@ -24489,7 +24406,7 @@ ram_mem_amulet: [
       let t = Math.abs(a) > 0.6 ? (a > 0 ? 1 : 2) : 0;
       (t && t !== mn && (t === 1 ? (U.downE = !0) : (U.upE = !0)), (mn = t));
     }
-    u.current = { press: hn, stick: Gs };
+    u.current = { press: hn, stick: Gs, cycleMelee: cycleMelee };
     let Ys = {
       ArrowLeft: "left",
       KeyA: "left",
@@ -24729,6 +24646,10 @@ ram_mem_amulet: [
         }),
         kit: () => ownedItems(),
         slots: () => ({ pri: d.pri || "", sec: d.sec || "" }),
+        melee: () => meleeNow(),
+        hands: () => ({ melee: meleeNow(), item: heldItem(), pri: d.pri || "", sec: d.sec || "" }),
+        worldInk: () => (A.worldInk || []).map((w) => ({ t: w.t, x: w.x, y: w.y })),
+        cycleMelee: () => cycleMelee(),
         objective: () =>
           A.story === "ros" ? rosObjective() : A.story === "ramshackle" ? ramObjective() : A.story === "drill" ? dsObjective() : skippyObjective(),
         chapters: () => STORY_ROWS.map((r) => ({ id: r.id, status: chapterStatus(r.id), sub: rowSub(r) })),
@@ -24776,7 +24697,7 @@ ram_mem_amulet: [
           enterStory(id);
           return Bt();
         },
-        build: () => window.__SQ_BUILD || "b32",
+        build: () => window.__SQ_BUILD || "b33",
         cast: () => castSpell(),
         hud: () => hudBits(),
         fightHud: () => fightHud(),
@@ -24901,14 +24822,21 @@ ram_mem_amulet: [
   });
   document.querySelectorAll("[data-b]").forEach((m) => {
     let u = m.dataset.b,
+      holdT = 0,
       l = (n) => {
         (n.preventDefault(),
           (m.dataset.held = m.dataset.b),
           m.classList.add("on"),
-          Ye.current && Ye.current.press(m.dataset.held, !0));
+          Ye.current && Ye.current.press(m.dataset.held, !0),
+          u === "attack" &&
+            (clearTimeout(holdT),
+            (holdT = setTimeout(() => {
+              m.classList.contains("on") && Ye.current && Ye.current.cycleMelee && Ye.current.cycleMelee();
+            }, 420))));
       },
       T = (n) => {
         (n.preventDefault(),
+          u === "attack" && clearTimeout(holdT),
           m.classList.contains("on") &&
             (m.classList.remove("on"),
             Ye.current && Ye.current.press(m.dataset.held || u, !1)));
