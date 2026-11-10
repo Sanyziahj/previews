@@ -18954,6 +18954,23 @@ ram_mem_amulet: [
       }
       return bits;
     }
+    function fightHud() {
+      let bits = hudBits().slice();
+      if (r && r.state === "fight") {
+        let name = ut(),
+          w = Ya(name, 1);
+        bits.push({ id: "bossbar", x: 48, y: 36, w: 224, h: 6, text: "" });
+        bits.push({
+          id: "bossname",
+          x: Math.round(160 - w / 2),
+          y: 44,
+          w: w,
+          h: 8,
+          text: name,
+        });
+      }
+      return bits;
+    }
     function drawHudRow() {
       for (let bit of hudBits())
         bit.text &&
@@ -19061,9 +19078,8 @@ ram_mem_amulet: [
                 I(142 + s * 10, 14, 4, 4, on ? "#fff6c0" : "#1a140c"));
             }))
             : A.story === "ramshackle"
-            ? (v(n, slotName(weaponNow(), !0), 140, 2, "#ffe070", 1, "", ""),
-              v(n, slotName(toolNow(), !0) || "--", 140, 12, toolNow() ? "#4ff0ff" : "#6a6a8a", 1, "", ""))
-            : (n.drawImage(O.icon.coin, 140, 4),
+              ? void 0
+              : (n.drawImage(O.icon.coin, 140, 4),
             v(n, String(d.coins).padStart(3, "0"), 154, 9, A.story === "skippy" ? "#ff9ae8" : "#ffe070", 1, "", ""),
             n.drawImage(O.icon.arrows, 174, 4),
             v(n, String(d.arrows).padStart(2, "0"), 188, 9, "#ffffff", 1, "", "")),
@@ -20623,15 +20639,15 @@ ram_mem_amulet: [
       }
       if (
         (r.state === "fight" &&
-          (I(60, 28, 200, 9, "#0d0a1a"),
+          (I(48, 36, 224, 6, "#0d0a1a"),
           I(
-            61,
-            29,
-            (198 * r.hp) / r.max,
-            7,
+            49,
+            37,
+            Math.max(0, (222 * r.hp) / r.max),
+            4,
             r.phase === 2 ? "#ff3a6a" : "#ff4fd8",
           ),
-          v(n, ut(), 160, 40, "#ffffff", 1, "center", X)),
+          v(n, ut(), 160, 44, "#ffffff", 1, "center", X)),
         rs(),
         A.bannerT > 0 && !q)
       ) {
@@ -22974,6 +22990,7 @@ ram_mem_amulet: [
         load: () => Bt(),
         cast: () => castSpell(),
         hud: () => hudBits(),
+        fightHud: () => fightHud(),
         board: () => ({
           has: hasSpaceBoard(),
           tier: boardTier(),
