@@ -1347,7 +1347,7 @@ function controlAudit(page) {
         label: (el.textContent || '').trim().slice(0, 28) || (el.id === 'stick' ? 'STICK' : ''),
         x: r.x, y: r.y, w: r.width, h: r.height,
         cx: r.x + r.width / 2, cy: r.y + r.height / 2, rad: Math.min(r.width, r.height) / 2,
-        round, stick: el.id === 'stick',
+        round: round || el.dataset.b === 'worldmap', stick: el.id === 'stick',
       };
     });
     const hits = [];
@@ -1435,7 +1435,8 @@ test.describe('context touch layouts', () => {
       });
       const play = await controlAudit(page);
       expect(play.mode, JSON.stringify(play)).toBe('play');
-      expect(play.labels).toEqual(expect.arrayContaining(['ATTACK', 'ITEM', 'SWAP', 'BOARD', 'ACTION', 'MAGIC', 'PAUSE']));
+      expect(play.labels).toEqual(expect.arrayContaining(['ATTACK', 'ITEM', 'SWAP', 'BOARD', 'ACTION', 'PAUSE', 'MAP']));
+      expect(play.labels.join(' ')).not.toMatch(/MAGIC/);
       expect(play.labels.join(' ')).not.toMatch(/TALK|BACK|\bROLL\b/);
       expect(play.hits, JSON.stringify(play)).toEqual([]);
       expect(play.onHearts, JSON.stringify(play)).toEqual([]);
@@ -1463,7 +1464,8 @@ test.describe('context touch layouts', () => {
       });
       const skippy = await controlAudit(page);
       expect(skippy.mode, JSON.stringify(skippy)).toBe('play');
-      expect(skippy.labels, JSON.stringify(skippy)).toEqual(expect.arrayContaining(['ATTACK', 'ITEM', 'SWAP', 'ROLL', 'ACTION', 'MAGIC', 'PAUSE']));
+      expect(skippy.labels, JSON.stringify(skippy)).toEqual(expect.arrayContaining(['ATTACK', 'ITEM', 'SWAP', 'ROLL', 'ACTION', 'PAUSE', 'MAP']));
+      expect(skippy.labels.join(' ')).not.toMatch(/MAGIC/);
       expect(skippy.labels.join(' ')).not.toMatch(/TALK|BACK|BOARD/);
       expect(skippy.hits, JSON.stringify(skippy)).toEqual([]);
       expect(skippy.onHearts, JSON.stringify(skippy)).toEqual([]);
@@ -1489,7 +1491,8 @@ test.describe('context touch layouts', () => {
         S.step(1);
       });
       const npc = await controlAudit(page);
-      expect(npc.labels, JSON.stringify(npc)).toEqual(expect.arrayContaining(['ATTACK', 'ITEM', 'SWAP', 'BOARD', 'TALK', 'MAGIC', 'PAUSE']));
+      expect(npc.labels, JSON.stringify(npc)).toEqual(expect.arrayContaining(['ATTACK', 'ITEM', 'SWAP', 'BOARD', 'TALK', 'PAUSE', 'MAP']));
+      expect(npc.labels.join(' ')).not.toMatch(/MAGIC/);
       expect(npc.labels.join(' ')).not.toContain('BACK');
       expect(npc.hits, JSON.stringify(npc)).toEqual([]);
       expect(npc.onHearts, JSON.stringify(npc)).toEqual([]);
@@ -1517,8 +1520,8 @@ test.describe('context touch layouts', () => {
       });
       const pause = await controlAudit(page);
       expect(pause.mode, JSON.stringify(pause)).toBe('pause');
-      expect(pause.labels).toContain('BACK');
-      expect(pause.labels.join(' ')).not.toMatch(/ATTACK|ITEM|SWAP|ROLL|TALK|PAUSE|MAGIC/);
+      expect(pause.labels).toEqual(expect.arrayContaining(['BACK', 'PAUSE', 'MAP']));
+      expect(pause.labels.join(' ')).not.toMatch(/ATTACK|ITEM|SWAP|ROLL|TALK|MAGIC/);
       expect(pause.hits, JSON.stringify(pause)).toEqual([]);
       expect(pause.onCanvas, JSON.stringify(pause)).toEqual([]);
       expect(pause.small, JSON.stringify(pause)).toEqual([]);
@@ -1859,7 +1862,8 @@ test.describe('Ramshackle phone layout', () => {
       });
       const play = await controlAudit(page);
       expect(play.mode, JSON.stringify(play)).toBe('play');
-      expect(play.labels, JSON.stringify(play)).toEqual(expect.arrayContaining(['ATTACK', 'ITEM', 'SWAP', 'BOARD', 'MAGIC', 'PAUSE']));
+      expect(play.labels, JSON.stringify(play)).toEqual(expect.arrayContaining(['ATTACK', 'ITEM', 'SWAP', 'BOARD', 'PAUSE', 'MAP']));
+      expect(play.labels.join(' ')).not.toMatch(/MAGIC/);
       expect(play.hits, JSON.stringify(play)).toEqual([]);
       expect(play.onHearts, JSON.stringify(play)).toEqual([]);
       expect(play.small, JSON.stringify(play)).toEqual([]);
@@ -2150,7 +2154,7 @@ test('cosmos map, surf lane, academy, and the new places', async ({ page }) => {
 
 test.describe('magic button on the phone', () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
-  test('portrait and landscape keep MAGIC between item and roll', async ({ page }) => {
+  test('portrait and landscape keep the cluster, with no MAGIC button', async ({ page }) => {
     const errors = await boot(page);
     await page.waitForFunction(() => document.documentElement.classList.contains('srml'));
     await page.evaluate(() => {
@@ -2174,8 +2178,7 @@ test.describe('magic button on the phone', () => {
         return { cx: r.x + r.width / 2, cy: r.y + r.height / 2, w: r.width, h: r.height, on: getComputedStyle(el).display !== 'none' };
       };
       const atk = box('attack'), item = box('item'), magic = box('magic'), roll = box('roll');
-      const ang = (el) => Math.atan2(atk.cy - el.cy, atk.cx - el.cx);
-      return { atk, item, magic, roll, ai: ang(item), am: ang(magic), ar: ang(roll) };
+      return { atk, item, magic, roll };
     });
     const talk = await page.evaluate(() => {
       const el = document.querySelector('[data-b="talk"]');
@@ -2183,7 +2186,7 @@ test.describe('magic button on the phone', () => {
       const pause = document.querySelector('[data-b="map"]').getBoundingClientRect();
       return { cx: r.x + r.width / 2, cy: r.y + r.height / 2, w: r.width, pauseX: pause.x };
     });
-    expect(place.magic.on).toBe(true);
+    expect(place.magic.on).toBe(false);
     expect(place.roll.w).toBeGreaterThanOrEqual(56);
     expect(place.atk.w).toBeGreaterThanOrEqual(56);
     expect(place.item.w).toBeGreaterThanOrEqual(56);
@@ -2191,7 +2194,6 @@ test.describe('magic button on the phone', () => {
     expect(place.item.cx).toBeGreaterThan(place.atk.cx);
     expect(talk.cy).toBeLessThan(place.atk.cy);
     expect(place.roll.cy).toBeGreaterThan(place.atk.cy);
-    expect(place.magic.cy).toBeLessThan(place.atk.cy);
     expect(talk.pauseX).toBeLessThan(200);
     const portraitClip = await page.evaluate(() => {
       const bad = [];
@@ -2211,14 +2213,14 @@ test.describe('magic button on the phone', () => {
       const box = (name) => {
         const el = document.querySelector('[data-b="' + name + '"]');
         const r = el.getBoundingClientRect();
-        return { cx: r.x + r.width / 2, cy: r.y + r.height / 2, w: r.width };
+        return { cx: r.x + r.width / 2, cy: r.y + r.height / 2, w: r.width, on: getComputedStyle(el).display !== 'none' };
       };
       const atk = box('attack'), item = box('item'), magic = box('magic'), roll = box('roll');
       return { atk, item, magic, roll };
     });
+    expect(land.magic.on).toBe(false);
     expect(land.roll.w).toBeGreaterThanOrEqual(56);
     expect(land.item.cx).toBeGreaterThan(land.atk.cx);
-    expect(land.magic.cy).toBeLessThan(land.atk.cy);
     expect(land.roll.cy).toBeGreaterThan(land.atk.cy);
     expect(land.atk.cx).toBeGreaterThan(400);
     const landClip = await page.evaluate(() => {
@@ -2236,7 +2238,7 @@ test.describe('magic button on the phone', () => {
     expect(errors, errors.join('\n')).toEqual([]);
   });
 
-  test('narrow phones keep MAGIC, ITEM, ROLL and TALK fully on screen', async ({ page }) => {
+  test('narrow phones keep ITEM, ROLL, TALK and MAP fully on screen', async ({ page }) => {
     const errors = await boot(page);
     await page.waitForFunction(() => document.documentElement.classList.contains('srml'));
     for (const [w, h] of [[360, 640], [390, 844], [430, 932], [640, 360], [844, 390], [932, 430]]) {
@@ -2276,7 +2278,8 @@ test.describe('magic button on the phone', () => {
       const pause = await page.evaluate(() => document.querySelector('[data-b="map"]').getBoundingClientRect());
       expect(pause.x, `${w}x${h} pause`).toBeLessThan(w / 2);
       expect(fit.talk, `${w}x${h} ${fit.labels.join(',')}`).toBe('1');
-      expect(fit.labels, `${w}x${h} ${fit.labels.join(',')}`).toEqual(expect.arrayContaining(['MAGIC', 'ITEM', 'SWAP', 'ROLL', 'TALK']));
+      expect(fit.labels, `${w}x${h} ${fit.labels.join(',')}`).toEqual(expect.arrayContaining(['MAP', 'ITEM', 'SWAP', 'ROLL', 'TALK']));
+      expect(fit.labels.join(' '), `${w}x${h}`).not.toMatch(/MAGIC/);
       expect(fit.clipped, `${w}x${h} ${fit.clipped.join(',')}`).toEqual([]);
     }
     expect(errors, errors.join('\n')).toEqual([]);
