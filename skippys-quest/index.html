@@ -8939,7 +8939,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
   }
   let COS_WEP = ["FLAMING SWORD", "TEMPERED BLADE", "CELESTIAL EDGE"],
     COS_ARM = ["SR SUIT", "LIGHT ARMOR", "GUARDIAN PLATE"],
-    COS_BRD = ["RIDER", "CELESTIAL", "SRX", "ANCIENT"],
+    COS_BRD = ["RIDER", "SPEED", "CELESTIAL", "SRX", "ANCIENT"],
     COS_TEA = {
       tea: "GREEN TEA",
       blossom: "BLOSSOM TEA",
@@ -9429,7 +9429,6 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         items: [
           { id: "forge_w", name: "FORGE WEAPON", price: 35, n: 1, once: "" },
           { id: "forge_a", name: "FORGE ARMOR", price: 35, n: 1, once: "" },
-          { id: "forge_b", name: "FORGE BOARD", price: 30, n: 1, once: "" },
         ],
       },
       sars: {
@@ -9442,7 +9441,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         title: "SKY CITY GARAGE",
         keeper: "slide",
         bye: "RIDE WHAT YOU FORGE.",
-        items: [{ id: "forge_b", name: "FORGE BOARD", price: 30, n: 1, once: "" }],
+        items: [{ id: "board_up", name: "UPGRADE BOARD", price: 40, n: 1, once: "" }],
       },
     });
     Object.assign(CHOICES, {
@@ -9459,7 +9458,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       ac_arch: [{ need: "charter_read", s: "ac_arch_done" }, { s: "ac_arch_now" }],
       ac_kal: [{ need: "galactic_map", s: "ac_kal_again" }, { s: "ac_kal" }],
       ac_drill: [{ s: "ac_drill" }],
-      sky_slide: [{ s: "sky_slide" }],
+      sky_slide: [{ s: "slide_gate" }],
       sky_jazz: [{ need: "jazz_tag", s: "sky_jazz_again" }, { s: "sky_jazz" }],
       sky_porter: [{ need: "companion_got", s: "sky_porter_again" }, { s: "sky_porter" }],
       hi_ros: [{ s: "hi_ros" }],
@@ -9499,9 +9498,19 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         h("drill", "BASIC TRAINING. THE LASER ROW IS REAL. ROLL IT. THREE PADS. THEN YOU ARE A CADET, NOT A STORY."),
       ],
       camp_ping: [{ t: "fn", f: "campPing" }],
-      sky_slide: [
-        h("slide", "GARAGE IS OPEN. RIDER, CELESTIAL, SRX, ANCIENT. THOSE ARE BOARDS."),
-        h("slide", "THE ANCIENTS AND THE CELESTIALS ARE ELDERS. DO NOT MIX THEM UP WITH A DECK."),
+      slide_gate: [{ t: "fn", f: "slideGate" }],
+      slide_wait: [
+        h("slide", "THE GARAGE IS OPEN. RIDE THE SKY LANE ONCE. THEN I SET A SPACE BOARD UNDER YOU."),
+      ],
+      slide_grant: [
+        h("slide", "THE LANE HOLDS. THIS RIDER BOARD IS YOURS. THE TOP BUTTON BECOMES BOARD."),
+        h("slide", "COME BACK AND I UPGRADE IT. SPEED, CELESTIAL, SRX, THEN THE ANCIENT BOARD THAT TELEPORTS."),
+        { t: "fn", f: "grantRiderBoard" },
+        { t: "shop", m: "boards" },
+      ],
+      slide_shop: [
+        h("slide", "RIDER DASH, SPEED, CELESTIAL HOVER, SRX STRIKE, ANCIENT TELEPORT. I UPGRADE EVERY RIDER."),
+        h("slide", "THE ANCIENTS AND THE CELESTIALS ARE ELDERS. THESE NAMES ARE ONLY THE DECKS."),
         { t: "shop", m: "boards" },
       ],
       sky_jazz: [
@@ -11182,9 +11191,15 @@ ram_mem_amulet: [
       trueT: 0,
       ember: 0,
     });
+    if (c && c.ownB && !c.board5) {
+      let map = { 1: 1, 2: 3, 3: 4, 4: 5 };
+      d.ownB = map[c.ownB] || c.ownB;
+      d.gearB = map[c.gearB] || d.ownB;
+    }
     d.gearW = Math.min(d.gearW, d.ownW);
     d.gearA = Math.min(d.gearA, d.ownA);
-    d.gearB = Math.min(d.gearB, d.ownB);
+    d.gearB = Math.max(1, Math.min(d.gearB || 1, d.ownB || 1));
+    d.ownB = Math.max(1, Math.min(5, d.ownB || 1));
   }
   function cosmosSave() {
     return {
@@ -11197,6 +11212,7 @@ ram_mem_amulet: [
       ownW: d.ownW || 1,
       ownA: d.ownA || 1,
       ownB: d.ownB || 1,
+      board5: 1,
       bottles: (d.bottles || []).slice(),
       brew: d.brew || 0,
       part: d.part || 0,
@@ -11294,7 +11310,118 @@ ram_mem_amulet: [
         ? ((d.ownB = own + 1), (d.gearB = d.ownB))
         : ((d.ownW = own + 1), (d.gearW = d.ownW));
   }
+  function hasSpaceBoard() {
+    return A.story !== "skippy" || !!ee.space_board;
+  }
+  function boardTier() {
+    return hasSpaceBoard() ? Math.max(1, Math.min(5, d.gearB || 1)) : 0;
+  }
+  function boardQuote() {
+    if (!hasSpaceBoard()) return { ok: !1, why: "EARN A BOARD FIRST.", price: 0, name: "RIDER" };
+    let own = d.ownB || 1;
+    if (own >= 5) return { ok: !1, why: "ANCIENT BOARD IS THE LAST.", price: 0, name: "ANCIENT" };
+    let price = [0, 40, 80, 120, 180][own],
+      name = COS_BRD[own];
+    if (own >= 2 && !(d.part > 0)) return { ok: !1, why: "SLIDE NEEDS A RARE PART.", price: price, name: name };
+    if (own >= 4 && !ee.lane_sky) return { ok: !1, why: "THE ANCIENT BOARD WANTS THE SKY LANE.", price: price, name: name };
+    return { ok: !0, why: "", price: price, name: name };
+  }
+  function grantRiderBoard() {
+    ((ee.space_board = !0),
+      (d.ownB = Math.max(1, d.ownB || 1)),
+      (d.gearB = Math.max(1, Math.min(d.gearB || 1, d.ownB))),
+      Q("SPACE BOARD."),
+      xe());
+  }
+  function slideGate() {
+    ye(A.story === "skippy" && !ee.space_board ? (ee.lane_sky ? "slide_grant" : "slide_wait") : "slide_shop");
+  }
+  function boardBreak(te) {
+    if ((d.gearB || 1) < 2) return;
+    for (let i = 1; i <= 2; i++) {
+      let tx = Math.floor((d.x + te[0] * 16 * i) / 16),
+        ty = Math.floor((d.y - 1 + te[1] * 16 * i) / 16);
+      ie(tx, ty) === "X" && Pt(tx, ty, ["#d8c090", "#fff6c0", "#ffffff"]);
+    }
+  }
+  function boardStrike(te) {
+    for (let f of ce)
+      !f.dead &&
+        (() => {
+          let dx = f.x - d.x,
+            dy = f.y - d.y,
+            along = dx * te[0] + dy * te[1],
+            side = Math.abs(dx * te[1] - dy * te[0]);
+          along > 0 && along < 78 && side < 20 && _a(f, 2, d.x, d.y, 0.25);
+        })();
+  }
+  function boardBlink(te) {
+    let land = null;
+    for (let i = 1; i <= 4; i++) {
+      let x = d.x + te[0] * 16 * i,
+        y = d.y + te[1] * 16 * i,
+        tx = Math.floor(x / 16),
+        ty = Math.floor((y - 1) / 16),
+        ch = ie(tx, ty);
+      if (tx < 0 || ty < 0 || tx >= we || ty >= ve) break;
+      ch !== "#" && ch !== "G" && ch !== "~" && ch !== "q" && !ia(tx, ty, !0) && (land = { x: x, y: y });
+    }
+    if (!land) return (D.nope(), Q("NO OPEN MARK AHEAD."));
+    (ne(d.x, d.y - 8, 12, ["#c9a0ff", "#ffffff"], 18),
+      (d.x = land.x),
+      (d.y = land.y),
+      (d.safeX = d.x),
+      (d.safeY = d.y),
+      ne(d.x, d.y - 8, 16, ["#ff4fd8", "#ffffff", "#c9a0ff"], 28),
+      (d.rollCd = 0.45),
+      (d.inv = 0.25),
+      D.mirage(),
+      Q("ANCIENT BOARD."));
+  }
+  function boardUse() {
+    let te = Ne[d.dir],
+      tier = boardTier() || 1;
+    if (w.surf) {
+      (A.surf || (A.surf = { rings: 0, got: {} }),
+        (A.surf.boost = tier >= 2 ? 120 : 80),
+        (d.rdx = te[0]),
+        (d.rdy = -1),
+        (d.roll = 0.12),
+        (d.rollCd = 0.35),
+        D.roll());
+      return;
+    }
+    if (tier >= 5) return boardBlink(te);
+    let spd = tier === 1 ? 280 : tier === 2 ? 460 : 360;
+    ((d.boardDash = tier),
+      (d.boardSpd = spd),
+      (d.rdx = te[0]),
+      (d.rdy = te[1]),
+      (d.roll = tier === 2 ? 0.22 : 0.18),
+      (d.rollCd = 0.42),
+      (d.inv = tier >= 3 ? 0.28 : 0.1),
+      D.roll(),
+      tier >= 2 && boardBreak(te),
+      tier >= 4 && boardStrike(te),
+      Q(COS_BRD[tier - 1] + " BOARD."));
+  }
   function cosmosOffer(S) {
+    if (S.id === "board_up") {
+      let q = boardQuote();
+      if (!q.ok) return (D.nope(), Q(q.why), !0);
+      if ((d.coins || 0) < q.price) return (D.nope(), Q("NOT ENOUGH STARS."), !0);
+      return (
+        (d.part = q.price && (d.ownB || 1) >= 2 ? Math.max(0, (d.part || 0) - 1) : d.part),
+        (d.ownB = (d.ownB || 1) + 1),
+        (d.gearB = d.ownB),
+        (d.coins -= q.price),
+        D.buy(),
+        Q(q.name + " BOARD. " + q.price + " STARS."),
+        xe(),
+        !0
+      );
+    }
+    if (S.id === "forge_b") return (D.nope(), Q("SLIDE UPGRADES BOARDS."), !0);
     if (S.id.indexOf("forge_") === 0) {
       let q = cosmosForgeQuote(S.id);
       if (!q.ok) return (D.nope(), Q(q.why), !0);
@@ -11353,7 +11480,7 @@ ram_mem_amulet: [
     let rows = [
         "WEAPON  " + COS_WEP[(d.gearW || 1) - 1],
         "ARMOR  " + COS_ARM[(d.gearA || 1) - 1],
-        "BOARD  " + COS_BRD[(d.gearB || 1) - 1],
+        "BOARD  " + (hasSpaceBoard() ? COS_BRD[(d.gearB || 1) - 1] : "--"),
         "SPELL  " + (d.spell === "ward" ? "GUARDIAN WARD" : "STAR LANTERN"),
         "VISOR  " + (visorShown() ? "ON" : d.ownVisor ? "OFF" : "--"),
         "GALACTIC MAP  " + (d.gmap ? "READY" : "--"),
@@ -11419,6 +11546,8 @@ ram_mem_amulet: [
       campPing: cosmosCamp,
       jazzTag: cosmosJazz,
       contractBoard: cosmosContract,
+      slideGate: slideGate,
+      grantRiderBoard: grantRiderBoard,
     };
   }
   function cosmosTick(e) {
@@ -11453,7 +11582,10 @@ ram_mem_amulet: [
     w.surf || (A.surf = null);
     if (le && nt[le.id])
       for (let S of nt[le.id].items)
-        if (S.id.indexOf("forge_") === 0) {
+        if (S.id === "board_up") {
+          let q = boardQuote();
+          ((S.price = q.price), (S.name = q.ok ? "NEXT " + q.name : q.name));
+        } else if (S.id.indexOf("forge_") === 0) {
           let q = cosmosForgeQuote(S.id);
           ((S.price = q.price), (S.name = q.name));
         }
@@ -12990,6 +13122,8 @@ ram_mem_amulet: [
         }
     }
     function or() {
+      let face = actionFace();
+      if (face.kind === "portal" && face.prop) return enterPortal(face.prop);
       let e = Ne[d.dir],
         a = d.x + e[0] * 12,
         t = d.y - 3 + e[1] * 12;
@@ -13312,6 +13446,7 @@ ram_mem_amulet: [
           }
         }
         }
+        if (U.boardE && d.roll <= 0 && d.rollCd <= 0 && d.atk <= 0) boardUse();
         if (U.rollE && d.roll <= 0 && d.rollCd <= 0 && d.atk <= 0) {
           let C = Math.hypot(t, i),
             te = Ne[d.dir];
@@ -13360,6 +13495,7 @@ ram_mem_amulet: [
           Object.keys(d.cds).forEach((id) => {
             d.cds[id] > 0 && (d.cds[id] = Math.max(0, d.cds[id] - e));
           }),
+        d.roll <= 0 && (d.boardDash = 0),
         d.rollCd > 0 && (d.rollCd -= e),
         d.inv > 0 && (d.inv -= e),
         d.beamCd > 0 && (d.beamCd -= e));
@@ -13369,7 +13505,7 @@ ram_mem_amulet: [
       if (d.kb > 0) ((d.kb -= e), (f = d.kbx * e), (c = d.kby * e));
       else if (d.roll > 0)
         ((d.roll -= e),
-          (f = d.rdx * 170 * e),
+          (f = d.rdx * (d.boardDash ? d.boardSpd || 280 : 170) * e),
           (c = d.rdy * 170 * e),
           Math.random() < 0.5 &&
             oe(
@@ -13482,7 +13618,7 @@ ram_mem_amulet: [
       if (
         _t(k, Y) &&
         d.kb <= 0 &&
-        !(d.roll > 0 && d.items.board && !w.dungeon)
+        !(d.roll > 0 && ((d.items.board && !w.dungeon) || (d.boardDash || 0) >= 3))
       ) {
         ((d.fall = 0.6), D.fall(), (d.roll = 0));
         return;
@@ -13869,6 +14005,7 @@ ram_mem_amulet: [
         U.priE =
         U.secE =
         U.magicE =
+        U.boardE =
         U.backE =
           !1),
         (Qe = !1));
@@ -17724,7 +17861,9 @@ ram_mem_amulet: [
         if (U.attack) d.charge = Math.min(1, (d.charge || 0) + e);
         else if ((d.charge || 0) >= 0.45) (fireJustice(), (d.charge = 0));
         else d.charge = 0;
-      (U.attackE && d.roll <= 0 && wpn && wpn !== "justice" && useItem(wpn),
+      (U.attackE &&
+          d.roll <= 0 &&
+          (wpn && wpn !== "justice" ? useItem(wpn) : tool === "shield" && useItem("shield")),
         U.itemE && d.roll <= 0 && tool && useItem(tool),
         U.itemE && d.roll <= 0 && !tool && Q("NO ITEM."),
         (U.swapE || U.priE) && cycleTool());
@@ -20019,6 +20158,35 @@ ram_mem_amulet: [
     }
     let Rt = "",
       bt = !1;
+    function actionFace() {
+      if (!w) return { label: "ACTION", on: 0 };
+      for (let C of w.props || [])
+        if (C.k === "portal" && (!C.need || Z(C.need)) && ae(d.x, d.y, p(C.x), p(C.y)) < 28)
+          return { label: "ENTER", on: 1, kind: "portal", prop: C };
+      for (let f of Ta)
+        if (f.vis && f.alpha > 0.5 && f.leave <= 0 && ae(d.x, d.y, f.x, f.y) < 36)
+          return { label: "TALK", on: 1 };
+      for (let i of w.chests || [])
+        if (lt(i) && !Z("chest_" + i.id) && ae(d.x, d.y, p(i.x), p(i.y)) < 28)
+          return { label: "OPEN", on: 1 };
+      for (let i of w.signs || [])
+        if (ae(d.x, d.y, p(i.x), p(i.y)) < 28) return { label: "READ", on: 1 };
+      for (let C of w.warps || [])
+        if (
+          d.x > C.x * 16 &&
+          d.x < (C.x + C.w) * 16 &&
+          d.y > C.y * 16 &&
+          d.y < (C.y + C.h) * 16
+        )
+          return { label: "ENTER", on: 1 };
+      return { label: "ACTION", on: 0 };
+    }
+    function enterPortal(C) {
+      if (C.to === "ros_home" || C.to === "ram_home")
+        return (D.mirage(), A.trans || (A.trans = { t: 0, done: !1, home: C.to }), !0);
+      let te = je[C.to || w.id];
+      return te ? (D.mirage(), dt(te.to, te.tx, te.ty, te.dir), !0) : !1;
+    }
     function nearInteract() {
       if (!w || A.state !== "play" || A.paused || q || ue || Ae) return !1;
       for (let f of Ta)
@@ -20198,11 +20366,19 @@ ram_mem_amulet: [
         tools = 0;
       }
       let root = document.documentElement;
+      let face = mode === "play" ? actionFace() : { label: "ACTION", on: 0 },
+        armed = !!(weaponNow() || toolNow() === "shield");
       ((root.dataset.touch = mode),
-        (root.dataset.item = mode === "play" && tools > 0 ? "1" : "0"),
-        (root.dataset.swap = mode === "play" && tools > 1 ? "1" : "0"),
-        (root.dataset.talk = mode === "play" && nearInteract() ? "1" : "0"),
+        (root.dataset.item = "1"),
+        (root.dataset.itemon = mode === "play" && toolNow() ? "1" : "0"),
+        (root.dataset.swap = "0"),
+        (root.dataset.talk = "1"),
+        (root.dataset.actlabel = face.label),
+        (root.dataset.acton = mode === "play" && face.on ? "1" : "0"),
+        (root.dataset.attackon = mode === "play" && armed ? "1" : "0"),
         (root.dataset.magic = mode === "play" ? "1" : "0"),
+        (root.dataset.rollact = hasSpaceBoard() ? "board" : "roll"),
+        (root.dataset.rolllabel = hasSpaceBoard() ? "BOARD" : "ROLL"),
         (root.dataset.board = d.boardId || ""));
       ((window.__SQ_PICK = touchPick),
         (window.__SQ_TOUCH = { mode, rows: touchRows(), tools }),
@@ -22379,7 +22555,9 @@ ram_mem_amulet: [
                         ? (U.downE = !0)
                         : e === "magic"
                         ? (U.magicE = !0)
-                        : e === "back" && (U.backE = !0)),
+                        : e === "board"
+                          ? (U.boardE = !0)
+                          : e === "back" && (U.backE = !0)),
         (U[e] = a));
     }
     let mn = 0;
@@ -22649,6 +22827,13 @@ ram_mem_amulet: [
         load: () => Bt(),
         cast: () => castSpell(),
         hud: () => hudBits(),
+        board: () => ({
+          has: hasSpaceBoard(),
+          tier: boardTier(),
+          name: hasSpaceBoard() ? COS_BRD[boardTier() - 1] : "",
+          own: d.ownB || 1,
+        }),
+        faces: () => actionFace(),
         toast: () => ({ text: A.toastT > 0 ? A.toast || "" : "", t: A.toastT || 0 }),
         hurt: (n = 1) => be(n, d.x, d.y + 20),
         drink: (i = 0) => drinkBottle(i),
@@ -22759,13 +22944,15 @@ ram_mem_amulet: [
     let u = m.dataset.b,
       l = (n) => {
         (n.preventDefault(),
+          (m.dataset.held = m.dataset.b),
           m.classList.add("on"),
-          Ye.current && Ye.current.press(u, !0));
+          Ye.current && Ye.current.press(m.dataset.held, !0));
       },
       T = (n) => {
         (n.preventDefault(),
           m.classList.contains("on") &&
-            (m.classList.remove("on"), Ye.current && Ye.current.press(u, !1)));
+            (m.classList.remove("on"),
+            Ye.current && Ye.current.press(m.dataset.held || u, !1)));
       };
     (m.addEventListener("pointerdown", l),
       m.addEventListener("pointerup", T),
@@ -22897,6 +23084,8 @@ html.srml .srml-b.itm{border-color:#ffcc33;color:#fff4c8}
 html.srml .srml-b.rol{border-color:#ff4fd8;color:#ffe0f6}
 html.srml [data-b=magic]{border-color:#c9a0ff;color:#ffe0ff}
 html.srml .srml-b.tlk{border-color:#3dff6a;color:#e4ffe9}
+html.srml .srml-b.dim{opacity:.4}
+html.srml [data-b=magic]{border-radius:999px;font-size:12px;letter-spacing:.6px}
 html.srml [data-b=swap]{border-color:#ffe650;color:#fff8d0;font-size:10px}
 html.srml [data-b=map]{border-color:#b7c3e6;color:#eef2ff;font-size:10px}
 html.srml #stick{display:none;position:fixed;z-index:6;margin:0;touch-action:none;border-radius:50%;border:3px solid #3dff6a;box-shadow:inset 0 0 0 7px rgba(61,255,106,.18),0 4px 0 #05060e}
@@ -22923,7 +23112,7 @@ var stick=document.getElementById("stick");
 if(stick){document.body.appendChild(stick);[["\u25B2","left:50%;top:8px;transform:translateX(-50%)"],["\u25BC","left:50%;bottom:8px;transform:translateX(-50%)"],["\u25C0","left:8px;top:50%;transform:translateY(-50%)"],["\u25B6","right:8px;top:50%;transform:translateY(-50%)"]].forEach(function(a){var s=document.createElement("span");s.className="srml-ar";s.textContent=a[0];s.style.cssText="position:absolute;color:#ffe650;font-size:16px;pointer-events:none;"+a[1];stick.appendChild(s);});}
 function px(name){return parseFloat(getComputedStyle(R).getPropertyValue(name))||0;}
 function hide(el){if(el)el.style.display="none";}
-function show(el,x,y,w,h,label){if(!el)return;el.style.display="flex";el.style.position="fixed";el.style.left=Math.round(x)+"px";el.style.top=Math.round(y)+"px";el.style.width=Math.round(w)+"px";el.style.height=Math.round(h)+"px";el.style.right="auto";el.style.bottom="auto";if(label&&el.dataset.label!==label){el.dataset.label=label;el.textContent=label;}}
+function show(el,x,y,w,h,label,dim){if(!el)return;el.style.display="flex";el.style.position="fixed";el.style.left=Math.round(x)+"px";el.style.top=Math.round(y)+"px";el.style.width=Math.round(w)+"px";el.style.height=Math.round(h)+"px";el.style.right="auto";el.style.bottom="auto";el.style.borderRadius=el.dataset.b==="magic"?"999px":"50%";el.classList.toggle("dim",!!dim);if(label&&el.dataset.label!==label){el.dataset.label=label;el.textContent=label;}}
 function renderRows(list){
   var sig=(list||[]).map(function(r){return r.label+"|"+(r.on?1:0)+"|"+(r.enabled?1:0);}).join("\n");
   if(rows.dataset.sig===sig)return;
@@ -22960,65 +23149,40 @@ function layout(){
     scr.style.width=dw+"px";
     scr.style.marginTop=Math.max(8,sat+8)+"px";
   }else if(play){
-    var gap=10;
-    function spot(cx,cy,d){return {cx:cx,cy:cy,r:d/2};}
-    function onScreen(b){
-      if(b.cx-b.r<left-0.5||b.cx+b.r>right+0.5)return false;
-      if(b.cy+b.r>H-bot+0.5||b.cy-b.r<top)return false;
-      if(b.cx+b.r>right-48-gap&&b.cy-b.r<top+48+gap)return false;
-      return true;
+    var gap=12, face=56;
+    var stickNeed=left+96+gap;
+    function fits(size){
+      var reach=size+gap;
+      var itemLeft=right-2-size/2-2*reach-size/2;
+      var rollTop=H-bot-2-size/2-2*reach-size/2;
+      return itemLeft>=stickNeed+8 && rollTop>=top+76;
     }
-    function separated(list){
-      for(var i=0;i<list.length;i++)for(var j=i+1;j<list.length;j++){
-        var a=list[i],b=list[j];
-        if(Math.hypot(a.cx-b.cx,a.cy-b.cy)<a.r+b.r+gap-0.25)return false;
-      }
-      return true;
-    }
-    function tryPlace(atk,itemD,magD,rollD,swapD){
-      var acx=right-atk/2, acy=H-bot-atk/2;
-      var primary=spot(acx,acy,atk);
-      var angs=[16,48,80];
-      var diams=[itemD,magD,rollD];
-      for(var extra=0;extra<=110;extra+=4){
-        var placed=diams.map(function(d,i){
-          var R=atk/2+gap+d/2+extra, a=angs[i]*Math.PI/180;
-          return spot(acx-Math.cos(a)*R, acy-Math.sin(a)*R, d);
-        });
-        var item=placed[0], sang=angs[0]*Math.PI/180+0.65;
-        var swapBox=spot(item.cx-Math.cos(sang)*(itemD/2+gap+swapD/2), item.cy-Math.sin(sang)*(itemD/2+gap+swapD/2), swapD);
-        var all=[primary,placed[0],placed[1],placed[2],swapBox];
-        if(all.every(onScreen)&&separated(all))return {primary:primary,item:placed[0],magic:placed[1],roll:placed[2],swap:swapBox,atk:atk,itemD:itemD,magD:magD,rollD:rollD,swapD:swapD};
-      }
-      return null;
-    }
-    var atk0=land?76:Math.max(64,Math.min(78,Math.round(Math.min(W,H)*0.2)));
-    var pack=null;
-    for(var scale=1;scale>=0.62&&!pack;scale-=0.04){
-      var atk=Math.max(56,Math.round(atk0*scale));
-      var itemD=Math.max(48,Math.round(atk*0.78));
-      var magD=Math.max(48,Math.round(atk*0.84));
-      var rollD=itemD, swapD=48;
-      pack=tryPlace(atk,itemD,magD,rollD,swapD);
-    }
-    if(!pack)pack=tryPlace(56,48,48,48,48);
-    var primary=pack.primary, itemBox=pack.item, magicBox=pack.magic, rollBox=pack.roll, swapBox=pack.swap;
-    var atk=pack.atk, itemD=pack.itemD, magD=pack.magD, rollD=pack.rollD, swapD=pack.swapD;
-    var talk=R.dataset.talk==="1";
-    var shown=[primary];
-    if(talk)show(by.talk,primary.cx-atk/2,primary.cy-atk/2,atk,atk,"TALK");
-    else show(by.attack,primary.cx-atk/2,primary.cy-atk/2,atk,atk,"ATTACK");
-    if(R.dataset.item==="1"){show(by.item,itemBox.cx-itemD/2,itemBox.cy-itemD/2,itemD,itemD,"ITEM");shown.push(itemBox);}
-    if(R.dataset.swap==="1"&&R.dataset.item==="1"){show(by.swap,swapBox.cx-swapD/2,swapBox.cy-swapD/2,swapD,swapD,"SWAP");shown.push(swapBox);}
-    if(R.dataset.magic==="1"){show(by.magic,magicBox.cx-magD/2,magicBox.cy-magD/2,magD,magD,"MAGIC");shown.push(magicBox);}
-    show(by.roll,rollBox.cx-rollD/2,rollBox.cy-rollD/2,rollD,rollD,"ROLL");
-    shown.push(rollBox);
-    var clusterLeft=Math.min.apply(null,shown.map(function(b){return b.cx-b.r;}));
-    var clusterTop=Math.min.apply(null,shown.map(function(b){return b.cy-b.r;}));
-    var stickS=Math.max(96,Math.min(land?124:136, clusterLeft-left-gap, H*0.32));
+    while(face+4<=68 && fits(face+4)) face+=4;
+    var adj=face+gap;
+    var atkX=right-face/2-2, actY=H-bot-face/2-2;
+    var midX=atkX-adj, midY=actY-adj;
+    function box(cx,cy,d){return {cx:cx,cy:cy,r:d/2};}
+    var attack=box(atkX,midY,face);
+    var item=box(midX-adj,midY,face);
+    var roll=box(midX,midY-adj,face);
+    var action=box(midX,actY,face);
+    var pillW=Math.min(112, Math.max(92, face+36)), pillH=56;
+    var magic=box(midX, roll.cy-face/2-gap-pillH/2, pillH);
+    if(by.roll) by.roll.dataset.b=R.dataset.rollact==="board"?"board":"roll";
+    var actLabel=R.dataset.actlabel||"ACTION";
+    var rollLabel=R.dataset.rolllabel||"ROLL";
+    show(by.attack,attack.cx-face/2,attack.cy-face/2,face,face,"ATTACK",R.dataset.attackon==="0");
+    show(by.item,item.cx-face/2,item.cy-face/2,face,face,"ITEM",R.dataset.itemon==="0");
+    show(by.roll,roll.cx-face/2,roll.cy-face/2,face,face,rollLabel,false);
+    show(by.talk,action.cx-face/2,action.cy-face/2,face,face,actLabel,R.dataset.acton==="0");
+    show(by.magic,magic.cx-pillW/2,magic.cy-pillH/2,pillW,pillH,"MAGIC",false);
+    var shown=[attack,item,roll,action,{cx:magic.cx,cy:magic.cy,r:pillW/2}];
+    var clusterLeft=Math.min(item.cx-face/2, magic.cx-pillW/2);
+    var clusterTop=magic.cy-pillH/2;
+    var stickS=Math.max(96,Math.min(land?120:128, clusterLeft-left-gap, H*0.3));
     if(stick)show(stick,left,H-bot-stickS,stickS,stickS);
-    if(by.map)show(by.map,right-48,top,48,48,"PAUSE");
-    var headP=top+60;
+    if(by.map)show(by.map,left,top,56,56,"PAUSE",false);
+    var headP=top+72;
     if(land){
       var colL=left+stickS+12, colR=clusterLeft-12;
       var maxW=Math.max(160,colR-colL), maxH=Math.max(120,H-headP-sab-8);

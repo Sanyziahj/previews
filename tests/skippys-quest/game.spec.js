@@ -1347,7 +1347,7 @@ function controlAudit(page) {
         label: (el.textContent || '').trim().slice(0, 28) || (el.id === 'stick' ? 'STICK' : ''),
         x: r.x, y: r.y, w: r.width, h: r.height,
         cx: r.x + r.width / 2, cy: r.y + r.height / 2, rad: Math.min(r.width, r.height) / 2,
-        round: round || el.dataset.b === 'magic', stick: el.id === 'stick',
+        round, stick: el.id === 'stick',
       };
     });
     const hits = [];
@@ -1425,10 +1425,8 @@ test.describe('context touch layouts', () => {
       });
       const play = await controlAudit(page);
       expect(play.mode, JSON.stringify(play)).toBe('play');
-      expect(play.labels).toContain('ATTACK');
-      expect(play.labels).toContain('ROLL');
-      expect(play.labels).toContain('PAUSE');
-      expect(play.labels.join(' ')).not.toMatch(/ITEM|SWAP|TALK|BACK/);
+      expect(play.labels).toEqual(expect.arrayContaining(['ATTACK', 'ITEM', 'BOARD', 'ACTION', 'MAGIC', 'PAUSE']));
+      expect(play.labels.join(' ')).not.toMatch(/SWAP|TALK|BACK|\bROLL\b/);
       expect(play.hits, JSON.stringify(play)).toEqual([]);
       expect(play.onCanvas, JSON.stringify(play)).toEqual([]);
       expect(play.small, JSON.stringify(play)).toEqual([]);
@@ -1455,8 +1453,8 @@ test.describe('context touch layouts', () => {
       });
       const skippy = await controlAudit(page);
       expect(skippy.mode, JSON.stringify(skippy)).toBe('play');
-      expect(skippy.labels, JSON.stringify(skippy)).toEqual(expect.arrayContaining(['ATTACK', 'ITEM', 'SWAP', 'ROLL', 'PAUSE']));
-      expect(skippy.labels.join(' ')).not.toMatch(/TALK|BACK/);
+      expect(skippy.labels, JSON.stringify(skippy)).toEqual(expect.arrayContaining(['ATTACK', 'ITEM', 'ROLL', 'ACTION', 'MAGIC', 'PAUSE']));
+      expect(skippy.labels.join(' ')).not.toMatch(/TALK|BACK|SWAP|BOARD/);
       expect(skippy.hits, JSON.stringify(skippy)).toEqual([]);
       expect(skippy.onCanvas, JSON.stringify(skippy)).toEqual([]);
       expect(skippy.small, JSON.stringify(skippy)).toEqual([]);
@@ -1481,8 +1479,7 @@ test.describe('context touch layouts', () => {
         S.step(1);
       });
       const npc = await controlAudit(page);
-      expect(npc.labels, JSON.stringify(npc)).toEqual(expect.arrayContaining(['ITEM', 'SWAP', 'ROLL', 'TALK', 'PAUSE']));
-      expect(npc.labels, JSON.stringify(npc)).not.toContain('ATTACK');
+      expect(npc.labels, JSON.stringify(npc)).toEqual(expect.arrayContaining(['ATTACK', 'ITEM', 'BOARD', 'TALK', 'MAGIC', 'PAUSE']));
       expect(npc.labels.join(' ')).not.toContain('BACK');
       expect(npc.hits, JSON.stringify(npc)).toEqual([]);
       expect(npc.onCanvas, JSON.stringify(npc)).toEqual([]);
@@ -1850,7 +1847,7 @@ test.describe('Ramshackle phone layout', () => {
       });
       const play = await controlAudit(page);
       expect(play.mode, JSON.stringify(play)).toBe('play');
-      expect(play.labels, JSON.stringify(play)).toEqual(expect.arrayContaining(['ATTACK', 'ITEM', 'SWAP', 'ROLL', 'PAUSE']));
+      expect(play.labels, JSON.stringify(play)).toEqual(expect.arrayContaining(['ATTACK', 'ITEM', 'BOARD', 'MAGIC', 'PAUSE']));
       expect(play.hits, JSON.stringify(play)).toEqual([]);
       expect(play.onCanvas, JSON.stringify(play)).toEqual([]);
       expect(play.small, JSON.stringify(play)).toEqual([]);
@@ -2168,13 +2165,22 @@ test.describe('magic button on the phone', () => {
       const ang = (el) => Math.atan2(atk.cy - el.cy, atk.cx - el.cx);
       return { atk, item, magic, roll, ai: ang(item), am: ang(magic), ar: ang(roll) };
     });
+    const talk = await page.evaluate(() => {
+      const el = document.querySelector('[data-b="talk"]');
+      const r = el.getBoundingClientRect();
+      const pause = document.querySelector('[data-b="map"]').getBoundingClientRect();
+      return { cx: r.x + r.width / 2, cy: r.y + r.height / 2, w: r.width, pauseX: pause.x };
+    });
     expect(place.magic.on).toBe(true);
-    expect(place.magic.w).toBeGreaterThanOrEqual(48);
-    expect(place.roll.w).toBeGreaterThanOrEqual(48);
-    const dx = place.roll.cx - place.item.cx, dy = place.roll.cy - place.item.cy;
-    const along = ((place.magic.cx - place.item.cx) * dx + (place.magic.cy - place.item.cy) * dy) / (dx * dx + dy * dy);
-    expect(along).toBeGreaterThan(0.05);
-    expect(along).toBeLessThan(0.95);
+    expect(place.roll.w).toBeGreaterThanOrEqual(56);
+    expect(place.atk.w).toBeGreaterThanOrEqual(56);
+    expect(place.item.w).toBeGreaterThanOrEqual(56);
+    expect(talk.w).toBeGreaterThanOrEqual(56);
+    expect(place.atk.cx).toBeGreaterThan(place.item.cx);
+    expect(talk.cy).toBeGreaterThan(place.atk.cy);
+    expect(place.roll.cy).toBeLessThan(place.atk.cy);
+    expect(place.magic.cy).toBeLessThan(place.roll.cy);
+    expect(talk.pauseX).toBeLessThan(200);
     const portraitClip = await page.evaluate(() => {
       const bad = [];
       for (const el of document.querySelectorAll('.srml-b, #stick')) {
@@ -2186,8 +2192,7 @@ test.describe('magic button on the phone', () => {
       return bad;
     });
     expect(portraitClip, 'portrait buttons clipped').toEqual([]);
-    await page.screenshot({ path: `${ART}/phone-portrait-after.png` });
-    await page.screenshot({ path: `${ART}/phone-magic-portrait.png` });
+    await page.screenshot({ path: `${ART}/phone-skippy-portrait.png` });
     await page.setViewportSize({ width: 844, height: 390 });
     await page.evaluate(() => __SQ.step(2));
     const land = await page.evaluate(() => {
@@ -2197,13 +2202,12 @@ test.describe('magic button on the phone', () => {
         return { cx: r.x + r.width / 2, cy: r.y + r.height / 2, w: r.width };
       };
       const atk = box('attack'), item = box('item'), magic = box('magic'), roll = box('roll');
-      const dx = roll.cx - item.cx, dy = roll.cy - item.cy;
-      const along = ((magic.cx - item.cx) * dx + (magic.cy - item.cy) * dy) / (dx * dx + dy * dy);
-      return { along, w: magic.w, atk, item, magic, roll };
+      return { atk, item, magic, roll };
     });
-    expect(land.w).toBeGreaterThanOrEqual(48);
-    expect(land.along).toBeGreaterThan(0.05);
-    expect(land.along).toBeLessThan(0.95);
+    expect(land.roll.w).toBeGreaterThanOrEqual(56);
+    expect(land.atk.cx).toBeGreaterThan(land.item.cx);
+    expect(land.magic.cy).toBeLessThan(land.roll.cy);
+    expect(land.atk.cx).toBeGreaterThan(400);
     const landClip = await page.evaluate(() => {
       const bad = [];
       for (const el of document.querySelectorAll('.srml-b, #stick')) {
@@ -2215,15 +2219,14 @@ test.describe('magic button on the phone', () => {
       return bad;
     });
     expect(landClip, 'landscape buttons clipped').toEqual([]);
-    await page.screenshot({ path: `${ART}/phone-landscape-after.png` });
-    await page.screenshot({ path: `${ART}/phone-magic-landscape.png` });
+    await page.screenshot({ path: `${ART}/phone-skippy-landscape.png` });
     expect(errors, errors.join('\n')).toEqual([]);
   });
 
   test('narrow phones keep MAGIC, ITEM, ROLL and TALK fully on screen', async ({ page }) => {
     const errors = await boot(page);
     await page.waitForFunction(() => document.documentElement.classList.contains('srml'));
-    for (const [w, h] of [[360, 640], [390, 844], [640, 360], [844, 390]]) {
+    for (const [w, h] of [[360, 640], [390, 844], [430, 932], [640, 360], [844, 390], [932, 430]]) {
       await page.setViewportSize({ width: w, height: h });
       const fit = await page.evaluate(() => {
         const S = __SQ;
@@ -2257,9 +2260,54 @@ test.describe('magic button on the phone', () => {
           .map((el) => (el.textContent || '').trim());
         return { clipped, labels, talk: document.documentElement.dataset.talk };
       });
+      const pause = await page.evaluate(() => document.querySelector('[data-b="map"]').getBoundingClientRect());
+      expect(pause.x, `${w}x${h} pause`).toBeLessThan(w / 2);
       expect(fit.talk, `${w}x${h} ${fit.labels.join(',')}`).toBe('1');
       expect(fit.labels, `${w}x${h} ${fit.labels.join(',')}`).toEqual(expect.arrayContaining(['MAGIC', 'ITEM', 'ROLL', 'TALK']));
       expect(fit.clipped, `${w}x${h} ${fit.clipped.join(',')}`).toEqual([]);
+    }
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+
+  test('ROS and Ramshackle use the same diamond', async ({ page }) => {
+    const errors = await boot(page);
+    await page.waitForFunction(() => document.documentElement.classList.contains('srml'));
+    for (const [story, area, file] of [
+      ['ros', 'ros_desert', 'phone-ros'],
+      ['ramshackle', 'ram_dock', 'phone-ram'],
+    ]) {
+      for (const [w, h, side] of [[390, 844, 'portrait'], [844, 390, 'landscape']]) {
+        await page.setViewportSize({ width: w, height: h });
+        const face = await page.evaluate(({ story, area }) => {
+          const S = __SQ;
+          S.G.state = 'play';
+          S.G.story = story;
+          S.G.paused = false;
+          if (story === 'ramshackle') {
+            S.P.items = { hatchet: true };
+            S.P.pri = 'hatchet';
+            S.P.wep = 'hatchet';
+          } else {
+            S.P.items = { blasters: true };
+            S.P.pri = 'lasers';
+            S.P.wep = 'lasers';
+          }
+          S.flag('oe_' + area);
+          S.warp(area, 8, 8, 3);
+          S.step(2);
+          for (let i = 0; i < 8 && (S.script || S.dlg); i++) {
+            S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
+          }
+          S.step(1);
+          const label = (b) => (document.querySelector('[data-b="' + b + '"]') || {}).textContent || '';
+          const pause = document.querySelector('[data-b="map"]').getBoundingClientRect();
+          return { top: label('roll') || label('board'), pause: pause.x, board: S.board().has };
+        }, { story, area });
+        expect(face.board, story).toBe(true);
+        expect(face.top.trim(), story).toBe('BOARD');
+        expect(face.pause, story).toBeLessThan(w / 2);
+        await page.screenshot({ path: `${ART}/${file}-${side}.png` });
+      }
     }
     expect(errors, errors.join('\n')).toEqual([]);
   });
@@ -2332,5 +2380,108 @@ test('HUD labels stay apart and toasts clear', async ({ page }) => {
   expect(cleared.tin).toContain('VISOR');
   expect(cleared.area).toBe('sky_city');
   expect(cleared.sky).toBe('');
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test('Skippy earns a board and Slide upgrades every tier', async ({ page }) => {
+  const errors = await boot(page);
+  const earned = await page.evaluate(() => {
+    const S = __SQ;
+    S.G.state = 'play';
+    S.G.story = 'skippy';
+    S.G.paused = false;
+    S.flag('space_board', false);
+    S.flag('oe_sky_city');
+    S.warp('sky_city', 8, 8, 0);
+    S.step(2);
+    const before = S.board();
+    S.flag('lane_sky');
+    S.run('slide_grant');
+    for (let i = 0; i < 8; i++) {
+      S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(2);
+      if (S.board().has) break;
+    }
+    const after = S.board();
+    S.P.coins = 200;
+    S.P.part = 2;
+    S.P.ownB = 1;
+    S.P.gearB = 1;
+    if (!S.shop) {
+      S.run('slide_shop');
+      for (let i = 0; i < 6 && !S.shop; i++) {
+        S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(2);
+      }
+    }
+    S.step(2);
+    const price = S.shop && S.shop.id;
+    S.press('attack', true); S.step(1); S.press('attack', false); S.step(2);
+    const speed = S.board();
+    S.press('back', true); S.step(1); S.press('back', false); S.step(2);
+    for (let i = 0; i < 6 && (S.script || S.dlg || S.shop); i++) {
+      S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
+      if (S.shop) { S.press('back', true); S.step(1); S.press('back', false); S.step(1); }
+    }
+    S.P.x = 160; S.P.y = 120; S.P.dir = 3;
+    const x0 = S.P.x;
+    S.press('board', true); S.step(2); S.press('board', false); S.step(8);
+    const dashed = S.P.x - x0;
+    S.P.gearB = 5; S.P.ownB = 5;
+    S.P.roll = 0; S.P.rollCd = 0; S.P.boardDash = 0;
+    S.P.x = 80; S.P.y = 120; S.P.dir = 3;
+    const t0 = S.P.x;
+    S.press('board', true); S.step(1); S.press('board', false); S.step(2);
+    return { before, after, shop: price, speed, dashed, tele: S.P.x - t0, ancient: S.board().name };
+  });
+  expect(earned.before.has).toBe(false);
+  expect(earned.after.has).toBe(true);
+  expect(earned.after.name).toBe('RIDER');
+  expect(earned.speed.own).toBe(2);
+  expect(earned.speed.name).toBe('SPEED');
+  expect(earned.dashed).toBeGreaterThan(20);
+  expect(earned.ancient).toBe('ANCIENT');
+  expect(earned.tele).toBeGreaterThan(40);
+  const others = await page.evaluate(() => {
+    const S = __SQ;
+    S.flag('space_board', false);
+    S.G.story = 'ros';
+    const ros = S.board().has;
+    S.G.story = 'ramshackle';
+    const ram = S.board().has;
+    S.G.story = 'skippy';
+    const skip = S.board().has;
+    return { ros, ram, skip };
+  });
+  expect(others.ros).toBe(true);
+  expect(others.ram).toBe(true);
+  expect(others.skip).toBe(false);
+  const ramHit = await page.evaluate(() => {
+    const S = __SQ;
+    S.G.state = 'play';
+    S.G.story = 'ramshackle';
+    S.G.paused = false;
+    S.P.items = { hatchet: true, axe: true, shield: true };
+    S.P.pri = 'axe';
+    S.P.wep = 'axe';
+    S.P.sec = 'shield';
+    S.P.tool = 'shield';
+    S.flag('axe_got');
+    S.flag('shield_got');
+    S.flag('oe_ram_dock');
+    S.warp('ram_dock', 6, 8, 3);
+    S.step(2);
+    for (let i = 0; i < 8 && (S.script || S.dlg || S.shop); i++) {
+      S.skipText(); S.press('back', true); S.step(1); S.press('back', false); S.step(1);
+    }
+    S.P.x = 40; S.P.y = 40; S.P.dir = 3;
+    S.shots.length = 0;
+    S.press('attack', true); S.step(2); S.press('attack', false); S.step(6);
+    const axe = S.shots.filter((s) => s.kind === 'axe').length;
+    S.P.sec = 'shield';
+    S.P.tool = 'shield';
+    S.press('item', true); S.step(2); S.press('item', false); S.step(2);
+    return { axe, shield: S.P.shield > 0 };
+  });
+  expect(ramHit.axe).toBeGreaterThan(0);
+  expect(ramHit.shield).toBe(true);
   expect(errors, errors.join('\n')).toEqual([]);
 });
