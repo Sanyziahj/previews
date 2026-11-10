@@ -3,7 +3,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script>window.__SQ_BUILD="b27";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b27(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b27");location.replace(u.href);}</script>
+<script>window.__SQ_BUILD="b28";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b28(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b28");location.replace(u.href);}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Space Riders: Skippy's Quest</title><link rel="icon" href="data:,">
 <meta name="description" content="Space Riders: Skippy's Quest - a free 16-bit top-down action adventure browser game. The Red King is missing. Ride with ROS through the Sand Dungeon, take Cash's portals to the Seaport and Ramshackle the Viking, win Ronin's flaming sword, beat the house at the Andromeda Casino and stop the Overlord on the Moon, survive the meteor shower with Blaze and earn your space board at the Crossroad and cross the mirror into the Dark World, then storm Fright's castle and bring the Red King home. Chapters 1-9 (Complete) out now.">
@@ -12057,12 +12057,6 @@ ram_mem_amulet: [
     (D.nope(), Q("NOTHING TO SELL. ARROWS AND BOTTLES DO."));
   }
   function startRace() {
-    let rocks = [],
-      pads = [];
-    for (let i = 1; i <= 6; i++) {
-      rocks.push({ d: i * 10, x: i % 2 ? -0.62 : 0.62, hit: !1 });
-      i % 2 === 0 && pads.push({ d: i * 10 - 4, x: 0, got: !1 });
-    }
     ((A.race = {
       x: 0,
       dist: 0,
@@ -12070,10 +12064,26 @@ ram_mem_amulet: [
       boost: 0,
       t: 0,
       hit: 0,
-      phase: "run",
+      phase: "count",
       win: !1,
-      rocks: rocks,
-      pads: pads,
+      paid: !1,
+      reward: "",
+      place: 2,
+      finish: 78,
+      rocks: [
+        { d: 16, x: 0.74, k: "rock", hit: !1 },
+        { d: 24, x: -0.72, k: "bar", hit: !1 },
+        { d: 34, x: 0.7, k: "rock", hit: !1 },
+        { d: 42, x: -0.7, k: "bar", hit: !1 },
+        { d: 52, x: 0.76, k: "rock", hit: !1 },
+        { d: 60, x: -0.68, k: "bar", hit: !1 },
+        { d: 68, x: 0.7, k: "rock", hit: !1 },
+      ],
+      pads: [
+        { d: 12, x: 0, got: !1 },
+        { d: 30, x: 0, got: !1 },
+        { d: 48, x: 0, got: !1 },
+      ],
     }),
       (q = null),
       (Ae = null),
@@ -12083,76 +12093,132 @@ ram_mem_amulet: [
   function raceTick(e) {
     let r = A.race;
     if (!r) return;
-    if (r.phase === "done") {
-      (U.attackE || U.talkE) && startRace();
-      (U.backE || U.mapE) && (A.race = null);
-      return;
-    }
     if (U.backE || U.mapE) {
       A.race = null;
       return;
     }
+    if (r.phase === "count") {
+      r.t += e;
+      r.t >= 3 && ((r.phase = "run"), (r.t = 0));
+      return;
+    }
+    if (r.phase === "done") {
+      (U.attackE || U.talkE) && startRace();
+      return;
+    }
     let steer = (U.right ? 1 : 0) - (U.left ? 1 : 0) + (U.sx || 0);
-    r.x = Math.max(-1, Math.min(1, r.x + steer * e * 1.8));
+    r.x = Math.max(-1, Math.min(1, r.x + steer * e * 2.2));
     (U.boardE || U.rollE || U.attackE) && r.boost <= 0 && (r.boost = 1.15);
     r.boost = Math.max(0, r.boost - e);
-    let spd = 16 + (r.boost > 0 ? 14 : 0);
-    r.hit > 0 && ((r.hit -= e), (spd = 8));
-    ((r.dist += spd * e), (r.cav += 15.2 * e), (r.t += e));
+    let spd = 17.6 + (r.boost > 0 ? 12 : 0);
+    r.hit > 0 && ((r.hit -= e), (spd = 6));
+    ((r.dist += spd * e), (r.cav += 16.2 * e), (r.t += e));
     for (let p of r.pads)
       !p.got &&
-        Math.abs(r.dist - p.d) < 1.4 &&
-        Math.abs(r.x - p.x) < 0.38 &&
-        ((p.got = !0), (r.boost = 1.2), D.coin());
+        Math.abs(r.dist - p.d) < 1.3 &&
+        Math.abs(r.x - p.x) < 0.36 &&
+        ((p.got = !0), (r.boost = 1.15), D.coin());
     for (let o of r.rocks)
       !o.hit &&
-        Math.abs(r.dist - o.d) < 1.2 &&
-        Math.abs(r.x - o.x) < 0.3 &&
-        ((o.hit = !0), (r.hit = 0.55), D.hurt());
-    if (r.dist >= 70 || r.cav >= 70) {
-      ((r.phase = "done"), (r.win = r.dist >= 70 && r.dist + 0.01 >= r.cav));
-      if (r.win) {
+        Math.abs(r.dist - o.d) < 1.15 &&
+        Math.abs(r.x - o.x) < 0.34 &&
+        ((o.hit = !0), (r.hit = 0.65), D.hurt());
+    r.place = r.dist + 0.05 >= r.cav ? 1 : 2;
+    if (r.dist >= r.finish || r.cav >= r.finish) {
+      ((r.phase = "done"), (r.win = r.dist >= r.finish && r.dist + 0.05 >= r.cav), (r.place = r.win ? 1 : 2));
+      if (r.win && !r.paid) {
+        r.paid = !0;
         ee.race_won
-          ? ((d.coins += 5), Q("YOU WIN AGAIN. 5 STARS."))
+          ? ((d.coins += 5), (r.reward = "5 STARS"))
           : ((ee.race_won = !0),
             (d.coins += 15),
             (d.part = (d.part || 0) + 1),
-            Q("YOU BEAT CAVENDISH. 15 STARS AND A BOARD TOKEN."));
+            (r.reward = "15 STARS AND A BOARD TOKEN"));
         (D.win(), xe());
-      } else Q("CAVENDISH TAKES THE TRACK. RETRY?");
+      } else if (!r.win) r.reward = "NO PRIZE. THE LANE IS STILL THERE.";
     }
+  }
+  function drawRaceDeck(x, y, neon, hot) {
+    (I(x - 13, y - 2, 26, 9, "#d7dbe6"),
+      I(x - 13, y - 2, 26, 2, "#ffffff"),
+      I(x - 11, y + 1, 22, 2, "#b7bdcc"),
+      I(x - 12, y + 5, 24, 3, neon),
+      I(x - 3, y + 7, 6, hot ? 8 : 4, hot ? "#ffe066" : "#ff7a3a"),
+      hot && I(x - 1, y + 12, 2, 4, "#fff6c0"));
   }
   function drawRace() {
     let r = A.race;
     if (!r) return;
-    (I(0, 0, 320, 224, "#10182a"), I(96, 16, 128, 190, "#1c2438"), I(158, 16, 4, 190, "#2a334c"));
-    let cam = r.dist;
+    I(0, 0, 320, 224, "#070814");
+    for (let i = 0; i < 40; i++) {
+      let sx = (i * 53) % 320,
+        sy = (i * 97 - r.dist * (6 + (i % 3) * 3)) % 224;
+      sy < 0 && (sy += 224);
+      I(sx, sy, i % 7 === 0 ? 2 : 1, i % 7 === 0 ? 2 : 1, i % 4 === 0 ? "#9ecbff" : "#ffffff");
+    }
+    (I(78, 18, 164, 188, "#12182c"),
+      I(78, 18, 3, 188, "#4ff0ff"),
+      I(239, 18, 3, 188, "#ff4fd8"));
+    let scroll = (r.dist * 8) % 16;
+    for (let y = 18 - scroll; y < 206; y += 16) I(157, y, 6, 8, "#24304c");
+    let laneX = (x) => 160 + x * 72,
+      sy = (d) => 172 - (d - r.dist) * 7;
     for (let p of r.pads) {
-      let y = 180 - (p.d - cam) * 8;
-      y > 10 && y < 210 && I(148, y, 20, 8, p.got ? "#245" : "#3dff6a");
+      let y = sy(p.d);
+      if (y < 8 || y > 214) continue;
+      let x = laneX(p.x);
+      (I(x - 10, y, 20, 16, p.got ? "#102018" : "#123822"),
+        I(x - 7, y + 3, 14, 3, "#3dff6a"),
+        I(x - 4, y + 8, 8, 3, "#d6ffe6"));
     }
     for (let o of r.rocks) {
-      let y = 180 - (o.d - cam) * 8;
-      y > 10 &&
-        y < 210 &&
-        I(160 + o.x * 52 - 8, y, 16, 12, o.hit ? "#445" : "#c45a3a");
+      let y = sy(o.d);
+      if (y < 4 || y > 218) continue;
+      let x = laneX(o.x);
+      if (o.k === "bar")
+        (I(x - 18, y - 3, 36, 10, o.hit ? "#3a3428" : "#1a140c"),
+          I(x - 18, y - 3, 36, 3, "#ffcc33"),
+          I(x - 18, y + 3, 36, 3, "#111111"));
+      else
+        (R(n, x, y, 12, 10, o.hit ? "#3a342c" : "#6d5b48"),
+          R(n, x - 3, y - 3, 4, 3, "#a8947c"),
+          R(n, x + 4, y + 2, 3, 2, "#2c241c"));
     }
-    let cy = 180 - (r.cav - cam) * 8;
-    cy > 8 && cy < 210 && I(168, cy, 14, 16, "#2a62c0");
-    (I(160 + r.x * 52 - 8, 168, 16, 16, r.hit > 0 ? "#ffffff" : "#f2f2f4"),
-      I(20, 20, 70, 6, "#2a334c"),
-      I(20, 20, Math.max(0, Math.min(70, (r.dist / 70) * 70)), 6, "#ffcc33"),
-      v(n, r.phase === "done" ? (r.win ? "YOU WIN" : "CAVENDISH WINS") : "RACE", 160, 8, "#ffcc33", 1, "center", "#000"),
-      v(
-        n,
-        r.phase === "done" ? "X RETRY   BACK EXITS" : "STEER   X OR C BOOSTS",
-        160,
-        214,
-        "#fff6c0",
-        1,
-        "center",
-        "#000",
-      ));
+    let fy = sy(r.finish);
+    if (fy > -8 && fy < 230)
+      for (let i = 0; i < 10; i++) I(80 + i * 16, fy, 16, 8, i % 2 ? "#ffffff" : "#111111");
+    let cavX = -0.48,
+      cy = sy(r.cav);
+    if (r.phase !== "done") {
+      cy > 16 &&
+        cy < 210 &&
+        (drawRaceDeck(laneX(cavX), cy + 2, "#4a8ae8", !1), Aa("cavendish", laneX(cavX), cy - 4, 1, 0, 1));
+      (drawRaceDeck(laneX(r.x), 174, "#7ef0ff", r.boost > 0),
+        Aa(ga(), laneX(r.x), 168, 1, Math.floor(A.t * 8) % 2, r.hit > 0 ? 0.55 : 1));
+    }
+    let mine = Math.max(0, Math.min(1, r.dist / r.finish)),
+      his = Math.max(0, Math.min(1, r.cav / r.finish));
+    (I(4, 36, 8, 92, "#141824"),
+      I(4, 36 + Math.round(92 * (1 - mine)), 8, Math.max(2, Math.round(92 * mine)), "#fff6c0"),
+      I(36, 36, 8, 92, "#141824"),
+      I(36, 36 + Math.round(92 * (1 - his)), 8, Math.max(2, Math.round(92 * his)), "#4a8ae8"),
+      v(n, "YOU", 8, 20, "#fff6c0", 1, "center", "#000"),
+      v(n, "CAV", 40, 20, "#9ecbff", 1, "center", "#000"),
+      v(n, r.place === 1 ? "1ST" : "2ND", 292, 36, "#ffcc33", 1, "center", "#000"));
+    if (r.phase === "count") {
+      let left = Math.ceil(3 - r.t);
+      (I(110, 78, 100, 48, "#0c1020cc"),
+        v(n, left > 0 ? String(left) : "GO", 160, 86, "#ffcc33", 3, "center", "#000"));
+    }
+    if (r.phase === "done") {
+      (I(36, 58, 248, 108, "#0c1020"),
+        I(36, 58, 248, 2, r.win ? "#3dff6a" : "#ff4fd8"),
+        v(n, r.win ? "YOU WIN" : "CAVENDISH WINS", 160, 70, r.win ? "#3dff6a" : "#ff9ae8", 2, "center", "#000"),
+        v(n, r.place === 1 ? "1ST PLACE" : "2ND PLACE", 160, 92, "#fff6c0", 1, "center", "#000"),
+        v(n, r.reward || "", 160, 108, "#ffffff", 1, "center", "#000"),
+        v(n, "X RETRY    BACK EXITS", 160, 140, "#ffe0a0", 1, "center", "#000"));
+    } else if (r.phase === "count")
+      v(n, "GET READY", 160, 200, "#fff6c0", 1, "center", "#000");
   }
   function placeLabel(x, y, text, color) {
     if (!text) return;
@@ -17416,7 +17482,7 @@ ram_mem_amulet: [
       for (let a = 0; a < 16; a++)
         I((a * 23) % 320, 20 + ((a * 17) % 70), 2, 2, "#fff2c8");
       (v(n, "SPACE RIDERS", 160, 8, "#ff4fd8", 2, "center", "#2a0a14"),
-        v(n, window.__SQ_BUILD || "b27", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
+        v(n, window.__SQ_BUILD || "b28", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
         v(n, "SIDE QUESTS COME HOME", 160, 28, "#ffcc33", 1, "center", "#2a0a14"));
       let a = 58;
       for (let t = 0; t < STORY_ROWS.length; t++) {
@@ -21114,7 +21180,7 @@ ram_mem_amulet: [
       let e = A.t;
       (v(n, "SPACE RIDERS", 160, 14, "#ff4fd8", 3, "center", "#2a0a3a"),
         v(n, "SKIPPY'S QUEST", 160, 42, "#ffcc33", 2, "center", "#2a0a3a"),
-        v(n, window.__SQ_BUILD || "b27", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
+        v(n, window.__SQ_BUILD || "b28", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
       let a = (s, E, f, c, S) => {
         let y = Ue(s, S, 0);
         n.drawImage(
@@ -21345,16 +21411,7 @@ ram_mem_amulet: [
       return !1;
     }
     function touchRows() {
-      if (A.race)
-        return A.race.phase === "done"
-          ? [
-              { label: "RETRY", enabled: !0, on: !1 },
-              { label: "EXIT", enabled: !0, on: !1 },
-            ]
-          : [
-              { label: "BOOST", enabled: !0, on: !1 },
-              { label: "EXIT", enabled: !0, on: !1 },
-            ];
+      if (A.race) return [];
       if (le && nt[le.id]) {
         let items = nt[le.id].items;
         return items
@@ -21618,6 +21675,7 @@ ram_mem_amulet: [
       let face = mode === "play" ? actionFace() : { label: "ACTION", on: 0 },
         armed = !!(weaponNow() || toolNow() === "shield");
       ((root.dataset.touch = mode),
+        (root.dataset.race = A.race && A.race.phase === "done" ? "done" : "run"),
         (root.dataset.item = "1"),
         (root.dataset.itemon = mode === "play" && toolNow() ? "1" : "0"),
         (root.dataset.swap = mode === "play" && ownedTools().filter((id) => id !== weaponNow()).length > 1 ? "1" : "0"),
@@ -24106,7 +24164,7 @@ ram_mem_amulet: [
           enterStory(id);
           return Bt();
         },
-        build: () => window.__SQ_BUILD || "b27",
+        build: () => window.__SQ_BUILD || "b28",
         cast: () => castSpell(),
         hud: () => hudBits(),
         fightHud: () => fightHud(),
@@ -24379,7 +24437,7 @@ html.srml [data-b=swap]{border-color:#ffe650;color:#fff8d0;font-size:10px}
 html.srml [data-b=map]{border-color:#b7c3e6;color:#eef2ff;font-size:10px}
 html.srml #stick{display:none;position:fixed;z-index:6;margin:0;touch-action:none;border-radius:50%;border:3px solid #3dff6a;box-shadow:inset 0 0 0 7px rgba(61,255,106,.18),0 4px 0 #05060e}
 html.srml #srml-rows{display:none;width:min(440px,calc(100% - 24px));margin:10px auto 0;padding:0 0 12px;box-sizing:border-box;overflow:auto;flex:1 1 auto;min-height:0;z-index:5}
-html.srml[data-touch=title] #srml-rows,html.srml[data-touch=back] #srml-rows,html.srml[data-touch=pause] #srml-rows,html.srml[data-touch=choice] #srml-rows,html.srml[data-touch=shop] #srml-rows,html.srml[data-touch=dialog] #srml-rows,html.srml[data-touch=cards] #srml-rows,html.srml[data-touch=race] #srml-rows{display:flex;flex-direction:column;gap:10px}
+html.srml[data-touch=title] #srml-rows,html.srml[data-touch=back] #srml-rows,html.srml[data-touch=pause] #srml-rows,html.srml[data-touch=choice] #srml-rows,html.srml[data-touch=shop] #srml-rows,html.srml[data-touch=dialog] #srml-rows,html.srml[data-touch=cards] #srml-rows{display:flex;flex-direction:column;gap:10px}
 html.srml #srml-rows .srml-b{position:relative;display:flex;width:100%;height:52px;flex:none;font-size:15px}
 html.srml #srml-rows .srml-b:disabled{opacity:.4}
 html.srml #srml-rows .srml-b.on{border-color:#ffcc33}
@@ -24418,14 +24476,65 @@ function layout(){
   var mode=R.dataset.touch||"title";
   var sat=px("--sat"),sab=px("--sab"),sal=px("--sal"),sar=px("--sar");
   var play=mode==="play";
-  var menu=mode==="title"||mode==="back"||mode==="pause"||mode==="choice"||mode==="shop"||mode==="dialog"||mode==="cards"||mode==="race";
-  var full=mode==="pause"||mode==="shop"||mode==="dialog"||mode==="cards"||mode==="race";
+  var menu=mode==="title"||mode==="back"||mode==="pause"||mode==="choice"||mode==="shop"||mode==="dialog"||mode==="cards";
+  var full=mode==="pause"||mode==="shop"||mode==="dialog"||mode==="cards";
   scr.style.alignSelf="";
   scr.style.marginLeft="";
   ["attack","item","swap","roll","talk","map","back","magic"].forEach(function(k){hide(by[k]);});
   hide(stick);
   var top=sat+8,bot=sab+10,left=sal+10,right=W-sar-10;
-  if(menu){
+  if(by.item) by.item.dataset.b="item";
+  if(by.attack) by.attack.dataset.b="attack";
+  if(by.talk) by.talk.dataset.b="talk";
+  if(by.roll && mode!=="play") by.roll.dataset.b="roll";
+  if(mode==="race"){
+    var face=Math.max(64, Math.min(86, land?70:80));
+    var gap=12;
+    var boostName=R.dataset.race==="done"?"RETRY":"BOOST";
+    var ctrlTop=H-bot-face;
+    var steerW=face*1.3;
+    show(by.item, left, ctrlTop, steerW, face, "LEFT", false);
+    by.item.dataset.b="left";
+    by.item.style.borderRadius="18px";
+    by.item.style.fontSize="15px";
+    show(by.roll, left+steerW+gap, ctrlTop, steerW, face, "RIGHT", false);
+    by.roll.dataset.b="right";
+    by.roll.style.borderRadius="18px";
+    by.roll.style.fontSize="15px";
+    var boostW=Math.max(96, face*1.6);
+    show(by.attack, right-boostW, ctrlTop-face-gap, boostW, face, boostName, false);
+    by.attack.style.borderRadius="18px";
+    by.attack.style.fontSize="15px";
+    show(by.talk, right-boostW, ctrlTop, boostW, face, "EXIT", false);
+    by.talk.dataset.b="back";
+    by.talk.style.borderRadius="18px";
+    by.talk.style.fontSize="15px";
+    var stickH=Math.min(land?112:130, face*1.55);
+    var stickTop=Math.max(top+4, ctrlTop-stickH-gap);
+    if(stick) show(stick, left, stickTop, stickH, stickH);
+    if(land){
+      var leftCol=left+steerW*2+gap*2;
+      var rightEdge=right-boostW;
+      var maxW=Math.max(180, rightEdge-leftCol-16);
+      var maxH=Math.max(140, H-top-bot);
+      var cwr=Math.min(maxW, maxH*(320/224));
+      var ch=cwr*(224/320);
+      scr.style.width=cwr+"px";
+      scr.style.alignSelf="flex-start";
+      scr.style.marginLeft=Math.round(leftCol+(maxW-cwr)/2)+"px";
+      scr.style.marginTop=Math.max(top, Math.round((H-ch)/2))+"px";
+    }else{
+      var canvasBottom=stickTop-8;
+      var maxHc=Math.max(140, canvasBottom-top);
+      var cwr=Math.min(W-16, maxHc*(320/224));
+      var ch=cwr*(224/320);
+      var free=Math.max(0, canvasBottom-top-ch);
+      scr.style.width=cwr+"px";
+      scr.style.marginTop=Math.round(top+free/2)+"px";
+    }
+    scr.style.height="auto";
+    scr.style.overflow="visible";
+  }else if(menu){
     var head=mode==="title"?top+4:top+60;
     var banner=Math.max(110,Math.min(land?H*0.42:H*0.3,H-head-220));
     scr.style.width=Math.min(W-24,banner*(320/224))+"px";

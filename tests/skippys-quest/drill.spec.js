@@ -39,7 +39,7 @@ async function advance(page, n = 6) {
 test('version, home, and Cash leave the lanes clear', async ({ page }) => {
   const errors = await bootLive(page);
   const build = await page.evaluate(() => __SQ.build());
-  expect(build).toBe('b27');
+  expect(build).toBe('b28');
   const sub = await page.evaluate(() => __SQ.chapters().find((c) => c.id === 'skippy').sub);
   expect(sub).toContain('MAIN');
   await page.evaluate(() => {
@@ -343,6 +343,8 @@ test('Cavendish board race is playable and pays a token', async ({ page }) => {
     await press(page, 'Space');
     await page.waitForTimeout(140);
   }
+  await page.waitForFunction(() => __SQ.G.race && __SQ.G.race.phase === 'run', null, { timeout: 8000 });
+  await page.waitForTimeout(700);
   await page.locator('#game').screenshot({ path: `${ART}/ds-race-desktop.png` });
   await press(page, 'KeyX');
   await page.waitForFunction(() => __SQ.G.race && __SQ.G.race.phase === 'done', null, { timeout: 20000 });
@@ -359,6 +361,48 @@ test('Cavendish board race is playable and pays a token', async ({ page }) => {
   await press(page, 'Backspace');
   await page.waitForTimeout(200);
   expect(await page.evaluate(() => __SQ.G.race)).toBeFalsy();
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test('holding into the asteroids loses the Cavendish race', async ({ page }) => {
+  const errors = await bootLive(page);
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.G.state = 'play';
+    S.G.story = 'skippy';
+    S.G.paused = false;
+    S.P.coins = 9;
+    S.P.part = 0;
+    S.flag('oe_carnival');
+    S.warp('carnival', 21, 6, 1);
+  });
+  await page.waitForTimeout(200);
+  await press(page, 'KeyE');
+  for (let i = 0; i < 6 && !(await page.evaluate(() => !!__SQ.G.choice)); i++) {
+    await press(page, 'Space');
+    await page.waitForTimeout(120);
+  }
+  await page.evaluate(() => { __SQ.G.choice.sel = 1; });
+  await press(page, 'KeyX');
+  for (let i = 0; i < 6 && !(await page.evaluate(() => !!__SQ.G.race)); i++) {
+    await press(page, 'Space');
+    await page.waitForTimeout(140);
+  }
+  await page.waitForFunction(() => __SQ.G.race && __SQ.G.race.phase === 'run', null, { timeout: 8000 });
+  await page.keyboard.down('ArrowRight');
+  await page.waitForFunction(() => __SQ.G.race && __SQ.G.race.phase === 'done', null, { timeout: 20000 });
+  await page.keyboard.up('ArrowRight');
+  const lost = await page.evaluate(() => ({
+    win: __SQ.G.race.win,
+    place: __SQ.G.race.place,
+    coins: __SQ.P.coins,
+    reward: __SQ.G.race.reward,
+  }));
+  expect(lost.win).toBe(false);
+  expect(lost.place).toBe(2);
+  expect(lost.coins).toBe(9);
+  expect(lost.reward).toContain('NO PRIZE');
+  await page.locator('#game').screenshot({ path: `${ART}/ds-race-lose.png` });
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
@@ -380,10 +424,20 @@ test.describe('phone race', () => {
       await page.waitForTimeout(120);
     }
     await page.waitForFunction(() => document.documentElement.dataset.touch === 'race');
+    await page.waitForFunction(() => __SQ.G.race && __SQ.G.race.phase === 'run', null, { timeout: 8000 });
+    await page.waitForTimeout(500);
+    const labels = await page.locator('.srml-b').allTextContents();
+    expect(labels.join(' ')).toContain('LEFT');
+    expect(labels.join(' ')).toContain('RIGHT');
+    expect(labels.join(' ')).toContain('BOOST');
+    expect(labels.join(' ')).toContain('EXIT');
     await page.screenshot({ path: `${ART}/ds-race-phone.png` });
-    await page.locator('#srml-rows button', { hasText: 'BOOST' }).tap();
+    await page.setViewportSize({ width: 844, height: 390 });
+    await page.waitForTimeout(250);
+    await page.screenshot({ path: `${ART}/ds-race-land.png` });
+    await page.locator('.srml-b', { hasText: 'BOOST' }).tap();
     await page.waitForFunction(() => __SQ.G.race && __SQ.G.race.phase === 'done', null, { timeout: 20000 });
-    await page.locator('#srml-rows button', { hasText: 'EXIT' }).tap();
+    await page.locator('.srml-b', { hasText: 'EXIT' }).tap();
     await page.waitForTimeout(300);
     expect(await page.evaluate(() => __SQ.G.race)).toBeFalsy();
     expect(errors, errors.join('\n')).toEqual([]);
