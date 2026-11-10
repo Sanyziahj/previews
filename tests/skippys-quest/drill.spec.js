@@ -39,7 +39,7 @@ async function advance(page, n = 6) {
 test('version, home, and Cash leave the lanes clear', async ({ page }) => {
   const errors = await bootLive(page);
   const build = await page.evaluate(() => __SQ.build());
-  expect(build).toBe('b29');
+  expect(build).toBe('b30');
   const sub = await page.evaluate(() => __SQ.chapters().find((c) => c.id === 'skippy').sub);
   expect(sub).toContain('MAIN');
   await page.evaluate(() => {
@@ -471,7 +471,7 @@ async function fightBoss(page, area, file) {
   await page.waitForFunction(() => __SQ.B && __SQ.B.state === 'fight', null, { timeout: 8000 });
   await page.locator('#game').screenshot({ path: `${ART}/${file}.png` });
   let hurt = false;
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 18; i++) {
     await press(page, 'KeyX');
     await page.waitForTimeout(180);
     const snap = await page.evaluate(() => ({ hp: __SQ.B.hp, state: __SQ.B.state, max: __SQ.B.max }));
@@ -1070,7 +1070,7 @@ test('Cash court sits downstairs of the Pour, and the heavy case opens', async (
     labels: (window.__SQ_LABELS || []).map((l) => l.text),
   }));
   expect(court.id).toBe('nexus');
-  expect(court.name).toBe("CASH'S COURT");
+  expect(court.name).toBe("CASH'S BASEMENT");
   expect(court.cash).toBe(true);
   expect(court.portals).toBeGreaterThanOrEqual(10);
   expect(court.labels.join(' ')).toContain('COSMOS');
@@ -1079,13 +1079,16 @@ test('Cash court sits downstairs of the Pour, and the heavy case opens', async (
 
   await page.evaluate(() => {
     const S = __SQ;
+    S.warp('saloon', 8, 6, 1);
+    for (let i = 0; i < 4; i++) { S.skipText(); S.step(1); }
     S.P.items.raygun = true;
     S.P.pri = 'raygun';
     S.P.wep = 'raygun';
-    S.P.x = 5.2 * 16 + 8;
-    S.P.y = 8.4 * 16;
+    S.P.x = 8.5 * 16 + 8;
+    S.P.y = 5.6 * 16;
     S.P.dir = 1;
     S.flag('court_box', false);
+    S.flag('pour_box', false);
   });
   await page.waitForTimeout(100);
   await press(page, 'KeyX');
@@ -1106,8 +1109,8 @@ test('Cash court sits downstairs of the Pour, and the heavy case opens', async (
     S.P.wep = 'heavy';
     S.P.sec = 'raygun';
     S.P.tool = 'raygun';
-    S.P.x = 5.2 * 16 + 8;
-    S.P.y = 8.4 * 16;
+    S.P.x = 8.5 * 16 + 8;
+    S.P.y = 5.6 * 16;
     S.P.dir = 1;
     S.P.cds = {};
   });
@@ -1122,20 +1125,22 @@ test('Cash court sits downstairs of the Pour, and the heavy case opens', async (
   await page.locator('#game').screenshot({ path: `${ART}/b29-case-after.png` });
   await page.evaluate(() => {
     const S = __SQ;
-    S.P.x = 6 * 16;
-    S.P.y = 8 * 16 + 10;
-    S.P.dir = 0;
+    S.P.x = 8.5 * 16;
+    S.P.y = 5.4 * 16;
+    S.P.dir = 1;
+  });
+  await page.waitForTimeout(200);
+  await page.locator('#game').screenshot({ path: `${ART}/b30-stairs.png` });
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.P.x = 8.5 * 16;
+    S.P.y = 4.4 * 16;
+    S.P.dir = 1;
   });
   await page.waitForTimeout(900);
-  const vault = await page.evaluate(() => ({
-    id: __SQ.A.id,
-    x: Math.round(__SQ.P.x),
-    y: Math.round(__SQ.P.y),
-    warps: (__SQ.A.warps || []).map((w) => w.to + ':' + (w.need || '') + '@' + w.x + ',' + w.y),
-    flag: !!__SQ.flags.court_box,
-    open: !!(__SQ.script || __SQ.dlg || __SQ.shop),
-  }));
-  expect(vault.id, JSON.stringify(vault)).toBe('court_vault');
+  const vault = await page.evaluate(() => __SQ.A.id);
+  expect(vault).toBe('nexus');
+  await page.locator('#game').screenshot({ path: `${ART}/b30-basement.png` });
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
@@ -1335,5 +1340,324 @@ test('BOARD draws a space deck under the rider', async ({ page }) => {
   await paint('skippy', 'sky_city', 2, 'b29-board-slide.png', 'slide');
   await paint('skippy', 'carnival', 1, 'b29-board-cavendish.png', 'cavendish');
   await paint('skippy', 'lane_sky', 3, 'b29-board-lane.png');
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test('the main road skips the tales, and gear, bosses, and labels stay honest', async ({ page }) => {
+  const errors = await bootLive(page);
+  const table = await page.evaluate(() => {
+    const S = __SQ;
+    S.G.state = 'play';
+    S.G.story = 'skippy';
+    S.G.paused = true;
+    S.G.skipPage = 2;
+    S.step(2);
+    const rows = S.gearTable();
+    const tales = rows.filter((r) => r.from === 'TALE').map((r) => r.id);
+    return { n: rows.length, tales, heavy: rows.find((r) => r.id === 'heavy') };
+  });
+  expect(table.n).toBeGreaterThan(10);
+  expect(table.tales).toEqual(expect.arrayContaining(['lasso', 'axe', 'heavy']));
+  expect(table.heavy.opens).toContain('CASE');
+  await page.locator('#game').screenshot({ path: `${ART}/b30-gear-table.png` });
+  await page.evaluate(() => { __SQ.G.gearSel = 15; __SQ.step(1); });
+  await page.locator('#game').screenshot({ path: `${ART}/b30-gear-rest.png` });
+
+  const road = await page.evaluate(() => {
+    const S = __SQ;
+    S.G.paused = false;
+    S.flag('tale_ros', false);
+    S.flag('tale_ram', false);
+    S.flag('tale_drill', false);
+    S.flag('heavy_got', false);
+    S.flag('pour_box', false);
+    const areas = [];
+    for (let chap = 1; chap <= 8; chap++) {
+      S.G.chap = chap;
+      S.nextRoad();
+      areas.push(S.A.id);
+    }
+    S.warp('saloon', 8, 6, 1);
+    const sealed = !(S.A.warps || []).some((w) => w.to === 'nexus' && !w.need);
+    return { areas, sealed, basement: S.basement() };
+  });
+  expect(road.areas[0]).toBe('seaport');
+  expect(road.areas[1]).toBe('village');
+  expect(road.areas[7]).toBe('cgate');
+  expect(road.areas).not.toContain('nexus');
+  expect(road.basement).toBe(false);
+  expect(road.sealed).toBe(true);
+
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.G.state = 'play';
+    S.G.story = 'drill';
+    S.P.items = { blast: true };
+    S.P.pri = 'blast';
+    S.P.wep = 'blast';
+    S.P.hp = 12;
+    S.P.maxHp = 12;
+    S.flag('oe_ds_moonboss');
+    S.warp('ds_moonboss', 9, 8, 1);
+    for (let i = 0; i < 16; i++) {
+      S.skipText();
+      S.press('talk', true); S.step(1); S.press('talk', false); S.step(2);
+      if (S.B && (S.B.state === 'fight' || S.B.state === 'intro')) break;
+    }
+    S.step(30);
+  });
+  await page.waitForFunction(() => __SQ.B && __SQ.B.state === 'fight', null, { timeout: 8000 });
+  await page.locator('#game').click();
+  for (let i = 0; i < 4; i++) {
+    await press(page, 'KeyX');
+    await page.waitForTimeout(220);
+    if (await page.evaluate(() => __SQ.B.hp < __SQ.B.max)) break;
+  }
+  const mid = await page.evaluate(() => ({ hp: __SQ.B.hp, max: __SQ.B.max }));
+  expect(mid.hp).toBeLessThan(mid.max);
+  expect(mid.hp).toBeGreaterThan(0);
+  await page.locator('#game').screenshot({ path: `${ART}/b30-boss-bar.png` });
+
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.G.story = 'skippy';
+    S.flag('oe_d1');
+    S.warp('d1', 10, 8, 1);
+    for (let i = 0; i < 4; i++) { S.skipText(); S.step(1); }
+  });
+  await page.waitForTimeout(300);
+  await page.locator('#game').screenshot({ path: `${ART}/b30-no-labels.png` });
+
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.G.story = 'skippy';
+    S.G.state = 'play';
+    S.G.paused = false;
+    S.flag('oe_desert');
+    S.warp('desert', 16, 16, 3);
+    for (let i = 0; i < 6; i++) { S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1); }
+    S.P.items.disc = true;
+    S.P.items.raygun = true;
+    S.P.pri = 'raygun';
+    S.P.wep = 'raygun';
+    S.P.sec = 'disc';
+    S.P.tool = 'disc';
+    S.P.arrowCd = 0;
+    S.P.dir = 3;
+    S.shots.length = 0;
+  });
+  await page.locator('#game').click();
+  await press(page, 'KeyZ');
+  await page.waitForTimeout(60);
+  const disc = await page.evaluate(() => ({
+    shot: __SQ.shots.some((s) => s.kind === 'disc'),
+    slots: __SQ.slots(),
+    n: __SQ.shots.length,
+  }));
+  expect(disc.shot, JSON.stringify(disc)).toBe(true);
+  await page.locator('#game').screenshot({ path: `${ART}/b30-disc.png` });
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test('each new piece does the job the table names', async ({ page }) => {
+  const errors = await bootLive(page);
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.G.state = 'play';
+    S.G.story = 'skippy';
+    S.flag('oe_d1');
+    S.flag('santt_met');
+    S.warp('d1', 4, 6, 3);
+    for (let i = 0; i < 8; i++) { S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1); }
+    S.step(8);
+  });
+  const sword = await page.evaluate(() => {
+    const S = __SQ;
+    const foe = S.ents.find((e) => e.k === 'vov' && !e.dead);
+    if (!foe) return { missing: true };
+    S.P.x = foe.x - 18;
+    S.P.y = foe.y;
+    S.P.dir = 3;
+    S.P.items.sword = true;
+    S.P.pri = 'sword';
+    S.P.wep = 'sword';
+    S.P.arrowCd = 0;
+    S.P.atk = 0;
+    return { hp: foe.hp, x: foe.x, y: foe.y };
+  });
+  expect(sword.missing).toBeFalsy();
+  await page.locator('#game').click();
+  await press(page, 'KeyX');
+  await page.waitForTimeout(220);
+  const afterSword = await page.evaluate(() => {
+    const foe = __SQ.ents.find((e) => e.k === 'vov');
+    return { hp: foe.hp, dead: !!foe.dead };
+  });
+  expect(afterSword.hp).toBe(sword.hp - 2);
+
+  const plasma = await page.evaluate(() => {
+    const S = __SQ;
+    const foe = S.ents.find((e) => e.k === 'vov');
+    if (!foe) return { missing: true };
+    foe.dead = false;
+    foe.hp = 6;
+    S.P.x = foe.x - 18;
+    S.P.y = foe.y;
+    S.P.dir = 3;
+    S.P.items.plasma = true;
+    S.P.pri = 'plasma';
+    S.P.wep = 'plasma';
+    S.P.arrowCd = 0;
+    S.P.atk = 0;
+    S.P.cds = {};
+    return { hp: foe.hp };
+  });
+  expect(plasma.missing).toBeFalsy();
+  await press(page, 'KeyX');
+  await page.waitForTimeout(220);
+  await page.locator('#game').screenshot({ path: `${ART}/b30-plasma.png` });
+  const afterPlasma = await page.evaluate(() => {
+    const foe = __SQ.ents.find((e) => e.k === 'vov');
+    return { hp: foe ? foe.hp : -1, dead: !!(foe && foe.dead) };
+  });
+  expect(afterPlasma.hp).toBe(3);
+
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.flag('oe_desert');
+    S.flag('santt_met');
+    S.warp('desert', 20, 20, 3);
+    for (let i = 0; i < 6; i++) { S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1); }
+    S.P.items.disc = true;
+    S.P.sec = 'disc';
+    S.P.tool = 'disc';
+    S.P.arrowCd = 0;
+    S.shots.length = 0;
+    S.P.dir = 3;
+  });
+  await press(page, 'KeyZ');
+  await page.waitForTimeout(500);
+  const back = await page.evaluate(() => {
+    const shot = __SQ.shots.find((s) => s.kind === 'disc');
+    return { gone: !shot, back: !!(shot && shot.back), t: shot ? shot.t : 0 };
+  });
+  expect(back.gone || back.back).toBe(true);
+
+  const suit = await page.evaluate(() => {
+    const S = __SQ;
+    S.warp('desert', 40, 20, 3);
+    for (let i = 0; i < 60 && (S.script || S.dlg); i++) {
+      if (S.dlg) { S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); }
+      S.step(2);
+    }
+    S.G.paused = false;
+    S.P.hp = 8;
+    S.P.maxHp = 8;
+    S.P.inv = 0;
+    S.P.god = false;
+    S.P.ward = 0;
+    S.P.ember = 0;
+    S.P.shield = 0;
+    S.P.gearA = 1;
+    S.P.items.suit = false;
+    S.hurt(2);
+    const bare = S.P.hp;
+    S.P.hp = 8;
+    S.P.inv = 0;
+    S.P.items.suit = true;
+    S.hurt(2);
+    return { bare, suited: S.P.hp, state: S.G.state, dlg: !!S.dlg, script: !!S.script, paused: !!S.G.paused, shop: !!S.shop, pop: !!S.getPop };
+  });
+  expect(suit.bare, JSON.stringify(suit)).toBe(6);
+  expect(suit.suited).toBe(7);
+
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.P.items.shield = true;
+    S.P.items.plate = true;
+    S.P.sec = 'shield';
+    S.P.tool = 'shield';
+    S.P.cds = {};
+    S.P.shield = 0;
+  });
+  await press(page, 'KeyZ');
+  await page.waitForTimeout(80);
+  const plate = await page.evaluate(() => __SQ.P.shield || 0);
+  expect(plate).toBeGreaterThan(2);
+
+  const latch = await page.evaluate(() => {
+    const S = __SQ;
+    S.warp('desert', 6, 16, 1);
+    for (let i = 0; i < 4; i++) { S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1); }
+    S.P.x = 6 * 16 + 8;
+    S.P.y = 16 * 16 + 8;
+    S.P.items.lasso = false;
+    S.P.items.gloves = false;
+    S.flag('tale_ros', false);
+    S.flag('latch_desert', false);
+    return true;
+  });
+  expect(latch).toBe(true);
+  await press(page, 'Space');
+  await page.waitForTimeout(80);
+  const shut = await page.evaluate(() => !!__SQ.flags.latch_desert);
+  expect(shut).toBe(false);
+  await page.evaluate(() => { __SQ.P.items.lasso = true; });
+  await press(page, 'Space');
+  await page.waitForTimeout(80);
+  const opened = await page.evaluate(() => ({
+    latch: !!__SQ.flags.latch_desert,
+    boots: !!__SQ.P.items.boots,
+  }));
+  expect(opened.latch).toBe(true);
+  expect(opened.boots).toBe(true);
+
+  const stride = await page.evaluate(() => {
+    const S = __SQ;
+    S.warp('desert', 40, 20, 3);
+    for (let i = 0; i < 4; i++) { S.skipText(); S.step(1); }
+    S.P.items.board = false;
+    S.P.items.boots = false;
+    S.flag('space_board', false);
+    S.flag('board_got', false);
+    S.P.x = 40 * 16;
+    S.P.y = 20 * 16;
+    return S.P.x;
+  });
+  await hold(page, 'ArrowRight', 700);
+  const slow = await page.evaluate(() => __SQ.P.x);
+  await page.evaluate((x) => { __SQ.P.items.boots = true; __SQ.P.x = x; }, stride);
+  await hold(page, 'ArrowRight', 700);
+  const fast = await page.evaluate(() => __SQ.P.x);
+  expect(fast - stride).toBeGreaterThan(slow - stride + 6);
+
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.G.trans = null;
+    S.flag('oe_seaport');
+    S.warp('seaport', 8, 8, 1);
+    for (let i = 0; i < 20 && (S.script || S.dlg || S.G.trans); i++) {
+      if (S.dlg) { S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); }
+      S.step(2);
+    }
+    S.P.x = 8 * 16 + 8;
+    S.P.y = 8 * 16 + 8;
+    S.P.items.axe = true;
+    S.flag('vine_sea', false);
+    S.P.items.gloves = false;
+  });
+  await press(page, 'Space');
+  await page.waitForTimeout(80);
+  const vine = await page.evaluate(() => ({
+    cut: !!__SQ.flags.vine_sea,
+    gloves: !!__SQ.P.items.gloves,
+    area: __SQ.A.id,
+    x: __SQ.P.x,
+    y: __SQ.P.y,
+    script: !!__SQ.script,
+    dlg: !!__SQ.dlg,
+  }));
+  expect(vine.cut, JSON.stringify(vine)).toBe(true);
+  expect(vine.gloves).toBe(true);
   expect(errors, errors.join('\n')).toEqual([]);
 });

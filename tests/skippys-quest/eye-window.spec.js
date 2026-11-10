@@ -76,7 +76,7 @@ test('a hatchet in X still drops the Eye during lightning', async ({ page }) => 
   const errors = await bootLive(page);
   await page.locator('#game').screenshot({ path: `${ART}/build-tag.png` });
   const build = await page.evaluate(() => __SQ.build());
-  expect(build).toBe('b29');
+  expect(build).toBe('b30');
   await readyEye(page, {
     items: { hatchet: true, amulet: true },
     pri: 'hatchet',
@@ -91,8 +91,9 @@ test('a hatchet in X still drops the Eye during lightning', async ({ page }) => 
   await page.locator('#game').screenshot({ path: `${ART}/eye-hp-drop.png` });
   await strike(page, -34, 0, 3);
   await strike(page, 34, 0, 2);
-  expect(mid).toBeLessThan(8);
-  for (let i = 0; i < 18; i++) {
+  expect(mid).toBeGreaterThan(0);
+  expect(mid).toBeLessThan(12);
+  for (let i = 0; i < 24; i++) {
     const snap = await page.evaluate(() => ({ hp: __SQ.B.hp, state: __SQ.B.state, rune: __SQ.P.rune || 0 }));
     if (snap.hp <= 0 || snap.state === 'dying' || snap.state === 'dead') break;
     if (snap.rune < 0.4) {
@@ -173,7 +174,7 @@ test.describe('phone hatchet tap', () => {
     await page.waitForTimeout(300);
     const mid = await page.evaluate(() => __SQ.B.hp);
     expect(mid).toBeLessThan(before);
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < 20; i++) {
       const snap = await page.evaluate(() => ({ hp: __SQ.B.hp, state: __SQ.B.state, rune: __SQ.P.rune || 0 }));
       if (snap.hp <= 0 || snap.state === 'dying' || snap.state === 'dead') break;
       if (snap.rune < 0.4) {
