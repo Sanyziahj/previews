@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="sr-build" content="b1">
+<meta name="theme-color" content="#120a24">
+<title>Space Riders: Cosmic Academy</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect rx='14' width='64' height='64' fill='%23120a24'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-size='36' fill='%23ffcf67'%3E★%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    --ink: #1a1230;
+    --paper: #fff8ee;
+    --gold: #ffcf67;
+    --night: #120a24;
+    --panel: #241848;
+    --line: #1a1230;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; overflow: hidden; background: var(--night); color: #fff8ee; }
+  body {
+    font-family: "Trebuchet MS", "DejaVu Sans", "Segoe UI", sans-serif;
+    touch-action: manipulation;
+    user-select: none;
+  }
+  button, input { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  #starfield { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+  #app { position: relative; z-index: 1; height: 100%; display: flex; flex-direction: column; }
+  header {
+    display: flex; align-items: center; gap: 8px;
+    min-height: 52px; padding: 6px 8px;
+    background: #1a1030ee;
+  }
+  #btn-home, .tool, .choice, .door, .lesson-card, .mode, .chip, .modal button {
+    border: 3px solid #1a1230;
+    background: var(--gold);
+    color: var(--ink);
+    border-radius: 14px;
+    font-weight: 800;
+    min-height: 48px;
+    padding: 8px 12px;
+  }
+  #btn-home { min-width: 72px; }
+  body[data-screen="hub"] #btn-home { visibility: hidden; }
+  h1 { flex: 1; margin: 0; font-size: clamp(16px, 2.4vw, 28px); line-height: 1.1; text-align: center; }
+  .stars { font-size: 20px; font-weight: 800; white-space: nowrap; }
+  #build {
+    font-size: 12px; font-weight: 800; letter-spacing: 0.04em;
+    border: 2px solid var(--gold); border-radius: 999px; padding: 2px 6px; color: var(--gold);
+  }
+  #screen { flex: 1; min-height: 0; position: relative; }
+  body[data-screen="hub"] #screen { background: transparent; }
+  body:not([data-screen="hub"]) #screen { background: #100c22; }
+
+  .hub { height: 100%; display: flex; flex-direction: column; gap: 8px; padding: 8px 10px 12px; }
+  .hero { display: flex; align-items: center; justify-content: center; gap: 10px; }
+  .bust { width: 92px; height: 92px; background: #fff8ee; border-radius: 18px; border: 3px solid var(--gold); }
+  .hello { margin: 0 0 4px; font-size: 18px; font-weight: 800; }
+  .note, .cap { margin: 0; color: #ffe9b0; font-size: 14px; }
+  .cap { color: #5c4a38; }
+  .doors { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  .door {
+    background: #2a1860;
+    color: #fff8ee;
+    border-color: var(--gold);
+    display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-end;
+    text-align: left; min-height: 0;
+  }
+  .door b { font-size: clamp(20px, 3vw, 32px); }
+  .door .kicker { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); }
+  .door small { font-weight: 700; opacity: 0.9; }
+  .door.art { background: #7a2a68; }
+  .door.math { background: #1d4f8f; }
+  .door.science { background: #0f6b62; }
+  .door.tech { background: #5a3a12; }
+  .door.language { background: #3a2a78; }
+
+  .class-wrap, .lesson, .picker, .art-home, .gallery { height: 100%; overflow: auto; padding: 10px; }
+  .level-h { margin: 12px 0 6px; font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); }
+  .cards, .lessons { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
+  .lesson-card, .mode {
+    background: #fff8ee; color: var(--ink); text-align: left; display: flex; flex-direction: column; gap: 4px;
+  }
+  .lesson-card.done { box-shadow: inset 0 0 0 3px #2fbf5a; }
+  .art-home .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .mode b { font-size: 22px; }
+  .filters { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 8px; }
+  .chip { background: #241848; color: #fff8ee; border-color: var(--gold); }
+  .chip.on { background: var(--gold); color: var(--ink); }
+  .card {
+    background: #fff8ee; color: var(--ink); border: 3px solid #1a1230; border-radius: 16px;
+    padding: 6px; text-align: center; font-weight: 800;
+  }
+  .card canvas { width: 100%; height: auto; background: #fff; border-radius: 10px; display: block; }
+  .card small { display: block; font-weight: 700; }
+
+  .play { height: 100%; display: flex; flex-direction: column; min-height: 0; }
+  .tipbar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 8px; background: #1a1030; min-height: 44px;
+  }
+  .tipbar .bust { width: 44px; height: 44px; border-width: 2px; flex: 0 0 auto; }
+  #tip { margin: 0; font-weight: 700; font-size: 15px; }
+  .stage { flex: 1; min-height: 120px; position: relative; background: #efe6d4; }
+  .stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+  .dock { display: flex; flex-direction: column; gap: 6px; padding: 6px; background: #120c28; }
+  .row { display: flex; gap: 6px; overflow-x: auto; align-items: center; }
+  .tool { min-width: 64px; background: #fff4d2; }
+  .tool.on, .pot.on { outline: 4px solid var(--gold); outline-offset: 1px; }
+  .pot {
+    border: 3px solid #1a1230; background: #241848; color: #fff8ee;
+    border-radius: 14px; min-width: 58px; min-height: 58px; padding: 4px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+    font-size: 11px; font-weight: 800;
+  }
+  .pot i { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #1a1230; display: block; }
+  .mixbar { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .slot {
+    min-width: 74px; min-height: 44px; border-radius: 12px; border: 3px solid #1a1230;
+    background: #fff; color: #1a1230; font-weight: 800; display: grid; place-items: center; padding: 4px 8px;
+  }
+  #mix-name { font-size: 18px; }
+  #thumb-pin {
+    position: absolute; right: 8px; bottom: 8px; width: 72px; height: 72px; padding: 0;
+    border: 4px solid var(--gold); border-radius: 12px; background: #fff; box-shadow: 0 0 0 3px #7b3fd0;
+  }
+  #thumb-pin img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: block; }
+
+  .lesson { display: flex; flex-direction: column; gap: 8px; }
+  .qbox { background: var(--paper); color: var(--ink); border-radius: 18px; padding: 12px; }
+  .prompt { font-size: clamp(18px, 2.5vw, 26px); font-weight: 800; margin: 0 0 8px; }
+  .visual { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .choice { width: 100%; }
+  .dots { display: flex; flex-wrap: wrap; gap: 6px; }
+  .dots i { width: 22px; height: 22px; border-radius: 50%; background: #7b3fd0; border: 2px solid #1a1230; display: block; }
+  .fbar { display: flex; width: min(280px, 100%); height: 28px; border: 3px solid #1a1230; border-radius: 8px; overflow: hidden; }
+  .fbar b { flex: 1; background: #fff; border-right: 2px solid #1a1230; }
+  .fbar b.on { background: #7b3fd0; }
+  .len { display: flex; align-items: center; gap: 8px; font-weight: 800; }
+  .len i { display: block; height: 16px; background: #2f6bff; border: 2px solid #1a1230; }
+  .fig { width: min(280px, 100%); height: auto; background: #fff; border-radius: 12px; }
+  .story-flag {
+    width: 100%; margin: 0 0 6px; padding: 8px; border-radius: 10px;
+    background: #fff4d2; color: #1a1230; border: 3px solid #e23b3b; font-weight: 800;
+  }
+  .passage { margin: 0; font-size: 18px; line-height: 1.35; font-weight: 700; }
+  .panel {
+    background: #241848; border: 3px solid var(--gold); border-radius: 16px; padding: 10px;
+  }
+  .panel p { margin: 0 0 8px; }
+  .belt { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 8px; }
+  .cells { display: grid; gap: 4px; }
+  .cell {
+    aspect-ratio: 1; border-radius: 8px; background: #1a2744; border: 2px solid #ffcf67;
+    display: grid; place-items: center; position: relative; color: #ffd23a; font-size: 20px;
+  }
+  .cell.goal { background: #3a2a10; }
+  .rover { color: #fff; font-size: 22px; line-height: 1; }
+  .prog { min-height: 36px; font-weight: 800; }
+  .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+  .gallery-grid img { width: 100%; border-radius: 12px; border: 4px solid var(--gold); box-shadow: 0 0 0 3px #7b3fd0; background: #fff; }
+
+  #modal[hidden] { display: none; }
+  #modal {
+    position: fixed; inset: 0; z-index: 5; background: #07061acc;
+    display: grid; place-items: center; padding: 16px;
+  }
+  .sheet {
+    width: min(440px, 100%); background: #fff8ee; color: var(--ink);
+    border-radius: 18px; padding: 16px; border: 4px solid var(--gold);
+  }
+  .sheet p { font-size: 18px; font-weight: 800; }
+  #modal-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  @media (max-width: 700px) {
+    .doors { grid-template-columns: 1fr 1fr; }
+    .bust { width: 72px; height: 72px; }
+    .choices { grid-template-columns: 1fr; }
+  }
+  @media (max-height: 460px) {
+    header { min-height: 42px; padding: 4px 6px; }
+    h1 { font-size: 16px; }
+    .hub { padding: 4px; gap: 4px; }
+    .hero .note { display: none; }
+    .hello { font-size: 14px; }
+    .bust { width: 64px; height: 64px; }
+    .door { justify-content: center; }
+    .door small, .door .kicker { display: none; }
+    .doors { grid-template-columns: repeat(5, 1fr); }
+    .lesson { display: flex; flex-direction: column; height: 100%; overflow: auto; }
+    .qbox { width: 100%; }
+    .choices { grid-template-columns: 1fr 1fr; }
+    .belt { grid-template-columns: 1.2fr 0.8fr; }
+    .tipbar { min-height: 36px; }
+    #tip { font-size: 13px; }
+    .pot span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    .pot { min-width: 46px; min-height: 46px; }
+    .dock { padding: 4px; gap: 4px; }
+  }
+</style>
+</head>
+<body data-screen="hub">
+<canvas id="starfield" aria-hidden="true"></canvas>
+<div id="app">
+  <header>
+    <button id="btn-home" type="button" data-act="home">Home</button>
+    <h1 id="title">Space Riders: Cosmic Academy</h1>
+    <div class="stars" aria-label="stars">★ <span id="star-count">0</span></div>
+    <span id="build">b1</span>
+  </header>
+  <main id="screen"></main>
+</div>
+<div id="modal" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="modal-text">
+    <p id="modal-text"></p>
+    <div id="modal-actions"></div>
+  </div>
+</div>
+<script>window.__AC_BUILD="b1";</script>
+<script src="js/lessons.js"></script>
+<script src="js/art.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
