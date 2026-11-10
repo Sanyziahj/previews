@@ -2579,3 +2579,100 @@ test('every key is a walk away from its door', async ({ page }) => {
   expect(fun).toBe(16);
   expect(errors, errors.join('\n')).toEqual([]);
 });
+
+async function openEye(page) {
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.G.state = 'play';
+    S.G.story = 'ramshackle';
+    S.G.paused = false;
+    S.P.items = { hatchet: true, axe: true, amulet: true };
+    S.flag('axe_got');
+    S.flag('amulet_got');
+    S.P.pri = 'axe';
+    S.P.wep = 'axe';
+    S.P.sec = 'amulet';
+    S.P.tool = 'amulet';
+    S.P.cds = {};
+    S.P.rune = 0;
+    S.P.thunder = 0;
+    S.warp('ram_eye', 8, 6, 1);
+    for (let i = 0; i < 8 && (S.script || S.dlg); i++) {
+      S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
+    }
+    for (let i = 0; i < 180 && S.B.state !== 'fight'; i++) S.step(1);
+  });
+}
+
+test('the axe lands between lightning and thunder', async ({ page }) => {
+  const errors = await boot(page);
+  await openEye(page);
+  const before = await page.evaluate(() => {
+    const S = __SQ;
+    const hp = S.B.hp;
+    S.press('attack', true); S.step(2); S.press('attack', false); S.step(24);
+    return { hp, locked: S.B.hp, state: S.B.state };
+  });
+  expect(before.state).toBe('fight');
+  expect(before.locked).toBe(before.hp);
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.P.cds = {};
+    S.press('item', true); S.step(2); S.press('item', false); S.step(3);
+  });
+  const strike = await page.evaluate(() => __SQ.lightning());
+  expect(strike.bolts).toBeGreaterThan(0);
+  expect(strike.rune).toBeGreaterThan(1.5);
+  await page.locator('#game').screenshot({ path: `${ART}/lightning-eye-desktop.png` });
+  await page.evaluate(() => __SQ.step(28));
+  await page.locator('#game').screenshot({ path: `${ART}/lightning-eye-glow.png` });
+  const during = await page.evaluate(() => {
+    const S = __SQ;
+    S.P.x = S.B.x;
+    S.P.y = S.B.y + 28;
+    S.P.dir = 1;
+    const hp = S.B.hp;
+    for (let n = 0; n < 4 && S.B.hp >= hp && (S.P.rune || 0) > 0.35; n++) {
+      S.press('attack', true); S.step(2); S.press('attack', false); S.step(18);
+    }
+    return { hp, hit: S.B.hp, rune: S.P.rune || 0 };
+  });
+  expect(during.hit).toBeLessThan(during.hp);
+  const after = await page.evaluate(() => {
+    const S = __SQ;
+    S.step(150);
+    const closed = S.lightning();
+    S.P.x = S.B.x;
+    S.P.y = S.B.y + 28;
+    S.P.dir = 1;
+    const hp = S.B.hp;
+    for (let n = 0; n < 3; n++) {
+      S.press('attack', true); S.step(2); S.press('attack', false); S.step(18);
+    }
+    return { closed, hp, clink: S.B.hp, text: S.objective() };
+  });
+  expect(after.closed.rune).toBe(0);
+  expect(after.closed.thunder).toBe(0);
+  expect(after.clink).toBe(after.hp);
+  expect(after.text).toContain('LIGHTNING');
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test.describe('lightning on a phone', () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+  test('the Storm Eye glow is visible on a phone', async ({ page }) => {
+    const errors = await boot(page);
+    await page.waitForFunction(() => document.documentElement.classList.contains('srml'));
+    await openEye(page);
+    await page.evaluate(() => {
+      const S = __SQ;
+      S.P.cds = {};
+      S.press('item', true); S.step(2); S.press('item', false); S.step(3);
+    });
+    await page.screenshot({ path: `${ART}/lightning-eye-phone.png` });
+    const glow = await page.evaluate(() => __SQ.lightning());
+    expect(glow.rune).toBeGreaterThan(1);
+    expect(glow.bolts).toBeGreaterThan(0);
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+});
