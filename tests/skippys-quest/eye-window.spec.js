@@ -76,7 +76,7 @@ test('a hatchet in X still drops the Eye during lightning', async ({ page }) => 
   const errors = await bootLive(page);
   await page.locator('#game').screenshot({ path: `${ART}/build-tag.png` });
   const build = await page.evaluate(() => __SQ.build());
-  expect(build).toBe('b32');
+  expect(build).toBe('b33');
   await readyEye(page, {
     items: { hatchet: true, amulet: true },
     pri: 'hatchet',
@@ -134,7 +134,7 @@ test('an old ram save still hurts the Eye', async ({ page }) => {
   await page.evaluate((raw) => localStorage.setItem('sq_save_ram_v1', JSON.stringify(raw)), old);
   await page.evaluate(() => __SQ.loadChapter('ramshackle'));
   await page.waitForFunction(() => __SQ.A.id === 'ram_eye' && __SQ.B.state === 'fight', null, { timeout: 10000 });
-  expect(await page.evaluate(() => __SQ.slots().pri)).toBe('axe');
+  expect(await page.evaluate(() => __SQ.melee())).toBe('axe');
   await page.locator('#game').focus();
   await press(page, 'KeyZ');
   await page.waitForTimeout(160);

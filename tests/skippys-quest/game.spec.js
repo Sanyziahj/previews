@@ -83,7 +83,7 @@ test('main yard, lasers, and coming home to the order', async ({ page }) => {
   const shots = await page.evaluate(() => {
     const S = __SQ;
     for (let i = 0; i < 6; i++) { S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(2); }
-    S.press('attack', true); S.step(2); S.press('attack', false); S.step(4);
+    S.press('item', true); S.step(2); S.press('item', false); S.step(4);
     return S.shots.filter((s) => s.kind === 'stun').length;
   });
   expect(shots).toBeGreaterThanOrEqual(2);
@@ -95,7 +95,7 @@ test('main yard, lasers, and coming home to the order', async ({ page }) => {
     }
     for (const e of S.ents.filter((en) => !en.dead)) {
       S.P.x = e.x - 18; S.P.y = e.y + 4; S.P.dir = 3; S.P.arrowCd = 0;
-      S.press('attack', true); S.step(2); S.press('attack', false); S.step(12);
+      S.press('item', true); S.step(2); S.press('item', false); S.step(12);
     }
     S.step(8);
   });
@@ -130,7 +130,7 @@ test('weapons and boards do different work', async ({ page }) => {
     S.G.state = 'play'; S.G.story = 'ros';
     S.warp('ros_desert', 8, 8, 3);
     S.P.items.blasters = true; S.P.items.justice = true; S.P.items.lasso = true; S.P.items.brand = true;
-    S.P.wep = 'justice'; S.P.tool = 'lasso'; S.P.z = 'lasso';
+    S.P.wep = ''; S.P.melee = ''; S.P.pri = 'lasers'; S.P.sec = 'justice'; S.P.tool = 'justice'; S.P.z = 'lasso';
     S.step(5);
   });
   const justice = await page.evaluate(() => {
@@ -139,9 +139,9 @@ test('weapons and boards do different work', async ({ page }) => {
     S.ents.forEach((e) => { e.dead = true; });
     S.P.x = 200; S.P.y = 160; S.P.dir = 3;
     S.shots.length = 0;
-    S.press('attack', true);
+    S.press('item', true);
     S.step(40);
-    S.press('attack', false);
+    S.press('item', false);
     S.step(1);
     return S.shots.filter((s) => s.kind === 'justice').length;
   });
@@ -149,9 +149,10 @@ test('weapons and boards do different work', async ({ page }) => {
   await page.evaluate(() => { __SQ.P.arrowCd = 0; __SQ.G.paused = false; });
   const lasers = await page.evaluate(() => {
     const S = __SQ;
-    S.P.wep = 'lasers';
+    S.P.sec = 'lasers';
+    S.P.tool = 'lasers';
     S.shots.length = 0;
-    S.press('attack', true); S.step(2); S.press('attack', false); S.step(3);
+    S.press('item', true); S.step(2); S.press('item', false); S.step(3);
     return S.shots.filter((s) => s.kind === 'stun').length;
   });
   expect(lasers).toBeGreaterThanOrEqual(2);
@@ -166,6 +167,7 @@ test('weapons and boards do different work', async ({ page }) => {
       if (!S.script) break;
       S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(2);
     }
+    S.P.sec = 'brand';
     S.P.tool = 'brand';
     S.P.items.brand = true;
     S.P.arrowCd = 0;
@@ -855,9 +857,13 @@ test('the Brand sleeps four seconds and then wakes', async ({ page }) => {
     S.press('item', true); S.step(2); S.press('item', false); S.step(2);
     const first = (S.G.toast || '').indexOf('STAR BRAND') >= 0 || (S.G.brands || []).length > 0;
     const sleeping = S.P.brandCd > 3;
+    S.P.sec = 'lasers';
+    S.P.tool = 'lasers';
     S.shots.length = 0;
-    S.press('attack', true); S.step(2); S.press('attack', false); S.step(2);
+    S.press('item', true); S.step(2); S.press('item', false); S.step(2);
     const stun = S.shots.filter((s) => s.kind === 'stun').length;
+    S.P.sec = 'brand';
+    S.P.tool = 'brand';
     S.press('item', true); S.step(2); S.press('item', false); S.step(1);
     const refused = (S.G.toast || '').indexOf('SLEEPING') >= 0;
     S.G.paused = true;
@@ -891,21 +897,20 @@ test('swap cycles items and attack stays a weapon', async ({ page }) => {
     S.step(3);
     S.ents.forEach((e) => { e.dead = true; });
     S.P.items = { blasters: true };
-    S.P.wep = 'lasers';
-    S.P.tool = '';
+    S.P.wep = '';
+    S.P.melee = '';
+    S.P.tool = 'lasers';
     S.P.pri = 'lasers';
     S.P.sec = '';
     S.P.cds = {};
     function edge(name) {
       S.press(name, true); S.step(2); S.press(name, false); S.step(1);
     }
-    edge('swap');
-    const one = S.slots();
-    S.shots.length = 0;
-    edge('item');
-    const itemQuiet = S.shots.length === 0 && (S.G.toast || '').indexOf('NO ITEM') >= 0;
     S.shots.length = 0;
     edge('attack');
+    const attackQuiet = S.shots.filter((s) => s.kind === 'stun' || s.kind === 'justice').length === 0;
+    S.shots.length = 0;
+    edge('item');
     const lasers = S.shots.filter((s) => s.kind === 'stun').length;
     S.P.items.lasso = true;
     S.P.items.brand = true;
@@ -915,45 +920,41 @@ test('swap cycles items and attack stays a weapon', async ({ page }) => {
     S.flag('justice_got');
     S.P.tool = 'lasso';
     S.P.sec = 'lasso';
-    S.P.wep = 'lasers';
     S.P.pri = 'lasers';
-    const order = ['lasso'];
-    for (let i = 0; i < 2; i++) {
+    const meleeNames = ['baton', 'sword', 'hatchet', 'axe', 'plasma'];
+    const order = [S.hands().item];
+    for (let i = 0; i < 3; i++) {
       edge('swap');
-      order.push(S.slots().sec);
+      order.push(S.hands().item);
     }
-    S.P.cds = {};
-    S.shots.length = 0;
-    edge('attack');
-    const attackStill = S.shots.filter((s) => s.kind === 'stun').length;
-    const weaponUntouched = S.slots().pri;
-    S.P.tool = 'brand';
+    const swappedClean = order.every((id) => meleeNames.indexOf(id) < 0);
     S.P.sec = 'brand';
+    S.P.tool = 'brand';
     S.P.brandCd = 0;
     S.P.cds = {};
     S.shots.length = 0;
     edge('item');
     const brand = (S.G.toast || '').indexOf('STAR BRAND') >= 0;
-    const noLaserFromItem = S.shots.filter((s) => s.kind === 'stun').length === 0;
-    S.P.wep = 'justice';
-    S.P.pri = 'justice';
+    S.P.sec = 'justice';
+    S.P.tool = 'justice';
     S.P.charge = 0;
     S.shots.length = 0;
-    S.press('attack', true); S.step(40); S.press('attack', false); S.step(2);
+    S.press('item', true); S.step(40); S.press('item', false); S.step(2);
     const justice = S.shots.some((s) => s.kind === 'justice');
-    const itemNotJustice = (S.G.toast || '').indexOf('JUSTICE') < 0;
-    return { one, itemQuiet, lasers, order, attackStill, weaponUntouched, brand, noLaserFromItem, justice, itemNotJustice, same: S.slots().pri !== S.slots().sec };
+    S.shots.length = 0;
+    edge('attack');
+    const attackStillQuiet = S.shots.filter((s) => s.kind === 'stun' || s.kind === 'justice').length === 0;
+    return { attackQuiet, lasers, order, swappedClean, brand, justice, attackStillQuiet, melee: S.melee() };
   });
-  expect(out.one).toEqual({ pri: 'lasers', sec: '' });
-  expect(out.itemQuiet, JSON.stringify(out)).toBe(true);
+  expect(out.attackQuiet, JSON.stringify(out)).toBe(true);
   expect(out.lasers).toBeGreaterThan(0);
-  expect(out.order).toEqual(['lasso', 'brand', 'lasso']);
-  expect(out.attackStill).toBeGreaterThan(0);
-  expect(out.weaponUntouched).toBe('lasers');
+  expect(out.swappedClean, JSON.stringify(out)).toBe(true);
+  expect(out.order[0]).toBe('lasso');
+  expect(new Set(out.order).size).toBeGreaterThan(1);
   expect(out.brand).toBe(true);
-  expect(out.noLaserFromItem).toBe(true);
   expect(out.justice).toBe(true);
-  expect(out.same).toBe(true);
+  expect(out.attackStillQuiet).toBe(true);
+  expect(out.melee).toBe('');
   const skippy = await page.evaluate(() => {
     const S = __SQ;
     S.G.story = 'skippy';
@@ -963,7 +964,8 @@ test('swap cycles items and attack stays a weapon', async ({ page }) => {
     S.flag('lasso_got', false);
     S.P.items = { bow: true, raygun: true, baton: true, lasso: true, missile: true };
     S.P.arrows = 5;
-    S.P.wep = 'raygun';
+    S.P.melee = 'baton';
+    S.P.wep = 'baton';
     S.P.tool = 'lasso';
     S.P.pri = 'raygun';
     S.P.sec = 'lasso';
@@ -972,18 +974,27 @@ test('swap cycles items and attack stays a weapon', async ({ page }) => {
       S.press(name, true); S.step(2); S.press(name, false); S.step(1);
     }
     edge('swap');
-    const after = S.slots();
+    const after = S.hands();
     S.shots.length = 0;
     edge('attack');
     const ray = S.shots.some((s) => s.kind === 'ray');
+    const swung = (S.P.atk || 0) > 0 || S.P.swingKind === 'melee';
     edge('swap');
-    return { after, ray, back: S.slots(), kept: !!(S.P.items.bow && S.P.items.raygun && S.P.items.lasso && S.P.items.missile) };
+    const back = S.hands();
+    const meleeNames = ['baton', 'sword', 'hatchet', 'axe', 'plasma'];
+    return {
+      after, ray, swung, back,
+      kept: !!(S.P.items.bow && S.P.items.raygun && S.P.items.lasso && S.P.items.missile && S.P.items.baton),
+      meleeHeld: after.melee === 'baton' && back.melee === 'baton',
+      itemsOnly: meleeNames.indexOf(after.item) < 0 && meleeNames.indexOf(back.item) < 0,
+    };
   });
   expect(skippy.kept).toBe(true);
-  expect(skippy.after).toEqual({ pri: 'raygun', sec: 'missile' });
-  expect(skippy.back.sec).toBe('lasso');
-  expect(skippy.back.pri).toBe('raygun');
-  expect(skippy.ray).toBe(true);
+  expect(skippy.meleeHeld).toBe(true);
+  expect(skippy.itemsOnly).toBe(true);
+  expect(skippy.after.item).not.toBe('lasso');
+  expect(skippy.ray).toBe(false);
+  expect(skippy.swung).toBe(true);
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
@@ -1607,7 +1618,7 @@ test('Ramshackle chapter: relics, worlds, bosses, and the road home', async ({ p
         S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
       }
       if (prep === 'axe' || prep === 'shield' || prep === 'amulet') {
-        S.P.items.axe = true; S.flag('axe_got'); S.P.wep = 'axe'; S.P.pri = 'axe';
+        S.P.items.axe = true; S.flag('axe_got'); S.P.melee = 'axe'; S.P.wep = 'axe';
       }
       if (prep === 'shield' || prep === 'amulet') {
         S.P.items.shield = true; S.flag('shield_got'); S.P.tool = 'shield'; S.P.sec = 'shield';
@@ -1638,7 +1649,7 @@ test('Ramshackle chapter: relics, worlds, bosses, and the road home', async ({ p
     S.P.items.axe = true;
     S.flag('axe_got');
     S.P.wep = 'axe';
-    S.P.pri = 'axe';
+    S.P.melee = 'axe'; S.P.pri = 'axe';
     const before = S.B.hp;
     S.press('attack', true); S.step(1); S.press('attack', false);
     let flipped = false;
@@ -1682,7 +1693,7 @@ test('Ramshackle chapter: relics, worlds, bosses, and the road home', async ({ p
     S.flag('axe_got');
     S.flag('amulet_got');
     S.P.wep = 'axe';
-    S.P.pri = 'axe';
+    S.P.melee = 'axe'; S.P.pri = 'axe';
     S.P.sec = 'amulet';
     S.P.tool = 'amulet';
     const locked = S.B.hp;
@@ -1848,7 +1859,7 @@ test.describe('Ramshackle phone layout', () => {
         S.G.paused = false;
         S.P.items = { hatchet: true, axe: true, shield: true, amulet: true };
         S.P.wep = 'axe';
-        S.P.pri = 'axe';
+        S.P.melee = 'axe'; S.P.pri = 'axe';
         S.P.sec = 'shield';
         S.P.tool = 'shield';
         S.flag('axe_got');
@@ -2358,7 +2369,7 @@ test('HUD labels stay apart and toasts clear', async ({ page }) => {
     return { hits, texts: bits.map((b) => b.text) };
   });
   expect(hud.texts.join(' ')).toContain('LANTERN');
-  expect(hud.texts.join(' ')).toContain('X RAY');
+  expect(hud.texts.join(' ')).toContain('X STRIKE');
   expect(hud.texts.join(' ')).toContain('Z ROPE');
   expect(hud.hits, hud.texts.join(' | ')).toEqual([]);
 
@@ -2476,7 +2487,7 @@ test('Skippy earns a board and Slide upgrades every tier', async ({ page }) => {
     S.G.story = 'ramshackle';
     S.G.paused = false;
     S.P.items = { hatchet: true, axe: true, shield: true };
-    S.P.pri = 'axe';
+    S.P.melee = 'axe'; S.P.pri = 'axe';
     S.P.wep = 'axe';
     S.P.sec = 'shield';
     S.P.tool = 'shield';
@@ -2555,8 +2566,13 @@ test.describe('swap chip on the diamond', () => {
       expect(face.swap.text, story).toBe('SWAP');
       expect(face.swap.w, story).toBeGreaterThanOrEqual(48);
       expect(face.swap.y + face.swap.h, story).toBeLessThanOrEqual(face.item.y + 2);
-      expect(face.after.pri, story).toBe(pri);
-      expect(face.after.sec, story).not.toBe(face.before);
+      if (story === 'ramshackle') {
+        expect(face.after.pri, story).not.toBe('hatchet');
+        expect(face.after.sec, story).not.toBe('hatchet');
+      } else {
+        expect(face.after.pri, story).toBe(pri);
+        expect(face.after.sec, story).not.toBe(face.before);
+      }
       expect(face.cd, story).toBe(true);
       expect(face.hud.join(' '), story).toMatch(/Z /);
       await page.screenshot({ path: `${ART}/${file}.png` });
@@ -2605,7 +2621,7 @@ async function openEye(page) {
     S.P.items = { hatchet: true, axe: true, amulet: true };
     S.flag('axe_got');
     S.flag('amulet_got');
-    S.P.pri = 'axe';
+    S.P.melee = 'axe'; S.P.pri = 'axe';
     S.P.wep = 'axe';
     S.P.sec = 'amulet';
     S.P.tool = 'amulet';
@@ -2710,7 +2726,7 @@ test('boss fights keep the HUD and the boss bar apart', async ({ page }) => {
   const errors = await boot(page);
   const fights = [
     ['skippy', 'd4', { sword: true }, 'sword', '', 'SWORD'],
-    ['ros', 'rs3', { blasters: true, lasso: true }, 'lasers', 'lasso', 'LASERS'],
+    ['ros', 'rs3', { blasters: true, lasso: true }, 'lasers', 'lasso', 'ROPE'],
     ['ramshackle', 'ram_eye', { axe: true, amulet: true }, 'axe', 'amulet', 'AXE'],
   ];
   for (const [story, area, items, pri, sec, word] of fights) {
