@@ -39,7 +39,7 @@ async function advance(page, n = 6) {
 test('version, home, and Cash leave the lanes clear', async ({ page }) => {
   const errors = await bootLive(page);
   const build = await page.evaluate(() => __SQ.build());
-  expect(build).toBe('b34');
+  expect(build).toBe('b35');
   const sub = await page.evaluate(() => __SQ.chapters().find((c) => c.id === 'skippy').sub);
   expect(sub).toContain('MAIN');
   await page.evaluate(() => {
@@ -1422,8 +1422,8 @@ test('the main road skips the tales, and gear, bosses, and labels stay honest', 
     return { areas, sealed, basement: S.basement() };
   });
   expect(road.areas[0]).toBe('desert');
-  expect(road.areas[1]).toBe('village');
-  expect(road.areas[7]).toBe('cgate');
+  expect(road.areas.slice(1)).toEqual(['hub', 'hub', 'hub', 'hub', 'hub', 'hub', 'hub']);
+  expect(road.areas).not.toContain('village');
   expect(road.areas).not.toContain('nexus');
   expect(road.basement).toBe(false);
   expect(road.sealed).toBe(true);
