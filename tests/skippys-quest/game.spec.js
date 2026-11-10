@@ -1138,26 +1138,29 @@ test('the chair ends the tale and the road home stays open', async ({ page }) =>
     rift: !!__SQ.flags.ros_rift,
     home: !!__SQ.flags.ros_home_end,
     area: __SQ.A.id,
+    portal: (__SQ.A.props || []).find((p) => p.need === 'ros_rift') || null,
   }));
   expect(opened.state).toBe('play');
   expect(opened.obj).toBe('STEP INTO THE PORTAL');
   expect(opened.rift).toBe(true);
   expect(opened.home).toBe(false);
   expect(opened.area).toBe('ros_pour');
-  await page.screenshot({ path: '/agent/repos/previews/skippys-quest/docs/portal/ros-rift.png' });
-  await page.evaluate(() => {
+  expect(opened.portal && opened.portal.k).toBe('portal');
+  expect(opened.portal.to).toBe('ros_home');
+  await page.screenshot({ path: '/agent/repos/previews/skippys-quest/docs/portal/ros-portal.png' });
+  const stepped = await page.evaluate(() => {
     const S = __SQ;
     S.press('up', true);
-    for (let i = 0; i < 20 && !S.G.rift; i++) S.step(1);
-    S.step(4);
-  });
-  await page.screenshot({ path: '/agent/repos/previews/skippys-quest/docs/portal/ros-warp.png' });
-  await page.evaluate(() => {
-    const S = __SQ;
-    for (let i = 0; i < 80 && S.story() !== 'skippy'; i++) S.step(1);
+    let saw = false;
+    for (let i = 0; i < 40 && S.story() !== 'skippy'; i++) {
+      S.step(1);
+      if (S.G.trans && S.G.trans.home) saw = true;
+    }
     S.press('up', false);
-    S.step(2);
+    for (let i = 0; i < 40 && S.G.trans; i++) S.step(1);
+    return saw;
   });
+  expect(stepped).toBe(true);
   await page.screenshot({ path: '/agent/repos/previews/skippys-quest/docs/portal/skippy-arrive.png' });
   await page.evaluate(() => {
     const S = __SQ;
@@ -1176,7 +1179,7 @@ test('the chair ends the tale and the road home stays open', async ({ page }) =>
     coins: JSON.parse(localStorage.getItem('sq_save_v1')).coins,
     ros: JSON.parse(localStorage.getItem('sq_save_ros_v1')).flags.ros_home_end,
     rift: JSON.parse(localStorage.getItem('sq_save_ros_v1')).flags.ros_rift,
-    shimmer: (__SQ.G.pourRift || 0) > 0,
+    portal: (__SQ.A.props || []).some((p) => p.k === 'portal' && p.x === 37 && p.need === 'tale_ros'),
   }));
   expect(back.story).toBe('skippy');
   expect(back.area).toBe('desert');
@@ -1187,7 +1190,17 @@ test('the chair ends the tale and the road home stays open', async ({ page }) =>
   expect(back.coins).toBe(42);
   expect(back.ros).toBe(true);
   expect(back.rift).toBe(true);
-  expect(back.shimmer).toBe(true);
+  expect(back.portal).toBe(true);
+  await page.evaluate(() => {
+    const S = __SQ;
+    for (let i = 0; i < 8 && (S.script || S.dlg); i++) {
+      S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
+    }
+    S.flag('boss_d1');
+    S.warp('desert', 23.5, 8.2, 1);
+    S.step(3);
+  });
+  await page.screenshot({ path: '/agent/repos/previews/skippys-quest/docs/portal/cash-portal.png' });
 
   await page.evaluate(() => {
     for (let i = 0; i < 8 && (__SQ.script || __SQ.dlg); i++) {

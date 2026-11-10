@@ -864,6 +864,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           { k: "saloon", x: 34, y: 2 },
           { k: "stairs", x: 23, y: 3 },
           { k: "portal", x: 23.5, y: 6.5, need: "boss_d1", to: "desert_nx" },
+          { k: "portal", x: 37, y: 7, need: "tale_ros" },
         ],
         signs: [
           {
@@ -8964,11 +8965,10 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         { x: 15, y: 4, text: "FINAL: THE EMPTY CHAIR. TALK TO RUSTY.", kind: "chair" },
         { x: 10, y: 11, text: "TALE DOOR. RETURN TO SKIPPY.", kind: "portal", script: "tale_door" },
       ],
-      props: [{ k: "rift", x: 18.5, y: 2.4, need: "ros_rift" }],
+      props: [{ k: "portal", x: 18.5, y: 2.4, need: "ros_rift", to: "ros_home" }],
       warps: [
         { x: 10, y: 13, w: 2, h: 1, to: "ros_desert", tx: 14, ty: 2, dir: 0 },
         { x: 0, y: 6, w: 1, h: 2, to: "ros_yard", tx: 13, ty: 5, dir: 2 },
-        { x: 18, y: 2, w: 2, h: 1, rift: !0 },
       ],
       onEnter: "pour_order",
     },
@@ -9436,12 +9436,12 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       h("rusty", "YOU CAME HOME. THE PAGES ARE ON THE BAR. THE CHAIR IS STILL EMPTY."),
       h("ros", "THE PROOF IS MINE. THE SLUGGER IS NOT. THAT IS THE TRUTH I GET TO STAND IN."),
       h("al", "THEN STAND IN IT. THE SONG CAN WAIT."),
-      h("rusty", "A RIFT'S OPENED OUT BACK. RECKON IT LEADS SOMEWHERE FAMILIAR."),
+      h("rusty", "A PORTAL'S OPENED OUT BACK. RECKON IT LEADS SOMEWHERE FAMILIAR."),
       h("ros", "THEN THAT IS THE WAY I CAME. AND THE WAY BACK."),
       { t: "flag", f: "ros_rift" },
       { t: "save" },
     ],
-    rusty_after: [h("rusty", "THE RIFT OUT BACK IS STILL OPEN. STEP THROUGH WHEN YOU WANT THE OTHER ROAD.")],
+    rusty_after: [h("rusty", "THE PORTAL OUT BACK IS STILL OPEN. STEP THROUGH WHEN YOU WANT THE OTHER ROAD.")],
     al_card: [h("al", "SKIPPY'S FACE IS ON A CARD. CONTRACTS. A LITTLE SPONSOR INK. THE BOY HAS NOT ASKED WHAT THE INK COSTS. THAT IS HIS ROAD, NOT THIS ONE.")],
     al_locker: [h("al", "THE ROPE LOCKER IS ON THE EAST WALL. IT SAYS ROPE. PRESS E. Q OR TOOL CYCLES EVERY ITEM YOU KEEP.")],
     buck_home: [h("buck", "I CAME ASHORE BECAUSE THE ORDER SMELLED WRONG. I AM NOT YOUR DEPUTY. I AM A WITNESS WHO STILL SALUTES THE WRONG MAN.")],
@@ -11459,9 +11459,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
             d.y - 3 > C.y * 16 &&
             d.y - 3 < (C.y + C.h) * 16
           ) {
-            C.rift
-              ? A.story === "ros" && Z("ros_rift") && beginRift()
-              : dt(C.to, C.tx, C.ty, C.dir);
+            dt(C.to, C.tx, C.ty, C.dir);
             break;
           }
         for (let C of w.triggers || [])
@@ -11482,8 +11480,13 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
             (!C.need || Z(C.need)) &&
             ae(d.x, d.y, p(C.x), p(C.y)) < 9
           ) {
-            let te = je[C.to || w.id];
-            te && (D.mirage(), dt(te.to, te.tx, te.ty, te.dir));
+            if (C.to === "ros_home")
+              (D.mirage(),
+                A.trans || (A.trans = { t: 0, done: !1, home: !0 }));
+            else {
+              let te = je[C.to || w.id];
+              te && (D.mirage(), dt(te.to, te.tx, te.ty, te.dir));
+            }
           }
       }
     }
@@ -11800,7 +11803,6 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         (A.t += e),
         (A.st += e),
         A.bannerT > 0 && (A.bannerT -= e),
-        A.pourRift > 0 && (A.pourRift -= e),
         A.toastT > 0 && (A.toastT -= e),
         A.saveT > 0 && (A.saveT -= e),
         A.shake > 0 && (A.shake -= e),
@@ -11881,17 +11883,12 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           Ze());
         return;
       }
-      if (A.rift) {
-        A.rift.t += e;
-        if (A.rift && A.rift.t > 0.45 && !A.rift.switched) ((A.rift.switched = !0), throughPortal());
-        if (A.rift && A.rift.t > 1.05) A.rift = null;
-        Ze();
-        return;
-      }
       if (A.trans) {
         let f = A.trans;
         ((f.t += e),
-          f.t > 0.22 && !f.done && ((f.done = !0), ba(f.area, f.x, f.y, f.dir)),
+          f.t > 0.22 &&
+            !f.done &&
+            ((f.done = !0), f.home ? throughPortal() : ba(f.area, f.x, f.y, f.dir)),
           f.t > 0.44 && (A.trans = null),
           Ze());
         return;
@@ -12302,8 +12299,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         (A.rosLeave = 0),
         (A.choice = null));
       if (!Bt()) {
-        ((A.rift = null),
-          (A.state = "stories"),
+        ((A.state = "stories"),
           (A.menu = 0),
           (A.st = 0),
           (A.note = "NO SKIPPY RIDE SAVED. THE TALE WAITS IN THE CHAPTER LIST."),
@@ -12315,17 +12311,11 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         ((ee.tale_ros = !0),
           (ee.tale_macho = !0),
           place
-            ? (ba(place.area, place.x, place.y, place.face), (A.pourRift = 6))
+            ? ba(place.area, place.x, place.y, place.face)
             : ba(tale.area, tale.x, tale.y, tale.face),
           ye("tale_ros_close"),
           xe());
       } else Q("BACK IN YOUR OWN SADDLE. THE TALE KEEPS.", 2.4);
-    }
-    function beginRift() {
-      A.rift ||
-        ((A.rift = { t: 0, switched: !1 }),
-        D.mirage(),
-        ne(d.x, d.y - 8, 18, ["#ff4fd8", "#4ff0ff", "#ffe070", "#ffffff"], 48));
     }
     function throughPortal() {
       ((ee.ros_home_end = !0), (ee.ros_rift = !0));
@@ -14452,7 +14442,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           "center",
           "#000",
         ),
-        v(n, "THE RIFT OUT BACK LEADS HOME", 160, 210, "#ffe0a0", 1, "center", "#000"));
+        v(n, "THE PORTAL OUT BACK LEADS HOME", 160, 210, "#ffe0a0", 1, "center", "#000"));
     }
     function flashCard() {
       let tale = taleById(A.taleId || "ros");
@@ -16322,14 +16312,13 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
             n.fillRect(f + y * E, c + S * E, Math.ceil(E), Math.ceil(E)));
         }
       for (let S of w.warps || [])
-        S.rift ||
-          I(
-            f + S.x * E,
-            c + S.y * E,
-            Math.max(2, S.w * E),
-            Math.max(2, S.h * E),
-            "#ffcc33",
-          );
+        I(
+          f + S.x * E,
+          c + S.y * E,
+          Math.max(2, S.w * E),
+          Math.max(2, S.h * E),
+          "#ffcc33",
+        );
       if (w.id === "ros_pour" && Z("ros_rift")) {
         let on = Math.floor(A.t * 4) % 2;
         I(
@@ -16507,39 +16496,6 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         n.ellipse(e, a, t, t * 0.4, 0, 0, 6.283),
         n.fill());
     }
-    function drawRiftDoor(x, y, wx, wy, alpha) {
-      let a = Math.max(0, Math.min(1, alpha == null ? 1 : alpha));
-      if (a <= 0.02) return;
-      ((n.globalAlpha = a), (n.lineWidth = 1.5));
-      for (let i = 4; i >= 0; i--)
-        ((n.strokeStyle = ["#ff4fd8", "#4ff0ff", "#ffe070", "#ffffff", "#c8a8ff"][
-          (i + Math.floor(A.t * 8)) % 5
-        ]),
-          n.beginPath(),
-          n.ellipse(x, y, 4 + i * 2, 8 + i * 3, 0, 0, 6.283),
-          n.stroke());
-      ((n.fillStyle = "#140818"),
-        n.beginPath(),
-        n.ellipse(x, y, 5, 9, 0, 0, 6.283),
-        n.fill(),
-        (n.strokeStyle = Math.floor(A.t * 10) % 2 ? "#ffffff" : "#4ff0ff"),
-        n.beginPath(),
-        n.ellipse(x, y, 3 + Math.sin(A.t * 7), 6, A.t * 2, 0, 6.283),
-        n.stroke(),
-        (n.globalAlpha = 1),
-        v(n, "RIFT", x, y - 22, "#fff6c0", 1, "center", "#000"));
-      a > 0.4 &&
-        Math.random() < 0.55 &&
-        oe(
-          wx + (Math.random() - 0.5) * 10,
-          wy - 8,
-          (Math.random() - 0.5) * 16,
-          -28 - Math.random() * 20,
-          0.55,
-          ["#ff4fd8", "#4ff0ff", "#ffe070", "#ffffff"][Math.floor(Math.random() * 4)],
-          1.5,
-        );
-    }
     function ts() {
       let e = A.shake > 0 ? (Math.random() - 0.5) * 4 : 0,
         a = Math.round(he.x + e),
@@ -16550,12 +16506,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         E = [];
       for (let f of w.props || [])
         if (!(f.need && !Z(f.need) && !f.ghost))
-          if (f.k === "rift")
-            E.push({
-              y: p(f.y),
-              f: () => drawRiftDoor(i(p(f.x)), s(p(f.y)) - 6, p(f.x), p(f.y), 1),
-            });
-          else if (f.k === "house")
+          if (f.k === "house")
             E.push({
               y: p(f.y + 4),
               f: () => n.drawImage(O.house, i(f.x * 16), s(f.y * 16) - 16),
@@ -16598,19 +16549,6 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
                 1.5,
               );
           } else Os(f, E, i, s);
-      w.id === "desert" &&
-        (A.pourRift || 0) > 0 &&
-        E.push({
-          y: p(7),
-          f: () =>
-            drawRiftDoor(
-              i(p(37)),
-              s(p(7)) - 6,
-              p(37),
-              p(7),
-              Math.min(1, A.pourRift / 1.4),
-            ),
-        });
       for (let f of w.signs || []) {
         let c = i(f.x * 16),
           S = s(f.y * 16);
@@ -17689,7 +17627,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       }
     }
     function touchContext() {
-      let dialog = !!(q || ue || Ae || A.choice || le || A.rift),
+      let dialog = !!(q || ue || Ae || A.choice || le),
         mode = "title";
       A.state === "play" && A.paused
         ? (mode = "pause")
@@ -17850,32 +17788,6 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         ((n.globalAlpha = Ee(e < 0.22 ? e / 0.22 : (0.44 - e) / 0.22, 0, 1)),
           I(0, 0, 320, 224, "#000000"),
           (n.globalAlpha = 1));
-      }
-      if (A.rift) {
-        let t = A.rift.t,
-          a = t < 0.45 ? t / 0.45 : Math.max(0, (1.05 - t) / 0.6);
-        ((n.globalAlpha = Math.min(0.82, a)),
-          (n.fillStyle = "#140818"),
-          n.beginPath(),
-          n.ellipse(160, 100, 150, 90, 0, 0, 6.283),
-          n.fill());
-        for (let i = 0; i < 7; i++)
-          ((n.strokeStyle = ["#ff4fd8", "#4ff0ff", "#ffe070", "#ffffff"][i % 4]),
-            (n.lineWidth = 2),
-            n.beginPath(),
-            n.ellipse(160, 100, 18 + i * 16, 10 + i * 9, A.t * 3 + i * 0.4, 0, 6.283),
-            n.stroke());
-        for (let i = 0; i < 18; i++) {
-          let ang = A.t * 5 + i * 0.9;
-          I(
-            160 + Math.cos(ang) * (24 + (i % 6) * 16),
-            100 + Math.sin(ang * 1.4) * (14 + (i % 5) * 10),
-            2,
-            2,
-            i % 2 ? "#fff6c0" : "#4ff0ff",
-          );
-        }
-        (v(n, "THE RIFT", 160, 96, "#fff6c0", 1, "center", "#000"), (n.globalAlpha = 1));
       }
       (w.id === "dream" &&
         ((n.fillStyle = "#c8a8ff18"),
@@ -19983,7 +19895,6 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           for (let id in Ie) {
             let area = Ie[id];
             for (let warp of area.warps || []) {
-              if (warp.rift) continue;
               let rows = Zs[warp.to];
               if (!rows) {
                 bad.push({ from: id, to: warp.to, tx: warp.tx, ty: warp.ty, tile: "missing" });
