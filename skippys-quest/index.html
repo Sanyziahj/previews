@@ -1554,6 +1554,57 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       brows: !0,
       extra: "jet",
     },
+    bjorn: {
+      name: "BJORN",
+      head: ["#e07020", "#f0a060", "#8a4010"],
+      suit: "#6a3a1a",
+      suit2: "#e0b040",
+      gloves: "#3a2414",
+      boots: "#3a2414",
+      hat: "viking",
+      hatC: "#c8ccd4",
+      hatC2: "#f0e6c8",
+      eyes: "half",
+      eyeC: "",
+      mouth: "grin",
+      cheek: "#f7a8d8",
+      brows: !0,
+      extra: "jet",
+    },
+    sigrid: {
+      name: "SIGRID",
+      head: ["#3a6ad8", "#7aa0f0", "#1a3080"],
+      suit: "#1a6a8a",
+      suit2: "#e0e8f0",
+      gloves: "#1a2430",
+      boots: "#1a2430",
+      hat: "viking",
+      hatC: "#d8dce4",
+      hatC2: "#f0e6c8",
+      eyes: "oval",
+      eyeC: "",
+      mouth: "line",
+      cheek: "#f7a8d8",
+      brows: !0,
+      extra: "jet",
+    },
+    halvar: {
+      name: "HALVAR",
+      head: ["#3a9a4a", "#70d080", "#1a5a28"],
+      suit: "#2a4a30",
+      suit2: "#e0c060",
+      gloves: "#1a2418",
+      boots: "#1a2418",
+      hat: "viking",
+      hatC: "#e8e8ee",
+      hatC2: "#f0e6c8",
+      eyes: "half",
+      eyeC: "",
+      mouth: "grin",
+      cheek: "#f7a8d8",
+      brows: !0,
+      extra: "jet",
+    },
     x_sailor: {
       name: "SAILOR",
       head: ["#1fb8a8", "#5ae8d8", "#0a7a6a"],
@@ -1717,6 +1768,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       gates: { G: "pk_met" },
       npcs: [
         { id: "pirateking", x: 20.5, y: 21.6, dir: 0, talk: "pk_talk" },
+        { id: "ram_teller", look: "ramshackle", x: 16, y: 16, dir: 0, talk: "ram_tale_talk", show: "tale_ros" },
         { id: "rusty", x: 28.5, y: 14.6, dir: 0, talk: "rusty_sea" },
         { id: "al", x: 8.5, y: 21.4, dir: 0, talk: "al_sea" },
         { id: "x_sailor", x: 36.8, y: 14.2, dir: 2, talk: "x_guard" },
@@ -6008,6 +6060,13 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           b(-1.8, -12, 1.2, 6.4, "#ff6a6a"),
           b(0.8, -12, 1, 6.4, n.hatC2));
         break;
+      case "viking":
+        (b(-7.2, -8.4, 14.4, 4.2, n.hatC),
+          b(-7.2, -8.4, 14.4, 0.8, n.hatC2),
+          b(-1.2, -11.2, 2.4, 3.2, n.hatC2),
+          P(m, [u - 8 * H, l - 8 * H, u - 12 * H, l - 14 * H, u - 5 * H, l - 8 * H], n.hatC),
+          P(m, [u + 8 * H, l - 8 * H, u + 12 * H, l - 14 * H, u + 5 * H, l - 8 * H], n.hatC));
+        break;
       case "trucker":
         (F(-2.8, () => {
           (g(0, -0.6, 8.6, 8.7, n.hatC), g(3.5, -1, 5, 8.7, "#2a2a32"));
@@ -8832,7 +8891,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
     { id: "spike", name: "SPIKE", sub: "SOON", play: !1, who: "spike" },
     { id: "drill", name: "DRILL SERGEANT", sub: "SOON", play: !1, who: "drill" },
     { id: "ronin", name: "RONIN", sub: "SOON", play: !1, who: "ronin" },
-    { id: "ramshackle", name: "RAMSHACKLE", sub: "SOON", play: !1, who: "ramshackle" },
+    { id: "ramshackle", name: "RAMSHACKLE", sub: "A JOURNEY HOME", play: !0, save: "sq_save_ram_v1", who: "ramshackle" },
     { id: "santt", name: "SANTT", sub: "SOON", play: !1, who: "santt" },
   ];
   var TALES = [
@@ -8851,6 +8910,24 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       face: 3,
       objective: "EAST DESERT: MIRAGE BY THE PIONEER POUR",
       close: "THE CHAIR IN THAT TALE IS STILL EMPTY. YOURS IS NOT.",
+      place: "A TALE TOLD IN THE DESERT",
+    },
+    {
+      id: "ram",
+      n: 3,
+      title: "RAMSHACKLE",
+      teller: "ramshackle",
+      hero: "ramshackle",
+      save: "sq_save_ram_v1",
+      need: "tale_ros",
+      heard: "tale_ram",
+      area: "seaport",
+      x: 16,
+      y: 16,
+      face: 0,
+      objective: "THE SEAPORT: RAMSHACKLE HAS A TALE",
+      close: "THE MOUNTAIN STANDS. YOUR ROAD IS STILL YOURS.",
+      place: "A JOURNEY HOME",
     },
   ];
   var CHOICES = {
@@ -8870,7 +8947,282 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         ["STAY IN THE TALE", "ros_return_no"],
       ],
     },
+    tale_ram_choice: {
+      tale: "ram",
+      who: "ramshackle",
+      back: "tale_ram_no",
+      opts: [
+        ["HEAR THE JOURNEY", "tale_ram_yes"],
+        ["NOT YET", "tale_ram_no"],
+      ],
+    },
   };
+
+  Object.assign(Ce, {
+    ram_tale_talk: [
+      { need: "tale_ram", s: "tale_ram_told" },
+      { s: "ram_tale_offer" },
+    ],
+    spike_dreamland: [{ s: "spike_ram" }],
+    bjorn_mars: [
+      { need: "shield_got", s: "bjorn_free" },
+      { s: "bjorn_locked" },
+    ],
+    sigrid_jup: [{ s: "sigrid_cloud" }],
+    halvar_city: [
+      { need: "ram_home_end", s: "halvar_home" },
+      { s: "halvar_wait" },
+    ],
+  });
+  Object.assign(oa, {
+    ram_tale_offer: [
+      h("ramshackle", "SKIPPY. THE DOCK IS QUIET. MY MEMORY IS NOT."),
+      h("ramshackle", "I FELL FROM A MOUNTAIN ABOVE THE CLOUDS. A HACK OPENED THE SKY. I AM TRYING TO GO HOME."),
+      h("ramshackle", "WILL YOU SIT AND HEAR THE JOURNEY?"),
+      { t: "choice", a: "tale_ram_choice", tale: "ram" },
+    ],
+    tale_ram_yes: [
+      h("ramshackle", "THEN CLOSE YOUR EYES. THE MOUNTAIN IS HIGHER THAN THE STARS."),
+      { t: "fn", f: "taleYes" },
+    ],
+    tale_ram_no: [h("ramshackle", "THE TALE WILL KEEP. THE SEA IS STILL HERE.")],
+    tale_ram_told: [
+      h("ramshackle", "YOU HEARD IT. THE CITY STANDS. THE HACK IS NOT THE LAST DOOR."),
+      { t: "choice", a: "tale_ram_choice", tale: "ram" },
+    ],
+    tale_ram_keep: [h("ramshackle", "RIDE YOUR OWN ROAD. I WILL BE ON THIS DOCK.")],
+    tale_ram_close: [
+      h("ramshackle", "AND THAT IS THE JOURNEY HOME."),
+      h("ramshackle", "THE MOUNTAIN STANDS. THE HACK DOES NOT HOLD IT."),
+      h("ramshackle", "SPACE RIDERS RISE. YOUR ROAD IS STILL YOURS, SKIPPY."),
+      h("skippy", "I'LL REMEMBER THE AXE. AND THE CITY ABOVE THE STARS."),
+      { t: "flag", f: "tale_ram" },
+      { t: "save" },
+    ],
+    ram_wake: [
+      h("ramshackle", "THE DOCK. I HIT IT HARD ENOUGH TO FORGET THE SKY."),
+      h("ramshackle", "SPACE RIDERS RISE. THAT WAS OURS, I THINK."),
+      h("ramshackle", "EAST IS A DREAM THAT STILL KNOWS MY NAME. A SIGN BEHIND ME OPENS THE MEMORY."),
+      { t: "flag", f: "ram_woke" },
+      { t: "save" },
+    ],
+    mem_glitch: [
+      h("ramshackle", "THE SKY ABOVE CENTER MOUNTAIN TEARS LIKE A BAD SIGNAL."),
+      h("overlord", "YOUR REALM IS OPEN. THE BROTHERHOOD LEAVES."),
+      h("ramshackle", "WE ARE CAST OUT. I CANNOT YET REMEMBER THEIR FACES."),
+      { t: "flag", f: "mem_hack" },
+      { t: "save" },
+    ],
+    mem_axe: [
+      h("ramshackle", "THE AXE REMEMBERS THE GATE. A PIECE OF THE MOUNTAIN COMES BACK."),
+      { t: "flag", f: "mem_axe" },
+    ],
+    mem_shield: [
+      h("ramshackle", "THE SHIELD HOLDS A LASER AND ANSWERS IT. BJORN'S VOICE COMES WITH IT."),
+      { t: "flag", f: "mem_shield" },
+      { t: "flag", f: "bjorn_free" },
+    ],
+    mem_amulet: [
+      h("ramshackle", "THE AMULET SPEAKS IN THUNDER. THE CLIMB IS OPEN."),
+      { t: "flag", f: "mem_amulet" },
+    ],
+    spike_ram: [
+      h("spike", "THIS DREAM IS YOURS. THE FEAR WEARS YOUR HELMET. IT IS NOT FRIGHT. HE STAYS IN HIS CASTLE."),
+      h("spike", "THE AXE IS IN THE TENT TO THE EAST. THROW IT. A HATCHET CANNOT REACH THAT FEAR."),
+    ],
+    bjorn_locked: [h("bjorn", "BJORN. THE COLONY LOCKED THE CANYON. THE SHIELD SINGS IN THE CORE. I WILL WAIT.")],
+    bjorn_free: [h("bjorn", "THE SHIELD IS YOURS. I REMEMBER THE MOUNTAIN. I WILL MEET YOU ABOVE THE STORMS.")],
+    sigrid_cloud: [h("sigrid", "SIGRID. THE LIGHTNING KEEPS THE AMULET. WHEN IT THUNDERS, THE EYE OF THE STORM BLINKS.")],
+    halvar_wait: [h("halvar", "HALVAR. SPACE RIDERS RISE. THE THRONE ROOM IS A HACK, NOT A GRAVE. WALK IN.")],
+    halvar_home: [h("halvar", "THE CITY IS OURS TO STAND IN. THE OVERLORD IS NOT FINISHED. HE ONLY LOST THIS DOOR.")],
+    draco_mars: [h("draco", "THE GREEN DRAGON IS PARKED ON MARS. HOT NOODLES. NO WAGERS. THE CANYON CORE IS EAST.")],
+    al_jup: [h("al", "LISTEN. THE AMULET HUMS WHERE THE LIGHTNING RESTS. I DO NOT CLIMB. YOU DO.")],
+    buck_jup: [h("buck", "THE BRIGADE DOES NOT SAIL CLOUDS. I CAME TO SAY THE HACK IS NOT THE WHOLE WAR.")],
+    shadow_climb: [h("shadow", "THE CONTRACT WAS THE MOUNTAIN. I WILL NOT COLLECT YOU. CLIMB. STEADY HAND.")],
+    fear_down: [
+      h("spike", "THE FEAR SHATTERS INTO STARDUST. YOU REMEMBER THE GATE."),
+      h("ramshackle", "MARS IS NORTH. A BROTHER IS THERE."),
+      { t: "save" },
+    ],
+    colony_down: [
+      h("ramshackle", "THE CORE GOES DARK. THE SHIELD ANSWERED THE LASER."),
+      h("bjorn", "JUPITER IS NORTH. SIGRID KEPT THE STORM."),
+      { t: "save" },
+    ],
+    storm_down: [
+      h("sigrid", "THE EYE BLINKS. THE AMULET IS AWAKE. THE CLIMB IS NORTH."),
+      { t: "save" },
+    ],
+    hack_down: [
+      { t: "flag", f: "ram_home_end" },
+      h("sys", "THE HACK SHATTERS INTO STARDUST."),
+      h("overlord", "THIS MOUNTAIN IS A DOOR. I WILL FIND ANOTHER."),
+      h("ramshackle", "STEADY HAND AND MIGHTY VALOR. THE CITY IS OURS AGAIN. THE WAR IS NOT OVER."),
+      h("halvar", "SPACE RIDERS RISE!"),
+      { t: "flag", f: "ram_home_end" },
+      { t: "save" },
+    ],
+  });
+  Object.assign(Se, {
+    memory: { name: "THE FORGOTTEN", sub: "A FEAR IN YOUR HELMET. NOT FRIGHT.", flag: "boss_memory", shard: "note", shardFlag: "boss_memory", contFlag: "ram_nocont", down: "fear_down", get: "fear_down", shardAt: [], contAt: [], upload: !1 },
+    colony: { name: "COLONY CORE", sub: "REFLECT THE BEAM.", flag: "boss_colony", shard: "note", shardFlag: "boss_colony", contFlag: "ram_nocont", down: "colony_down", get: "colony_down", shardAt: [], contAt: [], upload: !1 },
+    stormeye: { name: "STORM EYE", sub: "THUNDER, THEN THE AXE.", flag: "boss_storm", shard: "note", shardFlag: "boss_storm", contFlag: "ram_nocont", down: "storm_down", get: "storm_down", shardAt: [], contAt: [], upload: !1 },
+    hack: { name: "VOV ECHO", sub: "A HACK, NOT THE OVERLORD HIMSELF.", flag: "boss_hack", shard: "note", shardFlag: "boss_hack", contFlag: "ram_nocont", down: "hack_down", get: "hack_down", shardAt: [], contAt: [], upload: !1 },
+  });
+  Object.assign(Ie, {
+    ram_dock: {
+      id: "ram_dock", name: "FALLEN DOCK", theme: "sea", realm: "ram", music: "sea", peace: !0,
+      signs: [{ x: 4, y: 6, text: "REMEMBER THE SKY.", kind: "sign", script: "mem_glitch" }],
+      warps: [
+        { x: 4, y: 5, w: 1, h: 1, to: "ram_memory", tx: 6, ty: 6, dir: 0 },
+        { x: 21, y: 6, w: 1, h: 2, to: "ram_dream", tx: 2, ty: 8, dir: 3 },
+      ],
+      onEnter: "ram_wake",
+    },
+    ram_memory: {
+      id: "ram_memory", name: "A BROKEN SKY", theme: "dark", realm: "ram", music: "dark", peace: !0,
+      signs: [
+        { x: 6, y: 3, text: "CENTER MOUNTAIN. THE SKY GLITCHES.", kind: "sign" },
+        { x: 10, y: 8, text: "THE BROTHERHOOD IS CAST OUT.", kind: "sign" },
+      ],
+      warps: [{ x: 6, y: 11, w: 2, h: 1, to: "ram_dock", tx: 6, ty: 8, dir: 0 }],
+      onEnter: "mem_glitch",
+    },
+    ram_dream: {
+      id: "ram_dream", name: "DREAMLAND", theme: "dark", realm: "ram", music: "dark",
+      gates: { G: "axe_got" },
+      npcs: [{ id: "spike", x: 8, y: 6, dir: 0, talk: "spike_dreamland" }],
+      enemies: [{ k: "fear", x: 14, y: 8 }, { k: "fear", x: 16, y: 5 }],
+      signs: [{ x: 6, y: 4, text: "SPIKE'S CARNIVAL. FRIGHT STAYS IN HIS CASTLE.", kind: "sign" }],
+      warps: [
+        { x: 0, y: 8, w: 1, h: 2, to: "ram_dock", tx: 18, ty: 6, dir: 2 },
+        { x: 23, y: 8, w: 1, h: 2, to: "ram_d1", tx: 2, ty: 6, dir: 3 },
+        { x: 11, y: 0, w: 2, h: 1, to: "ram_mars", tx: 12, ty: 13, dir: 1 },
+      ],
+    },
+    ram_d1: {
+      id: "ram_d1", name: "DREAM TENT", theme: "dungeon", realm: "ram", music: "cave",
+      locks: { D: { flag: "door_dream", key: "small" } },
+      chests: [
+        { id: "ram_dkey", x: 4, y: 4, item: "key", n: 1 },
+        { id: "ram_axe", x: 14, y: 4, item: "axe", n: 1 },
+      ],
+      signs: [{ x: 12, y: 4, text: "THE ETERNAL AXE.", kind: "sign" }],
+      warps: [
+        { x: 0, y: 6, w: 1, h: 2, to: "ram_dream", tx: 20, ty: 8, dir: 2 },
+        { x: 9, y: 0, w: 2, h: 1, to: "ram_fear", tx: 8, ty: 9, dir: 1 },
+      ],
+    },
+    ram_fear: {
+      id: "ram_fear", name: "THE FORGOTTEN", theme: "dark", realm: "ram", music: "dark", boss: "memory",
+      warps: [{ x: 8, y: 11, w: 2, h: 1, to: "ram_d1", tx: 9, ty: 3, dir: 0 }],
+    },
+    ram_mars: {
+      id: "ram_mars", name: "MARS FRONTIER", theme: "desert", realm: "ram", music: "west",
+      gates: { G: "shield_got" },
+      npcs: [
+        { id: "bjorn", x: 6, y: 6, dir: 3, talk: "bjorn_mars" },
+        { id: "draco", x: 16, y: 8, dir: 2, talk: "draco_mars" },
+      ],
+      enemies: [{ k: "redcoat", x: 18, y: 5 }, { k: "vov", x: 20, y: 10, v: 1 }],
+      signs: [{ x: 10, y: 4, text: "CAVENDISH BROADCAST: THE GAMES SEE A MOUNTAIN ABOVE THE STORMS.", kind: "sign" }],
+      warps: [
+        { x: 12, y: 15, w: 2, h: 1, to: "ram_dream", tx: 12, ty: 2, dir: 0 },
+        { x: 25, y: 7, w: 1, h: 2, to: "ram_m1", tx: 2, ty: 6, dir: 3 },
+        { x: 12, y: 0, w: 2, h: 1, to: "ram_jup", tx: 10, ty: 11, dir: 1 },
+      ],
+    },
+    ram_m1: {
+      id: "ram_m1", name: "MARS CANYON", theme: "dungeon", realm: "ram", music: "cave",
+      locks: { D: { flag: "door_mars", key: "small" } },
+      chests: [
+        { id: "ram_mkey", x: 4, y: 3, item: "key", n: 1 },
+        { id: "ram_shield", x: 14, y: 4, item: "shield", n: 1 },
+      ],
+      signs: [{ x: 12, y: 4, text: "THE SHIELD.", kind: "sign" }],
+      warps: [
+        { x: 0, y: 6, w: 1, h: 2, to: "ram_mars", tx: 22, ty: 7, dir: 2 },
+        { x: 9, y: 0, w: 2, h: 1, to: "ram_core", tx: 8, ty: 9, dir: 1 },
+      ],
+    },
+    ram_core: {
+      id: "ram_core", name: "COLONY CORE", theme: "dungeon", realm: "ram", music: "cave", boss: "colony",
+      warps: [{ x: 8, y: 11, w: 2, h: 1, to: "ram_m1", tx: 9, ty: 3, dir: 0 }],
+    },
+    ram_jup: {
+      id: "ram_jup", name: "JUPITER STORMS", theme: "sea", realm: "ram", music: "sea",
+      gates: { G: "amulet_got" },
+      npcs: [
+        { id: "sigrid", x: 6, y: 6, dir: 3, talk: "sigrid_jup" },
+        { id: "al", x: 14, y: 5, dir: 0, talk: "al_jup" },
+        { id: "buck", x: 16, y: 8, dir: 2, talk: "buck_jup" },
+      ],
+      enemies: [{ k: "jelly", x: 12, y: 7 }, { k: "vov", x: 18, y: 6, v: 2 }],
+      warps: [
+        { x: 10, y: 13, w: 2, h: 1, to: "ram_mars", tx: 12, ty: 2, dir: 0 },
+        { x: 21, y: 6, w: 1, h: 2, to: "ram_j1", tx: 2, ty: 6, dir: 3 },
+        { x: 10, y: 0, w: 2, h: 1, to: "ram_climb", tx: 10, ty: 11, dir: 1 },
+      ],
+    },
+    ram_j1: {
+      id: "ram_j1", name: "LIGHTNING LOFT", theme: "dungeon", realm: "ram", music: "cave",
+      locks: { D: { flag: "door_jup", key: "small" } },
+      chests: [
+        { id: "ram_jkey", x: 4, y: 3, item: "key", n: 1 },
+        { id: "ram_amulet", x: 14, y: 4, item: "amulet", n: 1 },
+      ],
+      signs: [{ x: 12, y: 4, text: "THE POWER AMULET.", kind: "sign" }],
+      warps: [
+        { x: 0, y: 6, w: 1, h: 2, to: "ram_jup", tx: 18, ty: 6, dir: 2 },
+        { x: 9, y: 0, w: 2, h: 1, to: "ram_eye", tx: 8, ty: 9, dir: 1 },
+      ],
+    },
+    ram_eye: {
+      id: "ram_eye", name: "STORM EYE", theme: "sea", realm: "ram", music: "sea", boss: "stormeye",
+      warps: [{ x: 8, y: 11, w: 2, h: 1, to: "ram_j1", tx: 9, ty: 3, dir: 0 }],
+    },
+    ram_climb: {
+      id: "ram_climb", name: "CENTER MOUNTAIN", theme: "dungeon", realm: "ram", music: "cave",
+      npcs: [{ id: "shadow", x: 6, y: 6, dir: 3, talk: "shadow_climb" }],
+      enemies: [{ k: "vov", x: 14, y: 6, v: 3 }],
+      signs: [{ x: 8, y: 4, text: "THE HIGHEST MOUNTAIN. THE CITY IS ABOVE THE STARS.", kind: "sign" }],
+      warps: [
+        { x: 10, y: 13, w: 2, h: 1, to: "ram_jup", tx: 10, ty: 2, dir: 0 },
+        { x: 10, y: 0, w: 2, h: 1, to: "ram_city", tx: 10, ty: 11, dir: 1 },
+      ],
+    },
+    ram_city: {
+      id: "ram_city", name: "THE CITY ABOVE", theme: "nexus", realm: "ram", music: "nexus",
+      npcs: [{ id: "halvar", x: 8, y: 6, dir: 3, talk: "halvar_city" }],
+      enemies: [{ k: "vov", x: 14, y: 8, v: 2 }, { k: "vov", x: 16, y: 5, v: 4 }],
+      props: [{ k: "portal", x: 18, y: 6, need: "ram_home_end", to: "ram_home" }],
+      signs: [{ x: 6, y: 3, text: "A DIVINE CITY BEYOND THE CLOUDS.", kind: "sign" }],
+      warps: [
+        { x: 10, y: 13, w: 2, h: 1, to: "ram_climb", tx: 10, ty: 2, dir: 0 },
+        { x: 10, y: 0, w: 2, h: 1, to: "ram_throne", tx: 8, ty: 9, dir: 1 },
+      ],
+    },
+    ram_throne: {
+      id: "ram_throne", name: "THE HACKED THRONE", theme: "dark", realm: "ram", music: "dark", boss: "hack",
+      warps: [{ x: 8, y: 11, w: 2, h: 1, to: "ram_city", tx: 10, ty: 3, dir: 0 }],
+    },
+  });
+  Object.assign(Zs, {
+    ram_dock: RM(22, 14, (r) => { gap(r, 4, 5); gap(r, 21, 6); gap(r, 21, 7); }),
+    ram_memory: RM(16, 12, (r) => { gap(r, 6, 11); gap(r, 7, 11); }),
+    ram_dream: RM(24, 16, (r) => { gap(r, 0, 8); gap(r, 0, 9); gap(r, 23, 8); gap(r, 23, 9); gap(r, 11, 0, "G"); gap(r, 12, 0, "G"); }),
+    ram_d1: RM(18, 12, (r) => { gap(r, 0, 6); gap(r, 0, 7); gap(r, 9, 0, "D"); gap(r, 10, 0, "D"); }),
+    ram_fear: RM(16, 12, (r) => { gap(r, 8, 11); gap(r, 9, 11); }),
+    ram_mars: RM(26, 16, (r) => { gap(r, 12, 15); gap(r, 13, 15); gap(r, 25, 7); gap(r, 25, 8); gap(r, 12, 0, "G"); gap(r, 13, 0, "G"); }),
+    ram_m1: RM(18, 12, (r) => { gap(r, 0, 6); gap(r, 0, 7); gap(r, 9, 0, "D"); gap(r, 10, 0, "D"); }),
+    ram_core: RM(16, 12, (r) => { gap(r, 8, 11); gap(r, 9, 11); }),
+    ram_jup: RM(22, 14, (r) => { gap(r, 10, 13); gap(r, 11, 13); gap(r, 21, 6); gap(r, 21, 7); gap(r, 10, 0, "G"); gap(r, 11, 0, "G"); r[8][8] = "r"; r[8][9] = "r"; }),
+    ram_j1: RM(18, 12, (r) => { gap(r, 0, 6); gap(r, 0, 7); gap(r, 9, 0, "D"); gap(r, 10, 0, "D"); }),
+    ram_eye: RM(16, 12, (r) => { gap(r, 8, 11); gap(r, 9, 11); }),
+    ram_climb: RM(20, 14, (r) => { gap(r, 10, 13); gap(r, 11, 13); gap(r, 10, 0); gap(r, 11, 0); }),
+    ram_city: RM(22, 14, (r) => { gap(r, 10, 13); gap(r, 11, 13); gap(r, 10, 0); gap(r, 11, 0); }),
+    ram_throne: RM(16, 12, (r) => { gap(r, 8, 11); gap(r, 9, 11); }),
+  });
   Object.assign(Ge, {
     partner: {
       name: "PARTNER",
@@ -10469,7 +10821,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         Fr(),
         spawnClear(),
         w.onEnter && !ee["oe_" + e] && ((ee["oe_" + e] = !0), ye(w.onEnter)),
-        (Z("woke") || A.story === "ros") && e !== "dream" && xe());
+        (Z("woke") || A.story === "ros" || A.story === "ramshackle") && e !== "dream" && xe());
     }
     function inWarp(x, y) {
       for (let C of w.warps || [])
@@ -10579,9 +10931,28 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         (A.paused = !1),
         (A.choice = null));
     }
+    function EtRam() {
+      (Kt(),
+        (d.coins = 0),
+        (d.items.hatchet = !0),
+        (d.wep = "hatchet"),
+        (d.tool = ""),
+        (d.pri = "hatchet"),
+        (d.sec = ""),
+        (d.cds = {}),
+        (d.shield = 0),
+        (d.rune = 0),
+        (A.state = "play"),
+        (A.st = 0),
+        ba("ram_dock", 6, 8, 3));
+    }
     function Et() {
       if (A.story === "ros") {
         EtRos();
+        return;
+      }
+      if (A.story === "ramshackle") {
+        EtRam();
         return;
       }
       (Kt(),
@@ -10602,6 +10973,9 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       }
       if (e && A.story === "ros" && !Ie[e.area]) {
         ((e.area = "ros_pour"), (e.x = 168), (e.y = 136), (e.dir = 1), (e.migrated = !0));
+      }
+      if (e && A.story === "ramshackle" && !Ie[e.area]) {
+        ((e.area = "ram_dock"), (e.x = p(6)), (e.y = p(8)), (e.dir = 3));
       }
       return !e || !Ie[e.area]
         ? !1
@@ -10654,7 +11028,13 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
             (d.arrowCd = 0),
             (d.charge = 0),
             migrateSlots(e)),
-          Q(A.story === "ros" ? "WELCOME BACK, SHERIFF." : "WELCOME BACK, SKIPPY!"),
+          Q(
+            A.story === "ros"
+              ? "WELCOME BACK, SHERIFF."
+              : A.story === "ramshackle"
+                ? "WELCOME BACK, RAMSHACKLE."
+                : "WELCOME BACK, SKIPPY!",
+          ),
           !0);
     }
     function _e(e, a, t) {
@@ -10684,6 +11064,19 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           ((d.maxHp += 2),
             (d.hp = d.maxHp),
             (ee[w.boss && Se[w.boss] ? Se[w.boss].contFlag : "cont_got"] = !0));
+          break;
+        case "axe":
+          ((d.items.axe = !0), (ee.axe_got = !0), (d.wep = "axe"), (d.pri = "axe"), splitHands(), ye("mem_axe"));
+          break;
+        case "shield":
+          ((d.items.shield = !0),
+            (ee.shield_got = !0),
+            d.sec !== "amulet" && (d.sec = "shield"),
+            splitHands(),
+            ye("mem_shield"));
+          break;
+        case "amulet":
+          ((d.items.amulet = !0), (ee.amulet_got = !0), (d.sec = "amulet"), splitHands(), ye("mem_amulet"));
           break;
         case "armor":
         case "board":
@@ -11016,6 +11409,10 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
     }
     function be(e, a, t) {
       if (d.inv > 0 || d.roll > 0 || d.god || A.state !== "play") return;
+      if ((d.shield || 0) > 0) {
+        ((d.shield = 0), D.tink(), Q("THE SHIELD HOLDS."));
+        return;
+      }
       ((d.hp -= e), (d.inv = 1.1), D.hurt(), (A.shake = 0.15));
       let i = Math.atan2(d.y - t, d.x - a);
       ((d.kb = 0.16),
@@ -11298,6 +11695,8 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         (d.brandCd || 0) > 0 &&
           ((d.brandCd = Math.max(0, d.brandCd - e)),
           d.brandCd === 0 && Q("BRAND READY.")),
+        (d.shield || 0) > 0 && (d.shield = Math.max(0, d.shield - e)),
+        (d.rune || 0) > 0 && (d.rune = Math.max(0, d.rune - e)),
         d.cds &&
           Object.keys(d.cds).forEach((id) => {
             d.cds[id] > 0 && (d.cds[id] = Math.max(0, d.cds[id] - e));
@@ -11480,9 +11879,9 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
             (!C.need || Z(C.need)) &&
             ae(d.x, d.y, p(C.x), p(C.y)) < 9
           ) {
-            if (C.to === "ros_home")
+            if (C.to === "ros_home" || C.to === "ram_home")
               (D.mirage(),
-                A.trans || (A.trans = { t: 0, done: !1, home: !0 }));
+                A.trans || (A.trans = { t: 0, done: !1, home: C.to }));
             else {
               let te = je[C.to || w.id];
               te && (D.mirage(), dt(te.to, te.tx, te.ty, te.dir));
@@ -11644,6 +12043,34 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           (a.y += a.vy * e));
         let i = Math.floor(a.x / 16),
           s = Math.floor(a.y / 16);
+        if (a.kind === "axe") {
+          for (let f of ce) !f.dead && ae(a.x, a.y, f.x, f.y) < 12 && _a(f, 2, a.x, a.y, 0.15);
+          if (r.state === "fight" && ae(a.x, a.y, r.x, r.y) < 18) {
+            let bh = Le[r.kind] && Le[r.kind].hit;
+            bh ? bh([a.x, a.y, 8], "axe", 2) : Fe(2);
+            a.t = 99;
+          }
+          !a.back && a.t > 0.28 && ((a.back = 1), (a.vx *= -1), (a.vy *= -1));
+          (Wt(i, s) || a.t > 0.75) && (a.t = 99);
+          continue;
+        }
+        if (a.kind === "echo") {
+          if (r.state === "fight" && ae(a.x, a.y, r.x, r.y) < 18) {
+            let bh = Le[r.kind] && Le[r.kind].hit;
+            bh ? bh([a.x, a.y, 8], "echo", 2) : Fe(2);
+            a.t = 99;
+          }
+          a.t > 1.3 && (a.t = 99);
+          continue;
+        }
+        if (
+          (a.kind === "orb" || a.kind === "hmis" || a.kind === "fball") &&
+          (d.shield || 0) > 0 &&
+          ae(a.x, a.y, d.x, d.y - 6) < 14
+        ) {
+          ((a.vx *= -1), (a.vy *= -1), (a.kind = "echo"), (a.t = 0.05), D.tink());
+          continue;
+        }
         if (a.kind === "hmis") {
           ae(a.x, a.y, d.x, d.y - 6) < 7
             ? (be(1, a.x, a.y),
@@ -11888,7 +12315,8 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         ((f.t += e),
           f.t > 0.22 &&
             !f.done &&
-            ((f.done = !0), f.home ? throughPortal() : ba(f.area, f.x, f.y, f.dir)),
+            ((f.done = !0),
+            f.home === "ram_home" ? throughRam() : f.home ? throughPortal() : ba(f.area, f.x, f.y, f.dir)),
           f.t > 0.44 && (A.trans = null),
           Ze());
         return;
@@ -11896,6 +12324,11 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       if (A.paused) {
         if (A.story === "ros") {
           (!Vt() && rosPauseInput(), Ze());
+          return;
+        }
+        if (A.story === "ramshackle") {
+          !Vt() && (U.backE || U.mapE) && ((A.paused = !1), D.sel());
+          Ze();
           return;
         }
         (!Vt() && skippyPauseInput(), Ze());
@@ -12218,11 +12651,16 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           if (s && s.flags && s.flags.ros_home_end) return "COMPLETE";
           if (s) return "RIDING";
         }
+        if (id === "ramshackle") {
+          let s = JSON.parse(localStorage.getItem("sq_save_ram_v1") || "null");
+          if (s && s.flags && s.flags.ram_home_end) return "COMPLETE";
+          if (s) return "RIDING";
+        }
       } catch (e) {}
       return "";
     }
     function rowSub(i) {
-      if (i.id === "ros" && (taleHeard("ros") || chapterStatus("ros") === "COMPLETE"))
+      if ((i.id === "ros" || i.id === "ramshackle") && (taleHeard(i.id === "ramshackle" ? "ram" : "ros") || chapterStatus(i.id) === "COMPLETE"))
         return "THE TALE IS TOLD";
       let st = chapterStatus(i.id);
       return st || i.sub;
@@ -12249,7 +12687,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
     }
     function taleYes() {
       let tale = taleById(A.taleId || "ros");
-      ((ee.tale_macho = !0),
+      (tale.id === "ros" && (ee.tale_macho = !0),
         xe(),
         (A.taleId = tale.id),
         (A.state = "flash"),
@@ -12270,10 +12708,10 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       let tale = taleById(A.taleId || "ros");
       ((A.story = tale.hero || tale.id), (Mt = tale.save), (A.taleFrom = tale.id));
       if (overwrite || !localStorage.getItem(tale.save)) {
-        (EtRos(), (ee.tale_from = tale.id), xe());
+        (Et(), (ee.tale_from = tale.id), xe());
         return;
       }
-      Bt() ? ((ee.tale_from = tale.id), xe()) : (EtRos(), (ee.tale_from = tale.id), xe());
+      Bt() ? ((ee.tale_from = tale.id), xe()) : (Et(), (ee.tale_from = tale.id), xe());
     }
     function cancelTale() {
       ((A.state = "play"), (A.st = 0), (A.talePhase = ""), ye("tale_" + (A.taleId || "ros") + "_keep"));
@@ -12321,6 +12759,25 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       ((ee.ros_home_end = !0), (ee.ros_rift = !0));
       w && w.id === "ros_pour" && ((d.x = p(10)), (d.y = p(8)));
       backToSkippy(!0, { area: "desert", x: 36, y: 8.2, face: 1 });
+    }
+    function throughRam() {
+      ((ee.ram_home_end = !0),
+        w && w.id === "ram_city" && ((d.x = p(8)), (d.y = p(8))),
+        A.state === "play" && xe(),
+        (A.story = "skippy"),
+        (Mt = "sq_save_v1"),
+        (A.paused = !1),
+        (A.choice = null),
+        (A.taleFrom = ""));
+      if (!Bt()) {
+        ((A.state = "stories"),
+          (A.menu = 0),
+          (A.st = 0),
+          (A.note = "NO SKIPPY RIDE SAVED. THE TALE WAITS IN THE CHAPTER LIST."),
+          Ke("title"));
+        return;
+      }
+      ((ee.tale_ram = !0), ba("seaport", 16, 17, 1), ye("tale_ram_close"), xe());
     }
     function returnToPresent() {
       backToSkippy(!0);
@@ -14126,7 +14583,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         (A.st = 0),
         (A.note = ""),
         (A.menu = A.hasSave ? 1 : 0),
-        Ke(row.id === "ros" ? "west" : "title"));
+        Ke(row.id === "ros" ? "west" : row.id === "ramshackle" ? "sea" : "title"));
     }
     function EtRos() {
       (Kt(),
@@ -14456,7 +14913,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         n.fillRect(0, 0, 320, 224),
         v(n, "CHAPTER " + tale.n, 160, 64, "#3a2010", 1, "center", "#f0d8a0"),
         v(n, tale.title, 160, 92, "#2a1408", 2, "center", "#f0d8a0"),
-        v(n, "A TALE TOLD IN THE DESERT", 160, 128, "#6a3818", 1, "center", "#f0d8a0"),
+        v(n, tale.place || "A TALE TOLD IN THE DESERT", 160, 128, "#6a3818", 1, "center", "#f0d8a0"),
         v(n, "X CONTINUES   BACK CANCELS", 160, 200, "#3a2010", 1, "center", ""));
     }
     function taleGoScreen() {
@@ -14527,7 +14984,11 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           A.menu;
       else if (A.state === "title")
         e.textContent =
-          (A.story === "ros" ? "THE ROGUE OUTLAW SHERIFF" : "SKIPPY'S QUEST") +
+          (A.story === "ros"
+            ? "THE ROGUE OUTLAW SHERIFF"
+            : A.story === "ramshackle"
+              ? "RAMSHACKLE"
+              : "SKIPPY'S QUEST") +
           "\nNEW GAME\nCONTINUE\nmenu " +
           A.menu;
       else if (A.state === "flash") {
@@ -14648,6 +15109,64 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         });
       },
     };
+    function ramBoss(kind, fire) {
+      return {
+        init: () => {
+          ((ee.ram_nocont = !0),
+            (r.hp = r.max = kind === "hack" ? 10 : 6),
+            (r.x = p(8)),
+            (r.y = p(5)),
+            (r.a = 0),
+            (r.eyeT = 0.4));
+        },
+        upd: (e) => {
+          ((r.a += e),
+            (r.x = p(8) + Math.sin(r.a * 1.3) * 28),
+            (r.eyeT -= e));
+          if (r.eyeT <= 0) {
+            r.eyeT = fire;
+            let i = Math.atan2(d.y - 8 - r.y, d.x - r.x);
+            Oe.push({
+              x: r.x,
+              y: r.y - 8,
+              vx: Math.cos(i) * 90,
+              vy: Math.sin(i) * 90,
+              t: 0,
+              kind: "orb",
+              dir: 0,
+            });
+          }
+        },
+        parts: (e) => {
+          e.push([r.x, r.y - 8, 12, 1, 0]);
+        },
+        hit: (e, a) => {
+          if (kind === "memory")
+            a === "axe" ? Fe(2) : (D.tink(), Q("THE HATCHET CANNOT REACH THIS FEAR."));
+          else if (kind === "colony")
+            a === "echo" ? Fe(3) : (D.tink(), Q("REFLECT THE BEAM."));
+          else if (kind === "stormeye")
+            (d.rune || 0) > 0 ? Fe(2) : (D.tink(), Q("THE EYE WANTS THUNDER."));
+          else Fe(a === "axe" ? 2 : 1);
+        },
+        draw: (e, a, t) => {
+          e.push({
+            y: r.y,
+            f: () => {
+              let i = a(r.x),
+                s = t(r.y);
+              (R(n, i, s - 10, 12, 12, r.flash > 0 ? "#ffffff" : kind === "hack" ? "#2a0840" : "#6a3a8a"),
+                R(n, i, s - 10, 5, 5, kind === "colony" ? "#ff4455" : "#4ff0ff"),
+                kind === "hack" && I(i - 8, s - 18, 16, 2, Math.floor(A.t * 8) % 2 ? "#ff4fd8" : "#4ff0ff"));
+            },
+          });
+        },
+      };
+    }
+    Le.memory = ramBoss("memory", 1.4);
+    Le.colony = ramBoss("colony", 0.7);
+    Le.stormeye = ramBoss("stormeye", 1.2);
+    Le.hack = ramBoss("hack", 1.1);
     Le.sparkb = {
       init: () => {
         ((ee.sparkb_nocont = !0),
@@ -14776,6 +15295,23 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       if (Z("ros_ready") && !Z("ros_done")) return "HARBOR: THE KING'S DECK. THEN GO HOME";
       if (!Z("ros_home_end")) return "FINAL: GO HOME TO THE POUR. TALK TO RUSTY.";
       return "THE TALE IS TOLD. THE PORTAL IS OUT BACK.";
+    }
+    function ramObjective() {
+      if (!Z("mem_hack")) return "DOCK: REMEMBER THE HACK";
+      if (!Z("axe_got")) return "DREAMLAND: THE ETERNAL AXE";
+      if (!Z("shield_got")) return "MARS: THE SHIELD";
+      if (!Z("amulet_got")) return "JUPITER: THE POWER AMULET";
+      if (!Z("ram_home_end")) return "CENTER MOUNTAIN: CLIMB TO THE CITY";
+      return "THE CITY IS QUIET. THE PORTAL HOME IS OPEN.";
+    }
+    function ramSaga() {
+      return [
+        ["THE HACK", "mem_hack", "The sky glitched. The brotherhood fell."],
+        ["THE AXE", "axe_got", "It remembers the gate."],
+        ["THE SHIELD", "shield_got", "It holds a laser and answers it."],
+        ["THE AMULET", "amulet_got", "Thunder enough to climb."],
+        ["THE CITY", "ram_home_end", "The hack is expelled. The Overlord is not ended."],
+      ];
     }
     function rosQuestRows() {
       return [
@@ -15018,13 +15554,19 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       if (id === "raygun") return !!d.items.raygun;
       if (id === "missile") return !!d.items.missile;
       if (id === "lasso") return !!(d.items.lasso || Z("lasso_got"));
+      if (id === "hatchet") return !!d.items.hatchet;
+      if (id === "axe") return !!(d.items.axe || Z("axe_got"));
+      if (id === "shield") return !!(d.items.shield || Z("shield_got"));
+      if (id === "amulet") return !!(d.items.amulet || Z("amulet_got"));
       return !1;
     }
     function ownedItems() {
       let ids =
         A.story === "ros"
           ? ["lasers", "justice", "lasso", "brand"]
-          : ["baton", "sword", "bow", "raygun", "missile", "lasso"];
+          : A.story === "ramshackle"
+            ? ["hatchet", "axe", "shield", "amulet"]
+            : ["baton", "sword", "bow", "raygun", "missile", "lasso"];
       return ids.filter(ownedItem);
     }
     function slotName(id, short) {
@@ -15038,6 +15580,10 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           missile: "MISSILES",
           sword: "FLAME SWORD",
           baton: "STUN BATON",
+          hatchet: "HATCHET",
+          axe: "ETERNAL AXE",
+          shield: "SHIELD",
+          amulet: "POWER AMULET",
         },
         sh = {
           lasers: "LASERS",
@@ -15049,6 +15595,10 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           missile: "MISSILE",
           sword: "SWORD",
           baton: "BATON",
+          hatchet: "HATCHET",
+          axe: "AXE",
+          shield: "SHIELD",
+          amulet: "AMULET",
         };
       return id ? (short ? sh : full)[id] || id.toUpperCase() : "NONE";
     }
@@ -15082,6 +15632,10 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         missile: 0.5,
         sword: 0.26,
         baton: 0.26,
+        hatchet: 0.26,
+        axe: 0.55,
+        shield: 1.2,
+        amulet: 1.6,
       }[id] || 0.4;
       return Math.min(1, itemLeft(id) / max);
     }
@@ -15113,10 +15667,10 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       return "";
     }
     function weaponish(id) {
-      return ["lasers", "justice", "bow", "raygun", "sword", "baton"].indexOf(id) >= 0;
+      return ["lasers", "justice", "bow", "raygun", "sword", "baton", "hatchet", "axe"].indexOf(id) >= 0;
     }
     function toolish(id) {
-      return ["lasso", "brand", "missile"].indexOf(id) >= 0;
+      return ["lasso", "brand", "missile", "shield", "amulet"].indexOf(id) >= 0;
     }
     function migrateSlots(e) {
       if (e && typeof e.pri === "string") {
@@ -15221,7 +15775,40 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       else if (id === "bow") fireBow();
       else if (id === "raygun") fireRay();
       else if (id === "missile") wr();
-      else if (id === "baton" || id === "sword") swingItem(id);
+      else if (id === "baton" || id === "sword" || id === "hatchet") swingItem(id);
+      else if (id === "axe") throwAxe();
+      else if (id === "shield") raiseShield();
+      else if (id === "amulet") thunderBurst();
+    }
+    function throwAxe() {
+      if (itemLeft("axe") > 0) return;
+      let C = Ne[d.dir];
+      (Oe.push({
+        x: d.x + C[0] * 10,
+        y: d.y - 8 + C[1] * 8,
+        vx: C[0] * 200,
+        vy: C[1] * 200,
+        t: 0,
+        kind: "axe",
+        back: 0,
+        dir: d.dir,
+      }),
+        spend("axe", 0.55),
+        (d.atk = 0.12),
+        D.swing());
+    }
+    function raiseShield() {
+      if (itemLeft("shield") > 0) return;
+      ((d.shield = 1.4), spend("shield", 1.2), D.tink(), Q("SHIELD UP."));
+      for (let f of ce)
+        !f.dead && ae(f.x, f.y, d.x, d.y) < 28 && _a(f, 1, d.x, d.y, 0.35);
+    }
+    function thunderBurst() {
+      if (itemLeft("amulet") > 0) return;
+      ((d.rune = 1.8), spend("amulet", 1.6), D.shard(), Q("THE AMULET SPEAKS."));
+      ne(d.x, d.y - 8, 16, ["#ffe070", "#4ff0ff", "#ffffff"], 40);
+      for (let f of ce)
+        !f.dead && ae(f.x, f.y, d.x, d.y) < 72 && _a(f, 3, d.x, d.y, 1.1);
     }
     function fireBow() {
       if (!(d.items.bow || d.items.tbow)) return;
@@ -15280,10 +15867,18 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       }
     }
     function ownedWeapons() {
-      let ids = A.story === "ros" ? ["lasers", "justice"] : ["raygun", "bow", "sword", "baton"];
+      let ids =
+        A.story === "ros"
+          ? ["lasers", "justice"]
+          : A.story === "ramshackle"
+            ? ownedItem("axe")
+              ? ["axe"]
+              : ["hatchet"]
+            : ["raygun", "bow", "sword", "baton"];
       return ids.filter((id) => ownedItem(id));
     }
     function ownedTools() {
+      if (A.story === "ramshackle") return ["shield", "amulet"].filter((id) => ownedItem(id));
       return ["lasso", "brand", "missile"].filter((id) => ownedItem(id));
     }
     function defaultWeapon() {
@@ -15541,7 +16136,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       },
     };
     function ga() {
-      return A.story === "ros" ? "ros" : Z("hardened") ? "skippy2" : "skippy";
+      return A.story === "ros" ? "ros" : A.story === "ramshackle" ? "ramshackle" : Z("hardened") ? "skippy2" : "skippy";
     }
     ((Ia.gate = () => {
       Z("cgate_open") ||
@@ -16464,6 +17059,10 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           !A.paused &&
           !A.ev &&
           v(n, rosObjective(), 160, 208, "#ffe0a0", 1, "center", "#000"),
+        A.story === "ramshackle" &&
+          !A.paused &&
+          !q &&
+          v(n, ramObjective(), 160, 208, "#ffe0a0", 1, "center", "#000"),
         A.story === "skippy" &&
           !A.paused &&
           !A.choice &&
@@ -16838,6 +17437,10 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
                 2,
                 "#ff4fd8",
               ));
+          } else if (f.kind === "axe") {
+            let y = Math.atan2(f.vy, f.vx);
+            (I(c - 5, S - 2, 10, 4, "#e0c060"),
+              I(c + Math.cos(y) * 4, S + Math.sin(y) * 4, 3, 3, "#fff6c0"));
           } else if (f.kind === "green") {
             let y = Math.atan2(f.vy, f.vx);
             ((n.strokeStyle = "#3dff6a"),
@@ -17277,9 +17880,25 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         return !1;
       }
     }
+    function ramPause() {
+      let rows = ramSaga();
+      (I(0, 24, 320, 200, "#140c08"),
+        v(n, "SAGA", 160, 36, "#ffcc33", 2, "center", "#000"),
+        v(n, ramObjective(), 160, 54, "#ffe0a0", 1, "center", "#000"));
+      rows.forEach((r, i) => {
+        let y = 74 + i * 18;
+        v(n, (Z(r[1]) ? "OK " : "-- ") + r[0], 24, y, Z(r[1]) ? "#3dff6a" : "#ffffff", 1, "", "");
+        v(n, r[2], 24, y + 8, "#c8b090", 1, "", "");
+      });
+      v(n, "BACK CLOSES", 160, 200, "#ffe0c0", 1, "center", "#000");
+    }
     function is() {
       if (A.story === "ros") {
         rosPause();
+        return;
+      }
+      if (A.story === "ramshackle") {
+        ramPause();
         return;
       }
       (I(0, 24, 320, 200, "#05040ce8"),
@@ -17529,6 +18148,12 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           enabled: !0,
           on: A.choice.sel === i,
         }));
+      if (A.state === "play" && A.paused && A.story === "ramshackle")
+        return ramSaga().map((r) => ({
+          label: (Z(r[1]) ? "OK  " : "--  ") + r[0],
+          enabled: !0,
+          on: !1,
+        }));
       if (A.state === "play" && A.paused && A.story === "ros" && A.rosLeave)
         return [
           { label: "YES. SAVE AND RETURN TO SKIPPY", enabled: !0, on: !A.menu },
@@ -17600,6 +18225,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         ((A.choice.sel = i), (U.talkE = !0), choiceInput(), (U.talkE = !1));
         return;
       }
+      if (A.state === "play" && A.paused && A.story === "ramshackle") return;
       if (A.state === "play" && A.paused && A.story === "ros" && A.rosLeave) {
         i === 0 ? backToSkippy(!1) : (A.rosLeave = 0);
         return;
@@ -17789,10 +18415,14 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           I(0, 0, 320, 224, "#000000"),
           (n.globalAlpha = 1));
       }
-      (w.id === "dream" &&
+      (        w.id === "dream" &&
         ((n.fillStyle = "#c8a8ff18"),
         n.fillRect(0, 24, 320, 200),
         A.paused || v(n, "~ DREAM ~", 314, 28, "#c8a8ff", 1, "right", "")),
+        w.id === "ram_memory" &&
+          ((n.fillStyle = "#ff4fd822"),
+          n.fillRect(0, 24, 320, 200),
+          v(n, "MEMORY", 160, 36, "#ff9ae8", 1, "center", "#000")),
         A.state === "gameover" &&
           (I(0, 0, 320, 224, "#2a0010cc"),
           v(n, "SKIPPY IS DOWN!", 160, 80, "#ff4fd8", 2, "center", X),
@@ -19987,7 +20617,8 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         }),
         kit: () => ownedItems(),
         slots: () => ({ pri: d.pri || "", sec: d.sec || "" }),
-        objective: () => (A.story === "ros" ? rosObjective() : skippyObjective()),
+        objective: () =>
+          A.story === "ros" ? rosObjective() : A.story === "ramshackle" ? ramObjective() : skippyObjective(),
         chapters: () => STORY_ROWS.map((r) => ({ id: r.id, status: chapterStatus(r.id), sub: rowSub(r) })),
         quests: () => (A.story === "ros" ? rosQuestRows() : []),
 

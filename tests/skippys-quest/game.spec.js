@@ -1540,3 +1540,284 @@ test.describe('context touch layouts', () => {
     expect(errors, errors.join('\n')).toEqual([]);
   });
 });
+
+const RAM = '/agent/repos/previews/skippys-quest/docs/ram';
+
+test('Ramshackle chapter: relics, worlds, bosses, and the road home', async ({ page }) => {
+  fs.mkdirSync(RAM, { recursive: true });
+  const errors = await boot(page, { save: { skippy: DONE_SKIPPY } });
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.G.state = 'stories';
+    S.G.menu = 5;
+    S.G.st = 1;
+    S.step(2);
+  });
+  await page.waitForTimeout(320);
+  await page.evaluate(() => { __SQ.press('attack', true); __SQ.step(2); __SQ.press('attack', false); __SQ.step(2); });
+  await page.waitForTimeout(320);
+  await page.evaluate(() => { __SQ.G.menu = 0; __SQ.G.st = 1; __SQ.press('attack', true); __SQ.step(4); __SQ.press('attack', false); __SQ.step(8); });
+  const started = await page.evaluate(() => {
+    const S = __SQ;
+    for (let i = 0; i < 8 && (S.script || S.dlg); i++) {
+      S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
+    }
+    return { story: S.story(), area: S.A.id, hatchet: !!S.P.items.hatchet, hero: document.getElementById('sr-live').textContent };
+  });
+  expect(started.story).toBe('ramshackle');
+  expect(started.area).toBe('ram_dock');
+  expect(started.hatchet).toBe(true);
+  expect(started.hero).toContain('ramshackle');
+
+  await page.evaluate(() => { __SQ.warp('ram_memory', 6, 6, 0); __SQ.step(4); });
+  await page.screenshot({ path: `${RAM}/flashback.png` });
+  await page.evaluate(() => {
+    const S = __SQ;
+    for (let i = 0; i < 8 && (S.script || S.dlg); i++) {
+      S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
+    }
+  });
+  expect(await page.evaluate(() => __SQ.objective())).toContain('DREAMLAND');
+
+  for (const [id, file] of [['ram_dream', 'dream.png'], ['ram_mars', 'mars.png'], ['ram_jup', 'jupiter.png'], ['ram_city', 'city.png']]) {
+    await page.evaluate((area) => {
+      const S = __SQ;
+      for (let i = 0; i < 6 && (S.script || S.dlg); i++) {
+        S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
+      }
+      S.warp(area, 8, 6, 3);
+      S.step(3);
+    }, id);
+    expect(await page.evaluate(() => __SQ.A.id)).toBe(id);
+    await page.screenshot({ path: `${RAM}/${file}` });
+  }
+  await page.evaluate(() => { __SQ.warp('ram_d1', 12, 5, 2); __SQ.step(2); });
+  await page.screenshot({ path: `${RAM}/axe.png` });
+  await page.evaluate(() => { __SQ.warp('ram_m1', 12, 5, 2); __SQ.step(2); });
+  await page.screenshot({ path: `${RAM}/shield.png` });
+  await page.evaluate(() => { __SQ.warp('ram_j1', 12, 5, 2); __SQ.step(2); });
+  await page.screenshot({ path: `${RAM}/amulet.png` });
+
+  const axe = await page.evaluate(() => {
+    const S = __SQ;
+    S.warp('ram_fear', 6, 6, 3);
+    S.step(110);
+    S.P.items.axe = true;
+    S.flag('axe_got');
+    S.P.wep = 'axe';
+    S.P.pri = 'axe';
+    const before = S.B.hp;
+    S.press('attack', true); S.step(1); S.press('attack', false);
+    let flipped = false;
+    let kind = '';
+    for (let i = 0; i < 36; i++) {
+      S.step(1);
+      const shot = (S.shots || []).find((o) => o.kind === 'axe');
+      if (shot) {
+        kind = 'axe';
+        if (shot.back) flipped = true;
+      }
+    }
+    return { fight: S.B.state, before, after: S.B.hp, kind, flipped };
+  });
+  expect(axe.fight === 'fight' || axe.fight === 'dying' || axe.after < axe.before).toBe(true);
+  expect(axe.kind === 'axe' || axe.after < axe.before).toBe(true);
+  expect(axe.flipped || axe.after < axe.before).toBe(true);
+
+  const shield = await page.evaluate(() => {
+    const S = __SQ;
+    S.warp('ram_core', 6, 6, 3);
+    S.step(50);
+    S.P.items.shield = true;
+    S.flag('shield_got');
+    S.P.sec = 'shield';
+    S.P.tool = 'shield';
+    const hp = S.P.hp;
+    S.press('item', true); S.step(1); S.press('item', false); S.step(1);
+    const up = S.P.shield || 0;
+    S.step(50);
+    return { up, hp0: hp, hp1: S.P.hp, boss: S.B.hp };
+  });
+  expect(shield.up).toBeGreaterThan(0);
+
+  const amulet = await page.evaluate(() => {
+    const S = __SQ;
+    S.warp('ram_eye', 6, 6, 3);
+    S.step(110);
+    S.P.items.axe = true;
+    S.P.items.amulet = true;
+    S.flag('axe_got');
+    S.flag('amulet_got');
+    S.P.wep = 'axe';
+    S.P.pri = 'axe';
+    S.P.sec = 'amulet';
+    S.P.tool = 'amulet';
+    const locked = S.B.hp;
+    S.press('attack', true); S.step(1); S.press('attack', false); S.step(24);
+    const still = S.B.hp;
+    S.press('item', true); S.step(1); S.press('item', false); S.step(1);
+    const rune = S.P.rune || 0;
+    S.press('attack', true); S.step(1); S.press('attack', false); S.step(24);
+    return { locked, still, rune, after: S.B.hp, fight: S.B.state };
+  });
+  expect(amulet.fight).toBe('fight');
+  expect(amulet.still).toBe(amulet.locked);
+  expect(amulet.rune).toBeGreaterThan(0);
+  expect(amulet.after).toBeLessThan(amulet.locked);
+
+  const bosses = await page.evaluate(() => {
+    const S = __SQ;
+    const out = {};
+    function down(area, flag) {
+      for (let i = 0; i < 8 && (S.script || S.dlg); i++) {
+        S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
+      }
+      S.warp(area, 8, 6, 1);
+      S.step(2);
+      for (let i = 0; i < 8 && (S.script || S.dlg); i++) {
+        S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
+      }
+      for (let i = 0; i < 160 && S.B.state !== 'fight' && S.B.state !== 'dying'; i++) S.step(1);
+      for (let i = 0; i < 8 && S.B.state === 'fight'; i++) S.bossHurt(4);
+      for (let i = 0; i < 220 && !S.flags[flag]; i++) {
+        if (S.dlg) { S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); }
+        S.step(1);
+      }
+      out[flag] = !!S.flags[flag];
+      out[flag + 'State'] = S.B.state;
+      S.step(3);
+    }
+    down('ram_fear', 'boss_memory');
+    down('ram_core', 'boss_colony');
+    down('ram_eye', 'boss_storm');
+    down('ram_throne', 'boss_hack');
+    out.home = !!S.flags.ram_home_end;
+    return out;
+  });
+  expect(bosses.boss_memory, JSON.stringify(bosses)).toBe(true);
+  expect(bosses.boss_colony, JSON.stringify(bosses)).toBe(true);
+  expect(bosses.boss_storm, JSON.stringify(bosses)).toBe(true);
+  expect(bosses.boss_hack, JSON.stringify(bosses)).toBe(true);
+  expect(bosses.home, JSON.stringify(bosses)).toBe(true);
+
+  const home = await page.evaluate(() => {
+    const S = __SQ;
+    for (let i = 0; i < 12 && (S.script || S.dlg); i++) {
+      S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
+    }
+    S.warp('ram_city', 18, 6.25, 1);
+    S.step(2);
+    for (let i = 0; i < 50 && S.story() === 'ramshackle'; i++) S.step(1);
+    for (let i = 0; i < 30 && S.G.trans; i++) S.step(1);
+    for (let i = 0; i < 20 && !S.dlg; i++) S.step(1);
+    S.skipText();
+    S.step(2);
+    return {
+      story: S.story(),
+      area: S.A.id,
+      text: S.dlg ? S.dlg.pages.map((p) => p.join(' ')).join(' ') : '',
+      coins: JSON.parse(localStorage.getItem('sq_save_v1')).coins,
+      ram: JSON.parse(localStorage.getItem('sq_save_ram_v1')).flags.ram_home_end,
+      ros: localStorage.getItem('sq_save_ros_v1'),
+    };
+  });
+  expect(home.story, JSON.stringify(home)).toBe('skippy');
+  expect(home.area).toBe('seaport');
+  expect(home.text).toContain('JOURNEY HOME');
+  expect(home.coins).toBe(42);
+  expect(home.ram).toBe(true);
+  expect(home.ros).toBe(null);
+  await page.screenshot({ path: `${RAM}/return.png` });
+
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.G.story = 'skippy';
+    S.G.state = 'play';
+    S.flag('tale_ram', false);
+    S.flag('tale_ros');
+    S.step(2);
+  });
+  expect(await page.evaluate(() => __SQ.objective())).toContain('SEAPORT');
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.warp('seaport', 16, 17, 1);
+    S.step(2);
+    S.run('ram_tale_offer');
+    for (let i = 0; i < 8 && !S.G.choice; i++) {
+      S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
+    }
+  });
+  expect(await page.evaluate(() => !!__SQ.G.choice)).toBe(true);
+
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.G.state = 'stories';
+    S.G.menu = 5;
+    S.G.st = 1;
+    S.step(2);
+  });
+  await page.waitForTimeout(320);
+  await page.evaluate(() => { __SQ.press('attack', true); __SQ.step(2); __SQ.press('attack', false); __SQ.step(2); });
+  await page.waitForTimeout(320);
+  await page.evaluate(() => { __SQ.G.menu = 1; __SQ.G.st = 1; __SQ.press('attack', true); __SQ.step(4); __SQ.press('attack', false); __SQ.step(8); });
+  const continued = await page.evaluate(() => ({ story: __SQ.story(), area: __SQ.A.id }));
+  expect(continued.story).toBe('ramshackle');
+  expect(continued.area).toBe('ram_city');
+
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.setManual(false);
+    S.G.story = 'ramshackle';
+    S.warp('ram_mars', 8, 6, 3);
+  });
+  await page.waitForTimeout(1600);
+  const report = await page.evaluate(() => {
+    const work = __SQ.work();
+    const avg = (xs) => xs.reduce((a, b) => a + b, 0) / Math.max(1, xs.length);
+    return { workN: work.length, workAvg: avg(work), workMax: Math.max(...work, 0) };
+  });
+  fs.writeFileSync(`${RAM}/frame.json`, JSON.stringify(report, null, 2));
+  expect(report.workN).toBeGreaterThan(20);
+  expect(report.workAvg).toBeLessThan(16);
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test.describe('Ramshackle phone layout', () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+  test('gameplay buttons do not stack on the stick', async ({ page }) => {
+    const errors = await boot(page);
+    await page.waitForFunction(() => document.documentElement.classList.contains('srml'));
+    fs.mkdirSync(RAM, { recursive: true });
+    for (const [w, h] of [[390, 844], [844, 390]]) {
+      await page.setViewportSize({ width: w, height: h });
+      await page.evaluate(() => {
+        const S = __SQ;
+        S.G.state = 'play';
+        S.G.story = 'ramshackle';
+        S.G.paused = false;
+        S.P.items = { hatchet: true, axe: true, shield: true, amulet: true };
+        S.P.wep = 'axe';
+        S.P.pri = 'axe';
+        S.P.sec = 'shield';
+        S.P.tool = 'shield';
+        S.flag('axe_got');
+        S.flag('shield_got');
+        S.flag('amulet_got');
+        S.warp('ram_mars', 10, 8, 1);
+        S.step(3);
+        for (let i = 0; i < 6 && (S.script || S.dlg); i++) {
+          S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
+        }
+      });
+      const play = await controlAudit(page);
+      expect(play.mode, JSON.stringify(play)).toBe('play');
+      expect(play.labels, JSON.stringify(play)).toEqual(expect.arrayContaining(['ATTACK', 'ITEM', 'SWAP', 'ROLL', 'PAUSE']));
+      expect(play.hits, JSON.stringify(play)).toEqual([]);
+      expect(play.onCanvas, JSON.stringify(play)).toEqual([]);
+      expect(play.small, JSON.stringify(play)).toEqual([]);
+      expect(play.tight, JSON.stringify(play)).toEqual([]);
+      await page.screenshot({ path: `${RAM}/phone-${w}x${h}.png` });
+    }
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+});
