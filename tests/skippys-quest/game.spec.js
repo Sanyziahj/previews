@@ -1347,7 +1347,7 @@ function controlAudit(page) {
         label: (el.textContent || '').trim().slice(0, 28) || (el.id === 'stick' ? 'STICK' : ''),
         x: r.x, y: r.y, w: r.width, h: r.height,
         cx: r.x + r.width / 2, cy: r.y + r.height / 2, rad: Math.min(r.width, r.height) / 2,
-        round, stick: el.id === 'stick',
+        round: round || el.dataset.b === 'magic', stick: el.id === 'stick',
       };
     });
     const hits = [];
@@ -1397,7 +1397,7 @@ test.describe('context touch layouts', () => {
       await page.evaluate(() => { __SQ.G.paused = false; __SQ.G.state = 'stories'; __SQ.step(2); });
       const title = await controlAudit(page);
       expect(title.mode, JSON.stringify(title)).toBe('title');
-      expect(title.labels.join(' ')).not.toMatch(/ATTACK|ITEM|SWAP|ROLL|TALK|PAUSE/);
+      expect(title.labels.join(' ')).not.toMatch(/ATTACK|ITEM|SWAP|ROLL|TALK|PAUSE|MAGIC/);
       expect(title.labels.join(' ')).toContain('SKIPPY');
       expect(title.hits, JSON.stringify(title)).toEqual([]);
       expect(title.onCanvas, JSON.stringify(title)).toEqual([]);
@@ -1492,7 +1492,7 @@ test.describe('context touch layouts', () => {
       await page.evaluate(() => { __SQ.say('al', 'THE ROPE LOCKER IS ON THE EAST WALL.'); __SQ.step(2); });
       const dialog = await controlAudit(page);
       expect(dialog.mode, JSON.stringify(dialog)).toBe('dialog');
-      expect(dialog.labels.join(' '), JSON.stringify(dialog)).not.toMatch(/ATTACK|ITEM|SWAP|ROLL|TALK|PAUSE|BACK/);
+      expect(dialog.labels.join(' '), JSON.stringify(dialog)).not.toMatch(/ATTACK|ITEM|SWAP|ROLL|TALK|PAUSE|BACK|MAGIC/);
       expect(dialog.hits).toEqual([]);
       await page.screenshot({ path: `${LAYOUT}/dialog-${w}x${h}.png` });
 
@@ -1509,7 +1509,7 @@ test.describe('context touch layouts', () => {
       const pause = await controlAudit(page);
       expect(pause.mode, JSON.stringify(pause)).toBe('pause');
       expect(pause.labels).toContain('BACK');
-      expect(pause.labels.join(' ')).not.toMatch(/ATTACK|ITEM|SWAP|ROLL|TALK|PAUSE/);
+      expect(pause.labels.join(' ')).not.toMatch(/ATTACK|ITEM|SWAP|ROLL|TALK|PAUSE|MAGIC/);
       expect(pause.hits, JSON.stringify(pause)).toEqual([]);
       expect(pause.onCanvas, JSON.stringify(pause)).toEqual([]);
       expect(pause.small, JSON.stringify(pause)).toEqual([]);
@@ -1857,6 +1857,341 @@ test.describe('Ramshackle phone layout', () => {
       expect(play.tight, JSON.stringify(play)).toEqual([]);
       await page.screenshot({ path: `${RAM}/phone-${w}x${h}.png` });
     }
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+});
+
+async function shot(page, name) {
+  await page.locator('#game').screenshot({ path: `${ART}/${name}.png` });
+}
+
+async function ride(page, area, x, y, dir = 0) {
+  await page.evaluate(({ area, x, y, dir }) => {
+    const S = __SQ;
+    S.G.state = 'play';
+    S.G.story = 'skippy';
+    S.G.paused = false;
+    S.flag('oe_' + area);
+    S.warp(area, x, y, dir);
+    S.step(2);
+    for (let i = 0; i < 6 && (S.script || S.dlg); i++) {
+      S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
+    }
+  }, { area, x, y, dir });
+}
+
+test('cosmos magic, gear, shops, and old saves', async ({ page }) => {
+  const errors = await boot(page, {
+    save: { skippy: SKIPPY_SAVE, ros: '{"coins":3,"flags":{"lasso_got":true},"area":"ros_pour","x":160,"y":160,"dir":0,"hp":6,"maxHp":6,"pieces":0,"arrows":0,"items":{},"keys":{},"bigKeys":{},"party":[],"shards":0,"time":1,"visited":{}}' },
+  });
+  await page.evaluate(() => localStorage.setItem('sq_save_ram_v1', '{"coins":7,"flags":{"axe_got":true}}'));
+  const kept = await page.evaluate(() => {
+    const loaded = __SQ.load();
+    return {
+      loaded,
+      coins: __SQ.P.coins,
+      woke: !!__SQ.flags.woke,
+      magic: __SQ.magic().n,
+      spell: __SQ.magic().spell,
+    };
+  });
+  expect(kept.loaded).toBe(true);
+  expect(kept.coins).toBe(42);
+  expect(kept.woke).toBe(true);
+  expect(kept.magic).toBe(6);
+  expect(kept.spell).toBe('lantern');
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.G.state = 'play';
+    S.G.story = 'skippy';
+    S.G.paused = false;
+    S.flag('oe_desert');
+    S.warp('desert', 10, 10, 0);
+    S.step(3);
+    S.P.hp = 6;
+    S.P.maxHp = 6;
+    S.P.magic = 8;
+    S.P.magicMax = 8;
+    S.P.spell = 'lantern';
+    S.press('magic', true); S.step(2); S.press('magic', false); S.step(1);
+  });
+  const lantern = await page.evaluate(() => __SQ.magic());
+  expect(lantern.n).toBe(6);
+  expect(lantern.lantern).toBeGreaterThan(0);
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.P.magic = 8;
+    S.P.spell = 'ward';
+    S.P.hp = 6;
+    S.cast();
+    S.hurt(1);
+  });
+  const ward = await page.evaluate(() => ({ m: __SQ.magic(), hp: __SQ.P.hp }));
+  expect(ward.m.ward).toBe(2);
+  expect(ward.m.n).toBe(5);
+  expect(ward.hp).toBe(6);
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.P.ward = 0;
+    S.P.brew = 1;
+    S.P.hp = 1;
+    S.hurt(2);
+  });
+  const brew = await page.evaluate(() => ({ hp: __SQ.P.hp, brew: __SQ.P.brew }));
+  expect(brew.brew).toBe(0);
+  expect(brew.hp).toBeGreaterThan(1);
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.G.paused = true;
+    S.G.skipPage = 1;
+    S.G.gearSel = 2;
+    S.P.ownB = 4;
+    S.P.gearB = 1;
+    S.P.ownW = 3;
+    S.P.gearW = 1;
+    S.step(2);
+  });
+  await shot(page, 'gear-screen');
+  await page.evaluate(() => { __SQ.gearAct(2); __SQ.gearAct(0); __SQ.step(1); });
+  const gear = await page.evaluate(() => __SQ.cosmos());
+  expect(gear.gearB).toBe(2);
+  expect(gear.gearW).toBe(2);
+  await page.evaluate(() => { __SQ.G.story = 'santt'; __SQ.P.visor = 1; __SQ.P.ownVisor = 1; });
+  expect(await page.evaluate(() => __SQ.cosmos().visor)).toBe(false);
+  await page.evaluate(() => { __SQ.G.story = 'skippy'; __SQ.P.visor = 1; });
+  expect(await page.evaluate(() => __SQ.cosmos().visor)).toBe(true);
+
+  await ride(page, 'teashop', 6, 6, 0);
+  await shot(page, 'tea-house');
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.P.coins = 80;
+    S.P.bottles = [];
+    S.run('tea_shop');
+    S.step(2);
+    S.skipText();
+    S.press('talk', true); S.step(1); S.press('talk', false); S.step(2);
+  });
+  const tea = await page.evaluate(() => {
+    const S = __SQ;
+    if (!S.shop) return { shop: null };
+    S.press('attack', true); S.step(1); S.press('attack', false); S.step(2);
+    return { shop: S.shop.id, bottles: S.cosmos().bottles.slice(), stars: S.P.coins };
+  });
+  expect(tea.shop).toBe('tea');
+  expect(tea.bottles).toContain('tea');
+  expect(tea.stars).toBe(68);
+  await page.evaluate(() => { __SQ.P.hp = 1; __SQ.drink(0); });
+  expect(await page.evaluate(() => __SQ.P.hp)).toBe(await page.evaluate(() => __SQ.P.maxHp));
+
+  await ride(page, 'dragon', 6, 6, 0);
+  await shot(page, 'green-dragon');
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.P.coins = 100;
+    S.P.part = 1;
+    S.P.ownW = 1;
+    S.P.gearW = 1;
+    S.run('drag_front');
+    S.step(4);
+    for (let i = 0; i < 4 && !S.shop; i++) {
+      S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(2);
+    }
+    S.press('attack', true); S.step(1); S.press('attack', false); S.step(2);
+  });
+  const noodle = await page.evaluate(() => __SQ.cosmos().buff);
+  expect(noodle).toBe('fire');
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.press('back', true); S.step(1); S.press('back', false); S.step(2);
+    S.run('drag_forge');
+    S.step(3);
+    for (let i = 0; i < 4 && !S.shop; i++) {
+      S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(2);
+    }
+    S.press('attack', true); S.step(1); S.press('attack', false); S.step(2);
+  });
+  const forged = await page.evaluate(() => __SQ.cosmos());
+  expect(forged.ownW).toBeGreaterThanOrEqual(2);
+  expect(forged.stars).toBeLessThan(100);
+
+  await page.evaluate(() => __SQ.save());
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('sq_save_v1')));
+  expect(saved.coins).toBe(forged.stars);
+  expect(saved.flags.woke).toBe(true);
+  expect(saved.cosmos.spell).toBe('ward');
+  expect(saved.cosmos.ownW).toBeGreaterThanOrEqual(2);
+  const ros = await page.evaluate(() => localStorage.getItem('sq_save_ros_v1'));
+  const ram = await page.evaluate(() => localStorage.getItem('sq_save_ram_v1'));
+  expect(JSON.parse(ros).flags.lasso_got).toBe(true);
+  expect(JSON.parse(ros).coins).toBe(3);
+  expect(JSON.parse(ram).flags.axe_got).toBe(true);
+  expect(JSON.parse(ram).coins).toBe(7);
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test('cosmos map, surf lane, academy, and the new places', async ({ page }) => {
+  const errors = await boot(page);
+  const bad = await page.evaluate(() => __SQ.auditLandings());
+  expect(bad, JSON.stringify(bad)).toEqual([]);
+  await ride(page, 'cosmos', 14, 6, 0);
+  await shot(page, 'cosmos-map');
+  const seeker = await page.evaluate(() => __SQ.ents.some((e) => e.k === 'seeker' && e.def.rank === 'SEEKER'));
+  expect(seeker).toBe(true);
+  await page.evaluate(() => {
+    const S = __SQ;
+    const portal = S.A.props.find((p) => p.label === 'ACADEMY');
+    S.P.x = (portal.x + 0.5) * 16;
+    S.P.y = (portal.y + 0.5) * 16;
+    S.step(40);
+  });
+  expect(await page.evaluate(() => __SQ.A.id)).toBe('ac_hub');
+  await shot(page, 'academy-hub');
+  await ride(page, 'ac_lib', 9, 6, 0);
+  await shot(page, 'charter-library');
+  expect(await page.evaluate(() => __SQ.A.chests.length)).toBe(3);
+  await ride(page, 'ac_brief', 8, 6, 0);
+  await shot(page, 'briefing');
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.run('ac_kal');
+    for (let i = 0; i < 12; i++) {
+      S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(2);
+      if (S.P.gmap) break;
+    }
+  });
+  expect(await page.evaluate(() => __SQ.cosmos().gmap)).toBe(1);
+  await ride(page, 'ac_camp', 9, 8, 1);
+  await shot(page, 'training-camp');
+  await ride(page, 'ac_lock', 7, 5, 0);
+  await shot(page, 'restricted');
+  expect(await page.evaluate(() => __SQ.A.name)).toBe('RESTRICTED');
+  await ride(page, 'ac_range', 4, 7, 1);
+  await shot(page, 'tin-league');
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.P.items.sword = true;
+    for (const e of S.ents) {
+      S.P.x = e.x - 16; S.P.y = e.y + 4; S.P.dir = 3;
+      S.press('attack', true); S.step(2); S.press('attack', false); S.step(20);
+    }
+    S.step(4);
+  });
+  expect(await page.evaluate(() => __SQ.flags.tin_clear)).toBe(true);
+  await ride(page, 'sky_city', 8, 7, 0);
+  await shot(page, 'sky-city');
+  expect(await page.evaluate(() => __SQ.npcs.some((n) => n.id === 'jazz'))).toBe(true);
+  await ride(page, 'hi_life', 8, 7, 0);
+  await shot(page, 'hi-life');
+  await ride(page, 'pr_gate', 9, 7, 0);
+  await shot(page, 'lower-prison');
+  expect(await page.evaluate(() => __SQ.npcs.some((n) => n.id === 'recker' && n.look !== 'santt'))).toBe(true);
+  await ride(page, 'pr_dark', 9, 8, 1);
+  await shot(page, 'prison-dark');
+  const trapped = await page.evaluate(() => {
+    const S = __SQ;
+    const spirit = S.ents.find((e) => e.k === 'spirit');
+    S.P.magic = 4;
+    S.P.ward = 0;
+    S.P.hp = 6;
+    S.P.x = spirit.x;
+    S.P.y = spirit.y + 10;
+    S.hurt(1);
+    return { magic: S.magic().n, trait: spirit.def.trait, hp: S.P.hp };
+  });
+  expect(trapped.trait).toBe('SOUL TRAPPER');
+  expect(trapped.magic).toBe(3);
+  expect(trapped.hp).toBe(5);
+  await ride(page, 'lane_sky', 5.5, 13, 1);
+  await page.evaluate(() => __SQ.step(20));
+  await shot(page, 'surf-run');
+  await page.evaluate(() => __SQ.step(260));
+  const lane = await page.evaluate(() => ({
+    area: __SQ.A.id,
+    flag: !!__SQ.flags.lane_sky,
+    medal: !!__SQ.flags.medal_sky,
+    part: __SQ.cosmos().part,
+    stars: __SQ.P.coins,
+  }));
+  expect(lane.flag).toBe(true);
+  expect(lane.medal).toBe(true);
+  expect(lane.area).toBe('cosmos');
+  expect(lane.part).toBeGreaterThanOrEqual(1);
+  expect(lane.stars).toBeGreaterThanOrEqual(20);
+  await page.evaluate(() => {
+    const S = __SQ;
+    const portal = S.A.props.find((p) => p.label === 'SKY CITY');
+    S.P.x = (portal.x + 0.5) * 16;
+    S.P.y = (portal.y + 0.5) * 16;
+    S.step(40);
+  });
+  expect(await page.evaluate(() => __SQ.A.id)).toBe('sky_city');
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.warp('desert', 18, 14, 0);
+    S.flag('oe_desert');
+    S.P.lantern = 8;
+    S.P.x = 18 * 16;
+    S.P.y = 14 * 16;
+    S.step(5);
+  });
+  expect(await page.evaluate(() => !!__SQ.flags.page_desert)).toBe(true);
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test.describe('magic button on the phone', () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+  test('portrait and landscape keep MAGIC between item and roll', async ({ page }) => {
+    const errors = await boot(page);
+    await page.waitForFunction(() => document.documentElement.classList.contains('srml'));
+    await page.evaluate(() => {
+      const S = __SQ;
+      S.G.state = 'play';
+      S.G.story = 'skippy';
+      S.G.paused = false;
+      S.P.items = { raygun: true, lasso: true };
+      S.P.wep = 'raygun';
+      S.P.tool = 'lasso';
+      S.P.pri = 'raygun';
+      S.P.sec = 'lasso';
+      S.flag('oe_desert');
+      S.warp('desert', 12, 10, 1);
+      S.step(2);
+    });
+    const place = await page.evaluate(() => {
+      const box = (name) => {
+        const el = document.querySelector('[data-b="' + name + '"]');
+        const r = el.getBoundingClientRect();
+        return { cx: r.x + r.width / 2, cy: r.y + r.height / 2, w: r.width, h: r.height, on: getComputedStyle(el).display !== 'none' };
+      };
+      const atk = box('attack'), item = box('item'), magic = box('magic'), roll = box('roll');
+      const ang = (el) => Math.atan2(atk.cy - el.cy, atk.cx - el.cx);
+      return { atk, item, magic, roll, ai: ang(item), am: ang(magic), ar: ang(roll) };
+    });
+    expect(place.magic.on).toBe(true);
+    expect(place.magic.w).toBeGreaterThanOrEqual(48);
+    const dx = place.roll.cx - place.item.cx, dy = place.roll.cy - place.item.cy;
+    const along = ((place.magic.cx - place.item.cx) * dx + (place.magic.cy - place.item.cy) * dy) / (dx * dx + dy * dy);
+    expect(along).toBeGreaterThan(0.05);
+    expect(along).toBeLessThan(0.95);
+    await page.screenshot({ path: `${ART}/phone-magic-portrait.png` });
+    await page.setViewportSize({ width: 844, height: 390 });
+    await page.evaluate(() => __SQ.step(2));
+    const land = await page.evaluate(() => {
+      const box = (name) => {
+        const el = document.querySelector('[data-b="' + name + '"]');
+        const r = el.getBoundingClientRect();
+        return { cx: r.x + r.width / 2, cy: r.y + r.height / 2, w: r.width };
+      };
+      const atk = box('attack'), item = box('item'), magic = box('magic'), roll = box('roll');
+      const dx = roll.cx - item.cx, dy = roll.cy - item.cy;
+      const along = ((magic.cx - item.cx) * dx + (magic.cy - item.cy) * dy) / (dx * dx + dy * dy);
+      return { along, w: magic.w, atk, item, magic, roll };
+    });
+    expect(land.w).toBeGreaterThanOrEqual(48);
+    expect(land.along).toBeGreaterThan(0.05);
+    expect(land.along).toBeLessThan(0.95);
+    await page.screenshot({ path: `${ART}/phone-magic-landscape.png` });
     expect(errors, errors.join('\n')).toEqual([]);
   });
 });
