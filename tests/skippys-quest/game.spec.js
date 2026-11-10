@@ -1425,8 +1425,8 @@ test.describe('context touch layouts', () => {
       });
       const play = await controlAudit(page);
       expect(play.mode, JSON.stringify(play)).toBe('play');
-      expect(play.labels).toEqual(expect.arrayContaining(['ATTACK', 'ITEM', 'BOARD', 'ACTION', 'MAGIC', 'PAUSE']));
-      expect(play.labels.join(' ')).not.toMatch(/SWAP|TALK|BACK|\bROLL\b/);
+      expect(play.labels).toEqual(expect.arrayContaining(['ATTACK', 'ITEM', 'SWAP', 'BOARD', 'ACTION', 'MAGIC', 'PAUSE']));
+      expect(play.labels.join(' ')).not.toMatch(/TALK|BACK|\bROLL\b/);
       expect(play.hits, JSON.stringify(play)).toEqual([]);
       expect(play.onCanvas, JSON.stringify(play)).toEqual([]);
       expect(play.small, JSON.stringify(play)).toEqual([]);
@@ -1453,8 +1453,8 @@ test.describe('context touch layouts', () => {
       });
       const skippy = await controlAudit(page);
       expect(skippy.mode, JSON.stringify(skippy)).toBe('play');
-      expect(skippy.labels, JSON.stringify(skippy)).toEqual(expect.arrayContaining(['ATTACK', 'ITEM', 'ROLL', 'ACTION', 'MAGIC', 'PAUSE']));
-      expect(skippy.labels.join(' ')).not.toMatch(/TALK|BACK|SWAP|BOARD/);
+      expect(skippy.labels, JSON.stringify(skippy)).toEqual(expect.arrayContaining(['ATTACK', 'ITEM', 'SWAP', 'ROLL', 'ACTION', 'MAGIC', 'PAUSE']));
+      expect(skippy.labels.join(' ')).not.toMatch(/TALK|BACK|BOARD/);
       expect(skippy.hits, JSON.stringify(skippy)).toEqual([]);
       expect(skippy.onCanvas, JSON.stringify(skippy)).toEqual([]);
       expect(skippy.small, JSON.stringify(skippy)).toEqual([]);
@@ -1479,7 +1479,7 @@ test.describe('context touch layouts', () => {
         S.step(1);
       });
       const npc = await controlAudit(page);
-      expect(npc.labels, JSON.stringify(npc)).toEqual(expect.arrayContaining(['ATTACK', 'ITEM', 'BOARD', 'TALK', 'MAGIC', 'PAUSE']));
+      expect(npc.labels, JSON.stringify(npc)).toEqual(expect.arrayContaining(['ATTACK', 'ITEM', 'SWAP', 'BOARD', 'TALK', 'MAGIC', 'PAUSE']));
       expect(npc.labels.join(' ')).not.toContain('BACK');
       expect(npc.hits, JSON.stringify(npc)).toEqual([]);
       expect(npc.onCanvas, JSON.stringify(npc)).toEqual([]);
@@ -1847,7 +1847,7 @@ test.describe('Ramshackle phone layout', () => {
       });
       const play = await controlAudit(page);
       expect(play.mode, JSON.stringify(play)).toBe('play');
-      expect(play.labels, JSON.stringify(play)).toEqual(expect.arrayContaining(['ATTACK', 'ITEM', 'BOARD', 'MAGIC', 'PAUSE']));
+      expect(play.labels, JSON.stringify(play)).toEqual(expect.arrayContaining(['ATTACK', 'ITEM', 'SWAP', 'BOARD', 'MAGIC', 'PAUSE']));
       expect(play.hits, JSON.stringify(play)).toEqual([]);
       expect(play.onCanvas, JSON.stringify(play)).toEqual([]);
       expect(play.small, JSON.stringify(play)).toEqual([]);
@@ -2263,7 +2263,7 @@ test.describe('magic button on the phone', () => {
       const pause = await page.evaluate(() => document.querySelector('[data-b="map"]').getBoundingClientRect());
       expect(pause.x, `${w}x${h} pause`).toBeLessThan(w / 2);
       expect(fit.talk, `${w}x${h} ${fit.labels.join(',')}`).toBe('1');
-      expect(fit.labels, `${w}x${h} ${fit.labels.join(',')}`).toEqual(expect.arrayContaining(['MAGIC', 'ITEM', 'ROLL', 'TALK']));
+      expect(fit.labels, `${w}x${h} ${fit.labels.join(',')}`).toEqual(expect.arrayContaining(['MAGIC', 'ITEM', 'SWAP', 'ROLL', 'TALK']));
       expect(fit.clipped, `${w}x${h} ${fit.clipped.join(',')}`).toEqual([]);
     }
     expect(errors, errors.join('\n')).toEqual([]);
@@ -2483,5 +2483,99 @@ test('Skippy earns a board and Slide upgrades every tier', async ({ page }) => {
   });
   expect(ramHit.axe).toBeGreaterThan(0);
   expect(ramHit.shield).toBe(true);
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test.describe('swap chip on the diamond', () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+  test('SWAP sits on ITEM for Skippy, ROS, and Ramshackle', async ({ page }) => {
+    const errors = await boot(page);
+    await page.waitForFunction(() => document.documentElement.classList.contains('srml'));
+    const riders = [
+      ['skippy', 'desert', { raygun: true, lasso: true, missile: true }, 'raygun', 'lasso', 'phone-swap-skippy'],
+      ['ros', 'ros_desert', { blasters: true, lasso: true, brand: true }, 'lasers', 'lasso', 'phone-swap-ros'],
+      ['ramshackle', 'ram_dock', { hatchet: true, shield: true, amulet: true }, 'hatchet', 'shield', 'phone-swap-ram'],
+    ];
+    for (const [story, area, items, pri, sec, file] of riders) {
+      const face = await page.evaluate(({ story, area, items, pri, sec }) => {
+        const S = __SQ;
+        S.G.state = 'play';
+        S.G.story = story;
+        S.G.paused = false;
+        S.P.items = items;
+        S.P.pri = pri;
+        S.P.sec = sec;
+        S.P.wep = pri;
+        S.P.tool = sec;
+        S.P.cds = {};
+        if (story === 'ros') { S.flag('lasso_got'); S.flag('brand_got'); }
+        if (story === 'ramshackle') { S.flag('shield_got'); S.flag('amulet_got'); }
+        S.flag('oe_' + area);
+        S.warp(area, 20, 16, 3);
+        S.step(2);
+        for (let i = 0; i < 24 && (S.script || S.dlg || S.shop || document.documentElement.dataset.touch !== 'play'); i++) {
+          S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
+        }
+        const box = (name) => {
+          const el = document.querySelector('[data-b="' + name + '"]');
+          const r = el.getBoundingClientRect();
+          return { x: r.x, y: r.y, w: r.width, h: r.height, on: getComputedStyle(el).display !== 'none', text: el.textContent.trim() };
+        };
+        const before = S.slots().sec;
+        S.press('swap', true); S.step(2); S.press('swap', false); S.step(2);
+        const after = S.slots();
+        S.press('swap', true); S.step(1); S.press('swap', false);
+        const item = box('item'), swap = box('swap'), attack = box('attack');
+        const mode = document.documentElement.dataset.touch;
+        const cd = document.querySelector('[data-b="item"] .cd');
+        const hud = S.hud().map((b) => b.text).filter(Boolean);
+        return {
+          before, after, item, swap, attack, hud, mode,
+          cd: !!cd,
+          pri: after.pri,
+        };
+      }, { story, area, items, pri, sec });
+      expect(face.swap.on, story + ' ' + JSON.stringify(face)).toBe(true);
+      expect(face.swap.text, story).toBe('SWAP');
+      expect(face.swap.w, story).toBeGreaterThanOrEqual(48);
+      expect(face.swap.y + face.swap.h, story).toBeLessThanOrEqual(face.item.y + 2);
+      expect(face.after.pri, story).toBe(pri);
+      expect(face.after.sec, story).not.toBe(face.before);
+      expect(face.cd, story).toBe(true);
+      expect(face.hud.join(' '), story).toMatch(/Z /);
+      await page.screenshot({ path: `${ART}/${file}.png` });
+    }
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+});
+
+test('every key is a walk away from its door', async ({ page }) => {
+  const errors = await boot(page);
+  const rows = await page.evaluate(() => __SQ.keys());
+  const bad = rows.filter((row) => !row.ok);
+  expect(bad, JSON.stringify(rows)).toEqual([]);
+  expect(rows.length).toBeGreaterThan(12);
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.G.state = 'play';
+    S.G.story = 'skippy';
+    S.G.paused = false;
+    S.flag('oe_neon');
+    S.flag('club1_clear');
+    S.warp('neon', 4, 10, 0);
+    S.step(4);
+  });
+  await page.screenshot({ path: `${ART}/key-neon-alley.png` });
+  const fun = await page.evaluate(() => {
+    const S = __SQ;
+    S.G.story = 'ramshackle';
+    S.flag('oe_ram_fun');
+    S.warp('ram_fun', 16, 8, 0);
+    S.step(4);
+    const chest = (S.A.chests || []).find((c) => c.id === 'ram_dkey');
+    return chest && chest.x;
+  });
+  await page.screenshot({ path: `${ART}/key-funhouse.png` });
+  expect(fun).toBe(16);
   expect(errors, errors.join('\n')).toEqual([]);
 });

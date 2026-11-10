@@ -1008,6 +1008,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
             need: "d2_clear",
           },
           { id: "c_d2coins", x: 18, y: 5.5, item: "coins", n: 25 },
+          { id: "c_bigkey", x: 16, y: 9, item: "bigkey", n: 1, big: !0 },
         ],
         warps: [
           { x: 0, y: 5, w: 1, h: 2, to: "d1", tx: 17.8, ty: 5.9, dir: 2 },
@@ -1037,8 +1038,8 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           { id: "e3b", x: 0, y: 5, group: "d3_bridge", timer: 7 },
           { id: "e3c", x: 19, y: 4, group: "d3_bridge", timer: 7 },
         ],
-        chests: [
-          { id: "c_bigkey", x: 9.5, y: 4.5, item: "bigkey", n: 1, big: !0 },
+        signs: [
+          { x: 9, y: 6, text: "THE BIG KEY IS NOT HERE. IT IS IN THE EAST HALL, WITH THE SMALL KEY.", kind: "sign" },
         ],
         warps: [
           { x: 9, y: 11, w: 2, h: 1, to: "d1", tx: 9.5, ty: 1.2, dir: 0 },
@@ -1787,6 +1788,8 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         { k: "jelly", x: 4, y: 2 },
       ],
       eyes: [{ id: "tide_s1", x: 17, y: 0, script: "tide_out" }],
+      chests: [{ id: "c_s2key", x: 3, y: 9, item: "key", n: 1 }],
+      signs: [{ x: 8, y: 8, text: "THE CAVE KEY IS IN THIS ROOM. THE LOCKED DOORS ARE AHEAD.", kind: "sign" }],
       warps: [
         { x: 9, y: 11, w: 2, h: 1, to: "seaport", tx: 34.5, ty: 13.6, dir: 0 },
         { x: 9, y: 0, w: 2, h: 1, to: "s2", tx: 9.5, ty: 10.2, dir: 1 },
@@ -1820,7 +1823,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         { k: "vov", x: 12, y: 9, v: 4 },
         { k: "jelly", x: 9, y: 1.5 },
       ],
-      chests: [{ id: "c_s2key", x: 4, y: 4.5, item: "key", n: 1 }],
+      signs: [{ x: 12, y: 9, text: "NO KEY ON THIS FLOOR. GO BACK TO THE CAVE MOUTH.", kind: "sign" }],
       warps: [
         { x: 9, y: 11, w: 2, h: 1, to: "s1", tx: 9.5, ty: 1.2, dir: 0 },
         { x: 19, y: 5, w: 1, h: 2, to: "s3", tx: 1.2, ty: 5.9, dir: 3 },
@@ -2416,7 +2419,10 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         { k: "drone", x: 35, y: 13 },
         { k: "bot", x: 36, y: 10 },
       ],
-      chests: [{ id: "c_neon1", x: 38, y: 13.5, item: "arrows", n: 10 }],
+      chests: [
+        { id: "c_neon1", x: 38, y: 13.5, item: "arrows", n: 10 },
+        { id: "c_club_key", x: 4, y: 10, item: "key", n: 1, dung: "club", need: "club1_clear" },
+      ],
       props: [
         { k: "bldg", b: "tower", x: 3, y: 1 },
         { k: "bldg", b: "tower", x: 11, y: 1 },
@@ -2433,7 +2439,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         {
           x: 2,
           y: 9,
-          text: "ROBOT METROPOLIS - CITY LIMITS. THE EDGE NEVER SLEEPS.",
+          text: "CLUB KEY: WEST ALLEY, AFTER THE DANCE FLOOR GOES QUIET.",
           kind: "sign",
         },
       ],
@@ -2459,15 +2465,8 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         { k: "drone", x: 16, y: 2 },
         { k: "vov", x: 9.5, y: 2.5, v: 5 },
       ],
-      chests: [
-        {
-          id: "c_club_key",
-          x: 5,
-          y: 2.2,
-          item: "key",
-          n: 1,
-          need: "club1_clear",
-        },
+      signs: [
+        { x: 9, y: 8, text: "THE DOOR KEY IS NOT ON THE FLOOR. IT WAITS IN THE WEST ALLEY ONCE THIS ROOM IS QUIET.", kind: "sign" },
       ],
       warps: [
         { x: 9, y: 11, w: 2, h: 1, to: "neon", tx: 28.5, ty: 7.4, dir: 0 },
@@ -2859,6 +2858,8 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         { k: "drone", x: 9.5, y: 1 },
       ],
       eyes: [{ id: "v1_eye", x: 0, y: 8 }],
+      chests: [{ id: "c_v2key", x: 16, y: 9, item: "key", n: 1, need: "v2_clear" }],
+      signs: [{ x: 6, y: 9, text: "CLEAR THE NEXT FLOOR. THE SMALL KEY COMES BACK HERE.", kind: "sign" }],
       warps: [
         { x: 9, y: 11, w: 2, h: 1, to: "casino", tx: 14.5, ty: 1.6, dir: 0 },
         { x: 9, y: 0, w: 2, h: 1, to: "v2", tx: 9.5, ty: 10.2, dir: 1 },
@@ -2883,9 +2884,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         { k: "vov", x: 9.5, y: 7, v: 5 },
         { k: "drone", x: 3, y: 9 },
       ],
-      chests: [
-        { id: "c_v2key", x: 9.5, y: 5.5, item: "key", n: 1, need: "v2_clear" },
-      ],
+      signs: [{ x: 8, y: 8, text: "THE SMALL KEY IS IN THE LOBBY YOU CAME THROUGH, AFTER THIS FLOOR IS CLEAR.", kind: "sign" }],
       warps: [
         { x: 9, y: 11, w: 2, h: 1, to: "v1", tx: 9.5, ty: 1.2, dir: 0 },
         { x: 19, y: 5, w: 1, h: 2, to: "v2b", tx: 1.2, ty: 5.9, dir: 3 },
@@ -3268,6 +3267,8 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         { k: "drone", x: 15, y: 5 },
       ],
       eyes: [{ id: "st1_eye", x: 0, y: 7 }],
+      chests: [{ id: "c_st2key", x: 16, y: 8, item: "key", n: 1, need: "st2_clear" }],
+      signs: [{ x: 8, y: 8, text: "CLEAR THE NEXT BAY. THE SMALL KEY RETURNS TO THIS LOBBY.", kind: "sign" }],
       signs: [
         {
           x: 17,
@@ -3301,16 +3302,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         { k: "drone", x: 3, y: 9 },
         { k: "bot", x: 16, y: 9 },
       ],
-      chests: [
-        {
-          id: "c_st2key",
-          x: 9.5,
-          y: 5.5,
-          item: "key",
-          n: 1,
-          need: "st2_clear",
-        },
-      ],
+      signs: [{ x: 8, y: 8, text: "NO KEY IN THIS BAY. IT IS BACK IN THE LOBBY, ONCE THE BAY IS QUIET.", kind: "sign" }],
       warps: [
         { x: 9, y: 11, w: 2, h: 1, to: "st1", tx: 9.5, ty: 1.2, dir: 0 },
         { x: 19, y: 5, w: 1, h: 2, to: "st3", tx: 1.2, ty: 5.9, dir: 3 },
@@ -8192,7 +8184,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         { k: "redcoat", x: 6, y: 8 },
         { k: "vov", x: 14, y: 9, v: 3 },
       ],
-      chests: [{ id: "rs2_big", x: 10, y: 2, item: "bigkey", n: 1, big: !0, need: "rs2_clear" }],
+      chests: [{ id: "rs2_big", x: 3, y: 10, item: "bigkey", n: 1, big: !0, need: "rs2_clear" }],
       warps: [
         { x: 0, y: 8, w: 1, h: 2, to: "rs1", tx: 16, ty: 5, dir: 2 },
         { x: 9, y: 0, w: 2, h: 1, to: "rs3", tx: 10, ty: 9, dir: 1 },
@@ -8308,7 +8300,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         { k: "redcoat", x: 6, y: 8 },
         { k: "vov", x: 14, y: 9, v: 2 },
       ],
-      chests: [{ id: "rc2_big", x: 10, y: 2, item: "bigkey", n: 1, big: !0, need: "rc2_clear" }],
+      chests: [{ id: "rc2_big", x: 3, y: 10, item: "bigkey", n: 1, big: !0, need: "rc2_clear" }],
       warps: [
         { x: 9, y: 11, w: 2, h: 1, to: "rc1", tx: 16, ty: 5, dir: 2 },
         { x: 9, y: 0, w: 2, h: 1, to: "rc3", tx: 10, ty: 9, dir: 1 },
@@ -9307,7 +9299,8 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           { id: "recker", x: 4, y: 6, dir: 3, talk: "pr_recker" },
           { id: "mecko", x: 15, y: 6, dir: 2, talk: "pr_mecko" },
         ],
-        signs: [{ x: 9, y: 4, text: "FRIGHT'S LOWER PRISON. THE CASTLE IS ELSEWHERE. THIS DOOR IS THE FIRST FLOOR DOWN.", kind: "sign" }],
+        signs: [{ x: 9, y: 4, text: "FRIGHT'S LOWER PRISON. THE KEY IS IN THIS GATEHOUSE, NOT ON THE BARS.", kind: "sign" }],
+        chests: [{ id: "pr_key", x: 16, y: 8, item: "pkey", n: 1 }],
         warps: [
           { x: 9, y: 11, w: 2, h: 1, to: "cosmos", tx: 14, ty: 12, dir: 1 },
           { x: 9, y: 2, w: 2, h: 1, to: "pr_hall", tx: 9.5, ty: 8, dir: 1 },
@@ -9325,8 +9318,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           { k: "seeker", x: 4, y: 8 },
           { k: "swarm", x: 15, y: 8 },
         ],
-        chests: [{ id: "pr_key", x: 14, y: 9, item: "pkey", n: 1 }],
-        signs: [{ x: 9, y: 8, text: "THE BARS OPEN WITH THE PRISON KEY. PAST THEM THE DARK EATS THE FLOOR.", kind: "sign" }],
+        signs: [{ x: 9, y: 8, text: "THE PRISON KEY IS BACK IN THE GATEHOUSE, WITH RECKER. THESE BARS DO NOT KEEP IT.", kind: "sign" }],
         warps: [
           { x: 9, y: 11, w: 2, h: 1, to: "pr_gate", tx: 9.5, ty: 4, dir: 1 },
           { x: 9, y: 1, w: 2, h: 1, to: "pr_dark", tx: 9.5, ty: 8, dir: 1 },
@@ -9761,7 +9753,8 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         { k: "mirror", x: 10, y: 8, n: 2 },
         { k: "mirror", x: 15, y: 5, n: 3 },
       ],
-      signs: [{ x: 6, y: 6, text: "MIRRORS: ONE, THEN TWO, THEN THREE. A WRONG STEP RESETS.", kind: "sign" }],
+      signs: [{ x: 6, y: 6, text: "MIRRORS: ONE, THEN TWO, THEN THREE. THE AXE TENT KEY IS IN THIS HALL.", kind: "sign" }],
+      chests: [{ id: "ram_dkey", x: 16, y: 8, item: "key", n: 1 }],
       warps: [
         { x: 0, y: 6, w: 1, h: 2, to: "ram_dream", tx: 28, ty: 8, dir: 2 },
         { x: 19, y: 6, w: 1, h: 2, to: "ram_d1", tx: 2, ty: 6, dir: 3 },
@@ -9770,12 +9763,9 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
     ram_d1: {
       id: "ram_d1", name: "AXE TENT", theme: "carnival", realm: "ram", music: "ramdream",
       locks: { D: { flag: "door_dream", key: "small" } },
-      chests: [
-        { id: "ram_dkey", x: 4, y: 4, item: "key", n: 1 },
-        { id: "ram_axe", x: 14, y: 4, item: "axe", n: 1 },
-      ],
+      chests: [{ id: "ram_axe", x: 14, y: 4, item: "axe", n: 1 }],
       props: [{ k: "tent", x: 8, y: 8, c: "#ffe070" }],
-      signs: [{ x: 12, y: 4, text: "THE ETERNAL AXE.", kind: "sign" }],
+      signs: [{ x: 12, y: 4, text: "THE AXE IS HERE. THE KEY IS BACK IN THE FUNHOUSE.", kind: "sign" }],
       warps: [
         { x: 0, y: 6, w: 1, h: 2, to: "ram_fun", tx: 16, ty: 6, dir: 2 },
         { x: 9, y: 0, w: 2, h: 1, to: "ram_fear", tx: 8, ty: 8, dir: 1 },
@@ -9896,16 +9886,15 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         { x: 8, y: 7, w: 1, h: 1, script: "bowl_good", once: "bowl_m" },
         { x: 12, y: 7, w: 1, h: 1, script: "bowl_bad", once: "bowl_r" },
       ],
+      chests: [{ id: "ram_jkey", x: 14, y: 4, item: "key", n: 1, need: "noodle_ram" }],
+      signs: [{ x: 14, y: 8, text: "THE MIDDLE BOWL. THEN THE AMULET KEY IS YOURS.", kind: "sign" }],
       warps: [{ x: 8, y: 10, w: 2, h: 1, to: "ram_jup", tx: 8, ty: 8, dir: 0 }],
     },
     ram_j1: {
       id: "ram_j1", name: "AMULET LOFT", theme: "jove", realm: "ram", music: "ramjove",
       locks: { D: { flag: "door_jup", key: "small" } },
-      chests: [
-        { id: "ram_jkey", x: 4, y: 4, item: "key", n: 1 },
-        { id: "ram_amulet", x: 14, y: 4, item: "amulet", n: 1 },
-      ],
-      signs: [{ x: 12, y: 4, text: "THE POWER AMULET.", kind: "sign" }],
+      chests: [{ id: "ram_amulet", x: 14, y: 4, item: "amulet", n: 1 }],
+      signs: [{ x: 4, y: 4, text: "THE AMULET KEY IS AT THE GREEN DRAGON. TAKE THE MIDDLE BOWL.", kind: "sign" }],
       warps: [
         { x: 0, y: 6, w: 1, h: 2, to: "ram_jup3", tx: 14, ty: 6, dir: 2 },
         { x: 9, y: 0, w: 2, h: 1, to: "ram_eye", tx: 8, ty: 10, dir: 1 },
@@ -10608,7 +10597,8 @@ ram_mem_amulet: [
       locks: { D: { flag: "rs2_door", key: "small" }, K: { flag: "rs2_boss", key: "big" } },
       clearFlag: "rs2_clear",
       enemies: [{ k: "redcoat", x: 6, y: 8 }, { k: "vov", x: 14, y: 9, v: 3 }],
-      chests: [{ id: "rs2_big", x: 10, y: 2, item: "bigkey", n: 1, big: !0, need: "rs2_clear" }],
+      chests: [{ id: "rs2_big", x: 3, y: 10, item: "bigkey", n: 1, big: !0, need: "rs2_clear" }],
+      signs: [{ x: 14, y: 9, text: "THE BIG KEY IS IN THE SOUTH, AFTER THE COATS FALL. IT DOES NOT SIT ON THE BOSS DOOR.", kind: "sign" }],
       warps: [
         { x: 0, y: 8, w: 1, h: 2, to: "rs1", tx: 16, ty: 5, dir: 2 },
         { x: 9, y: 0, w: 2, h: 1, to: "rs3", tx: 10, ty: 9, dir: 1 },
@@ -10715,7 +10705,8 @@ ram_mem_amulet: [
       locks: { D: { flag: "rc2_door", key: "small" }, K: { flag: "rc2_boss", key: "big" } },
       clearFlag: "rc2_clear",
       enemies: [{ k: "redcoat", x: 6, y: 8 }, { k: "vov", x: 14, y: 9, v: 1 }],
-      chests: [{ id: "rc2_big", x: 10, y: 2, item: "bigkey", n: 1, big: !0, need: "rc2_clear" }],
+      chests: [{ id: "rc2_big", x: 3, y: 10, item: "bigkey", n: 1, big: !0, need: "rc2_clear" }],
+      signs: [{ x: 14, y: 9, text: "THE BIG KEY IS SOUTH OF THE LOCK, AFTER THIS ROOM IS CLEAR.", kind: "sign" }],
       warps: [
         { x: 9, y: 11, w: 2, h: 1, to: "rc1", tx: 16, ty: 5, dir: 2 },
         { x: 9, y: 0, w: 2, h: 1, to: "rc3", tx: 10, ty: 9, dir: 1 },
@@ -12797,8 +12788,8 @@ ram_mem_amulet: [
           ),
           !0);
     }
-    function _e(e, a, t) {
-      let i = w.dungeon || "";
+    function _e(e, a, t, dung) {
+      let i = dung || w.dungeon || "";
       switch (e) {
         case "baton":
           d.items.baton = !0;
@@ -13172,7 +13163,7 @@ ram_mem_amulet: [
           return (
             (ee["chest_" + i.id] = !0),
             D.door(),
-            _e(i.item, i.n, !0),
+            _e(i.item, i.n, !0, i.dung),
             i.script && ye(i.script),
             !0
           );
@@ -18900,10 +18891,15 @@ ram_mem_amulet: [
       if (slotsOn()) {
         let xl = "X " + slotName(weaponNow(), !0),
           zl = "Z " + slotName(toolNow(), !0),
-          sx = Math.max(x, 156);
+          sx = Math.max(x, 132),
+          cap = 246,
+          gap = 10;
+        while (sx + (xl.length + zl.length) * 6 + gap > cap && xl.length + zl.length > 6) {
+          if (xl.length >= zl.length && xl.length > 3) xl = xl.slice(0, -1);
+          else zl = zl.slice(0, -1);
+        }
         bits.push({ id: "xname", x: sx, y: 24, w: xl.length * 6, h: 8, text: xl });
-        bits.push({ id: "q", x: sx + xl.length * 6 + 6, y: 24, w: 6, h: 8, text: "Q" });
-        bits.push({ id: "zname", x: sx + xl.length * 6 + 18, y: 24, w: zl.length * 6, h: 8, text: zl });
+        bits.push({ id: "zname", x: sx + xl.length * 6 + gap, y: 24, w: zl.length * 6, h: 8, text: zl });
       }
       return bits;
     }
@@ -19013,10 +19009,9 @@ ram_mem_amulet: [
               (I(140 + s * 10, 12, 8, 8, on ? "#ffcc33" : "#3a2a20"),
                 I(142 + s * 10, 14, 4, 4, on ? "#fff6c0" : "#1a140c"));
             }))
-          : A.story === "ramshackle"
-            ? (v(n, Z("axe_got") ? "AXE" : "HATCHET", 140, 2, "#ffe070", 1, "", ""),
-              v(n, Z("shield_got") ? "SHIELD" : "SHIELD --", 140, 12, Z("shield_got") ? "#4ff0ff" : "#6a6a8a", 1, "", ""),
-              v(n, Z("amulet_got") ? "AMULET" : "AMULET --", 196, 12, Z("amulet_got") ? "#ff4fd8" : "#6a6a8a", 1, "", ""))
+            : A.story === "ramshackle"
+            ? (v(n, slotName(weaponNow(), !0), 140, 2, "#ffe070", 1, "", ""),
+              v(n, slotName(toolNow(), !0) || "--", 140, 12, toolNow() ? "#4ff0ff" : "#6a6a8a", 1, "", ""))
             : (n.drawImage(O.icon.coin, 140, 4),
             v(n, String(d.coins).padStart(3, "0"), 154, 9, A.story === "skippy" ? "#ff9ae8" : "#ffe070", 1, "", ""),
             n.drawImage(O.icon.arrows, 174, 4),
@@ -19049,11 +19044,11 @@ ram_mem_amulet: [
           v(
             n,
             "SAVED",
-            262,
-            26,
+            w.dungeon ? 160 : 274,
+            w.dungeon ? 188 : 10,
             Math.floor(A.t * 6) % 2 ? "#3dff6a" : "#ffffff",
             1,
-            "",
+            w.dungeon ? "center" : "",
             X,
           ));
     }
@@ -20158,6 +20153,80 @@ ram_mem_amulet: [
     }
     let Rt = "",
       bt = !1;
+    function keyWalk() {
+      let pairs = [
+          ["d1", "D", "d2", "c_d2key"],
+          ["d3", "K", "d2", "c_bigkey"],
+          ["s2", "D", "s1", "c_s2key"],
+          ["s2", "K", "s3", "c_s3big"],
+          ["club1", "D", "neon", "c_club_key"],
+          ["v2", "D", "v1", "c_v2key"],
+          ["v2", "K", "v2b", "c_v2big"],
+          ["st2", "D", "st1", "c_st2key"],
+          ["st2", "K", "st3", "c_st3big"],
+          ["rs2", "D", "rs1", "rs1_key"],
+          ["rs2", "K", "rs2", "rs2_big"],
+          ["rc2", "D", "rc1", "rc1_key"],
+          ["rc2", "K", "rc2", "rc2_big"],
+          ["ram_d1", "D", "ram_fun", "ram_dkey"],
+          ["ram_m2", "D", "ram_m1", "ram_mkey"],
+          ["ram_j1", "D", "ram_noodle", "ram_jkey"],
+          ["pr_hall", "G", "pr_gate", "pr_key"],
+        ],
+        doorsOf = (room, tile) => {
+          let rows = Zs[room] || [],
+            out = [];
+          return (
+            rows.forEach((row, y) => {
+              for (let x = 0; x < row.length; x++) row[x] === tile && out.push([x, y]);
+            }),
+            out
+          );
+        },
+        reach = (from, to) => {
+          let seen = {},
+            q = [from];
+          seen[from] = 1;
+          while (q.length) {
+            let id = q.shift();
+            if (id === to) return !0;
+            for (let warp of (Ie[id] && Ie[id].warps) || [])
+              !seen[warp.to] && Ie[warp.to] && ((seen[warp.to] = 1), q.push(warp.to));
+          }
+          return !1;
+        };
+      return pairs.map((row) => {
+        let door = row[0],
+          tile = row[1],
+          keyRoom = row[2],
+          id = row[3],
+          room = Ie[door],
+          home = Ie[keyRoom],
+          c = ((home && home.chests) || []).find((chest) => chest.id === id),
+          ds = doorsOf(door, tile),
+          dist =
+            c && door === keyRoom && ds.length
+              ? Math.min.apply(
+                  null,
+                  ds.map((spot) => Math.abs(spot[0] - c.x) + Math.abs(spot[1] - c.y)),
+                )
+              : 99,
+          credit = c ? c.dung || (home && home.dungeon) || "" : "",
+          need = tile === "G" ? credit : (room && room.dungeon) || "";
+        return {
+          door: door,
+          tile: tile,
+          keyRoom: keyRoom,
+          id: id,
+          x: c ? c.x : -1,
+          y: c ? c.y : -1,
+          doors: ds.length,
+          dist: dist,
+          reach: reach(keyRoom, door),
+          ok: !!(c && ds.length && reach(keyRoom, door) && (door !== keyRoom || dist >= 8) && credit === need),
+        };
+      });
+    }
     function actionFace() {
       if (!w) return { label: "ACTION", on: 0 };
       for (let C of w.props || [])
@@ -20371,7 +20440,7 @@ ram_mem_amulet: [
       ((root.dataset.touch = mode),
         (root.dataset.item = "1"),
         (root.dataset.itemon = mode === "play" && toolNow() ? "1" : "0"),
-        (root.dataset.swap = "0"),
+        (root.dataset.swap = mode === "play" && ownedTools().filter((id) => id !== weaponNow()).length > 1 ? "1" : "0"),
         (root.dataset.talk = "1"),
         (root.dataset.actlabel = face.label),
         (root.dataset.acton = mode === "play" && face.on ? "1" : "0"),
@@ -22834,6 +22903,7 @@ ram_mem_amulet: [
           own: d.ownB || 1,
         }),
         faces: () => actionFace(),
+        keys: () => keyWalk(),
         toast: () => ({ text: A.toastT > 0 ? A.toast || "" : "", t: A.toastT || 0 }),
         hurt: (n = 1) => be(n, d.x, d.y + 20),
         drink: (i = 0) => drinkBottle(i),
@@ -23173,6 +23243,9 @@ function layout(){
     var rollLabel=R.dataset.rolllabel||"ROLL";
     show(by.attack,attack.cx-face/2,attack.cy-face/2,face,face,"ATTACK",R.dataset.attackon==="0");
     show(by.item,item.cx-face/2,item.cy-face/2,face,face,"ITEM",R.dataset.itemon==="0");
+    var swapS=48;
+    var swapCy=item.cy-face/2-10-swapS/2;
+    show(by.swap,item.cx-swapS/2,swapCy-swapS/2,swapS,swapS,"SWAP",R.dataset.swap!=="1");
     show(by.roll,roll.cx-face/2,roll.cy-face/2,face,face,rollLabel,false);
     show(by.talk,action.cx-face/2,action.cy-face/2,face,face,actLabel,R.dataset.acton==="0");
     show(by.magic,magic.cx-pillW/2,magic.cy-pillH/2,pillW,pillH,"MAGIC",false);
