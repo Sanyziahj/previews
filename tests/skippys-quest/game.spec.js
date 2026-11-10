@@ -355,7 +355,7 @@ test('campaign routes pay off', async ({ page }) => {
     sent.log.push([S.B.state, S.B.hp]);
     S.bossHurt(4);
     sent.log.push([S.B.state, S.B.hp]);
-    for (let i = 0; i < 20 && S.B.state === 'fight'; i++) S.bossHurt(4);
+    for (let i = 0; i < 20 && S.B.state === 'fight'; i++) { S.bossHurt(4); S.step(16); }
     sent.log.push([S.B.state, S.B.hp, !!S.flags.boss_sentinel]);
     for (let i = 0; i < 500 && !S.flags.proof1; i++) {
       if (S.dlg) { S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); }
@@ -395,13 +395,13 @@ test('campaign routes pay off', async ({ page }) => {
 
     S.warp('ros_track', 4, 8, 3);
     for (let i = 0; i < 500 && S.B.state !== 'fight'; i++) S.step(1);
-    for (let i = 0; i < 20 && S.B.state === 'fight'; i++) S.bossHurt(5);
+    for (let i = 0; i < 20 && S.B.state === 'fight'; i++) { S.bossHurt(5); S.step(16); }
     for (let i = 0; i < 400 && !S.flags.shadow_under; i++) S.step(1);
     mash('shadow_under', 16);
 
     S.warp('rc3', 8, 8, 1);
     for (let i = 0; i < 600 && S.B.state !== 'fight'; i++) S.step(1);
-    for (let i = 0; i < 24 && S.B.state === 'fight'; i++) S.bossHurt(4);
+    for (let i = 0; i < 24 && S.B.state === 'fight'; i++) { S.bossHurt(4); S.step(16); }
     for (let i = 0; i < 500 && !S.flags.proof3; i++) S.step(1);
     mash('proof3', 20);
 
@@ -1714,7 +1714,7 @@ test('Ramshackle chapter: relics, worlds, bosses, and the road home', async ({ p
         S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
       }
       for (let i = 0; i < 160 && S.B.state !== 'fight' && S.B.state !== 'dying'; i++) S.step(1);
-      for (let i = 0; i < 8 && S.B.state === 'fight'; i++) S.bossHurt(4);
+      for (let i = 0; i < 8 && S.B.state === 'fight'; i++) { S.bossHurt(4); S.step(20); }
       for (let i = 0; i < 220 && !S.flags[flag]; i++) {
         if (S.dlg) { S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); }
         S.step(1);

@@ -3,7 +3,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script>window.__SQ_BUILD="b29";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b29(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b29");location.replace(u.href);}</script>
+<script>window.__SQ_BUILD="b30";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b30(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b30");location.replace(u.href);}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Space Riders: Skippy's Quest</title><link rel="icon" href="data:,">
 <meta name="description" content="Space Riders: Skippy's Quest - a free 16-bit top-down action adventure browser game. The Red King is missing. Ride with ROS through the Sand Dungeon, take Cash's portals to the Seaport and Ramshackle the Viking, win Ronin's flaming sword, beat the house at the Andromeda Casino and stop the Overlord on the Moon, survive the meteor shower with Blaze and earn your space board at the Crossroad and cross the mirror into the Dark World, then storm Fright's castle and bring the Red King home. Chapters 1-9 (Complete) out now.">
@@ -878,7 +878,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           { k: "house", x: 3, y: 2 },
           { k: "saloon", x: 34, y: 2 },
           { k: "stairs", x: 23, y: 3 },
-          { k: "portal", x: 23.5, y: 6.5, need: "boss_d1", to: "desert_nx" },
+          { k: "latch", id: "desert", x: 6, y: 16, gift: "boots" },
           { k: "portal", x: 37, y: 7, need: "tale_ros" },
         ],
         signs: [
@@ -927,7 +927,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
             h: 4,
             script: "tale_ros_arrive",
             once: "tale_ros_met",
-            need: "ch9_done",
+            need: "ch2_done",
           },
         ],
       },
@@ -956,9 +956,10 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           { id: "x_sombrero", x: 17.5, y: 9, dir: 2, talk: "x_sombrero" },
           { id: "x_wizard", x: 13.5, y: 9.5, dir: 0, talk: "x_wizard" },
         ],
+        props: [{ k: "heavycase", id: "pour", x: 8.5, y: 4.2 }],
         warps: [
           { x: 9, y: 11, w: 2, h: 1, to: "desert", tx: 37.5, ty: 7.4, dir: 0 },
-          { x: 7, y: 9, w: 2, h: 1, to: "nexus", tx: 9.5, ty: 9.2, dir: 1 },
+          { x: 8, y: 4, w: 2, h: 1, to: "nexus", tx: 9.5, ty: 9.2, dir: 1, need: "pour_box" },
         ],
         signs: [
           {
@@ -976,7 +977,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           {
             x: 8,
             y: 5,
-            text: "DOWNSTAIRS: CASH'S COURT. THE PORTALS STAND IN THE OPEN AIR.",
+            text: "A REINFORCED CASE. ONLY A HEAVY LASER OPENS THE STAIRS UNDER IT.",
             kind: "sign",
           },
         ],
@@ -1090,10 +1091,11 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           },
         ],
         props: [
-          { k: "portal", x: 9.5, y: 3, need: "boss_d1", to: "d4_desert" },
+          { k: "stairs", x: 9.5, y: 3 },
         ],
         warps: [
           { x: 9, y: 11, w: 2, h: 1, to: "d3", tx: 9.5, ty: 1.2, dir: 0 },
+          { x: 9, y: 2, w: 2, h: 2, to: "desert", tx: 23.5, ty: 8.2, dir: 0 },
         ],
       },
     },
@@ -1128,7 +1130,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       buck_talk: [{ s: "buck" }],
       kal_talk: [{ s: "kal" }],
       shadow_talk: [
-        { need: "tale_ros", not: "tale_ram", s: "shadow_ram_hand" },
+        { need: "ch3_done", not: "tale_ram", s: "shadow_ram_hand" },
         { s: "shadow" },
       ],
       draco_talk: [{ s: "draco" }],
@@ -1695,10 +1697,10 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
   Object.assign(Ie, {
     nexus: {
       id: "nexus",
-      name: "CASH'S COURT",
-      theme: "desert",
+      name: "CASH'S BASEMENT",
+      theme: "wood",
       realm: "desert",
-      music: "desert",
+      music: "saloon",
       npcs: [{ id: "wizard", x: 9.6, y: 5.4, dir: 0, talk: "cash_nexus" }],
       props: [
         { k: "portal", x: 4, y: 3.5, to: "nx_desert", label: "DESERT" },
@@ -1743,7 +1745,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       gates: { G: "pk_met" },
       npcs: [
         { id: "pirateking", x: 20.5, y: 21.6, dir: 0, talk: "pk_talk" },
-        { id: "ram_teller", look: "ramshackle", x: 16, y: 16, dir: 0, talk: "ram_tale_talk", show: "tale_ros" },
+        { id: "ram_teller", look: "ramshackle", x: 16, y: 16, dir: 0, talk: "ram_tale_talk", show: "ch3_done" },
         { id: "rusty", x: 28.5, y: 14.6, dir: 0, talk: "rusty_sea" },
         { id: "al", x: 8.5, y: 21.4, dir: 0, talk: "al_sea" },
         { id: "x_sailor", x: 36.8, y: 14.2, dir: 2, talk: "x_guard" },
@@ -1766,6 +1768,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       ],
       props: [
         { k: "portal", x: 3.5, y: 3.4, to: "sea_nx" },
+        { k: "vine", id: "sea", x: 8, y: 8, gift: "gloves" },
         { k: "bldg", b: "galley", x: 11, y: 3 },
         { k: "bldg", b: "lighthouse", x: 31, y: 1 },
         { k: "ship", b: "pship", x: 23, y: 18 },
@@ -8882,6 +8885,12 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
   Object.assign(Ea, {
     blast: { name: "BLASTER", desc: "DRILL'S BLAST. X OR Z. HE LIKES THE BOOM.", jingle: "item" },
     heavy: { name: "HEAVY LASER BLASTER", desc: "A GIFT FROM DRILL SERGEANT. X, Z, OR SWAP.", jingle: "item" },
+    plasma: { name: "PLASMA EDGE", desc: "A CHARGED BLADE. X SWINGS HARDER.", jingle: "item" },
+    disc: { name: "BOOMERANG DISC", desc: "Z THROWS IT. IT COMES HOME.", jingle: "item" },
+    suit: { name: "RIDING SUIT", desc: "HITS LAND SOFTER.", jingle: "item" },
+    plate: { name: "PLATED SHIELD", desc: "THE GUARD LASTS LONGER.", jingle: "item" },
+    gloves: { name: "GRIP GLOVES", desc: "A SURE HAND ON A LATCH.", jingle: "item" },
+    boots: { name: "JET BOOTS", desc: "A QUICKER STEP.", jingle: "item" },
   });
   Object.assign(Se, {
     revolt: { name: "REVOLT SENTINEL", sub: "A MEMORY OF THE MOON. NOT A GRAVE.", flag: "boss_revolt", shard: "note", shardFlag: "boss_revolt", contFlag: "ds_nocont", down: "moon_down", get: "moon_down", shardAt: [], contAt: [], upload: !1 },
@@ -9149,11 +9158,29 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
   STORY_ROWS = [
     { id: "skippy", name: "SKIPPY'S QUEST", sub: "THE MAIN RIDE. THE RED KING IS MISSING", play: !0, save: "sq_save_v1", who: "skippy" },
     { id: "ros", name: "THE ROGUE OUTLAW SHERIFF", sub: "A SIDE QUEST. IT RETURNS TO SKIPPY", play: !0, save: "sq_save_ros_v1", who: "ros" },
-    { id: "spike", name: "SPIKE", sub: "SOON", play: !1, who: "spike" },
+    { id: "spike", name: "SPIKE", sub: "SOON. AFTER CHAPTER 7", play: !1, who: "spike" },
     { id: "drill", name: "DRILL SERGEANT", sub: "A SIDE QUEST. IT RETURNS TO SKIPPY", play: !0, save: "sq_save_ds_v1", who: "drill" },
-    { id: "ronin", name: "RONIN", sub: "SOON", play: !1, who: "ronin" },
+    { id: "ronin", name: "RONIN", sub: "SOON. AFTER CHAPTER 8", play: !1, who: "ronin" },
     { id: "ramshackle", name: "RAMSHACKLE", sub: "A SIDE QUEST. IT RETURNS TO SKIPPY", play: !0, save: "sq_save_ram_v1", who: "ramshackle" },
-    { id: "santt", name: "SANTT", sub: "SOON", play: !1, who: "santt" },
+    { id: "santt", name: "SANTT", sub: "SOON. LAST", play: !1, who: "santt" },
+  ];
+  var GEAR_TABLE = [
+    { id: "baton", name: "STUN BATON", tier: 1, from: "MAIN", where: "BOOT CAMP", opens: "TRAINING" },
+    { id: "bow", name: "BOW", tier: 1, from: "MAIN", where: "DESERT", opens: "EYES AND SWITCHES" },
+    { id: "sword", name: "FLAME SWORD", tier: 2, from: "MAIN", where: "SAKURA", opens: "BAMBOO" },
+    { id: "raygun", name: "RAYGUN", tier: 2, from: "MAIN", where: "STATION", opens: "TECH DOORS" },
+    { id: "missile", name: "MISSILES", tier: 2, from: "MAIN", where: "DRILL'S GIFT", opens: "FORCE FIELDS" },
+    { id: "armor", name: "LIGHT ARMOR", tier: 1, from: "MAIN", where: "STATION", opens: "VACUUM" },
+    { id: "board", name: "SPACE BOARD", tier: 1, from: "MAIN", where: "SANTT, THEN SLIDE", opens: "GAPS" },
+    { id: "lasso", name: "SHERIFF LASSO", tier: 2, from: "TALE", where: "ROS", opens: "GRAPPLE LATCHES" },
+    { id: "axe", name: "RAM AXE", tier: 3, from: "TALE", where: "RAMSHACKLE", opens: "THICK WOOD" },
+    { id: "heavy", name: "HEAVY BLASTER", tier: 3, from: "TALE", where: "DRILL", opens: "REINFORCED CASES" },
+    { id: "plasma", name: "PLASMA EDGE", tier: 3, from: "SHOP", where: "CADET STORE", opens: "A HARDER SWING" },
+    { id: "disc", name: "BOOMERANG DISC", tier: 2, from: "SHOP", where: "CADET STORE", opens: "A RETURNING THROW" },
+    { id: "suit", name: "RIDING SUIT", tier: 2, from: "SHOP", where: "CADET STORE", opens: "SOFTER HITS" },
+    { id: "plate", name: "PLATED SHIELD", tier: 2, from: "SHOP", where: "CADET STORE", opens: "A LONGER GUARD" },
+    { id: "gloves", name: "GRIP GLOVES", tier: 1, from: "SECRET", where: "SEAPORT THICKET", opens: "A SURE GRIP" },
+    { id: "boots", name: "JET BOOTS", tier: 1, from: "SECRET", where: "DESERT LATCH", opens: "A QUICKER STEP" },
   ];
   var TALES = [
     {
@@ -9163,7 +9190,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       teller: "macho",
       hero: "ros",
       save: "sq_save_ros_v1",
-      need: "ch9_done",
+      need: "ch2_done",
       heard: "tale_ros",
       area: "desert",
       x: 32,
@@ -9180,7 +9207,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       teller: "ramshackle",
       hero: "ramshackle",
       save: "sq_save_ram_v1",
-      need: "tale_ros",
+      need: "ch3_done",
       heard: "tale_ram",
       area: "seaport",
       x: 16,
@@ -9469,7 +9496,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         ],
         signs: [
           { x: 3, y: 2, text: "SKY LANE IS THE NORTH DOOR. RIDE THE RINGS. THE PORTAL OPENS WHEN THE LANE IS CLEAR.", kind: "sign" },
-          { x: 24, y: 2, text: "CASH KEEPS THE MIDDLE CLEAR. PORTALS ARE EVENLY SPACED.", kind: "sign" },
+          { x: 24, y: 2, text: "CASH: I STAND WHERE YOU CAN READ EVERY DOOR. NONE OF THEM CROWD.", kind: "sign" },
         ],
         warps: [{ x: 13, y: 1, w: 2, h: 1, to: "lane_sky", tx: 5.5, ty: 13, dir: 1 }],
       },
@@ -9740,10 +9767,21 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         Ie.nexus.npcs[0].x = 9.6;
         Ie.nexus.npcs[0].y = 5.4;
       }
-      Zs.nexus = Array.from({ length: 12 }, () => ".".repeat(20));
-      Ie.nexus.warps = [{ x: 9, y: 11, w: 2, h: 1, to: "saloon", tx: 8, ty: 8, dir: 1 }];
-      Ie.nexus.props.push({ k: "heavycase", x: 5.2, y: 7.2 });
-      Ie.nexus.warps.push({ x: 3, y: 6, w: 6, h: 5, to: "court_vault", tx: 4.5, ty: 6, dir: 1, need: "court_box" });
+      Zs.nexus = [
+        "####################",
+        "#..................#",
+        "#..................#",
+        "#..................#",
+        "#..................#",
+        "#..................#",
+        "#..................#",
+        "#..................#",
+        "#..................#",
+        "#..................#",
+        "#..................#",
+        "#########..#########",
+      ];
+      Ie.nexus.warps = [{ x: 9, y: 11, w: 2, h: 1, to: "saloon", tx: 9, ty: 6, dir: 1 }];
       Ie.court_vault = {
         id: "court_vault",
         name: "THE OPEN CASE",
@@ -9814,6 +9852,10 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           { id: "med", name: "MED PACK", price: 15, n: 1, once: "" },
           { id: "moon", name: "MOON TEA", price: 10, n: 1, once: "" },
           { id: "arrows", name: "ARROWS X10", price: 10, n: 10, once: "" },
+          { id: "plasma", name: "PLASMA EDGE", price: 40, n: 1, once: "bought_plasma" },
+          { id: "disc", name: "BOOMERANG DISC", price: 28, n: 1, once: "bought_disc" },
+          { id: "suit", name: "RIDING SUIT", price: 32, n: 1, once: "bought_suit" },
+          { id: "plate", name: "PLATED SHIELD", price: 36, n: 1, once: "bought_plate" },
         ],
       },
       dragon: {
@@ -10032,6 +10074,14 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       dice_high: [{ t: "fn", f: "diceHigh" }],
       dice_low: [{ t: "fn", f: "diceLow" }],
       dice_no: [h("ros", "THEN DON'T TOSS. THE SARSAPARILLA IS STILL SWEET.")],
+      road_on1: [h("skippy", "THE SEA ROAD IS OPEN. NO PORTAL. I CAN WALK IT.")],
+      road_on2: [h("skippy", "SAKURA IS AHEAD ON THE ROAD. THE SHARD IS STILL THE WAY.")],
+      road_on3: [h("skippy", "THE CASINO LIGHTS ARE DOWN THE ROAD. COINS STAY IN MY POCKET.")],
+      road_on4: [h("skippy", "THE MOON LIFT IS A DOCK, NOT A PORTAL. I STILL HAVE MY FEET.")],
+      road_on5: [h("skippy", "ORBIT IS NEXT. THE ROAD KEEPS GOING.")],
+      road_on6: [h("skippy", "THE CROSSROAD MEETS EVERY PATH. I TAKE THE ONE IN FRONT OF ME.")],
+      road_on7: [h("skippy", "DREAMLAND IS THROUGH THE GATE I CAN WALK. THE TALES CAN WAIT.")],
+      road_on8: [h("skippy", "FRIGHT'S CASTLE STANDS AT THE END OF THE ROAD. SEVEN HOLLOWS. NO SHORTCUT.")],
     });
   }
   cosmosBuild();
@@ -11995,6 +12045,27 @@ ram_mem_amulet: [
     else if (row === 6) drinkBottle(0);
     (D.sel(), xe());
   }
+  function drawGearTable() {
+    (I(0, 24, 320, 200, "#0c1020"),
+      v(n, "GEAR", 160, 30, "#ffcc33", 2, "center", "#000"));
+    let rows = GEAR_TABLE,
+      top = (A.gearSel || 0) - 4;
+    top < 0 && (top = 0);
+    top > rows.length - 8 && (top = Math.max(0, rows.length - 8));
+    for (let i = 0; i < 8 && top + i < rows.length; i++) {
+      let g = rows[top + i],
+        y = 48 + i * 16,
+        on = (A.gearSel || 0) === top + i,
+        have = !!(d.items && d.items[g.id]) || Z(g.id + "_got") || (g.id === "heavy" && Z("heavy_got"));
+      (on && I(8, y - 2, 304, 14, "#243058"),
+        v(n, (have ? "OK " : "-- ") + g.name, 12, y, have ? "#fff6c0" : "#9aa3b8", 1, "", "#000"),
+        v(n, g.from + " " + g.tier, 168, y, "#7ef0ff", 1, "", "#000"),
+        v(n, g.opens, 230, y, "#ffd0ea", 1, "", "#000"));
+    }
+    let sel = rows[Math.min(A.gearSel || 0, rows.length - 1)];
+    (sel && v(n, sel.where + "  " + sel.opens, 160, 176, "#fff6c0", 1, "center", "#000"),
+      v(n, "UP DOWN  RIGHT PAGES  BACK CLOSES", 160, 192, "#c9d1e3", 1, "center", "#000"));
+  }
   function drawCosmosGear() {
     let rows = [
         "WEAPON  " + COS_WEP[(d.gearW || 1) - 1],
@@ -13650,6 +13721,9 @@ ram_mem_amulet: [
       if (e && A.story === "ramshackle" && !Ie[e.area]) {
         ((e.area = "ram_dock"), (e.x = p(6)), (e.y = p(8)), (e.dir = 3));
       }
+      if (e && (e.area === "court_vault" || e.area === "cash_court")) {
+        ((e.area = "saloon"), (e.x = p(9)), (e.y = p(8)), (e.dir = 1));
+      }
       if (e && A.story === "drill" && !Ie[e.area]) {
         ((e.area = "ds_camp"), (e.x = p(8)), (e.y = p(7)), (e.dir = 0));
       }
@@ -13855,6 +13929,14 @@ ram_mem_amulet: [
         case "bark":
           ee.nuke_bark = !0;
           break;
+        case "plasma":
+        case "disc":
+        case "suit":
+        case "plate":
+        case "gloves":
+        case "boots":
+          d.items[e] = !0;
+          break;
         case "proof1":
         case "proof2":
         case "proof3":
@@ -14045,6 +14127,28 @@ ram_mem_amulet: [
     function or() {
       let face = actionFace();
       if (face.kind === "portal" && face.prop) return enterPortal(face.prop);
+      for (let C of (w && w.props) || []) {
+        if (ae(d.x, d.y, p(C.x), p(C.y)) > 20) continue;
+        if (C.k === "latch" && !Z("latch_" + (C.id || "a"))) {
+          if (d.items.lasso || d.items.gloves || Z("tale_ros")) {
+            ((ee["latch_" + (C.id || "a")] = !0),
+              C.gift && _e(C.gift, 1, !1),
+              (d.coins += 12),
+              D.coin(),
+              Q(d.items.gloves && !d.items.lasso ? "THE GLOVES HOLD. THE LATCH OPENS." : "THE ROPE CATCHES. THE LATCH OPENS."));
+          } else Q("A GRAPPLE LATCH. THE SHERIFF'S LASSO WOULD OPEN IT.");
+          return;
+        }
+        if (C.k === "vine" && !Z("vine_" + (C.id || "a"))) {
+          if (d.items.axe || d.items.hatchet || Z("tale_ram")) {
+            ((ee["vine_" + (C.id || "a")] = !0),
+              C.gift && _e(C.gift, 1, !1),
+              ne(p(C.x), p(C.y), 10, ["#c8a060", "#fff6c0", "#ffffff"], 24),
+              Q("THE AXE OPENS THE THICKET."));
+          } else Q("THICK WOOD. AN AXE WOULD CUT IT.");
+          return;
+        }
+      }
       let e = Ne[d.dir],
         a = d.x + e[0] * 12,
         t = d.y - 3 + e[1] * 12;
@@ -14116,6 +14220,7 @@ ram_mem_amulet: [
     function be(e, a, t) {
       if (talkOpen() || d.inv > 0 || d.roll > 0 || d.god || A.state !== "play") return;
       e = cosmosGuard(e);
+      d.items && d.items.suit && e > 1 && (e -= 1);
       if (e <= 0) return;
       if ((d.shield || 0) > 0) {
         ((d.shield = 0), D.tink(), Q("THE SHIELD HOLDS."));
@@ -14191,9 +14296,10 @@ ram_mem_amulet: [
           : "";
     }
     function Fe(e) {
+      if ((r.iframe || 0) > 0 || r.state !== "fight") return;
       if (
-        r.state === "fight" &&
-        ((r.hp -= e),
+        ((r.iframe = 0.22),
+        (r.hp -= e),
         (r.flash = 0.15),
         D.hit(),
         ne(r.x, r.y, 8, ["#ff4fd8", "#ffffff"], 60),
@@ -14390,6 +14496,7 @@ ram_mem_amulet: [
           ((d.brandCd = Math.max(0, d.brandCd - e)),
           d.brandCd === 0 && Q("BRAND READY.")),
         (d.shield || 0) > 0 && (d.shield = Math.max(0, d.shield - e)),
+        (d.plasma || 0) > 0 && (d.plasma = Math.max(0, d.plasma - e)),
         (d.rune || 0) > 0 &&
           ((d.rune = Math.max(0, d.rune - e)),
           d.rune === 0 &&
@@ -14476,12 +14583,14 @@ ram_mem_amulet: [
           (d.items.baton ||
             d.items.sword ||
             weaponNow() === "hatchet" ||
-            weaponNow() === "axe") &&
+            weaponNow() === "axe" ||
+            weaponNow() === "plasma") &&
           (weaponNow() === "axe" || weaponNow() === "hatchet" || d.arrowCd < 0.2))
       ) {
         let axeHand = weaponNow() === "axe" || weaponNow() === "hatchet",
           C = axeHand ? axeBox() : fr(),
-          te = !!d.items.sword || weaponNow() === "axe",
+          plasma = weaponNow() === "plasma" || (d.plasma || 0) > 0,
+          te = !!d.items.sword || weaponNow() === "axe" || plasma,
           kind = weaponNow() === "axe" ? "axe" : "melee";
         for (let de of ce)
           !de.dead &&
@@ -14491,7 +14600,7 @@ ram_mem_amulet: [
             de.y + 2 > C[1] &&
             de.y - 12 < C[3] &&
             (ft.push(de),
-            _a(de, te ? 2 : 1, d.x, d.y, te ? 0.2 : 0.7),
+            _a(de, plasma ? 3 : te ? 2 : 1, d.x, d.y, te ? 0.2 : 0.7),
             ne(
               de.x,
               de.y - 6,
@@ -14579,13 +14688,17 @@ ram_mem_amulet: [
               continue;
             }
             if (C.need && !Z(C.need)) continue;
+            if (C.to === "nexus" && !basementOpen()) {
+              (A.toastT || 0) <= 0 && Q("THE STAIRS UNDER THE POUR ARE STILL SEALED.");
+              continue;
+            }
             dt(C.to, C.tx, C.ty, C.dir);
             break;
           }
         for (let C of w.triggers || [])
           if (
             !Z(C.once) &&
-            (!C.need || Z(C.need)) &&
+            (!C.need || reached(C.need)) &&
             d.x > C.x * 16 &&
             d.x < (C.x + C.w) * 16 &&
             d.y > C.y * 16 &&
@@ -14762,6 +14875,7 @@ ram_mem_amulet: [
         if (ae(a.x, a.y, p(prop.x), p(prop.y)) > 16) continue;
         if (a.kind === "heavy") {
           ((ee.court_box = !0),
+            (ee.pour_box = !0),
             ne(p(prop.x), p(prop.y), 18, ["#fff6c0", "#ffe066", "#ffffff", "#c9a0ff"], 40),
             D.boom(),
             (A.shake = 0.2),
@@ -14802,6 +14916,23 @@ ram_mem_amulet: [
           }
           !a.back && a.t > 0.48 && ((a.back = 1), (a.vx *= -1), (a.vy *= -1));
           a.t > 1.15 && (a.t = 99);
+          continue;
+        }
+        if (a.kind === "disc") {
+          for (let f of ce)
+            !f.dead &&
+              !a.hit &&
+              ae(a.x, a.y, f.x, f.y - 4) < 14 &&
+              (_a(f, 2, a.x, a.y, 0.15), (a.hit = 1));
+          if (!a.back && a.t > 0.32) a.back = 1;
+          if (a.back) {
+            let dx = d.x - a.x,
+              dy = d.y - 6 - a.y,
+              nrm = Math.hypot(dx, dy) || 1;
+            ((a.vx = (dx / nrm) * 200), (a.vy = (dy / nrm) * 200));
+            ae(a.x, a.y, d.x, d.y - 6) < 12 && (a.t = 99);
+          }
+          a.t > 1.4 && (a.t = 99);
           continue;
         }
         if (a.kind === "echo") {
@@ -15381,7 +15512,7 @@ ram_mem_amulet: [
       if (A.story !== "skippy") return null;
       for (let i = 0; i < TALES.length; i++) {
         let t = TALES[i];
-        if (Z(t.need) && !Z(t.heard)) return t;
+        if (reached(t.need) && !Z(t.heard)) return t;
       }
       return null;
     }
@@ -15389,12 +15520,19 @@ ram_mem_amulet: [
       let t = activeTale();
       return t ? t.objective : "";
     }
+    function reached(flag) {
+      if (Z(flag)) return !0;
+      let m = /^ch(\d+)_done$/.exec(flag || "");
+      if (!m) return !1;
+      for (let i = +m[1] + 1; i <= 9; i++) if (Z("ch" + i + "_done")) return !0;
+      return !1;
+    }
     function riderLog() {
       let mark = (flag, ready) => (Z(flag) ? "OK" : ready ? ">>" : "--");
       return [
-        { id: "ros", text: mark("tale_ros", Z("ch9_done")) + " ROS  HI LIFE OR THE DESERT" },
-        { id: "ram", text: mark("tale_ram", Z("tale_ros")) + " RAM  SHADOW OR THE SEAPORT" },
-        { id: "drill", text: mark("tale_drill", Z("ch5_done")) + " DRILL  THE ACADEMY RADIO" },
+        { id: "ros", text: mark("tale_ros", reached("ch2_done")) + " ROS  AFTER CHAPTER 2" },
+        { id: "ram", text: mark("tale_ram", reached("ch3_done")) + " RAM  AFTER CHAPTER 3" },
+        { id: "drill", text: mark("tale_drill", reached("ch5_done")) + " DRILL  THE ACADEMY RADIO" },
       ];
     }
     function chapterStatus(id) {
@@ -15570,6 +15708,23 @@ ram_mem_amulet: [
     function returnToPresent() {
       backToSkippy(!0);
     }
+    function basementOpen() {
+      return !!(ee.pour_box || ee.court_box);
+    }
+    function nextRoad() {
+      let routes = {
+        1: ["seaport", 3.5, 5.2, 0],
+        2: ["village", 3.5, 5.2, 0],
+        3: ["casino", 2, 13.4, 0],
+        4: ["moon", 3, 5.2, 0],
+        5: ["dock", 3, 9.2, 1],
+        6: ["crossroad", 15, 12.5, 1],
+        7: ["carnival", 3, 9.5, 3],
+        8: ["cgate", 11, 12, 1],
+      };
+      let r0 = routes[A.chap] || ["desert", 10, 10, 0];
+      ba(r0[0], r0[1], r0[2], r0[3]);
+    }
     function Or() {
       if (A.story === "ros") {
         returnToPresent();
@@ -15581,8 +15736,8 @@ ram_mem_amulet: [
       }
       ((A.state = "play"),
         (A.st = 0),
-        ba("nexus", 9.5, 7.6, 1),
-        ye("nexus_open" + (A.chap + 1)),
+        nextRoad(),
+        ye("road_on" + A.chap),
         xe());
     }
     function Jt(e, a, t, i, s) {
@@ -15747,7 +15902,7 @@ ram_mem_amulet: [
         (r.parts = []),
         r.kind === "centipede")
       ) {
-        ((r.hp = r.max = 16),
+        ((r.hp = r.max = 18),
           (r.x = p(9.5)),
           (r.y = p(2.5)),
           (r.a = Math.PI / 2),
@@ -15813,6 +15968,7 @@ ram_mem_amulet: [
         if (
           ((r.st += e),
           r.flash > 0 && (r.flash -= e),
+          (r.iframe || 0) > 0 && (r.iframe = Math.max(0, r.iframe - e)),
           r.stun > 0 && r.kind !== "centipede" && (r.stun -= e),
           r.state === "wait")
         ) {
@@ -16513,7 +16669,7 @@ ram_mem_amulet: [
             (r.y = p(3.2) + Math.sin(r.a * 1.4) * 6),
             (r.eyeT -= e));
           if (r.eyeT <= 0) {
-            r.eyeT = 1.7;
+            r.eyeT = r.phase === 2 ? 1.05 : 1.7;
             Oe.push({ x: r.x, y: r.y, vx: 0, vy: 42, t: 0, kind: "orb", dir: 0 });
           }
         },
@@ -16547,10 +16703,10 @@ ram_mem_amulet: [
         },
       };
     }
-    dsBoss("revolt", 6, "#8a909c", "#9ff0ea");
-    dsBoss("occupy", 6, "#a85a32", "#ffb070");
-    dsBoss("candyboss", 6, "#e070a0", "#fff0f6");
-    dsBoss("plutoboss", 6, "#3a6aa8", "#d6ecff");
+    dsBoss("revolt", 12, "#8a909c", "#9ff0ea");
+    dsBoss("occupy", 12, "#a85a32", "#ffb070");
+    dsBoss("candyboss", 14, "#e070a0", "#fff0f6");
+    dsBoss("plutoboss", 16, "#3a6aa8", "#d6ecff");
     function wr() {
       if (itemLeft("missile") > 0) return;
       let e = Ne[d.dir];
@@ -16830,6 +16986,7 @@ ram_mem_amulet: [
               : 80;
       return (
         (w.run ? 100 : d.items.board && !w.dungeon ? 102 + nn("up_speed") * 10 : 80) +
+        (d.items.boots ? 14 : 0) +
         (A.story === "ros" ? 0 : cosmosBoardSpeed())
       );
     }
@@ -17635,7 +17792,7 @@ ram_mem_amulet: [
       for (let a = 0; a < 16; a++)
         I((a * 23) % 320, 20 + ((a * 17) % 70), 2, 2, "#fff2c8");
       (v(n, "SPACE RIDERS", 160, 8, "#ff4fd8", 2, "center", "#2a0a14"),
-        v(n, window.__SQ_BUILD || "b29", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
+        v(n, window.__SQ_BUILD || "b30", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
         v(n, "SIDE QUESTS COME HOME", 160, 28, "#ffcc33", 1, "center", "#2a0a14"));
       let a = 58;
       for (let t = 0; t < STORY_ROWS.length; t++) {
@@ -17990,7 +18147,7 @@ ram_mem_amulet: [
       }
     }
     Le.memory = {
-      init: () => { ((ee.ram_nocont = !0), (r.hp = r.max = 8), (r.x = p(8)), (r.y = p(4)), (r.a = 0), (r.eyeT = 1)); },
+      init: () => { ((ee.ram_nocont = !0), (r.hp = r.max = 12), (r.x = p(8)), (r.y = p(4)), (r.a = 0), (r.eyeT = 1)); },
       upd: (e) => {
         r.a += e;
         r.eyeT -= e;
@@ -18018,7 +18175,7 @@ ram_mem_amulet: [
       },
     };
     Le.colony = {
-      init: () => { ((ee.ram_nocont = !0), (r.hp = r.max = 8), (r.x = p(8)), (r.y = p(5)), (r.a = 0), (r.eyeT = 0.8)); },
+      init: () => { ((ee.ram_nocont = !0), (r.hp = r.max = 12), (r.x = p(8)), (r.y = p(5)), (r.a = 0), (r.eyeT = 0.8)); },
       upd: (e) => {
         r.a += e * (r.phase === 2 ? 1.8 : 1);
         r.x = p(8) + Math.cos(r.a) * 40;
@@ -18041,7 +18198,7 @@ ram_mem_amulet: [
       },
     };
     Le.stormeye = {
-      init: () => { ((ee.ram_nocont = !0), (r.hp = r.max = 8), (r.x = p(8)), (r.y = p(3)), (r.a = 0), (r.eyeT = 0.6)); },
+      init: () => { ((ee.ram_nocont = !0), (r.hp = r.max = 12), (r.x = p(8)), (r.y = p(3)), (r.a = 0), (r.eyeT = 0.6)); },
       upd: (e) => {
         r.a += e;
         r.x = p(8) + Math.sin(r.a) * 36;
@@ -18416,9 +18573,18 @@ ram_mem_amulet: [
       (splitHands(), D.sel(), Q((weaponish(id) ? "ATTACK " : "ITEM ") + slotName(id)), xe());
     }
     function skippyPauseInput() {
-      if (U.right && !A.wasR) A.skipPage = (A.skipPage || 0) ? 0 : 1;
+      if (U.right && !A.wasR) A.skipPage = ((A.skipPage || 0) + 1) % 3;
       if (U.left && !A.wasL) A.skipPage = 0;
       ((A.wasL = U.left), (A.wasR = U.right));
+      if ((A.skipPage || 0) === 2) {
+        if (U.backE || U.mapE || Qe || U.rollE) {
+          ((A.paused = !1), (A.skipPage = 0), D.sel());
+          return;
+        }
+        if (U.upE) A.gearSel = Math.max(0, (A.gearSel || 0) - 1);
+        if (U.downE) A.gearSel = Math.min(GEAR_TABLE.length - 1, (A.gearSel || 0) + 1);
+        return;
+      }
       if ((A.skipPage || 0) === 1) {
         if (U.backE || U.mapE || Qe || U.rollE) {
           ((A.paused = !1), (A.skipPage = 0), D.sel());
@@ -18572,6 +18738,8 @@ ram_mem_amulet: [
       if (id === "amulet") return !!(d.items.amulet || Z("amulet_got"));
       if (id === "blast") return !!(d.items.blast || A.story === "drill");
       if (id === "heavy") return !!(d.items.heavy || Z("heavy_got"));
+      if (id === "plasma" || id === "disc" || id === "suit" || id === "plate" || id === "gloves" || id === "boots")
+        return !!(d.items && d.items[id]);
       return !1;
     }
     function ownedItems() {
@@ -18582,7 +18750,7 @@ ram_mem_amulet: [
             ? ["hatchet", "axe", "shield", "amulet"]
             : A.story === "drill"
               ? ["blast"]
-              : ["baton", "sword", "bow", "raygun", "missile", "lasso", "heavy"];
+              : ["baton", "sword", "bow", "raygun", "missile", "lasso", "heavy", "plasma", "disc", "axe", "hatchet"];
       return ids.filter(ownedItem);
     }
     function slotName(id, short) {
@@ -18602,6 +18770,8 @@ ram_mem_amulet: [
           amulet: "POWER AMULET",
           blast: "BLASTER",
           heavy: "HEAVY LASER BLASTER",
+          plasma: "PLASMA EDGE",
+          disc: "BOOMERANG DISC",
         },
         sh = {
           lasers: "LASERS",
@@ -18689,10 +18859,10 @@ ram_mem_amulet: [
       return "";
     }
     function weaponish(id) {
-      return ["lasers", "justice", "bow", "raygun", "sword", "baton", "hatchet", "axe", "blast", "heavy"].indexOf(id) >= 0;
+      return ["lasers", "justice", "bow", "raygun", "sword", "baton", "hatchet", "axe", "blast", "heavy", "plasma"].indexOf(id) >= 0;
     }
     function toolish(id) {
-      return ["lasso", "brand", "missile", "shield", "amulet", "heavy"].indexOf(id) >= 0;
+      return ["lasso", "brand", "missile", "shield", "amulet", "heavy", "disc"].indexOf(id) >= 0;
     }
     function migrateSlots(e) {
       if (e && typeof e.pri === "string") {
@@ -18802,6 +18972,8 @@ ram_mem_amulet: [
       else if (id === "shield") raiseShield();
       else if (id === "amulet") thunderBurst();
       else if (id === "blast" || id === "heavy") fireBlast(id);
+      else if (id === "plasma") ((d.plasma = 0.3), swingItem("sword"));
+      else if (id === "disc") throwDisc();
     }
     function eyeTouched(box) {
       if (!r || r.kind !== "stormeye" || r.state !== "fight") return !1;
@@ -18829,6 +19001,21 @@ ram_mem_amulet: [
           return [e, a - 18, e + 44, a + 10];
       }
     }
+    function throwDisc() {
+      if ((d.arrowCd || 0) > 0) return;
+      let te = Ne[d.dir];
+      (Oe.push({
+        x: d.x + te[0] * 8,
+        y: d.y - 6 + te[1] * 6,
+        vx: te[0] * 180,
+        vy: te[1] * 180,
+        t: 0,
+        kind: "disc",
+        dir: d.dir,
+      }),
+        (d.arrowCd = 0.35),
+        D.arrow());
+    }
     function throwAxe() {
       if (itemLeft("axe") > 0) return;
       let C = Ne[d.dir];
@@ -18852,7 +19039,7 @@ ram_mem_amulet: [
     }
     function raiseShield() {
       if (itemLeft("shield") > 0) return;
-      ((d.shield = 1.4), spend("shield", 1.2), D.tink(), Q("SHIELD UP."));
+      ((d.shield = d.items.plate ? 2.4 : 1.4), spend("shield", 1.2), D.tink(), Q(d.items.plate ? "PLATED SHIELD." : "SHIELD UP."));
       for (let f of ce)
         !f.dead && ae(f.x, f.y, d.x, d.y) < 28 && _a(f, 1, d.x, d.y, 0.35);
       r &&
@@ -20355,7 +20542,21 @@ ram_mem_amulet: [
               y: p(f.y + 4),
               f: () => n.drawImage(O.saloon, i(f.x * 16), s(f.y * 16) - 16),
             });
-          else if (f.k === "heavycase") {
+          else if (f.k === "latch" || f.k === "vine") {
+            let c = i(p(f.x)),
+              S = s(p(f.y)),
+              open = Z((f.k === "latch" ? "latch_" : "vine_") + (f.id || "a"));
+            E.push({
+              y: p(f.y),
+              f: () => {
+                f.k === "latch"
+                  ? (I(c - 6, S - 8, 12, 10, open ? "#3a4030" : "#6a5a38"),
+                    I(c - 2, S - 6, 4, 4, open ? "#3dff6a" : "#c9a060"))
+                  : (I(c - 8, S - 14, 16, 16, open ? "#2a3820" : "#1d4a22"),
+                    I(c - 2, S - 16, 4, 8, open ? "#6a8a40" : "#0e3014"));
+              },
+            });
+          } else if (f.k === "heavycase") {
             let c = i(p(f.x)),
               S = s(p(f.y)),
               open = Z("court_box");
@@ -20363,8 +20564,11 @@ ram_mem_amulet: [
               y: p(f.y),
               f: () => {
                 if (open) {
-                  (I(c - 8, S - 2, 16, 4, "#6a5430"),
-                    v(n, "OPEN", c, S - 12, "#ffe070", 1, "center", "#000"));
+                  (I(c - 10, S - 2, 20, 14, "#2a1a10"),
+                    I(c - 8, S, 16, 2, "#c8a060"),
+                    I(c - 8, S + 4, 16, 2, "#7a5030"),
+                    I(c - 8, S + 8, 16, 2, "#c8a060"),
+                    v(n, "DOWN", c, S - 12, "#ffe070", 1, "center", "#000"));
                   return;
                 }
                 (I(c - 10, S - 12, 20, 14, "#8a6a3a"),
@@ -20606,17 +20810,6 @@ ram_mem_amulet: [
                       Math.round(s(f.y) - c.height + 2),
                     ),
                 cosmosRankLabel(f, i, s),
-                (f.k === "vov" || f.k === "seeker" || f.k === "swarm") &&
-                  v(
-                    n,
-                    "VOV",
-                    i(f.x),
-                    s(f.y) - f.def.h - 8,
-                    "#ff4fd8",
-                    1,
-                    "center",
-                    "#14081f",
-                  ),
                 f.stun > 0 &&
                   Math.floor(A.t * 12) % 2 &&
                   I(
@@ -20726,6 +20919,17 @@ ram_mem_amulet: [
               n.fill(),
               (n.fillStyle = "#fff6c0"),
               n.fillRect(-6, -7, 4, 2),
+              n.restore());
+          } else if (f.kind === "disc") {
+            (n.save(),
+              n.translate(c, S),
+              n.rotate(A.t * 14),
+              (n.fillStyle = "#d7e4ff"),
+              n.beginPath(),
+              n.ellipse(0, 0, 7, 3, 0, 0, 6.283),
+              n.fill(),
+              (n.fillStyle = "#4ff0ff"),
+              n.fillRect(-2, -1, 4, 2),
               n.restore());
           } else if (f.kind === "green") {
             let y = Math.atan2(f.vy, f.vx);
@@ -21280,6 +21484,10 @@ ram_mem_amulet: [
           v(n, "BACK CLOSES", 160, 200, "#ffe0c0", 1, "center", "#000"));
         return;
       }
+      if ((A.skipPage || 0) === 2) {
+        drawGearTable();
+        return;
+      }
       if ((A.skipPage || 0) === 1) {
         drawCosmosGear();
         return;
@@ -21384,7 +21592,7 @@ ram_mem_amulet: [
       let e = A.t;
       (v(n, "SPACE RIDERS", 160, 14, "#ff4fd8", 3, "center", "#2a0a3a"),
         v(n, "SKIPPY'S QUEST", 160, 42, "#ffcc33", 2, "center", "#2a0a3a"),
-        v(n, window.__SQ_BUILD || "b29", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
+        v(n, window.__SQ_BUILD || "b30", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
       let a = (s, E, f, c, S) => {
         let y = Ue(s, S, 0);
         n.drawImage(
@@ -21603,6 +21811,8 @@ ram_mem_amulet: [
       if (C.to === "ros_home" || C.to === "ram_home" || C.to === "ds_home")
         return (D.mirage(), A.trans || (A.trans = { t: 0, done: !1, home: C.to }), !0);
       let te = je[C.to || w.id];
+      if (te && te.to === "nexus" && !basementOpen())
+        return (D.nope(), Q("THE STAIRS UNDER THE POUR ARE STILL SEALED."), !0);
       return te ? (D.mirage(), dt(te.to, te.tx, te.ty, te.dir), !0) : !1;
     }
     function nearInteract() {
@@ -24334,6 +24544,9 @@ ram_mem_amulet: [
           A.story === "ros" ? rosObjective() : A.story === "ramshackle" ? ramObjective() : A.story === "drill" ? dsObjective() : skippyObjective(),
         chapters: () => STORY_ROWS.map((r) => ({ id: r.id, status: chapterStatus(r.id), sub: rowSub(r) })),
         riderLog: () => riderLog(),
+        gearTable: () => GEAR_TABLE,
+        nextRoad: () => nextRoad(),
+        basement: () => basementOpen(),
         quests: () => (A.story === "ros" ? rosQuestRows() : []),
         magic: () => ({
           n: d.magic || 0,
@@ -24366,7 +24579,7 @@ ram_mem_amulet: [
           enterStory(id);
           return Bt();
         },
-        build: () => window.__SQ_BUILD || "b29",
+        build: () => window.__SQ_BUILD || "b30",
         cast: () => castSpell(),
         hud: () => hudBits(),
         fightHud: () => fightHud(),

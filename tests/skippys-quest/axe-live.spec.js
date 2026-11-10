@@ -64,7 +64,7 @@ test('keyboard: pick up the amulet, call lightning, and fell the Eye with the ax
   await press(page, 'KeyZ');
   await page.waitForTimeout(120);
   let hurt = false;
-  for (let i = 0; i < 14; i++) {
+  for (let i = 0; i < 22; i++) {
     await press(page, 'KeyX');
     await page.waitForTimeout(90);
     const snap = await page.evaluate(() => ({ hp: __SQ.B.hp, state: __SQ.B.state, rune: __SQ.P.rune || 0 }));
@@ -154,7 +154,7 @@ test.describe('phone attack button', () => {
     await item.tap();
     await page.waitForTimeout(180);
     let hurt = false;
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < 22; i++) {
       await attack.tap();
       await page.waitForTimeout(220);
       const snap = await page.evaluate(() => ({ hp: __SQ.B.hp, state: __SQ.B.state, rune: __SQ.P.rune || 0 }));
