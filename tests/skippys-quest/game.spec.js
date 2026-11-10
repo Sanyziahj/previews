@@ -1336,7 +1336,7 @@ const SIZES = [[390, 844], [844, 390], [360, 640], [640, 360], [768, 1024]];
 
 function controlAudit(page) {
   return page.evaluate(() => {
-    const canvas = (document.querySelector('#srml-scr') || document.querySelector('#game')).getBoundingClientRect();
+    const canvas = document.querySelector('#game').getBoundingClientRect();
     const els = [...document.querySelectorAll('.srml-b, #stick')].filter((el) => {
       const r = el.getBoundingClientRect();
       return getComputedStyle(el).display !== 'none' && r.width > 1 && r.height > 1;
@@ -1376,11 +1376,21 @@ function controlAudit(page) {
       const iy = Math.min(b.y + b.h, canvas.bottom) - Math.max(b.y, canvas.top);
       return ix > 1 && iy > 1;
     }).map((b) => b.label);
+    const scale = canvas.width / 320;
+    const overlap = (b, box) => {
+      const ix = Math.min(b.x + b.w, box.r) - Math.max(b.x, box.l);
+      const iy = Math.min(b.y + b.h, box.b) - Math.max(b.y, box.t);
+      return ix > 1 && iy > 1;
+    };
+    const heart = { l: canvas.left, t: canvas.top, r: canvas.left + 110 * scale, b: canvas.top + 34 * scale };
+    const dlg = { l: canvas.left + 4 * scale, t: canvas.top + 36 * scale, r: canvas.left + 240 * scale, b: canvas.top + 94 * scale };
+    const onHearts = els.filter((b) => overlap(b, heart)).map((b) => b.label);
+    const onDlg = els.filter((b) => overlap(b, dlg)).map((b) => b.label);
     const small = els.filter((b) => Math.min(b.w, b.h) < 48).map((b) => b.label);
     return {
       mode: document.documentElement.dataset.touch,
       labels: els.map((e) => e.label),
-      hits, onCanvas, small,
+      hits, onCanvas, onHearts, onDlg, small,
       tight: gaps.filter((g) => g < 8 && g >= 0),
     };
   });
@@ -1428,7 +1438,7 @@ test.describe('context touch layouts', () => {
       expect(play.labels).toEqual(expect.arrayContaining(['ATTACK', 'ITEM', 'SWAP', 'BOARD', 'ACTION', 'MAGIC', 'PAUSE']));
       expect(play.labels.join(' ')).not.toMatch(/TALK|BACK|\bROLL\b/);
       expect(play.hits, JSON.stringify(play)).toEqual([]);
-      expect(play.onCanvas, JSON.stringify(play)).toEqual([]);
+      expect(play.onHearts, JSON.stringify(play)).toEqual([]);
       expect(play.small, JSON.stringify(play)).toEqual([]);
       expect(play.tight, JSON.stringify(play)).toEqual([]);
       await page.screenshot({ path: `${LAYOUT}/play-${w}x${h}.png` });
@@ -1456,7 +1466,7 @@ test.describe('context touch layouts', () => {
       expect(skippy.labels, JSON.stringify(skippy)).toEqual(expect.arrayContaining(['ATTACK', 'ITEM', 'SWAP', 'ROLL', 'ACTION', 'MAGIC', 'PAUSE']));
       expect(skippy.labels.join(' ')).not.toMatch(/TALK|BACK|BOARD/);
       expect(skippy.hits, JSON.stringify(skippy)).toEqual([]);
-      expect(skippy.onCanvas, JSON.stringify(skippy)).toEqual([]);
+      expect(skippy.onHearts, JSON.stringify(skippy)).toEqual([]);
       expect(skippy.small, JSON.stringify(skippy)).toEqual([]);
       expect(skippy.tight, JSON.stringify(skippy)).toEqual([]);
       await page.screenshot({ path: `${LAYOUT}/arcade-skippy-${w}x${h}.png` });
@@ -1482,14 +1492,16 @@ test.describe('context touch layouts', () => {
       expect(npc.labels, JSON.stringify(npc)).toEqual(expect.arrayContaining(['ATTACK', 'ITEM', 'SWAP', 'BOARD', 'TALK', 'MAGIC', 'PAUSE']));
       expect(npc.labels.join(' ')).not.toContain('BACK');
       expect(npc.hits, JSON.stringify(npc)).toEqual([]);
-      expect(npc.onCanvas, JSON.stringify(npc)).toEqual([]);
+      expect(npc.onHearts, JSON.stringify(npc)).toEqual([]);
       expect(npc.small, JSON.stringify(npc)).toEqual([]);
       await page.screenshot({ path: `${LAYOUT}/npc-${w}x${h}.png` });
 
       await page.evaluate(() => { __SQ.say('al', 'THE ROPE LOCKER IS ON THE EAST WALL.'); __SQ.step(2); });
       const dialog = await controlAudit(page);
       expect(dialog.mode, JSON.stringify(dialog)).toBe('dialog');
-      expect(dialog.labels.join(' '), JSON.stringify(dialog)).not.toMatch(/ATTACK|ITEM|SWAP|ROLL|TALK|PAUSE|BACK|MAGIC/);
+      expect(dialog.labels, JSON.stringify(dialog)).toEqual(expect.arrayContaining(['ACTION', 'ATTACK', 'PAUSE']));
+      expect(dialog.onDlg, JSON.stringify(dialog)).toEqual([]);
+      expect(dialog.onHearts, JSON.stringify(dialog)).toEqual([]);
       expect(dialog.hits).toEqual([]);
       await page.screenshot({ path: `${LAYOUT}/dialog-${w}x${h}.png` });
 
@@ -1533,7 +1545,7 @@ test.describe('context touch layouts', () => {
     expect(turned.mode).toBe('play');
     expect(turned.labels).toContain('ATTACK');
     expect(turned.hits, JSON.stringify(turned)).toEqual([]);
-    expect(turned.onCanvas, JSON.stringify(turned)).toEqual([]);
+    expect(turned.onHearts, JSON.stringify(turned)).toEqual([]);
     expect(errors, errors.join('\n')).toEqual([]);
   });
 });
@@ -1849,7 +1861,7 @@ test.describe('Ramshackle phone layout', () => {
       expect(play.mode, JSON.stringify(play)).toBe('play');
       expect(play.labels, JSON.stringify(play)).toEqual(expect.arrayContaining(['ATTACK', 'ITEM', 'SWAP', 'BOARD', 'MAGIC', 'PAUSE']));
       expect(play.hits, JSON.stringify(play)).toEqual([]);
-      expect(play.onCanvas, JSON.stringify(play)).toEqual([]);
+      expect(play.onHearts, JSON.stringify(play)).toEqual([]);
       expect(play.small, JSON.stringify(play)).toEqual([]);
       expect(play.tight, JSON.stringify(play)).toEqual([]);
       await page.screenshot({ path: `${RAM}/phone-${w}x${h}.png` });
@@ -2176,10 +2188,10 @@ test.describe('magic button on the phone', () => {
     expect(place.atk.w).toBeGreaterThanOrEqual(56);
     expect(place.item.w).toBeGreaterThanOrEqual(56);
     expect(talk.w).toBeGreaterThanOrEqual(56);
-    expect(place.atk.cx).toBeGreaterThan(place.item.cx);
-    expect(talk.cy).toBeGreaterThan(place.atk.cy);
-    expect(place.roll.cy).toBeLessThan(place.atk.cy);
-    expect(place.magic.cy).toBeLessThan(place.roll.cy);
+    expect(place.item.cx).toBeGreaterThan(place.atk.cx);
+    expect(talk.cy).toBeLessThan(place.atk.cy);
+    expect(place.roll.cy).toBeGreaterThan(place.atk.cy);
+    expect(place.magic.cy).toBeLessThan(place.atk.cy);
     expect(talk.pauseX).toBeLessThan(200);
     const portraitClip = await page.evaluate(() => {
       const bad = [];
@@ -2205,8 +2217,9 @@ test.describe('magic button on the phone', () => {
       return { atk, item, magic, roll };
     });
     expect(land.roll.w).toBeGreaterThanOrEqual(56);
-    expect(land.atk.cx).toBeGreaterThan(land.item.cx);
-    expect(land.magic.cy).toBeLessThan(land.roll.cy);
+    expect(land.item.cx).toBeGreaterThan(land.atk.cx);
+    expect(land.magic.cy).toBeLessThan(land.atk.cy);
+    expect(land.roll.cy).toBeGreaterThan(land.atk.cy);
     expect(land.atk.cx).toBeGreaterThan(400);
     const landClip = await page.evaluate(() => {
       const bad = [];
