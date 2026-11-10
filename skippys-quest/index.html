@@ -7026,6 +7026,13 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           P(l, [9, 1, 15, 3, 14, 9, 10, 6], "#c8ccd8"),
           P(l, [10, 2, 14, 3, 13, 7], "#ffffff"));
         break;
+      case "amulet":
+        (R(l, 8, 8, 6, 6, "#3a2410"),
+          R(l, 8, 8, 4.5, 4.5, "#ffd24a"),
+          R(l, 8, 8, 2, 2, "#fff6c0"),
+          o(l, 7, 1, 2, 3, "#e8c878"),
+          o(l, 6, 3, 4, 1, "#e8c878"));
+        break;
       case "tea":
         (R(l, 8, 10, 6, 5, "#e8e8ee"),
           R(l, 8, 7, 5, 1.6, "#5ac84a"),
@@ -11754,6 +11761,7 @@ ram_mem_amulet: [
       "tea",
       "lasso",
       "blasters",
+      "amulet",
     ])
       O.icon[e] = $s(e);
     for (let e of [
@@ -13578,13 +13586,19 @@ ram_mem_amulet: [
         (_.on &&
           (d.x !== S || d.y !== y) &&
           (_.trail.push(d.x, d.y), _.trail.length > 60 && _.trail.splice(0, 2)),
-        d.atk > 0.05 &&
-          d.atk < 0.22 &&
-          (d.items.baton || d.items.sword) &&
-          d.arrowCd < 0.2)
+        d.atk > 0.04 &&
+          d.atk <
+            (weaponNow() === "axe" || weaponNow() === "hatchet" ? 0.3 : 0.22) &&
+          (d.items.baton ||
+            d.items.sword ||
+            weaponNow() === "hatchet" ||
+            weaponNow() === "axe") &&
+          (weaponNow() === "axe" || weaponNow() === "hatchet" || d.arrowCd < 0.2))
       ) {
-        let C = fr(),
-          te = !!d.items.sword;
+        let axeHand = weaponNow() === "axe" || weaponNow() === "hatchet",
+          C = axeHand ? axeBox() : fr(),
+          te = !!d.items.sword || weaponNow() === "axe",
+          kind = weaponNow() === "axe" ? "axe" : "melee";
         for (let de of ce)
           !de.dead &&
             ft.indexOf(de) < 0 &&
@@ -13624,7 +13638,7 @@ ram_mem_amulet: [
               pe[1] + pe[2] > C[1] &&
               pe[1] - pe[2] < C[3]
             ) {
-              ((it = !0), Ja(de, "melee", te ? 2 : 1));
+              ((it = !0), Ja(de, kind, te ? 2 : 1));
               break;
             }
           }
@@ -13856,14 +13870,23 @@ ram_mem_amulet: [
         let i = Math.floor(a.x / 16),
           s = Math.floor(a.y / 16);
         if (a.kind === "axe") {
-          for (let f of ce) !f.dead && ae(a.x, a.y, f.x, f.y) < 12 && _a(f, 2, a.x, a.y, 0.15);
-          if (r.state === "fight" && ae(a.x, a.y, r.x, r.y) < 18) {
-            let bh = Le[r.kind] && Le[r.kind].hit;
-            bh ? bh([a.x, a.y, 8], "axe", 2) : Fe(2);
-            a.t = 99;
+          a.spin = (a.spin || 0) + e * 22;
+          for (let f of ce)
+            !f.dead && ae(a.x, a.y, f.x, f.y - 4) < 16 && _a(f, 2, a.x, a.y, 0.2);
+          if (r.state === "fight" && !a.struck) {
+            let reach = r.kind === "stormeye" ? 38 : 24,
+              body = ae(a.x, a.y, r.x, r.y) < reach || ae(a.x, a.y, r.x, r.y - 8) < reach;
+            if (body) {
+              let bh = Le[r.kind] && Le[r.kind].hit;
+              (bh ? bh([a.x, a.y, 12], "axe", 2) : Fe(2), (a.struck = 1), (a.back = 1));
+              let sp = Math.hypot(a.vx, a.vy) || 280;
+              ((a.vx = -a.vx || (d.x - a.x)), (a.vy = -a.vy || (d.y - a.y)));
+              let nrm = Math.hypot(a.vx, a.vy) || 1;
+              ((a.vx = (a.vx / nrm) * sp), (a.vy = (a.vy / nrm) * sp));
+            }
           }
-          !a.back && a.t > 0.28 && ((a.back = 1), (a.vx *= -1), (a.vy *= -1));
-          (Wt(i, s) || a.t > 0.75) && (a.t = 99);
+          !a.back && a.t > 0.48 && ((a.back = 1), (a.vx *= -1), (a.vy *= -1));
+          a.t > 1.15 && (a.t = 99);
           continue;
         }
         if (a.kind === "echo") {
@@ -17021,8 +17044,17 @@ ram_mem_amulet: [
           Oe.push({ x: r.x + 16, y: r.y, vx: 0, vy: 80, t: 0, kind: "orb", dir: 0 });
         }
       },
-      parts: (e) => { e.push([r.x, r.y - 4, 12, 1, 0]); },
-      hit: (e, a) => { (d.rune || 0) > 0 && a === "axe" ? Fe(2) : (D.tink(), Q("THE EYE WANTS LIGHTNING. STRIKE BEFORE THE THUNDER.")); },
+      parts: (e) => {
+        e.push([r.x, r.y, 26, 1, 0]);
+        e.push([r.x, r.y - 8, 18, 1, 0]);
+      },
+      hit: (e, a) => {
+        (d.rune || 0) > 0 && a === "axe"
+          ? Fe(2)
+          : (D.tink(),
+            ne(r.x, r.y, 10, ["#ffffff", "#d8d8e4", "#fff6c0"], 24),
+            Q("THE EYE WANTS LIGHTNING. STRIKE BEFORE THE THUNDER."));
+      },
       draw: (e, a, t) => {
         e.push({ y: r.y + 20, f: () => {
           let i = a(r.x), s = t(r.y), open = (d.rune || 0) > 0, meter = open ? d.rune / 2 : 0;
@@ -17729,21 +17761,39 @@ ram_mem_amulet: [
       else if (id === "shield") raiseShield();
       else if (id === "amulet") thunderBurst();
     }
+    function axeBox() {
+      let e = d.x,
+        a = d.y;
+      switch (d.dir) {
+        case 0:
+          return [e - 16, a - 2, e + 16, a + 32];
+        case 1:
+          return [e - 18, a - 48, e + 18, a - 2];
+        case 2:
+          return [e - 44, a - 18, e, a + 10];
+        default:
+          return [e, a - 18, e + 44, a + 10];
+      }
+    }
     function throwAxe() {
       if (itemLeft("axe") > 0) return;
       let C = Ne[d.dir];
       (Oe.push({
-        x: d.x + C[0] * 10,
-        y: d.y - 8 + C[1] * 8,
-        vx: C[0] * 200,
-        vy: C[1] * 200,
+        x: d.x + C[0] * 14,
+        y: d.y - 12 + C[1] * 14,
+        vx: C[0] * 280,
+        vy: C[1] * 280,
         t: 0,
+        spin: 0,
         kind: "axe",
         back: 0,
+        struck: 0,
         dir: d.dir,
       }),
-        spend("axe", 0.55),
-        (d.atk = 0.12),
+        (ft = []),
+        (it = !1),
+        spend("axe", 0.42),
+        (d.atk = 0.28),
         D.swing());
     }
     function raiseShield() {
@@ -19537,9 +19587,22 @@ ram_mem_amulet: [
                 "#ff4fd8",
               ));
           } else if (f.kind === "axe") {
-            let y = Math.atan2(f.vy, f.vx);
-            (I(c - 5, S - 2, 10, 4, "#e0c060"),
-              I(c + Math.cos(y) * 4, S + Math.sin(y) * 4, 3, 3, "#fff6c0"));
+            (n.save(),
+              n.translate(c, S),
+              n.rotate(f.spin || 0),
+              (n.fillStyle = "#7a4a26"),
+              n.fillRect(-1.5, -2, 3, 12),
+              (n.fillStyle = "#e8eef6"),
+              n.beginPath(),
+              n.moveTo(-8, -8),
+              n.lineTo(7, -3),
+              n.lineTo(6, 2),
+              n.lineTo(-6, -1),
+              n.closePath(),
+              n.fill(),
+              (n.fillStyle = "#fff6c0"),
+              n.fillRect(-6, -7, 4, 2),
+              n.restore());
           } else if (f.kind === "green") {
             let y = Math.atan2(f.vy, f.vx);
             ((n.strokeStyle = "#3dff6a"),
@@ -19637,6 +19700,38 @@ ram_mem_amulet: [
             (n.globalAlpha = 1));
       }
     }
+    function drawHeldAxe(e, a) {
+      let id = weaponNow();
+      if (A.story !== "ramshackle" || (id !== "axe" && id !== "hatchet")) return;
+      let base = [Math.PI / 2, -Math.PI / 2, Math.PI, 0][d.dir],
+        swing = d.atk > 0 ? 1 - Math.min(1, d.atk / 0.28) : 0,
+        ang = d.atk > 0 ? base - 1.35 + swing * 2.7 : d.dir === 2 ? Math.PI + 0.6 : d.dir === 1 ? -0.5 : 0.6,
+        hx = d.atk > 0 ? e + Math.cos(ang) * 16 : e + (d.dir === 2 ? -11 : 10),
+        hy = d.atk > 0 ? a - 13 + Math.sin(ang) * 16 : a - 18;
+      (n.save(),
+        n.translate(hx, hy),
+        n.rotate(ang + Math.PI / 2),
+        (n.fillStyle = "#6a3e1c"),
+        n.fillRect(-1.5, -1, 3, 11),
+        (n.fillStyle = id === "axe" ? "#e7eef8" : "#c8ccd4"),
+        n.beginPath(),
+        n.moveTo(-7, -8),
+        n.lineTo(6, -3),
+        n.lineTo(5, 2),
+        n.lineTo(-5, -1),
+        n.closePath(),
+        n.fill(),
+        (n.fillStyle = "#fff6c0"),
+        n.fillRect(-6, -7, 4, 2),
+        n.restore());
+      if (d.atk > 0) {
+        ((n.strokeStyle = "rgba(255,246,192,0.85)"),
+          (n.lineWidth = 2),
+          n.beginPath(),
+          n.arc(e, a - 12, 18, ang - 0.9, ang + 0.15),
+          n.stroke());
+      }
+    }
     function ns(e, a) {
       if (d.inv > 0 && d.roll <= 0 && Math.floor(A.t * 14) % 2 && d.fall <= 0)
         return;
@@ -19709,6 +19804,7 @@ ram_mem_amulet: [
         Aa(ga(), e, a, d.dir, t, 1),
         drawVisorAt(e, a),
         drawCompanion(e, a),
+        drawHeldAxe(e, a),
         d.arrowCd > 0.12 && d.z === "raygun" && d.items.raygun)
       ) {
         let c = e + i[0] * 9,
