@@ -2676,3 +2676,95 @@ test.describe('lightning on a phone', () => {
     expect(errors, errors.join('\n')).toEqual([]);
   });
 });
+
+function hudHits(bits) {
+  const hits = [];
+  for (let i = 0; i < bits.length; i++) {
+    for (let j = i + 1; j < bits.length; j++) {
+      const a = bits[i], b = bits[j];
+      const ix = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
+      const iy = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
+      if (ix > 0.5 && iy > 0.5) hits.push((a.text || a.id) + ' / ' + (b.text || b.id));
+    }
+  }
+  return hits;
+}
+
+test('boss fights keep the HUD and the boss bar apart', async ({ page }) => {
+  const errors = await boot(page);
+  const fights = [
+    ['skippy', 'd4', { sword: true }, 'sword', '', 'SWORD'],
+    ['ros', 'rs3', { blasters: true, lasso: true }, 'lasers', 'lasso', 'LASERS'],
+    ['ramshackle', 'ram_eye', { axe: true, amulet: true }, 'axe', 'amulet', 'AXE'],
+  ];
+  for (const [story, area, items, pri, sec, word] of fights) {
+    const face = await page.evaluate(({ story, area, items, pri, sec }) => {
+      const S = __SQ;
+      S.G.state = 'play';
+      S.G.story = story;
+      S.G.paused = false;
+      S.P.items = items;
+      S.P.pri = pri;
+      S.P.sec = sec;
+      S.P.wep = pri;
+      S.P.tool = sec;
+      if (story === 'ros') S.flag('lasso_got');
+      if (story === 'ramshackle') {
+        S.flag('axe_got');
+        S.flag('amulet_got');
+      }
+      S.flag('oe_' + area);
+      S.warp(area, 8, 8, 1);
+      for (let i = 0; i < 8 && (S.script || S.dlg); i++) {
+        S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
+      }
+      for (let i = 0; i < 420 && S.B.state !== 'fight'; i++) {
+        if (S.script || S.dlg) {
+          S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false);
+        }
+        S.step(1);
+      }
+      const bits = S.fightHud();
+      const names = bits.filter((b) => b.text).map((b) => b.text);
+      return { state: S.B.state, bits, names };
+    }, { story, area, items, pri, sec });
+    expect(face.state, story).toBe('fight');
+    const bar = face.bits.find((b) => b.id === 'bossbar');
+    const title = face.bits.find((b) => b.id === 'bossname');
+    expect(bar, story).toBeTruthy();
+    expect(bar.y, story).toBeGreaterThanOrEqual(34);
+    expect(title.y, story).toBeGreaterThanOrEqual(bar.y + bar.h);
+    for (const bit of face.bits) {
+      if (!bit.text || bit.id === 'bossname') continue;
+      expect(bit.y + bit.h, story + ' ' + bit.text).toBeLessThanOrEqual(bar.y);
+    }
+    expect(hudHits(face.bits), story + ' ' + face.names.join(' | ')).toEqual([]);
+    const mentions = face.names.filter((t) => t.split(' ').includes(word));
+    expect(mentions, story + ' ' + face.names.join(' | ')).toHaveLength(1);
+    if (story === 'ramshackle') {
+      expect(face.names.filter((t) => t.includes('AMULET'))).toHaveLength(1);
+      await page.locator('#game').screenshot({ path: `${ART}/storm-eye-hud-desktop.png` });
+    }
+  }
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test.describe('Storm Eye HUD on a phone', () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+  test('the boss bar sits under the HUD', async ({ page }) => {
+    const errors = await boot(page);
+    await page.waitForFunction(() => document.documentElement.classList.contains('srml'));
+    await openEye(page);
+    const face = await page.evaluate(() => {
+      const bits = __SQ.fightHud();
+      return { state: __SQ.B.state, bits, names: bits.filter((b) => b.text).map((b) => b.text) };
+    });
+    const bar = face.bits.find((b) => b.id === 'bossbar');
+    expect(face.state).toBe('fight');
+    expect(bar.y).toBeGreaterThanOrEqual(34);
+    expect(hudHits(face.bits)).toEqual([]);
+    expect(face.names.filter((t) => t.includes('AXE'))).toHaveLength(1);
+    await page.screenshot({ path: `${ART}/storm-eye-hud-phone.png` });
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+});
