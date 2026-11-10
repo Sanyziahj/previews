@@ -3,7 +3,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script>window.__SQ_BUILD="b31c";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b31c(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b31c");location.replace(u.href);}</script>
+<script>window.__SQ_BUILD="b32";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b32(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b32");location.replace(u.href);}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Space Riders: Skippy's Quest</title><link rel="icon" href="data:,">
 <meta name="description" content="Space Riders: Skippy's Quest - a free 16-bit top-down action adventure browser game. The Red King is missing. Ride with ROS through the Sand Dungeon, take Cash's portals to the Seaport and Ramshackle the Viking, win Ronin's flaming sword, beat the house at the Andromeda Casino and stop the Overlord on the Moon, survive the meteor shower with Blaze and earn your space board at the Crossroad and cross the mirror into the Dark World, then storm Fright's castle and bring the Red King home. Chapters 1-9 (Complete) out now.">
@@ -40,7 +40,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
 <div id="gw"><canvas id="game" width="320" height="224" tabindex="0"></canvas><div id="dport" hidden><img id="dpimg" alt=""></div></div>
 <div id="pad">
  <div id="stick"><div id="knob"></div></div>
- <div class="mid"><div class="btn sm" data-b="map">MAP</div><div class="btn sm" data-b="swap">SWAP</div><div class="btn sm" data-b="back" style="display:none">BACK</div></div>
+ <div class="mid"><div class="btn sm" data-b="map">MAP</div><div class="btn sm" data-b="worldmap" style="display:none">MAP</div><div class="btn sm" data-b="swap">SWAP</div><div class="btn sm" data-b="back" style="display:none">BACK</div></div>
  <div class="acts"><div class="btn big itm" data-b="item">ITEM</div><div class="btn big mag" data-b="magic">MAGIC</div><div class="btn big atk" data-b="attack">ATTACK</div><div class="btn big rol" data-b="roll">ROLL</div><div class="btn big tlk" data-b="talk">TALK</div></div>
 </div>
 <div id="prize" hidden><h2>PRIZE UNLOCKED</h2><img id="pimg" alt="Space Riders Skippy's Quest victory poster: Skippy, ROS and Santt in the desert with the Desert Star Shard"><div class="pb"><a id="dl" class="btn2" download="space-riders-skippys-quest-poster.jpg">Download poster</a><button id="again" class="btn2">Back to title</button></div></div>
@@ -15233,20 +15233,21 @@ ram_mem_amulet: [
         return;
       }
       if (A.paused) {
+        let closeNow = U.mapE || U.backE;
         if (A.story === "ros") {
-          (!Vt() && rosPauseInput(), Ze());
+          ((!Vt() || closeNow) && rosPauseInput(), Ze());
           return;
         }
         if (A.story === "ramshackle" || A.story === "drill") {
-          if (!Vt()) {
-            U.right && !A.wasR && (A.talePage = 1);
-            U.left && !A.wasL && (A.talePage = 0);
+          if (!Vt() || closeNow) {
+            !Vt() && U.right && !A.wasR && (A.talePage = 1);
+            !Vt() && U.left && !A.wasL && (A.talePage = 0);
             (U.backE || U.mapE) && ((A.paused = !1), D.sel());
           }
           ((A.wasL = U.left), (A.wasR = U.right), Ze());
           return;
         }
-        (!Vt() && skippyPauseInput(), Ze());
+        ((!Vt() || closeNow) && skippyPauseInput(), Ze());
         return;
       }
       if (U.mapE && !q && !le && !ue && !Ae) {
@@ -17814,7 +17815,7 @@ ram_mem_amulet: [
       for (let a = 0; a < 16; a++)
         I((a * 23) % 320, 20 + ((a * 17) % 70), 2, 2, "#fff2c8");
       (v(n, "SPACE RIDERS", 160, 8, "#ff4fd8", 2, "center", "#2a0a14"),
-        v(n, window.__SQ_BUILD || "b31c", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
+        v(n, window.__SQ_BUILD || "b32", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
         v(n, "SIDE QUESTS COME HOME", 160, 28, "#ffcc33", 1, "center", "#2a0a14"));
       let a = 58;
       for (let t = 0; t < STORY_ROWS.length; t++) {
@@ -20284,8 +20285,10 @@ ram_mem_amulet: [
       let spell = (d.spell === "ward" ? "WARD" : "LANTERN") + ((d.ward || 0) ? " " + d.ward : ""),
         bits = [{ id: "bar", x: 4, y: 24, w: 48, h: 5 }],
         x = 56;
-      bits.push({ id: "spell", x, y: 24, w: spell.length * 6, h: 8, text: spell });
-      x += spell.length * 6 + 8;
+      if (!dn()) {
+        bits.push({ id: "spell", x, y: 24, w: spell.length * 6, h: 8, text: spell });
+        x += spell.length * 6 + 8;
+      }
       if (w.surf) {
         let rings = "RINGS " + ((A.surf && A.surf.rings) || 0);
         bits.push({ id: "rings", x, y: 24, w: rings.length * 6, h: 8, text: rings });
@@ -20411,10 +20414,11 @@ ram_mem_amulet: [
         }
         d.pieces && I(92, 20, 2, 2, "#8ae878");
       }
-      (I(4, 24, 48, 5, "#2a1848"),
+      dn() ||
+        (I(4, 24, 48, 5, "#2a1848"),
         I(4, 24, Math.max(0, Math.floor(48 * ((d.magic || 0) / (d.magicMax || 8)))), 5, "#c060ff"),
-        I(4, 24, 48, 1, "#ff9ae8"),
-        drawHudRow());
+        I(4, 24, 48, 1, "#ff9ae8"));
+      drawHudRow();
       let a = (t, i, s) => {
         (I(t, 3, 18, 18, "#1a1630"),
           I(t, 3, 18, 1, "#ffcc33"),
@@ -21745,7 +21749,7 @@ ram_mem_amulet: [
       let e = A.t;
       (v(n, "SPACE RIDERS", 160, 14, "#ff4fd8", 3, "center", "#2a0a3a"),
         v(n, "SKIPPY'S QUEST", 160, 42, "#ffcc33", 2, "center", "#2a0a3a"),
-        v(n, window.__SQ_BUILD || "b31c", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
+        v(n, window.__SQ_BUILD || "b32", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
       let a = (s, E, f, c, S) => {
         let y = Ue(s, S, 0);
         n.drawImage(
@@ -24472,6 +24476,8 @@ ram_mem_amulet: [
                         ? (U.downE = !0)
                         : e === "magic"
                         ? (U.magicE = !0)
+                        : e === "worldmap"
+                          ? (U.mapE = !0)
                         : e === "board"
                           ? (U.boardE = !0)
                           : e === "back" && (U.backE = !0)),
@@ -24770,7 +24776,7 @@ ram_mem_amulet: [
           enterStory(id);
           return Bt();
         },
-        build: () => window.__SQ_BUILD || "b31c",
+        build: () => window.__SQ_BUILD || "b32",
         cast: () => castSpell(),
         hud: () => hudBits(),
         fightHud: () => fightHud(),
@@ -25037,7 +25043,7 @@ html.srml .srml-b.rol{border-color:#ff4fd8;color:#ffe0f6;font-size:12px}
 html.srml .srml-b.tlk{border-color:#3dff6a;color:#e4ffe9;font-size:12px}
 html.srml [data-b=magic]{border-color:#c9a0ff;color:#ffe0ff;border-radius:999px;font-size:11px;letter-spacing:.4px}
 html.srml [data-b=swap]{border-color:#ffe650;color:#fff8d0;font-size:11px}
-html.srml [data-b=map]{border-color:#b7c3e6;color:#eef2ff;font-size:10px}
+html.srml [data-b=map],html.srml [data-b=worldmap]{border-color:#b7c3e6;color:#eef2ff;font-size:10px}
 html.srml .srml-b.dim{opacity:.38}
 html.srml .srml-b .cd{display:none!important}
 html.srml .srml-b.atk::before,html.srml .srml-b.itm::before{content:"";position:absolute;inset:5px;border-radius:50%;pointer-events:none;background:conic-gradient(from -90deg,#3dff6a calc(var(--cd,0)*360deg),transparent 0);-webkit-mask:radial-gradient(circle,transparent 66%,#000 68%);mask:radial-gradient(circle,transparent 66%,#000 68%)}
@@ -25081,7 +25087,7 @@ function layout(){
   R.dataset.land=land?"1":"0";
   var mode=R.dataset.touch||"title";
   var sat=px("--sat"),sab=px("--sab"),sal=px("--sal"),sar=px("--sar");
-  ["attack","item","swap","roll","talk","map","back","magic"].forEach(function(k){hide(by[k]);});
+  ["attack","item","swap","roll","talk","map","worldmap","back","magic"].forEach(function(k){hide(by[k]);});
   hide(stick);
   if(by.item) by.item.dataset.b="item";
   if(by.attack) by.attack.dataset.b="attack";
@@ -25186,11 +25192,12 @@ function layout(){
     show(by.attack, c.atk.x, c.atk.y, c.atk.w, c.atk.h, "ATTACK", mode==="play"&&R.dataset.attackon==="0");
     show(by.item, c.item.x, c.item.y, c.item.w, c.item.h, "ITEM", mode==="play"&&R.dataset.itemon==="0");
     show(by.roll, c.board.x, c.board.y, c.board.w, c.board.h, rollLabel, false);
-    var pillW=96, pillH=48;
-    show(by.magic, W-sar-12-pillW, sat+8, pillW, pillH, "MAGIC", false);
-    by.magic.style.borderRadius="999px";
-    var pauseS=48;
-    if(by.map) show(by.map, sal+10, sat+8, pauseS, pauseS, "PAUSE", false);
+    var pauseS=48, gap=8, pauseX=sal+10, pauseY=sat+8;
+    if(by.map) show(by.map, pauseX, pauseY, pauseS, pauseS, "PAUSE", false);
+    if(by.worldmap) show(by.worldmap, pauseX+pauseS+gap, pauseY, pauseS, pauseS, "MAP", false);
+    function heartBox(g){var sc=g.w/320;return {l:g.x,t:g.y,r:g.x+108*sc,b:g.y+32*sc};}
+    function covers(el,hb){if(!el)return false;var r=el.getBoundingClientRect();if(r.width<2||getComputedStyle(el).display==="none")return false;return r.left<hb.r-1&&r.right>hb.l+1&&r.top<hb.b-1&&r.bottom>hb.t+1;}
+    if(covers(by.map, heartBox(box))||covers(by.worldmap, heartBox(box))) box=placeGame(pauseY+pauseS+6, 0, 0, 0, "top");
     var stickS=Math.max(112, Math.min(land?148:132, Math.round(H*0.42)));
     var stickRoom=box.x-8-(sal+12);
     if(stickRoom>=96) stickS=Math.min(stickS, stickRoom);
@@ -25203,20 +25210,27 @@ function layout(){
   }
   var n=(info&&info.rows)?info.rows.length:4;
   var backOn=mode==="back"||mode==="pause"||mode==="choice";
+  var pauseChrome=mode==="pause";
+  var pauseTop=sat+8+48+8;
   var box;
   if(land){
     var col=Math.min(260, Math.max(168, Math.round(W*0.3)));
-    box=placeGame(sat, sab, sal, col+sar);
+    box=placeGame(pauseChrome?pauseTop:sat, sab, sal, col+sar);
     var rx=box.x+box.w+10, rw=Math.max(140, W-sar-8-rx);
     var ry=sat+8+(backOn?56:0);
     placeRows(rx, ry, rw, H-sab-8-ry);
     if(backOn&&by.back) show(by.back, rx, sat+8, Math.min(rw, 140), 48, "BACK", false);
   }else{
     var rowsH=Math.min(H*0.5, Math.max(180, n*58+16));
-    box=placeGame(sat+4, rowsH+sab, sal, sar);
+    box=placeGame(pauseChrome?pauseTop:sat+4, rowsH+sab, sal, sar);
     var ry2=box.y+box.h+8;
     placeRows(12, backOn?ry2+56:ry2, W-24, H-sab-8-(backOn?ry2+56:ry2));
     if(backOn&&by.back) show(by.back, W-sar-12-120, ry2, 120, 48, "BACK", false);
+  }
+  if(pauseChrome){
+    var pauseS=48, gap=8, pauseX=sal+10, pauseY=sat+8;
+    if(by.map) show(by.map, pauseX, pauseY, pauseS, pauseS, "PAUSE", false);
+    if(by.worldmap) show(by.worldmap, pauseX+pauseS+gap, pauseY, pauseS, pauseS, "MAP", false);
   }
   if(info) renderRows(info.rows||[]); else hideRows();
 }
