@@ -37,7 +37,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
 <div id="pad">
  <div id="stick"><div id="knob"></div></div>
  <div class="mid"><div class="btn sm" data-b="map">MAP</div><div class="btn sm" data-b="swap">SWAP</div><div class="btn sm" data-b="back" style="display:none">BACK</div></div>
- <div class="acts"><div class="btn big itm" data-b="item">ITEM</div><div class="btn big atk" data-b="attack">ATTACK</div><div class="btn big rol" data-b="roll">ROLL</div><div class="btn big tlk" data-b="talk">TALK</div></div>
+ <div class="acts"><div class="btn big itm" data-b="item">ITEM</div><div class="btn big mag" data-b="magic">MAGIC</div><div class="btn big atk" data-b="attack">ATTACK</div><div class="btn big rol" data-b="roll">ROLL</div><div class="btn big tlk" data-b="talk">TALK</div></div>
 </div>
 <div id="prize" hidden><h2>PRIZE UNLOCKED</h2><img id="pimg" alt="Space Riders Skippy's Quest victory poster: Skippy, ROS and Santt in the desert with the Desert Star Shard"><div class="pb"><a id="dl" class="btn2" download="space-riders-skippys-quest-poster.jpg">Download poster</a><button id="again" class="btn2">Back to title</button></div></div>
 <div id="help">Rider chapters on the title. Arrows/WASD move. X attack. Z item. Q swaps the item. C roll. E/Space talk. Enter map. M mute. Phone BACK closes menus and never attacks or rolls. Each rider chapter keeps its own autosave.</div>
@@ -6273,8 +6273,8 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           g(0, -0.6, 8.6, 8.7, n.hatC);
         }),
           O !== 1
-            ? (b(-7 + M * 1.3, -3.8, 14, 1.8, n.hatC2),
-              b(-1 + M, -8.6, 2, 2, "#ffffff"))
+            ? (b((n.extra.indexOf("backcap") >= 0 ? 7 - M * 1.3 - 14 : -7 + M * 1.3), -3.8, 14, 1.8, n.hatC2),
+              b((n.extra.indexOf("backcap") >= 0 ? 1 - M : -1 + M), -8.6, 2, 2, "#ffffff"))
             : b(-8, -3.6, 16, 1.2, n.hatC2));
         break;
       case "saucer": {
@@ -8906,6 +8906,654 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       ],
     },
   };
+  function cosmosRoom(w, h, openTop, openBot) {
+    let door =
+        "#".repeat(Math.floor((w - 2) / 2)) +
+        ".." +
+        "#".repeat(w - 2 - Math.floor((w - 2) / 2)),
+      rows = [];
+    for (let y = 0; y < h; y++)
+      rows.push(
+        y === 0
+          ? openTop
+            ? door
+            : "#".repeat(w)
+          : y === h - 1
+            ? openBot
+              ? door
+              : "#".repeat(w)
+            : "#" + ".".repeat(w - 2) + "#",
+      );
+    return rows;
+  }
+  function cosmosCarve(rows, edits) {
+    let g = rows.map((r) => r.split(""));
+    for (let e of edits) g[e.y][e.x] = e.ch;
+    return g.map((r) => r.join(""));
+  }
+  function cosmosField(w, h) {
+    let rows = [];
+    for (let y = 0; y < h; y++)
+      rows.push(y === 0 || y === h - 1 ? "#".repeat(w) : "#" + ".".repeat(w - 2) + "#");
+    return rows;
+  }
+  let COS_WEP = ["FLAMING SWORD", "TEMPERED BLADE", "CELESTIAL EDGE"],
+    COS_ARM = ["SR SUIT", "LIGHT ARMOR", "GUARDIAN PLATE"],
+    COS_BRD = ["RIDER", "CELESTIAL", "SRX", "ANCIENT"],
+    COS_TEA = {
+      tea: "GREEN TEA",
+      blossom: "BLOSSOM TEA",
+      moon: "MOON TEA",
+      ember: "EMBER TEA",
+      brew: "STARLIGHT BREW",
+    };
+  function cosmosBuild() {
+    let lane = [
+      "############",
+      "#..........#",
+      "#..........#",
+      "#..r....r..#",
+      "#..........#",
+      "#..r....r..#",
+      "#..........#",
+      "#..r....r..#",
+      "#..........#",
+      "#..r....r..#",
+      "#..........#",
+      "#..........#",
+      "#..........#",
+      "#..........#",
+      "#..........#",
+      "############",
+    ];
+    Object.assign(Da, {
+      seeker: { hp: 3, speed: 38, dmg: 1, ai: "chase", w: 12, h: 14, drops: !0, rank: "SEEKER" },
+      swarm: { hp: 2, speed: 64, dmg: 1, ai: "chase", w: 12, h: 14, drops: !0, rank: "SWARM" },
+      spirit: { hp: 5, speed: 30, dmg: 1, ai: "chase", w: 12, h: 14, drops: !0, rank: "SPIRIT", trait: "SOUL TRAPPER" },
+    });
+    Object.assign(Ge, {
+      jazz: {
+        name: "JAZZ THE FIFTH",
+        head: ["#7b3fd0", "#a06af0", "#4e2290"],
+        suit: "#c8202a",
+        suit2: "#ff4fd8",
+        gloves: "#16161c",
+        boots: "#16161c",
+        hat: "cap",
+        hatC: "#c8202a",
+        hatC2: "#ffcc33",
+        eyes: "half",
+        eyeC: "",
+        mouth: "jag",
+        cheek: "#f7a8d8",
+        brows: !1,
+        extra: "jet backcap",
+      },
+      recker: {
+        name: "RECKER",
+        head: ["#3a9a4a", "#68d070", "#1a6a28"],
+        suit: "#c8202a",
+        suit2: "#7a1020",
+        gloves: "#16161c",
+        boots: "#16161c",
+        hat: "fedora",
+        hatC: "#141418",
+        hatC2: "#ffcc33",
+        eyes: "slit",
+        eyeC: "",
+        mouth: "smile",
+        cheek: "#f7a8d8",
+        brows: !1,
+        extra: "jet",
+      },
+      mecko: {
+        name: "MECKO",
+        head: ["#7b3fd0", "#a06af0", "#4e2290"],
+        suit: "#6a6a74",
+        suit2: "#2a2a32",
+        gloves: "#16161c",
+        boots: "#16161c",
+        hat: "fedora",
+        hatC: "#141418",
+        hatC2: "#c8c8d0",
+        eyes: "half",
+        eyeC: "",
+        mouth: "smile",
+        cheek: "#f7a8d8",
+        brows: !1,
+        extra: "jet",
+      },
+      x_chop: {
+        name: "CHOP BOT",
+        head: ["#c8ccd4", "#f4f6fa", "#8a909c"],
+        suit: "#1f6a3a",
+        suit2: "#ffcc33",
+        gloves: "#16161c",
+        boots: "#16161c",
+        hat: "none",
+        hatC: "",
+        hatC2: "",
+        eyes: "half",
+        eyeC: "",
+        mouth: "line",
+        cheek: "#f7a8d8",
+        brows: !1,
+        extra: "jet",
+      },
+      x_arch: {
+        name: "ARCHIVIST",
+        head: ["#3a62c0", "#68a0f0", "#1a3070"],
+        suit: "#4a2080",
+        suit2: "#ff4fd8",
+        gloves: "#16161c",
+        boots: "#16161c",
+        hat: "none",
+        hatC: "",
+        hatC2: "",
+        eyes: "closed",
+        eyeC: "",
+        mouth: "smile",
+        cheek: "#f7a8d8",
+        brows: !1,
+        extra: "jet",
+      },
+      x_porter: {
+        name: "SKY PORTER",
+        head: ["#e8c040", "#ffe080", "#a08020"],
+        suit: "#2a4a8a",
+        suit2: "#4ff0ff",
+        gloves: "#16161c",
+        boots: "#16161c",
+        hat: "cap",
+        hatC: "#2a4a8a",
+        hatC2: "#ffffff",
+        eyes: "half",
+        eyeC: "",
+        mouth: "grin",
+        cheek: "#f7a8d8",
+        brows: !1,
+        extra: "jet",
+      },
+      x_patron: {
+        name: "TRAVELER",
+        head: ["#f08a2a", "#ffb060", "#b85a10"],
+        suit: "#ff4fd8",
+        suit2: "#7b3fd0",
+        gloves: "#16161c",
+        boots: "#16161c",
+        hat: "cap",
+        hatC: "#7b3fd0",
+        hatC2: "#ffcc33",
+        eyes: "half",
+        eyeC: "",
+        mouth: "grin",
+        cheek: "#f7a8d8",
+        brows: !1,
+        extra: "jet",
+      },
+      x_lane: {
+        name: "LANE RIDER",
+        head: ["#20a0a0", "#68e0e0", "#106868"],
+        suit: "#202038",
+        suit2: "#ffcc33",
+        gloves: "#16161c",
+        boots: "#16161c",
+        hat: "none",
+        hatC: "",
+        hatC2: "",
+        eyes: "slit",
+        eyeC: "",
+        mouth: "smile",
+        cheek: "#f7a8d8",
+        brows: !1,
+        extra: "jet",
+      },
+    });
+    Object.assign(Ie, {
+      cosmos: {
+        id: "cosmos",
+        name: "THE COSMOS",
+        theme: "nexus",
+        realm: "nexus",
+        music: "nexus",
+        npcs: [],
+        enemies: [{ k: "seeker", x: 24, y: 15 }],
+        props: [
+          { k: "portal", x: 6, y: 4, to: "cosmos_ac", label: "ACADEMY" },
+          { k: "portal", x: 14, y: 4, to: "cosmos_nx", label: "NEXUS" },
+          { k: "portal", x: 22, y: 4, to: "cosmos_sky", label: "SKY CITY", need: "lane_sky" },
+          { k: "portal", x: 6, y: 10, to: "cosmos_hi", label: "HI LIFE" },
+          { k: "portal", x: 22, y: 10, to: "cosmos_dr", label: "DRAGON" },
+          { k: "portal", x: 14, y: 14, to: "cosmos_pr", label: "PRISON" },
+          { k: "portal", x: 4, y: 14, to: "cosmos_des", label: "DESERT" },
+          { k: "portal", x: 10, y: 14, to: "cosmos_sea", label: "SEAPORT", need: "ch1_done" },
+          { k: "portal", x: 20, y: 14, to: "cosmos_sak", label: "SAKURA", need: "ch2_done" },
+        ],
+        signs: [
+          { x: 14, y: 7, text: "SKY LANE. RIDE THE RINGS. THE PORTAL OPENS WHEN THE LANE IS CLEAR.", kind: "sign" },
+          { x: 14, y: 2, text: "THE COSMOS MAP. NEXUS PORTALS STAY THE FAST ROAD. LET'S RIDE!", kind: "sign" },
+        ],
+        warps: [{ x: 12, y: 8, w: 4, h: 1, to: "lane_sky", tx: 5.5, ty: 13, dir: 1 }],
+      },
+      lane_sky: {
+        id: "lane_sky",
+        name: "SKY LANE",
+        theme: "dream",
+        realm: "nexus",
+        music: "dream",
+        surf: !0,
+        props: [
+          { k: "ring", x: 5, y: 3 },
+          { k: "ring", x: 5, y: 6 },
+          { k: "ring", x: 5, y: 9 },
+          { k: "ring", x: 5, y: 11 },
+        ],
+      },
+      ac_hub: {
+        id: "ac_hub",
+        name: "SR ACADEMY",
+        theme: "nexus",
+        realm: "nexus",
+        music: "nexus",
+        npcs: [{ id: "wizard", x: 12, y: 6, dir: 0, talk: "ac_cash" }],
+        signs: [
+          { x: 5, y: 3, text: "RESTRICTED. THIS WING IS DARK.", kind: "sign" },
+          { x: 18, y: 3, text: "RESTRICTED. CADETS KEEP OUT.", kind: "sign" },
+          { x: 12, y: 4, text: "NOTICE: BASIC CAMP NORTH. LIBRARY WEST. BRIEFING EAST. TIN RANGE IN THE CAMP HALL.", kind: "sign" },
+        ],
+        warps: [
+          { x: 11, y: 13, w: 2, h: 1, to: "cosmos", tx: 14, ty: 11, dir: 1 },
+          { x: 11, y: 0, w: 2, h: 1, to: "ac_camp", tx: 9.5, ty: 8, dir: 1 },
+          { x: 1, y: 6, w: 1, h: 2, to: "ac_lib", tx: 12, ty: 6, dir: 2 },
+          { x: 22, y: 6, w: 1, h: 2, to: "ac_brief", tx: 3, ty: 6, dir: 3 },
+          { x: 4, y: 2, w: 2, h: 1, to: "ac_lock", tx: 7.5, ty: 6, dir: 0 },
+          { x: 18, y: 2, w: 2, h: 1, to: "ac_lock2", tx: 7.5, ty: 6, dir: 0 },
+        ],
+      },
+      ac_lib: {
+        id: "ac_lib",
+        name: "COSMIC CHARTER",
+        theme: "nexus",
+        realm: "nexus",
+        music: "nexus",
+        npcs: [{ id: "x_arch", x: 9, y: 7, dir: 1, talk: "ac_arch" }],
+        chests: [
+          { id: "page_lib1", x: 4, y: 4, item: "page", n: 1 },
+          { id: "page_lib2", x: 9, y: 3, item: "page", n: 1 },
+          { id: "page_lib3", x: 15, y: 4, item: "page", n: 1 },
+        ],
+        signs: [{ x: 9, y: 5, text: "THREE PAGES OPEN A CHARTER. THE ANCIENTS WROTE. THE CELESTIALS KEEP THE OLD LIGHT.", kind: "sign" }],
+        warps: [{ x: 17, y: 5, w: 1, h: 2, to: "ac_hub", tx: 3.5, ty: 6.5, dir: 3 }],
+      },
+      ac_brief: {
+        id: "ac_brief",
+        name: "BRIEFING ROOM",
+        theme: "stone",
+        realm: "nexus",
+        music: "nexus",
+        npcs: [{ id: "kal", x: 9, y: 4, dir: 0, talk: "ac_kal" }],
+        signs: [{ x: 9, y: 7, text: "GALACTIC MAP BRIEFING. STARS ARE $STAR. THE RIDE IS STILL OURS.", kind: "sign" }],
+        warps: [{ x: 1, y: 5, w: 1, h: 2, to: "ac_hub", tx: 20, ty: 6.5, dir: 2 }],
+      },
+      ac_camp: {
+        id: "ac_camp",
+        name: "BASIC TRAINING",
+        theme: "nexus",
+        realm: "nexus",
+        music: "dream",
+        npcs: [{ id: "drill", x: 3, y: 8, dir: 3, talk: "ac_drill" }],
+        triggers: [
+          { x: 3, y: 2, w: 2, h: 2, once: "camp_a", script: "camp_ping" },
+          { x: 8, y: 2, w: 2, h: 2, once: "camp_b", script: "camp_ping" },
+          { x: 13, y: 2, w: 2, h: 2, once: "camp_c", script: "camp_ping" },
+        ],
+        signs: [
+          { x: 9, y: 8, text: "ROLL THE LASER WITH C. TOUCH THE THREE PADS. THEN THE TIN RANGE, EAST.", kind: "sign" },
+        ],
+        warps: [
+          { x: 9, y: 11, w: 2, h: 1, to: "ac_hub", tx: 12.5, ty: 3, dir: 0 },
+          { x: 17, y: 8, w: 1, h: 2, to: "ac_range", tx: 3, ty: 6, dir: 3 },
+        ],
+      },
+      ac_range: {
+        id: "ac_range",
+        name: "TIN LEAGUE",
+        theme: "stone",
+        realm: "nexus",
+        music: "dream",
+        enemies: [
+          { k: "dummy", x: 6, y: 4 },
+          { k: "dummy", x: 10, y: 4 },
+          { k: "dummy", x: 14, y: 4 },
+        ],
+        signs: [{ x: 9, y: 8, text: "TIN LEAGUE. THREE TARGETS. THEY BURST INTO DUST. NO BLOOD.", kind: "sign" }],
+        warps: [{ x: 1, y: 5, w: 1, h: 2, to: "ac_camp", tx: 15, ty: 8, dir: 2 }],
+      },
+      ac_lock: {
+        id: "ac_lock",
+        name: "RESTRICTED",
+        theme: "dungeon",
+        realm: "nexus",
+        music: "cave",
+        signs: [{ x: 7, y: 4, text: "RESTRICTED. THE DOOR IS REAL. THE WING IS NOT OPEN.", kind: "sign" }],
+        warps: [{ x: 7, y: 9, w: 2, h: 1, to: "ac_hub", tx: 6, ty: 4, dir: 0 }],
+      },
+      ac_lock2: {
+        id: "ac_lock2",
+        name: "RESTRICTED",
+        theme: "dungeon",
+        realm: "nexus",
+        music: "cave",
+        signs: [{ x: 7, y: 4, text: "RESTRICTED. COME BACK WHEN THE CHARTER SAYS SO.", kind: "sign" }],
+        warps: [{ x: 7, y: 9, w: 2, h: 1, to: "ac_hub", tx: 18, ty: 4, dir: 0 }],
+      },
+      sky_city: {
+        id: "sky_city",
+        name: "SKY CITY",
+        theme: "dream",
+        realm: "nexus",
+        music: "dream",
+        npcs: [
+          { id: "slide", x: 4, y: 6, dir: 3, talk: "sky_slide" },
+          { id: "jazz", x: 14, y: 5, dir: 2, talk: "sky_jazz" },
+          { id: "x_porter", x: 8, y: 8, dir: 1, talk: "sky_porter" },
+        ],
+        enemies: [{ k: "swarm", x: 16, y: 9 }],
+        props: [{ k: "mural", x: 12, y: 2 }],
+        signs: [{ x: 4, y: 4, text: "SLIDE'S SKY CITY GARAGE. BOARDS ONLY. THE PORTER HAS A COMPANION LIGHT.", kind: "sign" }],
+        warps: [{ x: 9, y: 11, w: 2, h: 1, to: "cosmos", tx: 22, ty: 6, dir: 0 }],
+      },
+      hi_life: {
+        id: "hi_life",
+        name: "THE HI LIFE",
+        theme: "wood",
+        realm: "nexus",
+        music: "sakura",
+        npcs: [
+          { id: "ros", x: 6, y: 5, dir: 0, talk: "hi_ros" },
+          { id: "rusty", x: 12, y: 4, dir: 2, talk: "hi_sars" },
+          { id: "x_patron", x: 15, y: 7, dir: 2, talk: "hi_patron" },
+          { id: "x_lane", x: 4, y: 8, dir: 3, talk: "hi_lane" },
+        ],
+        signs: [
+          { x: 9, y: 3, text: "RUMOR: A LONGER RIDE SPEAKS OF THE ONE. THAT IS NOT SANTT. SANTT KEEPS HIS OWN ROAD.", kind: "sign" },
+          { x: 9, y: 8, text: "BOUNTY: SEEKERS ON THE COSMOS MAP. SHADOW PAYS IN STARS. NOBODY DIES. THEY BURST.", kind: "sign" },
+          { x: 14, y: 3, text: "SARSAPARILLA ONLY. TEA IS FINE. NOTHING STRONGER. NO SMOKE ON THIS DECK.", kind: "sign" },
+        ],
+        warps: [{ x: 9, y: 11, w: 2, h: 1, to: "cosmos", tx: 6, ty: 12, dir: 0 }],
+      },
+      dragon: {
+        id: "dragon",
+        name: "GREEN DRAGON",
+        theme: "wood",
+        realm: "nexus",
+        music: "sakura",
+        npcs: [
+          { id: "draco", x: 5, y: 4, dir: 0, talk: "drag_front" },
+          { id: "x_chop", x: 14, y: 5, dir: 2, talk: "drag_forge" },
+        ],
+        signs: [
+          { x: 9, y: 8, text: "NOODLES UP FRONT. THE CHOP BOT FORGES IN BACK. ONE BOWL AT A TIME. STARS ONLY.", kind: "sign" },
+        ],
+        warps: [{ x: 9, y: 11, w: 2, h: 1, to: "cosmos", tx: 22, ty: 12, dir: 0 }],
+      },
+      pr_gate: {
+        id: "pr_gate",
+        name: "LOWER PRISON",
+        theme: "dungeon",
+        realm: "nexus",
+        music: "cave",
+        npcs: [
+          { id: "recker", x: 4, y: 6, dir: 3, talk: "pr_recker" },
+          { id: "mecko", x: 15, y: 6, dir: 2, talk: "pr_mecko" },
+        ],
+        signs: [{ x: 9, y: 4, text: "FRIGHT'S LOWER PRISON. THE CASTLE IS ELSEWHERE. THIS DOOR IS THE FIRST FLOOR DOWN.", kind: "sign" }],
+        warps: [
+          { x: 9, y: 11, w: 2, h: 1, to: "cosmos", tx: 14, ty: 12, dir: 1 },
+          { x: 9, y: 2, w: 2, h: 1, to: "pr_hall", tx: 9.5, ty: 8, dir: 1 },
+        ],
+      },
+      pr_hall: {
+        id: "pr_hall",
+        name: "PRISON HALL",
+        theme: "dungeon",
+        realm: "nexus",
+        music: "cave",
+        dungeon: "prison",
+        gates: { G: "prison_key" },
+        enemies: [
+          { k: "seeker", x: 4, y: 8 },
+          { k: "swarm", x: 15, y: 8 },
+        ],
+        chests: [{ id: "pr_key", x: 14, y: 9, item: "pkey", n: 1 }],
+        signs: [{ x: 9, y: 8, text: "THE BARS OPEN WITH THE PRISON KEY. PAST THEM THE DARK EATS THE FLOOR.", kind: "sign" }],
+        warps: [
+          { x: 9, y: 11, w: 2, h: 1, to: "pr_gate", tx: 9.5, ty: 4, dir: 1 },
+          { x: 9, y: 1, w: 2, h: 1, to: "pr_dark", tx: 9.5, ty: 8, dir: 1 },
+        ],
+      },
+      pr_dark: {
+        id: "pr_dark",
+        name: "THE DARK CELL",
+        theme: "dungeon",
+        realm: "nexus",
+        music: "cave",
+        dark: !0,
+        pages: [{ id: "page_prison", x: 4, y: 4 }],
+        enemies: [{ k: "spirit", x: 14, y: 5 }],
+        chests: [{ id: "pr_part", x: 15, y: 8, item: "part", n: 1 }],
+        signs: [{ x: 9, y: 7, text: "STAR LANTERN OPENS THE DARK. THE SPIRIT IS A SOUL TRAPPER. IT TAKES LIGHT, NOT A LIFE.", kind: "sign" }],
+        warps: [{ x: 9, y: 11, w: 2, h: 1, to: "pr_hall", tx: 9.5, ty: 3, dir: 0 }],
+      },
+    });
+    let camp = cosmosCarve(cosmosRoom(20, 12, !1, !0), []);
+    for (let x = 1; x <= 18; x++) camp = cosmosCarve(camp, [{ x: x, y: 5, ch: "r" }]);
+    let hall = cosmosRoom(20, 12, !1, !0);
+    for (let x = 1; x <= 18; x++) hall = cosmosCarve(hall, [{ x: x, y: 5, ch: "G" }]);
+    Object.assign(Zs, {
+      cosmos: cosmosField(28, 18),
+      lane_sky: lane,
+      ac_hub: cosmosRoom(24, 14, !0, !0),
+      ac_lib: cosmosRoom(20, 12, !1, !1),
+      ac_brief: cosmosRoom(20, 12, !1, !1),
+      ac_camp: camp,
+      ac_range: cosmosRoom(20, 12, !1, !1),
+      ac_lock: cosmosRoom(16, 10, !1, !0),
+      ac_lock2: cosmosRoom(16, 10, !1, !0),
+      sky_city: cosmosRoom(20, 12, !1, !0),
+      hi_life: cosmosRoom(20, 12, !1, !0),
+      dragon: cosmosRoom(20, 12, !1, !0),
+      pr_gate: cosmosRoom(20, 12, !1, !0),
+      pr_hall: hall,
+      pr_dark: cosmosRoom(20, 12, !1, !0),
+    });
+    Object.assign(je, {
+      nx_cosmos: { to: "cosmos", tx: 14, ty: 6, dir: 0 },
+      cosmos_nx: { to: "nexus", tx: 9.5, ty: 7.5, dir: 1 },
+      cosmos_ac: { to: "ac_hub", tx: 12.5, ty: 11, dir: 1 },
+      cosmos_sky: { to: "sky_city", tx: 9.5, ty: 8, dir: 1 },
+      cosmos_hi: { to: "hi_life", tx: 9.5, ty: 8, dir: 1 },
+      cosmos_dr: { to: "dragon", tx: 9.5, ty: 8, dir: 1 },
+      cosmos_pr: { to: "pr_gate", tx: 9.5, ty: 8, dir: 1 },
+      cosmos_des: { to: "desert", tx: 10, ty: 12, dir: 0 },
+      cosmos_sea: { to: "seaport", tx: 8, ty: 8, dir: 0 },
+      cosmos_sak: { to: "village", tx: 8, ty: 8, dir: 0 },
+    });
+    Ie.nexus.props.push({ k: "portal", x: 9.5, y: 9, to: "nx_cosmos", label: "COSMOS" });
+    Ie.teashop.name = "SHADOW'S TEA HOUSE";
+    Ie.teashop.signs.push({
+      x: 8,
+      y: 4,
+      text: "CONTRACT BOARD. TRACK A SEEKER. SHADOW PAYS STARS. NOBODY IS COLLECTED.",
+      kind: "sign",
+      script: "contract_board",
+    });
+    Ie.desert.pages = [{ id: "page_desert", x: 18, y: 14 }];
+    Ie.seaport.pages = [{ id: "page_sea", x: 10, y: 8 }];
+    Ie.village.pages = [{ id: "page_sakura", x: 8, y: 8 }];
+    nt.tea.title = "SHADOW'S TEA HOUSE";
+    nt.tea.bye = "MAY THE POT STAY WARM.";
+    nt.tea.items = [
+      { id: "tea", name: "GREEN TEA", price: 12, n: 1, once: "" },
+      { id: "blossom", name: "BLOSSOM TEA", price: 6, n: 1, once: "" },
+      { id: "moon", name: "MOON TEA", price: 10, n: 1, once: "" },
+      { id: "ember", name: "EMBER TEA", price: 14, n: 1, once: "" },
+      { id: "brew", name: "STARLIGHT BREW", price: 30, n: 1, once: "" },
+    ];
+    Object.assign(nt, {
+      cadet: {
+        title: "CADET STORE",
+        keeper: "wizard",
+        bye: "SPEND STARS, NOT TROUBLE.",
+        items: [
+          { id: "med", name: "MED PACK", price: 15, n: 1, once: "" },
+          { id: "moon", name: "MOON TEA", price: 10, n: 1, once: "" },
+          { id: "arrows", name: "ARROWS X10", price: 10, n: 10, once: "" },
+        ],
+      },
+      dragon: {
+        title: "GREEN DRAGON NOODLES",
+        keeper: "draco",
+        bye: "THE BOWL IS EMPTY. THE ROAD IS NOT.",
+        items: [
+          { id: "ramen", name: "FIRE RAMEN", price: 16, n: 1, once: "" },
+          { id: "udon", name: "COMET UDON", price: 16, n: 1, once: "" },
+          { id: "iron", name: "IRON BROTH", price: 18, n: 1, once: "" },
+          { id: "trueb", name: "TRUE BROTH", price: 22, n: 1, once: "" },
+        ],
+      },
+      forge: {
+        title: "CHOP SHOP FORGE",
+        keeper: "x_chop",
+        bye: "BRING A RARE PART FOR THE HIGH TIERS.",
+        items: [
+          { id: "forge_w", name: "FORGE WEAPON", price: 35, n: 1, once: "" },
+          { id: "forge_a", name: "FORGE ARMOR", price: 35, n: 1, once: "" },
+          { id: "forge_b", name: "FORGE BOARD", price: 30, n: 1, once: "" },
+        ],
+      },
+      sars: {
+        title: "SARSAPARILLA",
+        keeper: "rusty",
+        bye: "THAT IS THE ONLY POUR.",
+        items: [{ id: "sars", name: "SARSAPARILLA", price: 8, n: 1, once: "" }],
+      },
+      boards: {
+        title: "SKY CITY GARAGE",
+        keeper: "slide",
+        bye: "RIDE WHAT YOU FORGE.",
+        items: [{ id: "forge_b", name: "FORGE BOARD", price: 30, n: 1, once: "" }],
+      },
+    });
+    Object.assign(CHOICES, {
+      dice_call: {
+        back: "dice_no",
+        opts: [
+          ["HIGH", "dice_high"],
+          ["LOW", "dice_low"],
+        ],
+      },
+    });
+    Object.assign(Ce, {
+      ac_cash: [{ s: "ac_cash" }],
+      ac_arch: [{ need: "charter_read", s: "ac_arch_done" }, { s: "ac_arch_now" }],
+      ac_kal: [{ need: "galactic_map", s: "ac_kal_again" }, { s: "ac_kal" }],
+      ac_drill: [{ s: "ac_drill" }],
+      sky_slide: [{ s: "sky_slide" }],
+      sky_jazz: [{ need: "jazz_tag", s: "sky_jazz_again" }, { s: "sky_jazz" }],
+      sky_porter: [{ need: "companion_got", s: "sky_porter_again" }, { s: "sky_porter" }],
+      hi_ros: [{ s: "hi_ros" }],
+      hi_sars: [{ s: "hi_sars" }],
+      hi_patron: [{ s: "hi_patron" }],
+      hi_lane: [{ s: "hi_lane" }],
+      drag_front: [{ s: "drag_front" }],
+      drag_forge: [{ s: "drag_forge" }],
+      pr_recker: [{ s: "pr_recker" }],
+      pr_mecko: [{ s: "pr_mecko" }],
+      contract_board: [
+        { need: "contract_paid", s: "contract_done_say" },
+        { need: "contract_on", s: "contract_hunt" },
+        { s: "contract_offer" },
+      ],
+    });
+    Object.assign(oa, {
+      ac_cash: [
+        h("wizard", "CASH. THE ACADEMY DOCKS HERE. STARS SPEND LIKE COINS. THE OLD NEXUS DOORS STILL WORK."),
+        h("wizard", "LIBRARY, BRIEFING, CAMP. THE OTHER WINGS SAY RESTRICTED BECAUSE THEY ARE."),
+        { t: "shop", m: "cadet" },
+      ],
+      ac_arch_now: [
+        h("x_arch", "THE COSMIC CHARTER. THREE PAGES AND I FILE THEM. ANCIENTS WROTE THESE. CELESTIALS ARE THE ELDERS WHO KEPT THEM."),
+        { t: "fn", f: "tryCharter" },
+      ],
+      ac_arch_done: [h("x_arch", "THE FIRST CHARTER IS FILED. THE LIGHT IN YOU IS WIDER.")],
+      ac_kal: [
+        h("kal", "KAL. THIS IS THE BRIEFING. THE GALACTIC MAP IS THE COSMOS, FOLDED SMALL."),
+        h("kal", "SANTT IS SANTT. NOBODY HERE WEARS HIS NAME, AND HE WEARS NO VISOR."),
+        { t: "give", item: "gmap" },
+        { t: "flag", f: "galactic_map" },
+        { t: "save" },
+      ],
+      ac_kal_again: [h("kal", "OPEN THE MAP FROM THE GEAR SCREEN WHEN YOU ARE ABOVE GROUND. LET'S RIDE.")],
+      ac_drill: [
+        h("drill", "BASIC TRAINING. THE LASER ROW IS REAL. ROLL IT. THREE PADS. THEN YOU ARE A CADET, NOT A STORY."),
+      ],
+      camp_ping: [{ t: "fn", f: "campPing" }],
+      sky_slide: [
+        h("slide", "GARAGE IS OPEN. RIDER, CELESTIAL, SRX, ANCIENT. THOSE ARE BOARDS."),
+        h("slide", "THE ANCIENTS AND THE CELESTIALS ARE ELDERS. DO NOT MIX THEM UP WITH A DECK."),
+        { t: "shop", m: "boards" },
+      ],
+      sky_jazz: [
+        h("jazz", "JAZZ THE FIFTH. I RHYME AND I PAINT. I AM NOT A HENCHMAN AND I DO NOT WORK A CREW."),
+        h("jazz", "THE WALL CAN TAKE A TAG IF YOU WANT IT."),
+        { t: "fn", f: "jazzTag" },
+      ],
+      sky_jazz_again: [h("jazz", "THE TAG STAYS. LET'S RIDE.")],
+      sky_porter: [
+        h("x_porter", "PORTER. WELCOME TO SKY CITY. THIS COMPANION IS A LIGHT, NOT A PERSON. IT FOLLOWS."),
+        { t: "give", item: "companion" },
+        { t: "flag", f: "companion_got" },
+      ],
+      sky_porter_again: [h("x_porter", "KEEP THE LIGHT ON YOUR SHOULDER. THE GARAGE IS SLIDE'S.")],
+      hi_ros: [
+        h("ros", "OUTLAWS AND TRAVELERS. THIS BLIMP POURS SARSAPARILLA AND NOTHING MEANER."),
+        h("ros", "HIGH OR LOW. FOUR STARS IF YOU MISS. EIGHT IF YOU CALL THE DICE."),
+        { t: "choice", a: "dice_call" },
+      ],
+      hi_sars: [
+        h("rusty", "SARSAPARILLA. SWEET, COLD, AND THAT IS THE WHOLE MENU."),
+        { t: "shop", m: "sars" },
+      ],
+      hi_patron: [
+        h("x_patron", "JUST PASSING THROUGH. THE LONGER RIDE HAS MORE FACES THAN THIS DECK."),
+        h("x_patron", "IF YOU HEAR THE ONE, THAT IS NOT SANTT. LET'S RIDE."),
+      ],
+      hi_lane: [h("x_lane", "I SURFED THE SKY LANE TO GET HERE. RINGS IF YOU WANT THE GOLD MEDAL. THE PORTAL CARES THAT YOU FINISH.")],
+      drag_front: [
+        h("draco", "GREEN DRAGON. NOODLES UP FRONT. I MOVE WHEN THE RUMORS DO. SAME SHOP."),
+        h("draco", "ONE BOWL. FIRE, SPEED, IRON, OR THE BROTH THAT FEEDS THE LIGHT."),
+        { t: "shop", m: "dragon" },
+      ],
+      drag_forge: [
+        h("x_chop", "CHOP BOT. TIER TWO IS STARS. TIER THREE AND THE FAST BOARDS WANT A RARE PART."),
+        { t: "shop", m: "forge" },
+      ],
+      pr_recker: [h("recker", "RECKER. I MOVE WHAT THE ROAD WON'T CARRY. MECKO WORKS UNDER ME. WE ARE NOT YOUR PARTY.")],
+      pr_mecko: [h("mecko", "MECKO. THE LOWER DARK EATS A ROOM. BRING THE STAR LANTERN. THE SPIRIT TRAPS LIGHT.")],
+      contract_board: [{ t: "fn", f: "contractBoard" }],
+      contract_offer: [
+        h("sys", "CONTRACT: A SEEKER ON THE COSMOS MAP. BURST IT INTO STARDUST. TWENTY-FIVE STARS."),
+        { t: "flag", f: "contract_on" },
+      ],
+      contract_hunt: [h("sys", "THE SEEKER IS STILL OUT ON THE MAP.")],
+      contract_done_say: [h("sys", "PAID. SHADOW DOES NOT COLLECT PEOPLE.")],
+      dice_high: [{ t: "fn", f: "diceHigh" }],
+      dice_low: [{ t: "fn", f: "diceLow" }],
+      dice_no: [h("ros", "THEN DON'T TOSS. THE SARSAPARILLA IS STILL SWEET.")],
+    });
+  }
+  cosmosBuild();
 
   Object.assign(Ce, {
     ram_tale_talk: [
@@ -10480,6 +11128,441 @@ ram_mem_amulet: [
     bed_sleep: [{ t: "fn", f: "sleep" }],
   });
   function Fn(m, u, l) {
+  function cosmosDefaults() {
+    return {
+      magic: 6,
+      magicMax: 8,
+      spell: "lantern",
+      ward: 0,
+      lantern: 0,
+      gearW: 1,
+      gearA: 1,
+      gearB: 1,
+      ownW: 1,
+      ownA: 1,
+      ownB: 1,
+      bottles: [],
+      buff: "",
+      buffHits: 0,
+      trueT: 0,
+      ember: 0,
+      emberArea: "",
+      brew: 0,
+      part: 0,
+      companion: 0,
+      gmap: 0,
+      visor: 0,
+      compX: 0,
+      compY: 0,
+    };
+  }
+  function applyCosmos(c) {
+    let b = cosmosDefaults();
+    c = c || {};
+    Object.assign(d, b, {
+      magic: c.magic != null ? c.magic : b.magic,
+      magicMax: c.magicMax || b.magicMax,
+      spell: c.spell || "lantern",
+      gearW: c.gearW || 1,
+      gearA: c.gearA || 1,
+      gearB: c.gearB || 1,
+      ownW: c.ownW || 1,
+      ownA: c.ownA || 1,
+      ownB: c.ownB || 1,
+      bottles: (c.bottles || []).slice(),
+      brew: c.brew || 0,
+      part: c.part || 0,
+      companion: c.companion || 0,
+      gmap: c.gmap || 0,
+      visor: c.visor && A.story !== "santt" ? 1 : 0,
+      ward: 0,
+      lantern: 0,
+      buff: "",
+      buffHits: 0,
+      trueT: 0,
+      ember: 0,
+    });
+    d.gearW = Math.min(d.gearW, d.ownW);
+    d.gearA = Math.min(d.gearA, d.ownA);
+    d.gearB = Math.min(d.gearB, d.ownB);
+  }
+  function cosmosSave() {
+    return {
+      magic: d.magic || 0,
+      magicMax: d.magicMax || 8,
+      spell: d.spell || "lantern",
+      gearW: d.gearW || 1,
+      gearA: d.gearA || 1,
+      gearB: d.gearB || 1,
+      ownW: d.ownW || 1,
+      ownA: d.ownA || 1,
+      ownB: d.ownB || 1,
+      bottles: (d.bottles || []).slice(),
+      brew: d.brew || 0,
+      part: d.part || 0,
+      companion: d.companion || 0,
+      gmap: d.gmap || 0,
+      visor: d.visor || 0,
+    };
+  }
+  function castSpell() {
+    if (A.state !== "play" || Ae || q || le || ue || A.paused) return;
+    let spell = d.spell === "ward" ? "ward" : "lantern",
+      cost = spell === "ward" ? 3 : 2;
+    if ((d.magic || 0) < cost) {
+      (D.nope(), Q("NOT ENOUGH LIGHT."));
+      return;
+    }
+    d.magic -= cost;
+    spell === "ward"
+      ? ((d.ward = 3), D.tink(), Q("GUARDIAN WARD. THREE HITS."))
+      : ((d.lantern = 8), D.mirage(), Q("STAR LANTERN."));
+  }
+  function cosmosGuard(e) {
+    if ((d.ward || 0) > 0) {
+      (d.ward--, D.tink(), Q("THE WARD HOLDS. " + d.ward + " LEFT."));
+      return 0;
+    }
+    if (d.ember && d.emberArea === w.id) {
+      ((d.ember = 0), D.tink(), Q("EMBER TEA TAKES THE HIT."));
+      return 0;
+    }
+    (d.gearA || 1) >= 3 ? (e = Math.max(1, e - 1)) : (d.gearA || 1) >= 2 && e > 1 && (e -= 1);
+    d.buff === "iron" && (e = Math.max(1, Math.ceil(e / 2)));
+    if (
+      ce.some((f) => !f.dead && f.k === "spirit" && ae(f.x, f.y, d.x, d.y) < 36) &&
+      (d.magic || 0) > 0
+    )
+      ((d.magic--), Q("SOUL TRAPPER."));
+    return e;
+  }
+  function cosmosHitBonus() {
+    let n = Math.max(0, (d.gearW || 1) - 1);
+    return (
+      d.buff === "fire" &&
+        (d.buffHits || 0) > 0 &&
+        (n++, d.buffHits--, d.buffHits <= 0 && (d.buff = "")),
+      n
+    );
+  }
+  function cosmosShatter(e) {
+    if (e.k !== "seeker" && e.k !== "swarm" && e.k !== "spirit" && e.k !== "vov") return;
+    d.magic = Math.min(d.magicMax || 8, (d.magic || 0) + 2);
+    ne(e.x, e.y - 8, 16, ["#7ad0ff", "#ffffff", "#c9a0ff"], 40);
+    ee.contract_on &&
+      !ee.contract_paid &&
+      e.k === "seeker" &&
+      ((ee.contract_paid = !0), (d.coins += 25), Q("CONTRACT PAID. 25 STARS."));
+  }
+  function cosmosBoardSpeed() {
+    return Math.max(0, (d.gearB || 1) - 1) * 14 + (d.buff === "speed" ? 18 : 0);
+  }
+  function visorShown() {
+    return !!(d.visor && ga() !== "santt" && A.story !== "santt");
+  }
+  function cosmosGrant(id) {
+    if (COS_TEA[id]) {
+      d.bottles = d.bottles || [];
+      if (d.bottles.length >= 4) return (D.nope(), Q("ONLY FOUR BOTTLES."), !1);
+      return (d.bottles.push(id), !0);
+    }
+    if (id === "ramen") return ((d.buff = "fire"), (d.buffHits = 3), Q("FIRE RAMEN. THREE STRONG HITS."), !0);
+    if (id === "udon") return ((d.buff = "speed"), Q("COMET UDON."), !0);
+    if (id === "iron") return ((d.buff = "iron"), (d.ironArea = w.id), Q("IRON BROTH. THIS AREA HITS SOFTER."), !0);
+    if (id === "trueb") return ((d.buff = "true"), (d.trueT = 24), Q("TRUE BROTH. THE LIGHT COMES BACK."), !0);
+    if (id === "sars") return ((d.hp = d.maxHp), D.heal(), Q("SARSAPARILLA. SWEET. THAT IS ALL."), !0);
+    return !1;
+  }
+  function cosmosForgeQuote(id) {
+    let kind = id === "forge_a" ? "a" : id === "forge_b" ? "b" : "w",
+      own = kind === "a" ? d.ownA || 1 : kind === "b" ? d.ownB || 1 : d.ownW || 1,
+      max = kind === "b" ? 4 : 3,
+      names = kind === "a" ? COS_ARM : kind === "b" ? COS_BRD : COS_WEP;
+    if (own >= max) return { ok: !1, why: names[max - 1] + " IS FINISHED.", price: 0, name: names[max - 1] };
+    let price = kind === "b" ? [0, 30, 60, 100][own] : own === 1 ? 35 : 70,
+      need = own >= 2;
+    if (need && !(d.part > 0)) return { ok: !1, why: "THE FORGE NEEDS A RARE PART.", price: price, name: names[own] };
+    return { ok: !0, why: "", price: price, name: names[own] };
+  }
+  function cosmosForgeApply(id) {
+    let kind = id === "forge_a" ? "a" : id === "forge_b" ? "b" : "w",
+      own = kind === "a" ? d.ownA || 1 : kind === "b" ? d.ownB || 1 : d.ownW || 1;
+    own >= 2 && d.part--;
+    kind === "a"
+      ? ((d.ownA = own + 1), (d.gearA = d.ownA))
+      : kind === "b"
+        ? ((d.ownB = own + 1), (d.gearB = d.ownB))
+        : ((d.ownW = own + 1), (d.gearW = d.ownW));
+  }
+  function cosmosOffer(S) {
+    if (S.id.indexOf("forge_") === 0) {
+      let q = cosmosForgeQuote(S.id);
+      if (!q.ok) return (D.nope(), Q(q.why), !0);
+      if ((d.coins || 0) < q.price) return (D.nope(), Q("NOT ENOUGH STARS."), !0);
+      return (cosmosForgeApply(S.id), (d.coins -= q.price), D.buy(), Q(q.name + "  " + q.price + " STARS."), !0);
+    }
+    let ids = ["tea", "blossom", "moon", "ember", "brew", "ramen", "udon", "iron", "trueb", "sars"];
+    if (ids.indexOf(S.id) < 0) return !1;
+    if (S.once && Z(S.once)) return (D.nope(), Q("SOLD OUT!"), !0);
+    if ((d.coins || 0) < S.price) return (D.nope(), Q("NOT ENOUGH STARS."), !0);
+    if (!cosmosGrant(S.id)) return !0;
+    return ((d.coins -= S.price), S.once && (ee[S.once] = !0), D.buy(), Q(S.name + "  " + S.price + " STARS."), !0);
+  }
+  function drinkBottle(i) {
+    d.bottles = d.bottles || [];
+    if (!d.bottles.length) return (Q("NO BOTTLES."), !1);
+    let id = d.bottles.splice(Math.max(0, Math.min(i || 0, d.bottles.length - 1)), 1)[0];
+    return (
+      id === "tea"
+        ? (d.hp = d.maxHp)
+        : id === "blossom"
+          ? (d.hp = Math.min(d.maxHp, d.hp + Math.ceil(d.maxHp / 2)))
+          : id === "moon"
+            ? (d.magic = d.magicMax || 8)
+            : id === "ember"
+              ? ((d.ember = 1), (d.emberArea = w.id))
+              : id === "brew" && (d.brew = 1),
+      D.heal(),
+      Q((COS_TEA[id] || "TEA") + " SIPPED."),
+      !0
+    );
+  }
+  function useGalacticMap() {
+    if (!d.gmap) return Q("NO GALACTIC MAP.");
+    if (w.dungeon || w.surf) return Q("THE MAP STAYS SHUT HERE.");
+    (D.mirage(), dt("cosmos", 14, 6, 0), (A.paused = !1));
+  }
+  function cosmosGearAct(row) {
+    if (row === 0 && d.ownW > 1) d.gearW = (d.gearW % d.ownW) + 1;
+    else if (row === 1 && d.ownA > 1) d.gearA = (d.gearA % d.ownA) + 1;
+    else if (row === 2 && d.ownB > 1) d.gearB = (d.gearB % d.ownB) + 1;
+    else if (row === 3) d.spell = d.spell === "ward" ? "lantern" : "ward";
+    else if (row === 4)
+      d.visor
+        ? (d.visor = 0)
+        : A.story === "santt"
+          ? Q("SANTT WEARS NO VISOR.")
+          : d.ownVisor
+            ? (d.visor = 1)
+            : Q("NO VISOR YET.");
+    else if (row === 5) useGalacticMap();
+    else if (row === 6) drinkBottle(0);
+    (D.sel(), xe());
+  }
+  function drawCosmosGear() {
+    let rows = [
+        "WEAPON  " + COS_WEP[(d.gearW || 1) - 1],
+        "ARMOR  " + COS_ARM[(d.gearA || 1) - 1],
+        "BOARD  " + COS_BRD[(d.gearB || 1) - 1],
+        "SPELL  " + (d.spell === "ward" ? "GUARDIAN WARD" : "STAR LANTERN"),
+        "VISOR  " + (visorShown() ? "ON" : d.ownVisor ? "OFF" : "--"),
+        "GALACTIC MAP  " + (d.gmap ? "READY" : "--"),
+        "BOTTLE  " + ((d.bottles || [])[0] ? COS_TEA[d.bottles[0]] : "EMPTY"),
+      ],
+      sel = A.gearSel || 0;
+    (I(0, 24, 320, 200, "#14081f"),
+      v(n, "GEAR", 160, 32, "#ff4fd8", 2, "center", "#1a0820"),
+      v(n, "LET'S RIDE!", 160, 50, "#c9a0ff", 1, "center", "#1a0820"),
+      v(n, "$STAR " + d.coins + "   PART " + (d.part || 0), 160, 64, "#ff9ae8", 1, "center", "#1a0820"));
+    for (let i = 0; i < rows.length; i++)
+      v(n, (sel === i ? "> " : "  ") + rows[i], 28, 80 + i * 14, sel === i ? "#ff4fd8" : "#f4e8ff", 1, "", "#14081f");
+    v(n, "X CYCLES. F CASTS. RIGHT CLOSES GEAR.", 160, 188, "#c9a0ff", 1, "center", "#14081f");
+    v(n, "ANCIENTS AND CELESTIALS STAY ELDERS.", 160, 202, "#ff9ae8", 1, "center", "#14081f");
+  }
+  function cosmosPageCount() {
+    return ["page_desert", "page_sea", "page_sakura", "chest_page_lib1", "chest_page_lib2", "chest_page_lib3"].filter(
+      (k) => Z(k),
+    ).length;
+  }
+  function cosmosRollDice() {
+    if ((d.coins || 0) < 4) return Q("NEED 4 STARS TO TOSS.");
+    let roll = 1 + Math.floor(Math.random() * 6),
+      high = A.diceCall !== "low",
+      win = high ? roll >= 4 : roll <= 3;
+    (win ? ((d.coins += 8), D.coin(), Q("DICE " + roll + ". YOU WIN 8 STARS.")) : ((d.coins = Math.max(0, d.coins - 4)), D.nope(), Q("DICE " + roll + ". THE HOUSE KEEPS 4.")),
+      (A.diceCall = ""));
+  }
+  function cosmosCharter() {
+    let n = cosmosPageCount();
+    if (n >= 3 && !Z("charter_read"))
+      return (
+        (ee.charter_read = !0),
+        (d.magicMax = (d.magicMax || 8) + 2),
+        (d.magic = d.magicMax),
+        (d.coins += 15),
+        D.item(),
+        Q("CHARTER FILED. THE LIGHT GROWS.")
+      );
+    Q(n + " PAGES. THE LIBRARY WANTS THREE.");
+  }
+  function cosmosCamp() {
+    let n = ["camp_a", "camp_b", "camp_c"].filter((k) => Z(k)).length;
+    Q("PAD " + n + " OF 3.");
+  }
+  function cosmosJazz() {
+    ((ee.jazz_tag = !0), D.item(), Q("JAZZ TAGS THE WALL. LET'S RIDE!"));
+  }
+  function cosmosContract() {
+    Z("contract_paid")
+      ? Oa("sys", "PAID. SHADOW DOES NOT COLLECT PEOPLE.")
+      : Z("contract_on")
+        ? Oa("sys", "THE SEEKER IS STILL OUT ON THE COSMOS MAP.")
+        : ((ee.contract_on = !0),
+          Oa("sys", "CONTRACT: A SEEKER ON THE COSMOS MAP. BURST IT INTO STARDUST. TWENTY-FIVE STARS."));
+  }
+  function cosmosFns() {
+    return {
+      rollDice: cosmosRollDice,
+      diceHigh: () => ((A.diceCall = "high"), cosmosRollDice()),
+      diceLow: () => ((A.diceCall = "low"), cosmosRollDice()),
+      tryCharter: cosmosCharter,
+      campPing: cosmosCamp,
+      jazzTag: cosmosJazz,
+      contractBoard: cosmosContract,
+    };
+  }
+  function cosmosTick(e) {
+    (d.lantern || 0) > 0 && (d.lantern = Math.max(0, d.lantern - e));
+    if (d.buff === "true") {
+      d.trueT -= e;
+      d.trueT <= 0 ? (d.buff = "") : Math.random() < e * 0.7 && (d.magic = Math.min(d.magicMax || 8, (d.magic || 0) + 1));
+    }
+    d.buff === "iron" && d.ironArea && d.ironArea !== w.id && (d.buff = "");
+    d.ember && d.emberArea && d.emberArea !== w.id && (d.ember = 0);
+    if ((d.lantern || 0) > 0)
+      for (let p of w.pages || [])
+        !ee[p.id] &&
+          Math.abs(d.x - p.x * 16) < 24 &&
+          Math.abs(d.y - p.y * 16) < 24 &&
+          ((ee[p.id] = !0), D.item(), Q("A CHARTER PAGE. THE ANCIENTS LEFT IT."));
+    if (w.id === "ac_range" && !ee.tin_clear && ce.length && ce.every((f) => f.dead))
+      ((ee.tin_clear = !0),
+        (d.ownVisor = 1),
+        A.story !== "santt" && (d.visor = 1),
+        (d.coins += 15),
+        D.item(),
+        Q("TIN LEAGUE. THE VISOR IS YOURS."));
+    if (Z("camp_a") && Z("camp_b") && Z("camp_c") && !ee.camp_grad)
+      ((ee.camp_grad = !0), (d.coins += 12), D.item(), Q("BASIC TRAINING COMPLETE."));
+    if (d.companion) {
+      d.compX || (d.compX = d.x - 16);
+      d.compY || (d.compY = d.y);
+      d.compX += (d.x - 18 - d.compX) * Math.min(1, e * 4);
+      d.compY += (d.y - d.compY) * Math.min(1, e * 4);
+    }
+    w.surf || (A.surf = null);
+    if (le && nt[le.id])
+      for (let S of nt[le.id].items)
+        if (S.id.indexOf("forge_") === 0) {
+          let q = cosmosForgeQuote(S.id);
+          ((S.price = q.price), (S.name = q.name));
+        }
+  }
+  function surfSteer(e, solids) {
+    A.surf || (A.surf = { rings: 0, got: {} });
+    if ((d.roll || 0) > 0) {
+      ((d.roll -= e), va(d, d.rdx * 200 * e, d.rdy * 90 * e - 30 * e, 5, 5, 2, !1, solids, !0));
+      return;
+    }
+    let steer = (U.right ? 1 : 0) - (U.left ? 1 : 0) + (U.sx || 0),
+      boost = A.surf.boost || 0;
+    A.surf.boost = Math.max(0, boost - 50 * e);
+    va(
+      d,
+      steer * 120 * e,
+      -(88 + cosmosBoardSpeed() + boost) * e,
+      5,
+      5,
+      2,
+      !1,
+      solids,
+      !0,
+    );
+    ((d.moving = !0), (d.dir = 1));
+    let tx = Math.floor(d.x / 16),
+      ty = Math.floor((d.y - 1) / 16);
+    if (ie(tx, ty) === "r" && (d.inv || 0) <= 0) be(1, d.x, d.y + 10);
+    for (let prop of w.props || []) {
+      let key = prop.x + "_" + prop.y;
+      prop.k === "ring" &&
+        !A.surf.got[key] &&
+        ae(d.x, d.y, p(prop.x), p(prop.y)) < 14 &&
+        ((A.surf.got[key] = 1),
+        (A.surf.rings = (A.surf.rings || 0) + 1),
+        (A.surf.boost = 80),
+        D.coin(),
+        Q("BOOST RING " + A.surf.rings));
+    }
+    if (d.y < 56) {
+      let first = !ee.lane_sky;
+      (first &&
+        ((ee.lane_sky = !0),
+        (ee.medal_sky = !0),
+        (A.surf.rings || 0) >= 3 && (ee.medal_gold = !0),
+        (d.coins += 20),
+        (d.part = (d.part || 0) + 1)),
+        first || (d.coins += 5),
+        Q(first ? "SKY LANE CLEAR. THE PORTAL OPENS." : "LANE RUN DONE."),
+        D.heal(),
+        dt("cosmos", 14, 11, 1));
+    }
+  }
+  function cosmosDark() {
+    if (!w.dark) return;
+    let x = d.x - he.x,
+      y = d.y - he.y - 12,
+      rad = (d.lantern || 0) > 0 ? 86 : 28;
+    (n.save(),
+      n.beginPath(),
+      n.rect(0, 0, 320, 224),
+      n.arc(x, y, rad, 0, 6.283, !0),
+      (n.fillStyle = "rgba(6,0,14,0.86)"),
+      n.fill("evenodd"),
+      n.restore());
+  }
+  function cosmosRankLabel(f, ix, sy) {
+    if (!f.def || !f.def.rank) return;
+    (v(n, f.def.rank, ix(f.x), sy(f.y) - f.def.h - 10, "#ff4fd8", 1, "center", "#14081f"),
+      f.def.trait && v(n, f.def.trait, ix(f.x), sy(f.y) - f.def.h - 18, "#c9a0ff", 1, "center", "#14081f"));
+  }
+  function cosmosProp(e, a, t, i) {
+    if (e.k === "ring") {
+      let s = t(p(e.x)),
+        E = i(p(e.y));
+      a.push({
+        y: p(e.y),
+        f: () => {
+          (R(n, s, E, 7, 3, "#ff4fd8"), R(n, s, E, 4, 1.6, "#fff0ff"), R(n, s, E - 1, 2, 1, "#c9a0ff"));
+        },
+      });
+      return;
+    }
+    if (e.k === "mural") {
+      let s = t(e.x * 16),
+        E = i(e.y * 16);
+      a.push({
+        y: e.y * 16 + 40,
+        f: () => {
+          (I(s, E, 64, 40, "#1a0828"),
+            I(s, E, 64, 3, "#ff4fd8"),
+            I(s, E + 37, 64, 3, "#c9a0ff"),
+            v(n, "JAZZ V", s + 32, E + 6, "#ff4fd8", 1, "center", ""),
+            v(n, "LET'S RIDE", s + 32, E + 18, "#ffffff", 1, "center", ""),
+            ee.jazz_tag && v(n, "TAGGED", s + 32, E + 28, "#c9a0ff", 1, "center", ""));
+        },
+      });
+    }
+  }
+  function drawCompanion(e, a) {
+    if (!d.companion) return;
+    let x = (d.compX || d.x) - he.x,
+      y = (d.compY || d.y) - he.y - 16;
+    (R(n, x, y, 4, 4, "#ff4fd8"), R(n, x - 1, y - 1, 2, 2, "#fff0ff"));
+  }
+  function drawVisorAt(e, a) {
+    if (!visorShown()) return;
+    (I(e - 8, a - 18, 16, 3, "#ff4fd8"), I(e - 6, a - 17, 5, 1, "#c9a0ff"), I(e + 1, a - 17, 5, 1, "#c9a0ff"));
+  }
     let T = m.getContext("2d");
     if (!T) throw new Error("no ctx");
     let n = T;
@@ -11037,6 +12120,8 @@ ram_mem_amulet: [
         secE: !1,
         back: !1,
         backE: !1,
+        magic: !1,
+        magicE: !1,
       },
       ee = {},
       Xe = [],
@@ -11336,6 +12421,7 @@ ram_mem_amulet: [
           ghost: !!E.ghost,
         }))),
         (Oe = []),
+        (le = null),
         (Be = []),
         (ha = []),
         (ze = {}),
@@ -11425,6 +12511,7 @@ ram_mem_amulet: [
         pri: slotsOn() ? d.pri || "" : void 0,
         sec: slotsOn() ? d.sec || "" : void 0,
         boardId: A.story === "ros" ? d.boardId || "" : void 0,
+        cosmos: cosmosSave(),
       };
       try {
         (window.localStorage.setItem(Mt, JSON.stringify(e)),
@@ -11458,6 +12545,7 @@ ram_mem_amulet: [
         (ua = {}),
         (A.time = 0),
         (A.tv = "off"),
+        applyCosmos(null),
         (Ae = null),
         (q = null),
         (le = null),
@@ -11565,6 +12653,7 @@ ram_mem_amulet: [
             (d.arrowCd = 0),
             (d.charge = 0),
             migrateSlots(e)),
+          applyCosmos(e.cosmos),
           Q(
             A.story === "ros"
               ? "WELCOME BACK, SHERIFF."
@@ -11647,6 +12736,25 @@ ram_mem_amulet: [
           break;
         case "raygun":
           ((d.items.raygun = !0), (d.z = "raygun"));
+          break;
+        case "page":
+          Q("AN ANCIENTS CHARTER PAGE.");
+          break;
+        case "pkey":
+          ((ee.prison_key = !0), Q("PRISON KEY."));
+          break;
+        case "part":
+          ((d.part = (d.part || 0) + 1), Q("RARE PART."));
+          break;
+        case "gmap":
+          ((d.gmap = 1), (ee.galactic_map = !0), Q("GALACTIC MAP."));
+          break;
+        case "companion":
+          ((d.companion = 1), Q("COMPANION LIGHT."));
+          break;
+        case "visor":
+          ((d.ownVisor = 1),
+            A.story === "santt" ? Q("SANTT WEARS NO VISOR.") : (d.visor = 1));
           break;
         case "tea":
           d.hp = d.maxHp;
@@ -11738,6 +12846,7 @@ ram_mem_amulet: [
         le = { sel: 0, id: "travel" };
       },
     };
+    Object.assign(Ia, cosmosFns());
     function rr(e) {
       if (!Ae || q || le || ue || A.trans || z || K) return;
       let a = Ae,
@@ -11946,6 +13055,8 @@ ram_mem_amulet: [
     }
     function be(e, a, t) {
       if (d.inv > 0 || d.roll > 0 || d.god || A.state !== "play") return;
+      e = cosmosGuard(e);
+      if (e <= 0) return;
       if ((d.shield || 0) > 0) {
         ((d.shield = 0), D.tink(), Q("THE SHIELD HOLDS."));
         return;
@@ -11955,6 +13066,12 @@ ram_mem_amulet: [
       ((d.kb = 0.16),
         (d.kbx = Math.cos(i) * 150),
         (d.kby = Math.sin(i) * 150),
+        d.hp <= 0 &&
+          d.brew &&
+          ((d.brew = 0),
+          (d.hp = Math.max(1, Math.ceil(d.maxHp / 2))),
+          Q("STARLIGHT BREW."),
+          D.heal()),
         d.hp <= 0 &&
           ((d.hp = 0),
           (A.state = "gameover"),
@@ -11980,6 +13097,7 @@ ram_mem_amulet: [
     }
     function _a(e, a, t, i, s) {
       if (e.inv > 0 || e.dead) return;
+      a += cosmosHitBonus();
       ((e.hp -= a), (e.inv = 0.25), (e.flash = 0.15), D.hit());
       let E = Math.atan2(e.y - i, e.x - t);
       ((e.kb = 0.14),
@@ -11988,6 +13106,7 @@ ram_mem_amulet: [
         s && (e.stun = s),
         e.hp <= 0 &&
           ((e.dead = !0),
+          cosmosShatter(e),
           A.story === "ros" ? (D.shard(), e.k === "fear" && fearFed()) : D.kill(),
           ne(
             e.x,
@@ -12225,6 +13344,7 @@ ram_mem_amulet: [
             D.roll());
           }
         }
+        U.magicE && castSpell();
         U.talkE && or();
       }
       (d.atk > 0 && (d.atk -= e),
@@ -12241,6 +13361,7 @@ ram_mem_amulet: [
         d.rollCd > 0 && (d.rollCd -= e),
         d.inv > 0 && (d.inv -= e),
         d.beamCd > 0 && (d.beamCd -= e));
+      if (w.surf && !E) return surfSteer(e, a);
       let f = 0,
         c = 0;
       if (d.kb > 0) ((d.kb -= e), (f = d.kbx * e), (c = d.kby * e));
@@ -12745,6 +13866,7 @@ ram_mem_amulet: [
         U.toolE =
         U.priE =
         U.secE =
+        U.magicE =
         U.backE =
           !1),
         (Qe = !1));
@@ -12922,6 +14044,7 @@ ram_mem_amulet: [
             S[4] && !Z(S[4])
               ? (D.nope(), Q("NOT DISCOVERED YET."))
               : ((le = null), D.mirage(), dt(S[0], S[1], S[2], S[3]));
+          } else if (cosmosOffer(c[le.sel])) {
           } else {
             let S = c[le.sel];
             S.once && Z(S.once)
@@ -12945,6 +14068,7 @@ ram_mem_amulet: [
         Sr(e),
         Rr(e),
         ramWorld(e),
+        cosmosTick(e),
         Vr(e));
       for (let f of Ta)
         (f.drop > 0 && (f.drop = Math.max(0, f.drop - e * 0.9)),
@@ -14524,11 +15648,10 @@ ram_mem_amulet: [
             : d.boardId === "skimmer"
               ? 74
               : 80;
-      return w.run
-        ? 100
-        : d.items.board && !w.dungeon
-          ? 102 + nn("up_speed") * 10
-          : 80;
+      return (
+        (w.run ? 100 : d.items.board && !w.dungeon ? 102 + nn("up_speed") * 10 : 80) +
+        (A.story === "ros" ? 0 : cosmosBoardSpeed())
+      );
     }
     let Re = { spawnT: 0, fly: -1, flyK: "", flyT: 0, said: 0, start: 0 };
     function Fr() {
@@ -16071,6 +17194,20 @@ ram_mem_amulet: [
       (splitHands(), D.sel(), Q((weaponish(id) ? "ATTACK " : "ITEM ") + slotName(id)), xe());
     }
     function skippyPauseInput() {
+      if (U.right && !A.wasR) A.skipPage = (A.skipPage || 0) ? 0 : 1;
+      if (U.left && !A.wasL) A.skipPage = 0;
+      ((A.wasL = U.left), (A.wasR = U.right));
+      if ((A.skipPage || 0) === 1) {
+        if (U.backE || U.mapE || Qe || U.rollE) {
+          ((A.paused = !1), (A.skipPage = 0), D.sel());
+          return;
+        }
+        let n = 7;
+        if (U.upE) A.gearSel = ((A.gearSel || 0) + n - 1) % n;
+        if (U.downE) A.gearSel = ((A.gearSel || 0) + 1) % n;
+        U.attackE && cosmosGearAct(A.gearSel || 0);
+        return;
+      }
       if (U.backE || U.mapE || Qe || U.rollE) {
         ((A.paused = !1),
           D.sel(),
@@ -17656,7 +18793,8 @@ ram_mem_amulet: [
     }
     function as() {
       sandVeil();
-      (I(0, 0, 320, 24, "#0d0a1a"), I(0, 23, 320, 1, "#3a3f55"));
+      cosmosDark();
+      (I(0, 0, 320, 32, "#120818"), I(0, 31, 320, 1, "#ff4fd8"));
       let e = Math.ceil(d.maxHp / 2);
       if (e <= 7) {
         v(n, "LIFE", 4, 2, "#3dff6a", 1, "", "");
@@ -17675,6 +18813,12 @@ ram_mem_amulet: [
         }
         d.pieces && I(92, 20, 2, 2, "#8ae878");
       }
+      (I(4, 24, 64, 5, "#2a1848"),
+        I(4, 24, Math.max(0, Math.floor(64 * ((d.magic || 0) / (d.magicMax || 8)))), 5, "#c060ff"),
+        I(4, 24, 64, 1, "#ff9ae8"),
+        v(n, (d.spell === "ward" ? "WARD" : "LANTERN") + ((d.ward || 0) ? " " + d.ward : ""), 70, 23, "#ff9ae8", 1, "", ""),
+        A.story === "skippy" && v(n, "$STAR", 168, 23, "#c9a0ff", 1, "", ""),
+        w.surf && v(n, "RINGS " + ((A.surf && A.surf.rings) || 0), 210, 23, "#ff4fd8", 1, "", ""));
       let a = (t, i, s) => {
         (I(t, 3, 18, 18, "#1a1630"),
           I(t, 3, 18, 1, "#ffcc33"),
@@ -17701,7 +18845,7 @@ ram_mem_amulet: [
               v(n, Z("shield_got") ? "SHIELD" : "SHIELD --", 140, 12, Z("shield_got") ? "#4ff0ff" : "#6a6a8a", 1, "", ""),
               v(n, Z("amulet_got") ? "AMULET" : "AMULET --", 196, 12, Z("amulet_got") ? "#ff4fd8" : "#6a6a8a", 1, "", ""))
             : (n.drawImage(O.icon.coin, 140, 4),
-            v(n, String(d.coins).padStart(3, "0"), 154, 9, "#ffe070", 1, "", ""),
+            v(n, String(d.coins).padStart(3, "0"), 154, 9, A.story === "skippy" ? "#ff9ae8" : "#ffe070", 1, "", ""),
             n.drawImage(O.icon.arrows, 174, 4),
             v(n, String(d.arrows).padStart(2, "0"), 188, 9, "#ffffff", 1, "", "")),
         w.dungeon &&
@@ -18063,6 +19207,7 @@ ram_mem_amulet: [
                       Math.round(i(f.x) - c.width / 2),
                       Math.round(s(f.y) - c.height + 2),
                     ),
+                cosmosRankLabel(f, i, s),
                 f.stun > 0 &&
                   Math.floor(A.t * 12) % 2 &&
                   I(
@@ -18300,6 +19445,8 @@ ram_mem_amulet: [
       if (
         (s && f(),
         Aa(ga(), e, a, d.dir, t, 1),
+        drawVisorAt(e, a),
+        drawCompanion(e, a),
         d.arrowCd > 0.12 && d.z === "raygun" && d.items.raygun)
       ) {
         let c = e + i[0] * 9,
@@ -18620,6 +19767,10 @@ ram_mem_amulet: [
         ramPause();
         return;
       }
+      if ((A.skipPage || 0) === 1) {
+        drawCosmosGear();
+        return;
+      }
       (I(0, 24, 320, 200, "#05040ce8"),
         v(n, "PAUSED", 160, 30, "#ffcc33", 2, "center", X),
         v(n, w.dungeon ? "" : w.name, 106, 52, "#ff9ae8", 1, "center", X),
@@ -18674,7 +19825,7 @@ ram_mem_amulet: [
           )),
         v(n, "X " + slotName(slotsOn() ? d.pri : ""), 16, 176, "#ffcc33", 1, "", ""),
         v(n, "Z " + slotName(slotsOn() ? d.sec : ""), 170, 176, "#4ff0ff", 1, "", ""),
-        v(n, "Q SWAPS THE ITEM. X SETS THE ROW. BACK CLOSES", 160, 190, "#c9d1e3", 1, "center", ""),
+        v(n, "Q SWAPS THE ITEM. X SETS THE ROW. RIGHT OPENS GEAR.", 160, 190, "#c9d1e3", 1, "center", ""),
         skippyObjective()
           ? v(n, skippyObjective(), 160, 208, "#ffe0a0", 1, "center", "#000")
           : Math.floor(A.t * 2) % 2 &&
@@ -18917,12 +20068,20 @@ ram_mem_amulet: [
           );
         return tabs;
       }
-      if (A.state === "play" && A.paused)
-        return ownedItems().map((id, i) => ({
-          label: slotName(id) + (d.wep === id ? "  ARMED" : d.tool === id ? "  HELD" : ""),
+      if (A.state === "play" && A.paused && (A.skipPage || 0) === 1)
+        return ["WEAPON", "ARMOR", "BOARD", "SPELL", "VISOR", "GALACTIC MAP", "BOTTLE", "ITEMS"].map((label, i) => ({
+          label: label,
           enabled: !0,
           on: (A.gearSel || 0) === i,
         }));
+      if (A.state === "play" && A.paused)
+        return ownedItems()
+          .map((id, i) => ({
+            label: slotName(id) + (d.wep === id ? "  ARMED" : d.tool === id ? "  HELD" : ""),
+            enabled: !0,
+            on: (A.gearSel || 0) === i,
+          }))
+          .concat([{ label: "GEAR", enabled: !0, on: !1 }]);
       return [];
     }
     function touchPick(i) {
@@ -18967,6 +20126,14 @@ ram_mem_amulet: [
         return;
       }
       if (A.state === "play" && A.paused) {
+        if ((A.skipPage || 0) === 1) {
+          i === 7 ? (A.skipPage = 0) : ((A.gearSel = i), cosmosGearAct(i));
+          return;
+        }
+        if (i === ownedItems().length) {
+          ((A.skipPage = 1), (A.gearSel = 0));
+          return;
+        }
         let id = ownedItems()[i];
         id && (weaponish(id) ? (d.wep = id) : (d.tool = id), splitHands(), D.sel(), xe());
       }
@@ -19001,6 +20168,7 @@ ram_mem_amulet: [
         (root.dataset.item = mode === "play" && tools > 0 ? "1" : "0"),
         (root.dataset.swap = mode === "play" && tools > 1 ? "1" : "0"),
         (root.dataset.talk = mode === "play" && nearInteract() ? "1" : "0"),
+        (root.dataset.magic = mode === "play" ? "1" : "0"),
         (root.dataset.board = d.boardId || ""));
       ((window.__SQ_PICK = touchPick),
         (window.__SQ_TOUCH = { mode, rows: touchRows(), tools }),
@@ -19763,6 +20931,7 @@ ram_mem_amulet: [
     }
     function Os(e, a, t, i) {
       if (e.k === "clue") return;
+      if (e.k === "ring" || e.k === "mural") return cosmosProp(e, a, t, i);
       if (e.k === "orb") {
         let s = t(p(e.x)),
           E = i(p(e.y));
@@ -19853,6 +21022,9 @@ ram_mem_amulet: [
       }
     }
     function cn(e, a) {
+      if (e.k === "seeker") return O.vov[0][a % 2];
+      if (e.k === "swarm") return O.vov[1][a % 2];
+      if (e.k === "spirit") return O.vov[2][a % 2];
       if (e.k === "redcoat" && O.redcoat) return O.redcoat[a % 2];
       if (e.k === "skipbot") return Ue("skipbot", 0, a % 2);
       if (e.k === "fear") return Ue("ros", 0, a % 2);
@@ -21171,6 +22343,8 @@ ram_mem_amulet: [
                         ? (U.upE = !0)
                         : e === "down"
                         ? (U.downE = !0)
+                        : e === "magic"
+                        ? (U.magicE = !0)
                         : e === "back" && (U.backE = !0)),
         (U[e] = a));
     }
@@ -21196,6 +22370,7 @@ ram_mem_amulet: [
       KeyK: "item",
       KeyC: "roll",
       KeyL: "roll",
+      KeyF: "magic",
       ShiftLeft: "roll",
       ShiftRight: "roll",
       KeyE: "talk",
@@ -21230,6 +22405,7 @@ ram_mem_amulet: [
           U.tool =
           U.pri =
           U.sec =
+          U.magic =
             !1),
           (U.sx = U.sy = 0),
           A.state === "play" && !Ae && !q && !le && (A.paused = !0));
@@ -21410,6 +22586,37 @@ ram_mem_amulet: [
           A.story === "ros" ? rosObjective() : A.story === "ramshackle" ? ramObjective() : skippyObjective(),
         chapters: () => STORY_ROWS.map((r) => ({ id: r.id, status: chapterStatus(r.id), sub: rowSub(r) })),
         quests: () => (A.story === "ros" ? rosQuestRows() : []),
+        magic: () => ({
+          n: d.magic || 0,
+          max: d.magicMax || 8,
+          spell: d.spell || "lantern",
+          ward: d.ward || 0,
+          lantern: d.lantern || 0,
+        }),
+        cosmos: () => ({
+          gearW: d.gearW || 1,
+          gearA: d.gearA || 1,
+          gearB: d.gearB || 1,
+          ownW: d.ownW || 1,
+          ownA: d.ownA || 1,
+          ownB: d.ownB || 1,
+          bottles: (d.bottles || []).slice(),
+          stars: d.coins,
+          part: d.part || 0,
+          gmap: d.gmap || 0,
+          visor: visorShown(),
+          companion: d.companion || 0,
+          buff: d.buff || "",
+          brew: d.brew || 0,
+          pages: cosmosPageCount(),
+          lane: !!ee.lane_sky,
+          area: w.id,
+        }),
+        load: () => Bt(),
+        cast: () => castSpell(),
+        hurt: (n = 1) => be(n, d.x, d.y + 20),
+        drink: (i = 0) => drinkBottle(i),
+        gearAct: (i) => cosmosGearAct(i),
 
       };
       window.__SQ = e;
@@ -21648,10 +22855,11 @@ html.srml #srml-scr canvas{width:100%!important;height:auto!important;display:bl
 html.srml #pad,html.srml #help{display:none!important}
 html.srml .srml-b{box-sizing:border-box;margin:0;display:none;align-items:center;justify-content:center;border-radius:16px;font-weight:800;font-family:system-ui,sans-serif;touch-action:none;user-select:none;color:#e9eef8;background:#141a2e;border:2px solid #3a3f55;position:fixed;z-index:6}
 html.srml .srml-b.on{filter:brightness(1.25)}
-html.srml .srml-b.atk,html.srml .srml-b.itm,html.srml .srml-b.rol,html.srml .srml-b.tlk,html.srml [data-b=swap],html.srml [data-b=map]{border-radius:50%;border-width:3px;background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.5),transparent 36%),radial-gradient(circle at 50% 62%,#2a385f,#0c1020 74%);box-shadow:inset 0 -7px 0 rgba(0,0,0,.4),0 4px 0 #05060e;text-shadow:0 1px 0 #000;font-size:11px;letter-spacing:.4px;padding:2px}
+html.srml .srml-b.atk,html.srml .srml-b.itm,html.srml .srml-b.rol,html.srml .srml-b.tlk,html.srml [data-b=swap],html.srml [data-b=map],html.srml [data-b=magic]{border-radius:50%;border-width:3px;background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.5),transparent 36%),radial-gradient(circle at 50% 62%,#2a385f,#0c1020 74%);box-shadow:inset 0 -7px 0 rgba(0,0,0,.4),0 4px 0 #05060e;text-shadow:0 1px 0 #000;font-size:11px;letter-spacing:.4px;padding:2px}
 html.srml .srml-b.atk{border-color:#4ff0ff;color:#e7fdff}
 html.srml .srml-b.itm{border-color:#ffcc33;color:#fff4c8}
 html.srml .srml-b.rol{border-color:#ff4fd8;color:#ffe0f6}
+html.srml [data-b=magic]{border-color:#c9a0ff;color:#ffe0ff}
 html.srml .srml-b.tlk{border-color:#3dff6a;color:#e4ffe9}
 html.srml [data-b=swap]{border-color:#ffe650;color:#fff8d0;font-size:10px}
 html.srml [data-b=map]{border-color:#b7c3e6;color:#eef2ff;font-size:10px}
@@ -21699,7 +22907,7 @@ function layout(){
   var menu=mode==="title"||mode==="back"||mode==="pause"||mode==="choice";
   scr.style.alignSelf="";
   scr.style.marginLeft="";
-  ["attack","item","swap","roll","talk","map","back"].forEach(function(k){hide(by[k]);});
+  ["attack","item","swap","roll","talk","map","back","magic"].forEach(function(k){hide(by[k]);});
   hide(stick);
   var top=sat+8,bot=sab+10,left=sal+10,right=W-sar-10;
   if(menu){
@@ -21732,20 +22940,25 @@ function layout(){
       }
     }
     var primary=spot(acx,acy,atk);
-    var angI=36*Math.PI/180;
+    var magD=Math.max(56,Math.round(atk*0.8));
+    var angI=22*Math.PI/180;
     var itemBox=spot(acx-Math.cos(angI)*(atk/2+gap+itemD/2), acy-Math.sin(angI)*(atk/2+gap+itemD/2), itemD);
+    var angM=50*Math.PI/180;
+    var magicBox=spot(acx-Math.cos(angM)*(atk/2+gap+magD/2), acy-Math.sin(angM)*(atk/2+gap+magD/2), magD);
     var angR=78*Math.PI/180;
     var rollBox=spot(acx-Math.cos(angR)*(atk/2+gap+rollD/2), acy-Math.sin(angR)*(atk/2+gap+rollD/2), rollD);
-    shove(rollBox,[primary,itemBox]);
-    var sang=angI+0.7;
+    shove(magicBox,[primary,itemBox]);
+    shove(rollBox,[primary,itemBox,magicBox]);
+    var sang=angI+0.55;
     var swapBox=spot(itemBox.cx-Math.cos(sang)*(itemD/2+gap+swapD/2), itemBox.cy-Math.sin(sang)*(itemD/2+gap+swapD/2), swapD);
-    shove(swapBox,[primary,itemBox,rollBox]);
+    shove(swapBox,[primary,itemBox,magicBox,rollBox]);
     var talk=R.dataset.talk==="1";
     var shown=[primary];
     if(talk)show(by.talk,primary.cx-atk/2,primary.cy-atk/2,atk,atk,"TALK");
     else show(by.attack,primary.cx-atk/2,primary.cy-atk/2,atk,atk,"ATTACK");
     if(R.dataset.item==="1"){show(by.item,itemBox.cx-itemD/2,itemBox.cy-itemD/2,itemD,itemD,"ITEM");shown.push(itemBox);}
     if(R.dataset.swap==="1"&&R.dataset.item==="1"){show(by.swap,swapBox.cx-swapD/2,swapBox.cy-swapD/2,swapD,swapD,"SWAP");shown.push(swapBox);}
+    if(R.dataset.magic==="1"){show(by.magic,magicBox.cx-magD/2,magicBox.cy-magD/2,magD,magD,"MAGIC");shown.push(magicBox);}
     show(by.roll,rollBox.cx-rollD/2,rollBox.cy-rollD/2,rollD,rollD,"ROLL");
     shown.push(rollBox);
     var clusterLeft=Math.min.apply(null,shown.map(function(b){return b.cx-b.r;}));
