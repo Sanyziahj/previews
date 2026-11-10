@@ -107,21 +107,41 @@ async function checkSurface(page, shot) {
     return S.toastInk();
   }, LONGEST[2]);
   expectInside(toast, 'toast');
-  const radio = await page.evaluate(() => {
+  const live = await page.evaluate(() => {
     const S = __SQ;
     S.G.state = 'play';
     S.G.story = 'drill';
     S.G.paused = false;
+    S.G.choice = null;
     S.G.toastT = 0;
     S.G.dsCalm = 0;
     S.flag('oe_ds_moon1');
     S.warp('ds_moon1', 4, 4, 0);
-    for (let i = 0; i < 6; i++) { S.skipText(); S.step(1); }
+    for (let i = 0; i < 8; i++) { S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1); }
     S.G.dsCalm = 0;
+    S.G.banner = 'MOON COLONY REVOLT';
+    S.G.bannerT = 3;
+    S.G.saveT = 1.4;
     S.step(2);
-    return S.radioInk();
+    return { radio: S.radioInk(), frame: S.frameInk() };
   });
-  expectInside(radio, 'radio');
+  expectInside(live.radio, 'radio');
+  const said = live.radio.lines.map((l) => l.text).join(' ');
+  expect(said).toContain('RADIO:');
+  expect(said).toContain('KEY IS NOT BY THE GATE');
+  const frameText = live.frame.flatMap((item) => item.lines.map((l) => l.text));
+  expect(frameText.join(' ')).toContain('SAVED');
+  expect(frameText.join(' ')).toContain('MOON COLONY REVOLT');
+  for (const item of live.frame) expectInside(item, item.kind || 'frame');
+  const rects = live.frame.flatMap((item) => item.lines);
+  for (let i = 0; i < rects.length; i++) {
+    for (let j = i + 1; j < rects.length; j++) {
+      const a = rects[i], b = rects[j];
+      const ix = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
+      const iy = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
+      expect(ix > 0.5 && iy > 0.5, `${a.text} / ${b.text}`).toBe(false);
+    }
+  }
   if (shot) await page.screenshot({ path: shot.radio });
 }
 
@@ -130,8 +150,8 @@ test.describe('speech stays in the box on a phone', () => {
   test('long lines page inside the box at every landscape size', async ({ page }) => {
     const errors = await boot(page);
     const shots = {
-      '844x390': { talk: `${ART}/b31b-talk-844.png`, radio: `${ART}/b31b-radio-844.png` },
-      '740x360': { talk: `${ART}/b31b-talk-740.png`, radio: `${ART}/b31b-radio-740.png` },
+      '844x390': { talk: `${ART}/b31c-talk-844.png`, radio: `${ART}/b31c-radio-844.png` },
+      '740x360': { talk: `${ART}/b31c-talk-740.png`, radio: `${ART}/b31c-radio-740.png` },
     };
     for (const [w, h] of [[844, 390], [932, 430], [667, 375], [740, 360], [390, 844]]) {
       await page.setViewportSize({ width: w, height: h });

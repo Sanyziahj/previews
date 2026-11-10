@@ -3,7 +3,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script>window.__SQ_BUILD="b31b";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b31b(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b31b");location.replace(u.href);}</script>
+<script>window.__SQ_BUILD="b31c";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b31c(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b31c");location.replace(u.href);}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Space Riders: Skippy's Quest</title><link rel="icon" href="data:,">
 <meta name="description" content="Space Riders: Skippy's Quest - a free 16-bit top-down action adventure browser game. The Red King is missing. Ride with ROS through the Sand Dungeon, take Cash's portals to the Seaport and Ramshackle the Viking, win Ronin's flaming sword, beat the house at the Andromeda Casino and stop the Overlord on the Moon, survive the meteor shower with Blaze and earn your space board at the Crossroad and cross the mirror into the Dark World, then storm Fright's castle and bring the Red King home. Chapters 1-9 (Complete) out now.">
@@ -12490,10 +12490,18 @@ ram_mem_amulet: [
         placeLabel(sx((warp.x + warp.w / 2) * 16), sy((warp.y + 0.5) * 16), "SKY LANE", "#9ff0ea");
   }
   function drawMemory() {
+    A.radioInk = null;
     if (A.story !== "drill" || !w) return;
     let id = w.id || "";
     if (id === "ds_breathe") {
-      v(n, "BREATHE. IN FOUR. OUT FOUR. THIS IS NOW.", 160, 200, "#fff6c0", 1, "center", "#000");
+      A.radioInk = drawSentences(
+        ["BREATHE. IN FOUR. OUT FOUR. THIS IS NOW.", dsObjective()].filter(Boolean),
+        160,
+        140,
+        260,
+        "#9ff0ea",
+        "radio",
+      );
       return;
     }
     let mem =
@@ -12520,12 +12528,13 @@ ram_mem_amulet: [
       n.fillStyle = (i + Math.floor((A.t || 0) * 18)) % 2 ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)";
       n.fillRect((i * 53 + Math.floor((A.t || 0) * 80)) % 320, (i * 31) % 190, 3, 1);
     }
-    A.radioInk = drawBoxed(
-      "RADIO: YOU ARE AT THE ACADEMY. THIS ALREADY HAPPENED.",
+    A.radioInk = drawSentences(
+      ["RADIO: YOU ARE AT THE ACADEMY. THIS ALREADY HAPPENED.", dsObjective()].filter(Boolean),
       160,
-      176,
-      220,
+      132,
+      288,
       "#9ff0ea",
+      "radio",
     );
   }
   function dsWorld(e) {
@@ -12539,15 +12548,7 @@ ram_mem_amulet: [
         id.indexOf("ds_pluto") === 0;
     if (!mem) return;
     A.dsRadio = (A.dsRadio || 0) - e;
-    if (A.dsRadio <= 0 && (A.toastT || 0) <= 0 && !Ae && !q) {
-      A.dsRadio = 8;
-      let lines = [
-        "RADIO: YOU ARE AT THE ACADEMY.",
-        "RADIO: THIS ALREADY HAPPENED.",
-        "RADIO: BREATHE. YOU ARE HERE.",
-      ];
-      Q(lines[Math.floor(A.t || 0) % lines.length], 2.2);
-    }
+    if (A.dsRadio <= 0) A.dsRadio = 8;
     A.dsShift = (A.dsShift || 0) - e;
     A.dsShift < -5 && (A.dsShift = 0.45);
   }
@@ -17813,7 +17814,7 @@ ram_mem_amulet: [
       for (let a = 0; a < 16; a++)
         I((a * 23) % 320, 20 + ((a * 17) % 70), 2, 2, "#fff2c8");
       (v(n, "SPACE RIDERS", 160, 8, "#ff4fd8", 2, "center", "#2a0a14"),
-        v(n, window.__SQ_BUILD || "b31b", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
+        v(n, window.__SQ_BUILD || "b31c", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
         v(n, "SIDE QUESTS COME HOME", 160, 28, "#ffcc33", 1, "center", "#2a0a14"));
       let a = 58;
       for (let t = 0; t < STORY_ROWS.length; t++) {
@@ -20460,6 +20461,7 @@ ram_mem_amulet: [
         A.story === "drill" &&
           !A.paused &&
           !q &&
+          !A.radioInk &&
           v(n, dsObjective(), 160, 208, "#ffe0a0", 1, "center", "#000"),
         A.story === "skippy" &&
           !A.paused &&
@@ -20468,18 +20470,7 @@ ram_mem_amulet: [
           skippyObjective() &&
           v(n, skippyObjective(), 160, 208, "#ffe0a0", 1, "center", "#000"),
         A.ev && drawEvidence(),
-        A.choice && drawChoice(),
-        A.saveT > 0 &&
-          v(
-            n,
-            "SAVED",
-            w.dungeon ? 160 : 274,
-            w.dungeon ? 188 : 10,
-            Math.floor(A.t * 6) % 2 ? "#3dff6a" : "#ffffff",
-            1,
-            w.dungeon ? "center" : "",
-            X,
-          ));
+        A.choice && drawChoice());
     }
     function Aa(e, a, t, i, s, E) {
       let f = Ue(e, i, s);
@@ -21394,19 +21385,76 @@ ram_mem_amulet: [
         left = align === "center" ? Math.round(x - w / 2) : align === "right" ? x - w : x;
       return { text: String(text), x: left, y: y, w: w, h: 7 };
     }
-    function drawBoxed(text, cx, cy, maxW, color) {
-      let cols = Math.max(8, Math.floor((maxW - 12) / 6)),
-        lines = Nn(text, cols).slice(0, 3),
-        tw = Math.min(maxW, Math.max.apply(null, lines.map((l) => Ya(l.toUpperCase(), 1))) + 12),
-        th = 8 + lines.length * 10,
+    function noteInk(kind, ink) {
+      if (!ink || !ink.box) return ink;
+      (A.frameInk || (A.frameInk = [])).push({ kind: kind, box: ink.box, lines: ink.lines || [] });
+      return ink;
+    }
+    function rectHit(a, b) {
+      return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+    }
+    function dodgeBox(box) {
+      let occ = [A.radioInk, A.speechInk, A.bannerInk, A.toastInk, A.savedInk, A.shopInk, A.choiceInk]
+        .map((ink) => ink && ink.box)
+        .filter(Boolean);
+      let guard = 0;
+      while (guard++ < 8 && occ.some((o) => rectHit(box, o))) {
+        let hit = occ.find((o) => rectHit(box, o));
+        box.y = hit.y - box.h - 6;
+        if (box.y < 36) box.y = hit.y + hit.h + 6;
+      }
+      if (box.y < 36) box.y = 36;
+      if (box.y + box.h > 220) box.y = Math.max(36, 220 - box.h);
+      return box;
+    }
+    function drawSentences(parts, cx, cy, maxW, color, kind) {
+      let cols = Math.max(8, Math.floor((maxW - 16) / 6)),
+        lines = [];
+      for (let part of parts) lines.push.apply(lines, Nn(part, cols));
+      if (!lines.length) lines = [""];
+      let tw = Math.min(maxW, Math.max.apply(null, lines.map((l) => Ya(l.toUpperCase(), 1))) + 16),
+        th = 10 + lines.length * 11,
         x = Math.max(4, Math.min(316 - tw, Math.round(cx - tw / 2))),
-        y = Math.max(4, Math.round(cy));
-      na(x, y, tw, th, color || "#ffcc33");
+        y = Math.max(36, Math.round(cy));
+      if (y + th > 216) y = Math.max(36, 216 - th);
+      let box = dodgeBox({ x: x, y: y, w: tw, h: th });
+      na(box.x, box.y, box.w, box.h, color || "#ffcc33");
       let ink = lines.map((l, i) => {
-        v(n, l, x + tw / 2, y + 4 + i * 10, "#fff6c0", 1, "center", "#000");
-        return inkOf(l, x + tw / 2, y + 4 + i * 10, "center");
+        let ly = box.y + 4 + i * 11;
+        v(n, l, box.x + box.w / 2, ly, "#fff6c0", 1, "center", "#000");
+        return inkOf(l, box.x + box.w / 2, ly, "center");
       });
-      return { box: { x: x, y: y, w: tw, h: th }, lines: ink };
+      return noteInk(kind || "box", { box: box, lines: ink });
+    }
+    function drawBoxed(text, cx, cy, maxW, color, kind) {
+      return drawSentences([text], cx, cy, maxW, color, kind || "toast");
+    }
+    function placeSaved() {
+      let label = "SAVED",
+        w = Ya(label, 1) + 14,
+        h = 16,
+        occ = [A.radioInk, A.speechInk, A.bannerInk, A.toastInk, A.shopInk, A.choiceInk]
+          .map((ink) => ink && ink.box)
+          .filter(Boolean);
+      occ.push({ x: 0, y: 0, w: 320, h: 34 });
+      let spots = [];
+      if (A.radioInk) {
+        let b = A.radioInk.box;
+        spots.push({ x: Math.round(b.x + (b.w - w) / 2), y: b.y - h - 6 });
+      }
+      spots.push({ x: Math.round(160 - w / 2), y: 40 }, { x: 8, y: 40 }, { x: 316 - w, y: 40 });
+      let spot = null;
+      for (let s of spots) {
+        let r = { x: s.x, y: s.y, w: w, h: h };
+        if (r.x < 4 || r.y < 36 || r.x + r.w > 316 || r.y + r.h > 220) continue;
+        if (occ.some((o) => rectHit(r, o))) continue;
+        spot = r;
+        break;
+      }
+      spot || (spot = { x: 8, y: 40, w: w, h: h });
+      na(spot.x, spot.y, spot.w, spot.h, "#3dff6a");
+      v(n, label, spot.x + 7, spot.y + 4, Math.floor(A.t * 6) % 2 ? "#3dff6a" : "#ffffff", 1, "", "#000");
+      A.savedInk = noteInk("saved", { box: spot, lines: [inkOf(label, spot.x + 7, spot.y + 4, "")] });
     }
     function ss() {
       if (!q) return;
@@ -21443,7 +21491,7 @@ ram_mem_amulet: [
       q.n >= a.join(" ").length &&
         Math.floor(A.t * 3) % 2 &&
         v(n, q.page < q.pages.length - 1 ? ">" : "*", g.arrowX, g.arrowY, "#ffcc33", 1, "", "");
-      A.speechInk = { box: { x: g.x, y: g.y, w: g.w, h: g.h }, lines: lines, page: q.page, pages: q.pages.length };
+      A.speechInk = noteInk("speech", { box: { x: g.x, y: g.y, w: g.w, h: g.h }, lines: lines, page: q.page, pages: q.pages.length });
     }
     function os() {
       if (!le) return;
@@ -21697,7 +21745,7 @@ ram_mem_amulet: [
       let e = A.t;
       (v(n, "SPACE RIDERS", 160, 14, "#ff4fd8", 3, "center", "#2a0a3a"),
         v(n, "SKIPPY'S QUEST", 160, 42, "#ffcc33", 2, "center", "#2a0a3a"),
-        v(n, window.__SQ_BUILD || "b31b", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
+        v(n, window.__SQ_BUILD || "b31c", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
       let a = (s, E, f, c, S) => {
         let y = Ue(s, S, 0);
         n.drawImage(
@@ -22220,6 +22268,13 @@ ram_mem_amulet: [
         window.__SRML_LAYOUT && window.__SRML_LAYOUT());
     }
     function Es() {
+      ((A.frameInk = []),
+        (A.savedInk = null),
+        !(A.toastT > 0 && A.toast) && (A.toastInk = null),
+        !(A.bannerT > 0) && (A.bannerInk = null),
+        !q && (A.speechInk = null),
+        !le && (A.shopInk = null),
+        !A.choice && (A.choiceInk = null));
       touchContext();
       publishLive();
       if (A.state === "stories") {
@@ -22335,14 +22390,15 @@ ram_mem_amulet: [
         ((n.globalAlpha = e),
           na(bx, 34, bw, bh, "#ffcc33"),
           lines.forEach((l, i) => v(n, l, 160, 40 + i * 12, "#ffcc33", 1, "center", X)),
-          (A.bannerInk = {
+          (A.bannerInk = noteInk("banner", {
             box: { x: bx, y: 34, w: bw, h: bh },
             lines: lines.map((l, i) => inkOf(l, 160, 40 + i * 12, "center")),
-          }),
+          })),
           (n.globalAlpha = 1));
       }
       if ((os(), ys(), Us(), ss(), fs(), A.toastT > 0 && A.toast))
         A.toastInk = drawBoxed(A.toast, 160, 124, 292, "#4ff0ff");
+      A.saveT > 0 && placeSaved();
       if (
         (A.paused && is(),
         A.fade > 0.001 &&
@@ -24673,6 +24729,7 @@ ram_mem_amulet: [
         riderLog: () => riderLog(),
         gearTable: () => GEAR_TABLE,
         speechInk: () => A.speechInk || null,
+        frameInk: () => (A.frameInk || []).slice(),
         toastInk: () => A.toastInk || null,
         shopInk: () => A.shopInk || null,
         choiceInk: () => A.choiceInk || null,
@@ -24713,7 +24770,7 @@ ram_mem_amulet: [
           enterStory(id);
           return Bt();
         },
-        build: () => window.__SQ_BUILD || "b31b",
+        build: () => window.__SQ_BUILD || "b31c",
         cast: () => castSpell(),
         hud: () => hudBits(),
         fightHud: () => fightHud(),
