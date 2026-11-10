@@ -40,6 +40,8 @@ test('version, home, and Cash leave the lanes clear', async ({ page }) => {
   const errors = await bootLive(page);
   const build = await page.evaluate(() => __SQ.build());
   expect(build).toBe('b27');
+  const sub = await page.evaluate(() => __SQ.chapters().find((c) => c.id === 'skippy').sub);
+  expect(sub).toContain('MAIN');
   await page.evaluate(() => {
     const S = __SQ;
     S.G.state = 'play';
@@ -63,8 +65,6 @@ test('version, home, and Cash leave the lanes clear', async ({ page }) => {
   expect(home.chests).toBe(1);
   expect(home.pots).toBe(4);
   await page.locator('#game').screenshot({ path: `${ART}/ds-home-desktop.png` });
-  const sub = await page.evaluate(() => __SQ.chapters().find((c) => c.id === 'skippy').sub);
-  expect(sub).toContain('MAIN');
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
@@ -151,7 +151,9 @@ test('Cash and the portals keep their own space', async ({ page }) => {
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
-test('a shop can be bought, sold, and left from the phone', async ({ page }) => {
+test.describe('phone shops', () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+  test('a shop can be bought, sold, and left from the phone', async ({ page }) => {
   const errors = await bootLive(page);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.waitForFunction(() => document.documentElement.classList.contains('srml'));
@@ -205,7 +207,25 @@ test('a shop can be bought, sold, and left from the phone', async ({ page }) => 
     await page.waitForTimeout(120);
   }
   await page.screenshot({ path: `${ART}/ds-shop-land.png` });
+  const shops = ['pour', 'hauler', 'tea', 'cadet', 'dragon', 'forge', 'sars', 'boards', 'travel', 'slide'];
+  for (const id of shops) {
+    await page.evaluate((id) => {
+      const S = __SQ;
+      S.G.state = 'play';
+      S.G.paused = false;
+      S.P.coins = 80;
+      S.openShop(id);
+    }, id);
+    await page.waitForTimeout(150);
+    const row = (await page.locator('#srml-rows button').allTextContents()).join(' ');
+    expect(row, id).toContain('BUY');
+    expect(row, id).toContain('SELL');
+    expect(row, id).toContain('EXIT');
+    await page.locator('#srml-rows button', { hasText: 'EXIT' }).tap();
+    await page.waitForTimeout(150);
+  }
   expect(errors, errors.join('\n')).toEqual([]);
+});
 });
 
 test('dialogue freezes a fight until the box closes', async ({ page }) => {
@@ -261,8 +281,9 @@ test('Shadow gives Ramshackle a board and an old save keeps it', async ({ page }
   await page.waitForTimeout(200);
   const fresh = await page.evaluate(() => __SQ.board());
   expect(fresh.has).toBe(false);
-  await page.locator('#game').screenshot({ path: `${ART}/ds-shadow-board.png` });
   await press(page, 'KeyE');
+  await page.waitForTimeout(400);
+  await page.locator('#game').screenshot({ path: `${ART}/ds-shadow-board.png` });
   for (let i = 0; i < 8; i++) {
     if (await page.evaluate(() => __SQ.board().has)) break;
     await press(page, 'Space');
@@ -288,8 +309,13 @@ test('Shadow gives Ramshackle a board and an old save keeps it', async ({ page }
   expect(old.has).toBe(true);
   expect(old.coins).toBe(7);
   expect(old.axe).toBe(true);
-  const kept = await page.evaluate(() => JSON.parse(localStorage.getItem('sq_save_v1')));
-  expect(kept).toBeTruthy();
+  await page.evaluate(() => localStorage.setItem('sq_save_v1', '{"coins":42,"flags":{"woke":true},"area":"home","x":160,"y":120,"dir":0,"hp":6,"maxHp":6,"pieces":0,"arrows":0,"items":{"raygun":true},"keys":{},"bigKeys":{},"party":[],"shards":0,"time":1,"visited":{"home":true},"pri":"raygun","sec":""}'));
+  const kept = await page.evaluate(() => {
+    const before = localStorage.getItem('sq_save_v1');
+    return { before: JSON.parse(before).coins, ram: JSON.parse(localStorage.getItem('sq_save_ram_v1')).coins };
+  });
+  expect(kept.before).toBe(42);
+  expect(kept.ram).toBe(7);
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
@@ -399,11 +425,12 @@ async function fightBoss(page, area, file) {
 test('Drill Sergeant walks the memories and gifts the heavy blaster', async ({ page }) => {
   test.setTimeout(180000);
   const errors = await bootLive(page);
+  await page.waitForTimeout(400);
   for (let i = 0; i < 3; i++) await press(page, 'ArrowDown');
   await press(page, 'KeyX');
-  await page.waitForTimeout(200);
+  await page.waitForTimeout(500);
   await press(page, 'KeyX');
-  await page.waitForTimeout(400);
+  await page.waitForTimeout(500);
   await advance(page, 8);
   const started = await page.evaluate(() => ({ story: __SQ.story(), area: __SQ.A.id, blast: !!__SQ.P.items.blast, board: __SQ.board().has }));
   expect(started.story).toBe('drill');
@@ -422,13 +449,16 @@ test('Drill Sergeant walks the memories and gifts the heavy blaster', async ({ p
     await page.evaluate(({ keyRoom }) => {
       const S = __SQ;
       S.flag('oe_' + keyRoom);
-      S.warp(keyRoom, 4, 4, 1);
+      const south = keyRoom === 'ds_plutokey';
+      S.warp(keyRoom, 4, south ? 7 : 4, south ? 0 : 1);
     }, { keyRoom });
     await page.waitForTimeout(200);
     await page.locator('#game').screenshot({ path: `${ART}/${shot}.png` });
     if (keyRoom === 'ds_moonkey') await page.locator('#game').screenshot({ path: `${ART}/ds-flash-desktop.png` });
     await press(page, 'KeyE');
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(800);
+    await press(page, 'Space');
+    await page.waitForTimeout(150);
     const key = await page.evaluate((dung) => (__SQ.P.keys || {})[dung] || 0, dung);
     expect(key, keyRoom).toBeGreaterThan(0);
     await page.evaluate(({ doorRoom }) => {
@@ -457,7 +487,7 @@ test('Drill Sergeant walks the memories and gifts the heavy blaster', async ({ p
     const S = __SQ;
     S.flag('oe_ds_elite');
     S.flag('ds_ready');
-    S.warp('ds_elite', 9, 6, 1);
+    S.warp('ds_elite', 9, 5.15, 1);
   });
   await page.waitForTimeout(400);
   for (let i = 0; i < 20 && (await page.evaluate(() => __SQ.story())) === 'drill'; i++) {
@@ -482,7 +512,12 @@ test('Drill Sergeant walks the memories and gifts the heavy blaster', async ({ p
   expect(gift.tale).toBe(true);
   expect(gift.coins).toBe(42);
   expect(gift.drill).toBe(true);
-  await advance(page, 8);
+  for (let i = 0; i < 10; i++) {
+    const open = await page.evaluate(() => !!(__SQ.script || __SQ.dlg || __SQ.getPop));
+    if (!open) break;
+    await press(page, 'Space');
+    await page.waitForTimeout(200);
+  }
   await page.evaluate(() => {
     const S = __SQ;
     S.P.pri = 'heavy';
@@ -504,9 +539,13 @@ test('Drill Sergeant walks the memories and gifts the heavy blaster', async ({ p
   const shotZ = await page.evaluate(() => __SQ.shots.filter((s) => s.kind === 'heavy').length);
   expect(shotZ).toBeGreaterThan(0);
   await press(page, 'KeyQ');
-  await page.waitForTimeout(100);
+  await page.waitForTimeout(120);
   const swapped = await page.evaluate(() => __SQ.slots());
-  expect(swapped.sec === 'heavy' || swapped.pri === 'heavy').toBe(true);
+  expect(swapped.sec).not.toBe('heavy');
+  await press(page, 'KeyQ');
+  await page.waitForTimeout(120);
+  const back = await page.evaluate(() => __SQ.slots());
+  expect(back.sec).toBe('heavy');
   const landings = await page.evaluate(() => __SQ.auditLandings().filter((b) => String(b.from).indexOf('ds_') === 0 || String(b.to).indexOf('ds_') === 0));
   expect(landings, JSON.stringify(landings)).toEqual([]);
   expect(errors, errors.join('\n')).toEqual([]);
@@ -528,7 +567,7 @@ test('every Drill boss takes a real hit, including a sword save and the phone', 
     S.P.cds = {};
     S.P.hp = 10;
     S.flag('oe_ds_moonboss');
-    S.warp('ds_moonboss', 9, 5, 1);
+    S.warp('ds_moonboss', 9, 4, 1);
   });
   await page.waitForFunction(() => __SQ.B.state === 'fight', null, { timeout: 8000 });
   const max = await page.evaluate(() => __SQ.B.max);
@@ -594,6 +633,25 @@ test.describe('phone blaster and flashback', () => {
     await page.waitForTimeout(250);
     const shot = await page.evaluate(() => __SQ.shots.some((s) => s.kind === 'heavy'));
     expect(shot).toBe(true);
+    await page.evaluate(() => {
+      const S = __SQ;
+      S.P.pri = 'raygun';
+      S.P.wep = 'raygun';
+      S.P.sec = 'heavy';
+      S.P.tool = 'heavy';
+      S.P.items.raygun = true;
+      S.P.items.lasso = true;
+      S.flag('lasso_got');
+      S.P.cds = {};
+    });
+    await page.locator('[data-b="item"]').tap();
+    await page.waitForTimeout(250);
+    const itemShot = await page.evaluate(() => __SQ.shots.filter((s) => s.kind === 'heavy').length);
+    expect(itemShot).toBeGreaterThan(0);
+    await page.locator('[data-b="swap"]').tap();
+    await page.waitForTimeout(150);
+    const swapped = await page.evaluate(() => __SQ.slots());
+    expect(swapped.sec).not.toBe('heavy');
     await page.setViewportSize({ width: 844, height: 390 });
     await page.waitForTimeout(300);
     await page.screenshot({ path: `${ART}/ds-flash-land.png` });

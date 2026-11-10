@@ -9787,6 +9787,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         items: [{ id: "board_up", name: "UPGRADE BOARD", price: 40, n: 1, once: "" }],
       },
     });
+    nt.slide = nt.boards;
     Object.assign(CHOICES, {
       cav_play: {
         back: "cav_later",
@@ -14933,7 +14934,7 @@ ram_mem_amulet: [
                   : (q = null)));
       } else if (K) Jr(e);
       else if (z) Dr(e);
-      else if (le) {
+      else if (le && nt[le.id]) {
         let c = nt[le.id].items;
         U.upE && ((le.sel = (le.sel + c.length) % (c.length + 1)), D.sel());
         U.downE && ((le.sel = (le.sel + 1) % (c.length + 1)), D.sel());
@@ -15350,6 +15351,7 @@ ram_mem_amulet: [
         (A.taleFrom = ""),
         (A.rosLeave = 0));
       Bt() || Et();
+      ((ee.tale_drill = !0), (ee.heavy_got = !0));
       (grantHeavy(),
         ba("moon", 10, 8, 1),
         (ue = { item: "heavy", n: 1, t: 0 }),
@@ -19720,7 +19722,7 @@ ram_mem_amulet: [
         I(e, a + i - 1, t, 1, "#3a3f55"),
         I(e, a, 1, i, "#3a3f55"),
         I(e + t - 1, a, 1, i, "#3a3f55"),
-        w.dungeon)
+        w.dungeon && Ka[w.dungeon])
       ) {
         let S = Ka[w.dungeon],
           y = Math.floor((t - 4) / S.cols),
@@ -23968,6 +23970,9 @@ ram_mem_amulet: [
           return ze;
         },
         warp: (a, t, i, s = 0) => ba(a, t, i, s),
+        openShop: (id) => {
+          le = { sel: 0, id: id };
+        },
         stick: (a, t) => Gs(a, t),
         auditLandings: () => {
           let bad = [];
