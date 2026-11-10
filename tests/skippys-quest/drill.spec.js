@@ -39,7 +39,7 @@ async function advance(page, n = 6) {
 test('version, home, and Cash leave the lanes clear', async ({ page }) => {
   const errors = await bootLive(page);
   const build = await page.evaluate(() => __SQ.build());
-  expect(build).toBe('b28');
+  expect(build).toBe('b29');
   const sub = await page.evaluate(() => __SQ.chapters().find((c) => c.id === 'skippy').sub);
   expect(sub).toContain('MAIN');
   await page.evaluate(() => {
@@ -133,9 +133,15 @@ test('Cash and the portals keep their own space', async ({ page }) => {
     const desk = await roomSpacing(page, area);
     expect(desk.hits, area + ' ' + JSON.stringify(desk.hits)).toEqual([]);
     expect(desk.labelHits, area + ' ' + JSON.stringify(desk.labelHits)).toEqual([]);
-    expect(desk.cash, area).toBe(true);
-    expect(desk.labels.join(' ')).toContain('CASH');
-    if (area !== 'home') expect(desk.portals).toBeGreaterThan(3);
+    if (area === 'home') {
+      expect(desk.cash, area).toBe(false);
+      expect(desk.portals).toBe(0);
+    } else {
+      expect(desk.cash, area).toBe(true);
+      expect(desk.labels.join(' '), area).toContain('CASH');
+      expect(desk.portals).toBeGreaterThan(3);
+    }
+    if (area === 'nexus') expect(desk.portals).toBeGreaterThanOrEqual(10);
     await page.locator('#game').screenshot({ path: `${ART}/space-${area}-desktop.png` });
   }
   await page.setViewportSize({ width: 390, height: 844 });
@@ -273,14 +279,13 @@ test('Shadow gives Ramshackle a board and an old save keeps it', async ({ page }
     S.P.pri = 'hatchet';
     S.P.wep = 'hatchet';
     S.flag('oe_ram_dock');
-    S.flag('ram_board', false);
-    S.flag('space_board', false);
     S.flag('axe_got', false);
     S.warp('ram_dock', 16, 9, 0);
   });
   await page.waitForTimeout(200);
   const fresh = await page.evaluate(() => __SQ.board());
-  expect(fresh.has).toBe(false);
+  expect(fresh.has).toBe(true);
+  expect(fresh.name).toBe('RIDER');
   await press(page, 'KeyE');
   await page.waitForTimeout(400);
   await page.locator('#game').screenshot({ path: `${ART}/ds-shadow-board.png` });
@@ -579,9 +584,16 @@ test('Drill Sergeant walks the memories and gifts the heavy blaster', async ({ p
     S.P.sec = 'lasso';
     S.P.tool = 'lasso';
     S.P.cds = {};
+    S.flag('oe_moon');
     S.warp('moon', 10, 8, 3);
   });
   await page.waitForTimeout(200);
+  for (let i = 0; i < 8; i++) {
+    const open = await page.evaluate(() => !!(__SQ.script || __SQ.dlg || __SQ.getPop));
+    if (!open) break;
+    await press(page, 'Space');
+    await page.waitForTimeout(150);
+  }
   await page.locator('#game').screenshot({ path: `${ART}/ds-skippy-blaster.png` });
   await press(page, 'KeyX');
   await page.waitForTimeout(200);
@@ -711,4 +723,617 @@ test.describe('phone blaster and flashback', () => {
     await page.screenshot({ path: `${ART}/ds-flash-land.png` });
     expect(errors, errors.join('\n')).toEqual([]);
   });
+});
+
+test('Skippy rolls before a board, then the board is the only dash', async ({ page }) => {
+  const errors = await bootLive(page);
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.G.state = 'play';
+    S.G.story = 'skippy';
+    S.G.paused = false;
+    S.flag('space_board', false);
+    S.flag('board_got', false);
+    S.P.items = { baton: true };
+    S.flag('oe_desert');
+    S.flag('santt_met');
+    S.flag('ros_eh');
+    S.flag('macho_seen');
+    S.flag('tale_ros_met');
+    S.warp('desert', 40, 20, 3);
+    for (let i = 0; i < 8; i++) { S.skipText(); S.step(1); }
+  });
+  await page.waitForTimeout(200);
+  for (let i = 0; i < 14 && (await page.evaluate(() => !!(__SQ.script || __SQ.dlg))); i++) {
+    await press(page, 'Space');
+    await page.waitForTimeout(80);
+  }
+  const early = await page.evaluate(() => ({
+    has: __SQ.board().has,
+    label: document.documentElement.dataset.rolllabel,
+    open: !!(__SQ.script || __SQ.dlg),
+  }));
+  expect(early.open).toBe(false);
+  expect(early.has).toBe(false);
+  expect(early.label).toBe('ROLL');
+  await page.locator('#game').click();
+  await page.keyboard.down('KeyC');
+  await page.waitForTimeout(90);
+  const rolled = await page.evaluate(() => ({ roll: __SQ.P.roll > 0.05, dash: __SQ.P.boardDash || 0 }));
+  await page.keyboard.up('KeyC');
+  expect(rolled.roll).toBe(true);
+  expect(rolled.dash).toBe(0);
+
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.flag('oe_ac_camp');
+    S.warp('ac_camp', 9, 3, 0);
+    S.P.hp = 8;
+    S.P.maxHp = 8;
+    S.P.roll = 0;
+    S.P.rollCd = 0;
+    S.P.boardDash = 0;
+    S.P.inv = 0;
+    S.P.dir = 0;
+    for (let i = 0; i < 6; i++) { S.skipText(); S.step(1); }
+  });
+  await page.waitForTimeout(150);
+  await page.keyboard.down('ArrowDown');
+  await page.waitForTimeout(450);
+  await page.keyboard.up('ArrowDown');
+  const blocked = await page.evaluate(() => Math.floor((__SQ.P.y - 1) / 16));
+  expect(blocked).toBeLessThan(5);
+
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.warp('ac_camp', 9, 3, 0);
+    S.P.roll = 0;
+    S.P.rollCd = 0;
+    S.P.boardDash = 0;
+    S.P.inv = 0;
+    S.P.dir = 0;
+    for (let i = 0; i < 4; i++) { S.skipText(); S.step(1); }
+  });
+  await page.waitForTimeout(150);
+  await page.keyboard.down('KeyC');
+  await page.waitForTimeout(500);
+  await page.keyboard.up('KeyC');
+  const crossed = await page.evaluate(() => Math.floor((__SQ.P.y - 1) / 16));
+  expect(crossed).toBeGreaterThan(5);
+
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.flag('space_board');
+    S.flag('oe_home');
+    S.flag('woke');
+    S.P.ownB = 1;
+    S.P.gearB = 1;
+    S.P.items.board = true;
+    S.warp('home', 8, 6, 3);
+    for (let i = 0; i < 8; i++) { S.skipText(); S.step(1); }
+  });
+  await page.waitForTimeout(200);
+  for (let i = 0; i < 8 && (await page.evaluate(() => !!(__SQ.script || __SQ.dlg))); i++) await press(page, 'Space');
+  await page.locator('#game').click();
+  const late = await page.evaluate(() => ({
+    has: __SQ.board().has,
+    label: document.documentElement.dataset.rolllabel,
+  }));
+  expect(late.has).toBe(true);
+  expect(late.label).toBe('BOARD');
+  await page.keyboard.down('KeyC');
+  await page.waitForTimeout(90);
+  const dashed = await page.evaluate(() => ({ dash: __SQ.P.boardDash || 0, label: document.documentElement.dataset.rolllabel }));
+  await page.keyboard.up('KeyC');
+  expect(dashed.label).toBe('BOARD');
+  expect(dashed.dash).toBeGreaterThan(0);
+
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.flag('oe_v2b');
+    S.warp('v2b', 8, 1, 3);
+    for (const e of S.ents) e.dead = true;
+    S.P.hp = 8;
+    S.P.x = 8 * 16 + 12;
+    S.P.y = 1 * 16 + 8;
+    S.P.dir = 3;
+    S.P.roll = 0;
+    S.P.rollCd = 0;
+    S.P.boardDash = 0;
+    S.P.fall = 0;
+    S.P.inv = 0;
+    S.P.safeX = S.P.x;
+    S.P.safeY = S.P.y;
+    for (let i = 0; i < 6; i++) { S.skipText(); S.step(1); }
+  });
+  await page.waitForTimeout(120);
+  await page.keyboard.down('KeyC');
+  await page.waitForTimeout(450);
+  await page.keyboard.up('KeyC');
+  await page.waitForTimeout(800);
+  const pit = await page.evaluate(() => ({ hp: __SQ.P.hp, x: __SQ.P.x, fall: __SQ.P.fall || 0 }));
+  expect(pit.fall).toBe(0);
+  expect(pit.hp).toBe(8);
+  expect(pit.x).toBeGreaterThan(12 * 16);
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test('other riders have a board from the first moment, and old saves keep it', async ({ page }) => {
+  const errors = await bootLive(page);
+  const fresh = await page.evaluate(() => {
+    const S = __SQ;
+    function open(story, area) {
+      S.G.state = 'play';
+      S.G.story = story;
+      S.G.paused = false;
+      S.flag('space_board', false);
+      S.flag('ram_board', false);
+      S.flag('ds_board', false);
+      S.flag('board_got', false);
+      S.P.items = story === 'ramshackle' ? { hatchet: true } : story === 'drill' ? { blast: true } : { blasters: true };
+      S.warp(area, 6, 6, 3);
+      for (let i = 0; i < 8; i++) { S.skipText(); S.step(1); }
+      return { has: S.board().has, label: document.documentElement.dataset.rolllabel, name: S.board().name };
+    }
+    return {
+      ros: open('ros', 'ros_yard'),
+      ram: open('ramshackle', 'ram_dock'),
+      drill: open('drill', 'ds_camp'),
+    };
+  });
+  expect(fresh.ros).toEqual({ has: true, label: 'BOARD', name: 'RIDER' });
+  expect(fresh.ram).toEqual({ has: true, label: 'BOARD', name: 'RIDER' });
+  expect(fresh.drill).toEqual({ has: true, label: 'BOARD', name: 'RIDER' });
+
+  await page.evaluate(() => {
+    localStorage.setItem('sq_save_v1', JSON.stringify({
+      z: 'bow', v: 1, area: 'home', x: 160, y: 140, dir: 3,
+      hp: 6, maxHp: 6, pieces: 0, coins: 11, arrows: 0,
+      items: { board: true, raygun: true }, keys: {}, bigKeys: {},
+      flags: { board_got: true, woke: true }, party: [], shards: 6, time: 3,
+      visited: { home: true },
+    }));
+    localStorage.setItem('sq_save_ros_v1', JSON.stringify({
+      z: 'lasso', v: 1, area: 'ros_yard', x: 80, y: 96, dir: 3,
+      hp: 6, maxHp: 6, pieces: 0, coins: 4, arrows: 0,
+      items: { blasters: true }, keys: {}, bigKeys: {},
+      flags: { yard_clear: true }, party: [], shards: 0, time: 2,
+      visited: { ros_yard: true }, wep: 'lasers', tool: '', act: '',
+    }));
+    localStorage.setItem('sq_save_ram_v1', JSON.stringify({
+      z: 'bow', v: 1, area: 'ram_dock', x: 96, y: 128, dir: 3,
+      hp: 6, maxHp: 6, pieces: 0, coins: 2, arrows: 0,
+      items: { hatchet: true }, keys: {}, bigKeys: {},
+      flags: { ram_woke: true }, party: [], shards: 0, time: 1,
+      visited: { ram_dock: true }, pri: 'hatchet', sec: '',
+    }));
+  });
+  const loaded = await page.evaluate(() => {
+    const S = __SQ;
+    const skip = S.loadChapter('skippy');
+    const skippy = { ok: skip, has: S.board().has, coins: S.P.coins };
+    const ros = S.loadChapter('ros');
+    const sheriff = { ok: ros, has: S.board().has, label: document.documentElement.dataset.rolllabel };
+    const ram = S.loadChapter('ramshackle');
+    const shack = { ok: ram, has: S.board().has, coins: S.P.coins, flag: !!S.flags.ram_board };
+    return { skippy, sheriff, shack };
+  });
+  expect(loaded.skippy).toEqual({ ok: true, has: true, coins: 11 });
+  expect(loaded.sheriff.ok).toBe(true);
+  expect(loaded.sheriff.has).toBe(true);
+  expect(loaded.sheriff.label).toBe('BOARD');
+  expect(loaded.shack).toEqual({ ok: true, has: true, coins: 2, flag: true });
+
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.G.story = 'ros';
+    S.G.state = 'play';
+    S.G.paused = false;
+    S.P.items.hopper = true;
+    S.flag('hopper_got');
+    S.flag('oe_ros_mesa');
+    S.warp('ros_mesa', 14, 6, 3);
+    S.P.boardId = 'hopper';
+    S.P.x = 14 * 16 + 8;
+    S.P.y = 6 * 16 + 8;
+    S.P.dir = 3;
+    S.P.roll = 0;
+    S.P.rollCd = 0;
+    S.P.hp = 6;
+    for (let i = 0; i < 6; i++) { S.skipText(); S.step(1); }
+  });
+  await page.waitForTimeout(150);
+  const before = await page.evaluate(() => __SQ.P.x);
+  await press(page, 'KeyC');
+  await page.waitForTimeout(200);
+  const hopped = await page.evaluate(() => ({ x: __SQ.P.x, hp: __SQ.P.hp }));
+  expect(hopped.x).toBeGreaterThan(before + 40);
+  expect(hopped.hp).toBe(6);
+
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.G.story = 'ros';
+    S.warp('cv1', 8, 4, 0);
+    S.P.hp = 6;
+    S.P.dir = 0;
+    S.P.roll = 0;
+    S.P.rollCd = 0;
+    S.P.boardDash = 0;
+    S.P.inv = 0;
+    for (let i = 0; i < 4; i++) { S.skipText(); S.step(1); }
+  });
+  await page.waitForTimeout(150);
+  await page.keyboard.down('KeyC');
+  await page.waitForTimeout(500);
+  await page.keyboard.up('KeyC');
+  const floor = await page.evaluate(() => ({ y: Math.floor((__SQ.P.y - 1) / 16), hp: __SQ.P.hp }));
+  expect(floor.y).toBeGreaterThan(6);
+  expect(floor.hp).toBe(6);
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test.describe('phone board buttons', () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+  test('each chapter shows ROLL only for early Skippy', async ({ page }) => {
+    const errors = await bootLive(page);
+    await page.waitForFunction(() => document.documentElement.classList.contains('srml'));
+    const shots = [
+      ['skippy', 'desert', false, 'ROLL', 'phone-chapter-skippy.png'],
+      ['skippy', 'home', true, 'BOARD', 'phone-chapter-skippy-board.png'],
+      ['ros', 'ros_yard', true, 'BOARD', 'phone-chapter-ros.png'],
+      ['ramshackle', 'ram_dock', true, 'BOARD', 'phone-chapter-ram.png'],
+      ['drill', 'ds_camp', true, 'BOARD', 'phone-chapter-drill.png'],
+    ];
+    for (const [story, area, board, label, file] of shots) {
+      await page.evaluate(({ story, area, board }) => {
+        const S = __SQ;
+        S.G.state = 'play';
+        S.G.story = story;
+        S.G.paused = false;
+        S.flag('space_board', board && story === 'skippy');
+        S.flag('board_got', board && story === 'skippy');
+        S.P.items = board && story === 'skippy' ? { board: true, raygun: true } : { raygun: true };
+        if (story === 'ros') S.P.items = { blasters: true };
+        if (story === 'ramshackle') S.P.items = { hatchet: true };
+        if (story === 'drill') S.P.items = { blast: true };
+        S.flag('oe_' + area);
+        S.flag('santt_met');
+        S.flag('woke');
+        S.warp(area, story === 'skippy' && area === 'desert' ? 16 : 6, story === 'skippy' && area === 'desert' ? 16 : 6, 3);
+        for (let i = 0; i < 8; i++) { S.skipText(); S.step(1); }
+        S.step(2);
+      }, { story, area, board });
+      for (let i = 0; i < 8; i++) {
+        const mode = await page.evaluate(() => document.documentElement.dataset.touch);
+        if (mode === 'play') break;
+        await press(page, 'Space');
+        await page.waitForTimeout(120);
+      }
+      await page.waitForTimeout(200);
+      const face = await page.evaluate(() => {
+        const shown = [...document.querySelectorAll('.srml-b')]
+          .filter((el) => getComputedStyle(el).display !== 'none')
+          .map((el) => (el.textContent || '').trim());
+        return { shown, has: __SQ.board().has };
+      });
+      expect(face.has, story).toBe(board);
+      expect(face.shown, story + ' ' + face.shown.join(',')).toContain(label);
+      if (label === 'BOARD') expect(face.shown.join(' '), story).not.toMatch(/\bROLL\b/);
+      await page.screenshot({ path: `${ART}/${file}` });
+    }
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+});
+
+test('Cash court sits downstairs of the Pour, and the heavy case opens', async ({ page }) => {
+  const errors = await bootLive(page);
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.G.state = 'play';
+    S.G.story = 'skippy';
+    S.G.paused = false;
+    S.flag('woke');
+    S.flag('oe_home');
+    S.warp('home', 9, 9, 0);
+    for (let i = 0; i < 6; i++) { S.skipText(); S.step(1); }
+  });
+  await page.waitForTimeout(200);
+  const house = await page.evaluate(() => ({
+    name: __SQ.A.name,
+    cash: __SQ.npcs.some((n) => n.id === 'wizard'),
+    to: (__SQ.A.warps || []).map((w) => w.to),
+    sign: (__SQ.A.signs || []).some((s) => /POUR/i.test(s.text)),
+  }));
+  expect(house.name).toBe("SKIPPY'S PLACE");
+  expect(house.cash).toBe(false);
+  expect(house.to).toContain('desert');
+  expect(house.sign).toBe(true);
+  await page.locator('#game').screenshot({ path: `${ART}/b29-house-exit.png` });
+
+  await page.evaluate(() => {
+    localStorage.setItem('sq_save_v1', JSON.stringify({
+      z: 'bow', v: 1, area: 'nexus', x: 160, y: 96, dir: 0,
+      hp: 6, maxHp: 6, pieces: 0, coins: 9, arrows: 0,
+      items: { raygun: true }, keys: {}, bigKeys: {},
+      flags: { woke: true, ch1_done: true }, party: [], shards: 1, time: 2,
+      visited: { nexus: true }, pri: 'raygun', sec: '',
+    }));
+    __SQ.loadChapter('skippy');
+    for (let i = 0; i < 6; i++) { __SQ.skipText(); __SQ.step(1); }
+  });
+  await page.waitForTimeout(250);
+  const court = await page.evaluate(() => ({
+    id: __SQ.A.id,
+    name: __SQ.A.name,
+    cash: __SQ.npcs.some((n) => n.id === 'wizard'),
+    portals: (__SQ.A.props || []).filter((p) => p.k === 'portal').length,
+    labels: (window.__SQ_LABELS || []).map((l) => l.text),
+  }));
+  expect(court.id).toBe('nexus');
+  expect(court.name).toBe("CASH'S COURT");
+  expect(court.cash).toBe(true);
+  expect(court.portals).toBeGreaterThanOrEqual(10);
+  expect(court.labels.join(' ')).toContain('COSMOS');
+  expect(court.labels.join(' ')).toContain('CASH');
+  await page.locator('#game').screenshot({ path: `${ART}/b29-cash-court.png` });
+
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.P.items.raygun = true;
+    S.P.pri = 'raygun';
+    S.P.wep = 'raygun';
+    S.P.x = 5.2 * 16 + 8;
+    S.P.y = 8.4 * 16;
+    S.P.dir = 1;
+    S.flag('court_box', false);
+  });
+  await page.waitForTimeout(100);
+  await press(page, 'KeyX');
+  await page.waitForTimeout(400);
+  const tough = await page.evaluate(() => ({
+    open: !!__SQ.flags.court_box,
+    toast: __SQ.toast().text,
+  }));
+  expect(tough.open).toBe(false);
+  expect(tough.toast).toContain('HEAVY');
+  await page.locator('#game').screenshot({ path: `${ART}/b29-case-before.png` });
+
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.P.items.heavy = true;
+    S.flag('heavy_got');
+    S.P.pri = 'heavy';
+    S.P.wep = 'heavy';
+    S.P.sec = 'raygun';
+    S.P.tool = 'raygun';
+    S.P.x = 5.2 * 16 + 8;
+    S.P.y = 8.4 * 16;
+    S.P.dir = 1;
+    S.P.cds = {};
+  });
+  await page.waitForTimeout(100);
+  await press(page, 'KeyX');
+  await page.waitForTimeout(500);
+  const broke = await page.evaluate(() => ({
+    open: !!__SQ.flags.court_box,
+    toast: __SQ.toast().text,
+  }));
+  expect(broke.open).toBe(true);
+  await page.locator('#game').screenshot({ path: `${ART}/b29-case-after.png` });
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.P.x = 6 * 16;
+    S.P.y = 8 * 16 + 10;
+    S.P.dir = 0;
+  });
+  await page.waitForTimeout(900);
+  const vault = await page.evaluate(() => ({
+    id: __SQ.A.id,
+    x: Math.round(__SQ.P.x),
+    y: Math.round(__SQ.P.y),
+    warps: (__SQ.A.warps || []).map((w) => w.to + ':' + (w.need || '') + '@' + w.x + ',' + w.y),
+    flag: !!__SQ.flags.court_box,
+    open: !!(__SQ.script || __SQ.dlg || __SQ.shop),
+  }));
+  expect(vault.id, JSON.stringify(vault)).toBe('court_vault');
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test('rider chapters are offered inside Skippy and the desert stays spread out', async ({ page }) => {
+  const errors = await bootLive(page);
+  await page.evaluate(() => {
+    const S = __SQ;
+    S.G.state = 'play';
+    S.G.story = 'skippy';
+    S.G.paused = false;
+    S.flag('ch9_done');
+    S.flag('oe_hi_life');
+    S.warp('hi_life', 6, 6, 1);
+    for (let i = 0; i < 6; i++) { S.skipText(); S.step(1); }
+    const ros = S.npcs.find((n) => n.id === 'ros');
+    if (ros) { S.P.x = ros.x; S.P.y = ros.y + 14; S.P.dir = 1; }
+  });
+  await page.waitForTimeout(200);
+  await page.locator('#game').click();
+  await press(page, 'KeyE');
+  for (let i = 0; i < 8 && !(await page.evaluate(() => !!__SQ.G.choice)); i++) {
+    await page.waitForTimeout(280);
+    await press(page, 'Space');
+  }
+  await page.waitForFunction(() => !!__SQ.G.choice, null, { timeout: 5000 });
+  await page.locator('#game').screenshot({ path: `${ART}/b29-ros-handoff.png` });
+  await press(page, 'KeyX');
+  for (let i = 0; i < 4 && (await page.evaluate(() => __SQ.G.state !== 'flash')); i++) {
+    await page.waitForTimeout(250);
+    await press(page, 'Space');
+  }
+  await page.waitForFunction(() => __SQ.G.state === 'flash', null, { timeout: 5000 });
+  const handed = await page.evaluate(() => ({
+    state: __SQ.G.state,
+    choice: __SQ.G.choice && __SQ.G.choice.id,
+    script: !!__SQ.script,
+    dlg: !!__SQ.dlg,
+    x: Math.round(__SQ.P.x),
+    y: Math.round(__SQ.P.y),
+  }));
+  expect(handed.state, JSON.stringify(handed)).toBe('flash');
+
+  const log = await page.evaluate(() => {
+    const S = __SQ;
+    S.G.state = 'play';
+    S.G.story = 'skippy';
+    S.flag('ch5_done');
+    S.flag('tale_ros');
+    return S.riderLog().map((r) => r.text);
+  });
+  expect(log.join(' ')).toContain('ROS');
+  expect(log.join(' ')).toContain('RAM');
+  expect(log.join(' ')).toContain('DRILL');
+  expect(log[0].startsWith('OK')).toBe(true);
+
+  const spaced = await page.evaluate(() => {
+    const S = __SQ;
+    S.flag('santt_here');
+    S.flag('macho_here');
+    S.flag('tale_macho');
+    S.flag('boss_d1');
+    S.flag('oe_desert');
+    S.warp('desert', 16, 16, 0);
+    for (let i = 0; i < 4; i++) { S.skipText(); S.step(1); }
+    const bodies = S.npcs.filter((n) => n.vis !== false).map((n) => ({ id: n.id, x: n.x, y: n.y }));
+    const hits = [];
+    for (let i = 0; i < bodies.length; i++) {
+      for (let j = i + 1; j < bodies.length; j++) {
+        const d = Math.hypot(bodies[i].x - bodies[j].x, bodies[i].y - bodies[j].y);
+        if (d < 36) hits.push(bodies[i].id + ' / ' + bodies[j].id + ' ' + Math.round(d));
+      }
+      for (const w of S.A.warps || []) {
+        const d = Math.hypot(bodies[i].x - (w.x + w.w / 2) * 16, bodies[i].y - (w.y + 0.5) * 16);
+        if (d < 28) hits.push(bodies[i].id + ' / door ' + w.to);
+      }
+      for (const s of S.A.signs || []) {
+        const d = Math.hypot(bodies[i].x - s.x * 16, bodies[i].y - s.y * 16);
+        if (d < 24) hits.push(bodies[i].id + ' / sign');
+      }
+    }
+    return { hits, n: bodies.length };
+  });
+  expect(spaced.n).toBeGreaterThan(3);
+  expect(spaced.hits, spaced.hits.join(', ')).toEqual([]);
+  await page.locator('#game').screenshot({ path: `${ART}/b29-desert-space.png` });
+
+  for (const [area, file] of [
+    ['ds_moonboss', 'b29-boss-revolt.png'],
+    ['ds_marsboss', 'b29-boss-mars.png'],
+    ['ds_candyboss', 'b29-boss-candy.png'],
+    ['ds_plutoboss', 'b29-boss-pluto.png'],
+    ['ram_eye', 'b29-boss-eye.png'],
+  ]) {
+    await page.evaluate((area) => {
+      const S = __SQ;
+      S.G.state = 'play';
+      S.G.story = area.startsWith('ds_') ? 'drill' : 'ramshackle';
+      S.G.paused = false;
+      S.P.hp = 10;
+      S.P.maxHp = 10;
+      if (S.G.story === 'drill') {
+        S.P.items = { blast: true };
+        S.P.pri = 'blast';
+        S.P.wep = 'blast';
+      } else {
+        S.P.items = { axe: true, hatchet: true };
+        S.P.pri = 'axe';
+        S.P.wep = 'axe';
+      }
+      S.flag('oe_' + area);
+      S.warp(area, 9, 8, 1);
+      for (let i = 0; i < 4; i++) { S.skipText(); S.step(1); }
+    }, area);
+    await page.waitForFunction(() => __SQ.B && __SQ.B.state === 'fight', null, { timeout: 8000 });
+    await page.waitForTimeout(200);
+    await page.locator('#game').screenshot({ path: `${ART}/${file}` });
+    if (area === 'ds_moonboss') {
+      await page.evaluate(() => {
+        const S = __SQ;
+        S.P.x = S.B.x;
+        S.P.y = S.B.y + 36;
+        S.P.dir = 1;
+        S.P.cds = {};
+      });
+      await page.locator('#game').click();
+      await press(page, 'KeyX');
+      await page.waitForTimeout(500);
+      const hurt = await page.evaluate(() => __SQ.B.hp < __SQ.B.max);
+      expect(hurt, area).toBe(true);
+    }
+  }
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test('BOARD draws a space deck under the rider', async ({ page }) => {
+  const errors = await bootLive(page);
+  async function paint(story, area, tier, file, npc) {
+    await page.evaluate(({ story, area, tier, npc }) => {
+      const S = __SQ;
+      S.G.state = 'play';
+      S.G.story = story;
+      S.G.paused = false;
+      S.flag('space_board');
+      S.flag('oe_' + area);
+      S.flag('woke');
+      S.flag('santt_met');
+      S.P.ownB = tier;
+      S.P.gearB = tier;
+      S.P.items = Object.assign({}, S.P.items, { board: true });
+      S.P.boardDash = 0;
+      S.P.roll = 0;
+      S.warp(area, 12, 5, 3);
+      for (let i = 0; i < 6; i++) { S.skipText(); S.step(1); }
+      if (npc) {
+        const who = S.npcs.find((n) => n.id === npc);
+        if (who) { S.P.x = who.x - 28; S.P.y = who.y; }
+      }
+      S.step(2);
+    }, { story, area, tier, npc });
+    for (let i = 0; i < 6; i++) {
+      if (!(await page.evaluate(() => !!(__SQ.script || __SQ.dlg)))) break;
+      await press(page, 'Space');
+    }
+    await page.waitForTimeout(200);
+    await page.locator('#game').screenshot({ path: `${ART}/${file}` });
+  }
+  await paint('skippy', 'desert', 1, 'b29-board-skippy.png');
+  await page.locator('#game').click();
+  await page.keyboard.down('KeyC');
+  await page.waitForTimeout(80);
+  const deck = await page.evaluate(() => {
+    const S = __SQ;
+    const cam = S.cam;
+    const sx = Math.round(S.P.x - cam.x);
+    const sy = Math.round(S.P.y - cam.y + 24);
+    const ctx = document.getElementById('game').getContext('2d');
+    const img = ctx.getImageData(Math.max(0, sx - 16), Math.max(0, sy - 8), 32, 16).data;
+    let bright = 0;
+    for (let i = 0; i < img.length; i += 4) {
+      if (img[i] > 180 && img[i + 2] > 140) bright++;
+    }
+    return { bright, dash: S.P.boardDash || 0, sx, sy };
+  });
+  await page.keyboard.up('KeyC');
+  expect(deck.dash, JSON.stringify(deck)).toBeGreaterThan(0);
+  expect(deck.bright, JSON.stringify(deck)).toBeGreaterThan(8);
+  await page.waitForTimeout(1600);
+  for (const [dir, name] of [[0, 'down'], [1, 'up'], [2, 'left'], [3, 'right']]) {
+    await page.evaluate((dir) => { __SQ.P.dir = dir; __SQ.P.boardDash = 1; }, dir);
+    await page.waitForTimeout(80);
+    await page.locator('#game').screenshot({ path: `${ART}/b29-board-${name}.png` });
+  }
+  await paint('ros', 'ros_yard', 1, 'b29-board-ros.png');
+  await paint('ramshackle', 'ram_dock', 1, 'b29-board-ram.png');
+  await paint('drill', 'ds_camp', 1, 'b29-board-drill.png');
+  for (let tier = 1; tier <= 5; tier++) await paint('skippy', 'sky_city', tier, `b29-board-tier-${tier}.png`);
+  await paint('skippy', 'sky_city', 2, 'b29-board-slide.png', 'slide');
+  await paint('skippy', 'carnival', 1, 'b29-board-cavendish.png', 'cavendish');
+  await paint('skippy', 'lane_sky', 3, 'b29-board-lane.png');
+  expect(errors, errors.join('\n')).toEqual([]);
 });

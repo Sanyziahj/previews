@@ -196,12 +196,12 @@ test('weapons and boards do different work', async ({ page }) => {
     S.step(2);
     const x0 = S.P.x;
     S.P.boardId = '';
-    S.press('roll', true); S.step(8); S.press('roll', false); S.step(4);
+    S.press('board', true); S.step(8); S.press('board', false); S.step(4);
     const walked = S.P.x;
     S.warp('ros_mesa', 14, 6, 3);
     S.P.boardId = 'hopper';
     S.P.roll = 0; S.P.rollCd = 0;
-    S.press('roll', true); S.step(4); S.press('roll', false); S.step(2);
+    S.press('board', true); S.step(4); S.press('board', false); S.step(2);
     return { x0, walked, hopped: S.P.x };
   });
   expect(hop.hopped).toBeGreaterThan(hop.walked + 20);
@@ -579,7 +579,7 @@ test('finished Skippy hears the tale and wakes as ROS', async ({ page }) => {
   const errors = await boot(page, { save: { skippy: DONE_SKIPPY } });
   await enterContinue(page);
   const obj = await page.evaluate(() => __SQ.objective());
-  expect(obj).toContain('PIONEER POUR');
+  expect(obj).toContain('OUTLAW');
   const arrived = await reachTaleChoice(page);
   expect(arrived.choice, JSON.stringify(arrived)).toBe(true);
   await page.screenshot({ path: `${ART}/tale-choice.png` });
@@ -2303,8 +2303,8 @@ test.describe('magic button on the phone', () => {
           const pause = document.querySelector('[data-b="map"]').getBoundingClientRect();
           return { top: label('roll') || label('board'), pause: pause.x, board: S.board().has };
         }, { story, area });
-        expect(face.board, story).toBe(story !== 'ramshackle');
-        expect(face.top.trim(), story).toBe(story === 'ramshackle' ? 'ROLL' : 'BOARD');
+        expect(face.board, story).toBe(true);
+        expect(face.top.trim(), story).toBe('BOARD');
         expect(face.pause, story).toBeLessThan(w / 2);
         await page.screenshot({ path: `${ART}/${file}-${side}.png` });
       }
@@ -2452,7 +2452,7 @@ test('Skippy earns a board and Slide upgrades every tier', async ({ page }) => {
     return { ros, ram, skip };
   });
     expect(others.ros).toBe(true);
-    expect(others.ram).toBe(false);
+    expect(others.ram).toBe(true);
     expect(others.skip).toBe(false);
   const ramHit = await page.evaluate(() => {
     const S = __SQ;
