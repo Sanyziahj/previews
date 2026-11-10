@@ -39,7 +39,7 @@ async function advance(page, n = 6) {
 test('version, home, and Cash leave the lanes clear', async ({ page }) => {
   const errors = await bootLive(page);
   const build = await page.evaluate(() => __SQ.build());
-  expect(build).toBe('b30');
+  expect(build).toBe('b31a');
   const sub = await page.evaluate(() => __SQ.chapters().find((c) => c.id === 'skippy').sub);
   expect(sub).toContain('MAIN');
   await page.evaluate(() => {
@@ -1350,7 +1350,7 @@ test('the main road skips the tales, and gear, bosses, and labels stay honest', 
     S.G.state = 'play';
     S.G.story = 'skippy';
     S.G.paused = true;
-    S.G.skipPage = 2;
+    S.G.skipPage = 4;
     S.step(2);
     const rows = S.gearTable();
     const tales = rows.filter((r) => r.from === 'TALE').map((r) => r.id);
