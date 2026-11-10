@@ -5,12 +5,12 @@ const ART = '/opt/cursor/artifacts/skippys-quest';
 const GAME = '/skippys-quest/index.html';
 fs.mkdirSync(ART, { recursive: true });
 
-async function boot(page) {
+async function boot(page, phone = true) {
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await page.addInitScript(() => { window.__SQ_DEBUG = true; });
   await page.goto(GAME);
-  await page.waitForFunction(() => window.__SQ && document.documentElement.classList.contains('srml'));
+  await page.waitForFunction((wantPhone) => window.__SQ && (!wantPhone || document.documentElement.classList.contains('srml')), phone);
   await page.locator('#game').focus();
   return errors;
 }
@@ -69,6 +69,44 @@ function boxes(page) {
     };
   });
 }
+
+function overlaps(a, b) {
+  const ix = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
+  const iy = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
+  return ix > 0.5 && iy > 0.5;
+}
+
+test('pause pages keep their text in separate boxes', async ({ page }) => {
+  const errors = await boot(page, false);
+  for (const [w, h] of [[1280, 800], [844, 390], [932, 430], [390, 844]]) {
+    await page.setViewportSize({ width: w, height: h });
+    await playDesert(page);
+    for (const n of [0, 1, 2, 3, 4]) {
+      const boxes = await page.evaluate((n) => {
+        const S = __SQ;
+        S.G.paused = true;
+        S.G.skipPage = n;
+        S.G.gearSel = 0;
+        S.step(2);
+        return S.pauseBoxes();
+      }, n);
+      if (n > 2) continue;
+      expect(boxes.length, `${w}x${h} page ${n}`).toBeGreaterThan(2);
+      for (const b of boxes) {
+        expect(b.x, `${b.t} left`).toBeGreaterThanOrEqual(2);
+        expect(b.y, `${b.t} top`).toBeGreaterThanOrEqual(2);
+        expect(b.x + b.w, `${b.t} right`).toBeLessThanOrEqual(318);
+        expect(b.y + b.h, `${b.t} bottom`).toBeLessThanOrEqual(222);
+      }
+      for (let i = 0; i < boxes.length; i++) {
+        for (let j = i + 1; j < boxes.length; j++) {
+          expect(overlaps(boxes[i], boxes[j]), `${w}x${h} ${boxes[i].t} / ${boxes[j].t}`).toBe(false);
+        }
+      }
+    }
+  }
+  expect(errors, errors.join('\n')).toEqual([]);
+});
 
 test.describe('phone landscape handheld', () => {
   test.use({ viewport: { width: 844, height: 390 }, hasTouch: true, isMobile: true });
@@ -184,8 +222,11 @@ test.describe('phone landscape handheld', () => {
     const paused = await page.evaluate(() => ({ paused: !!__SQ.G.paused, page: __SQ.G.skipPage || 0 }));
     expect(paused.paused).toBe(true);
     expect(paused.page).toBe(0);
-    await page.screenshot({ path: `${ART}/b31-pause.png` });
     await page.screenshot({ path: `${ART}/b31-map.png` });
+    await page.evaluate(() => { __SQ.G.skipPage = 1; __SQ.step(2); });
+    await page.screenshot({ path: `${ART}/b31-pause.png` });
+    await page.evaluate(() => { __SQ.G.skipPage = 2; __SQ.step(2); });
+    await page.screenshot({ path: `${ART}/b31-journal.png` });
 
     await page.evaluate(() => { __SQ.G.paused = false; __SQ.step(2); });
     await page.keyboard.press('KeyM');

@@ -3,7 +3,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script>window.__SQ_BUILD="b31";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b31(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b31");location.replace(u.href);}</script>
+<script>window.__SQ_BUILD="b31a";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b31a(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b31a");location.replace(u.href);}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Space Riders: Skippy's Quest</title><link rel="icon" href="data:,">
 <meta name="description" content="Space Riders: Skippy's Quest - a free 16-bit top-down action adventure browser game. The Red King is missing. Ride with ROS through the Sand Dungeon, take Cash's portals to the Seaport and Ramshackle the Viking, win Ronin's flaming sword, beat the house at the Andromeda Casino and stop the Overlord on the Moon, survive the meteor shower with Blaze and earn your space board at the Crossroad and cross the mirror into the Dark World, then storm Fright's castle and bring the Red King home. Chapters 1-9 (Complete) out now.">
@@ -12046,7 +12046,7 @@ ram_mem_amulet: [
     (D.sel(), xe());
   }
   function drawGearTable() {
-    (I(0, 24, 320, 200, "#0c1020"),
+    (I(0, 0, 320, 224, "#0c1020"),
       v(n, "GEAR", 160, 30, "#ffcc33", 2, "center", "#000"));
     let rows = GEAR_TABLE,
       top = (A.gearSel || 0) - 4;
@@ -12059,8 +12059,8 @@ ram_mem_amulet: [
         have = !!(d.items && d.items[g.id]) || Z(g.id + "_got") || (g.id === "heavy" && Z("heavy_got"));
       (on && I(8, y - 2, 304, 14, "#243058"),
         v(n, (have ? "OK " : "-- ") + g.name, 12, y, have ? "#fff6c0" : "#9aa3b8", 1, "", "#000"),
-        v(n, g.from + " " + g.tier, 168, y, "#7ef0ff", 1, "", "#000"),
-        v(n, g.opens, 230, y, "#ffd0ea", 1, "", "#000"));
+        v(n, g.from + " " + g.tier, 122, y, "#7ef0ff", 1, "", "#000"),
+        v(n, g.opens, 176, y, "#ffd0ea", 1, "", "#000"));
     }
     let sel = rows[Math.min(A.gearSel || 0, rows.length - 1)];
     (sel && v(n, sel.where + "  " + sel.opens, 160, 176, "#fff6c0", 1, "center", "#000"),
@@ -12077,7 +12077,7 @@ ram_mem_amulet: [
         "BOTTLE  " + ((d.bottles || [])[0] ? COS_TEA[d.bottles[0]] : "EMPTY"),
       ],
       sel = A.gearSel || 0;
-    (I(0, 24, 320, 200, "#14081f"),
+    (I(0, 0, 320, 224, "#14081f"),
       v(n, "GEAR", 160, 32, "#ff4fd8", 2, "center", "#1a0820"),
       v(n, "LET'S RIDE!", 160, 50, "#c9a0ff", 1, "center", "#1a0820"),
       v(n, "STARS " + d.coins + "   PART " + (d.part || 0), 160, 64, "#ff9ae8", 1, "center", "#1a0820"));
@@ -17796,7 +17796,7 @@ ram_mem_amulet: [
       for (let a = 0; a < 16; a++)
         I((a * 23) % 320, 20 + ((a * 17) % 70), 2, 2, "#fff2c8");
       (v(n, "SPACE RIDERS", 160, 8, "#ff4fd8", 2, "center", "#2a0a14"),
-        v(n, window.__SQ_BUILD || "b31", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
+        v(n, window.__SQ_BUILD || "b31a", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
         v(n, "SIDE QUESTS COME HOME", 160, 28, "#ffcc33", 1, "center", "#2a0a14"));
       let a = 58;
       for (let t = 0; t < STORY_ROWS.length; t++) {
@@ -18577,10 +18577,10 @@ ram_mem_amulet: [
       (splitHands(), D.sel(), Q((weaponish(id) ? "ATTACK " : "ITEM ") + slotName(id)), xe());
     }
     function skippyPauseInput() {
-      if (U.right && !A.wasR) A.skipPage = ((A.skipPage || 0) + 1) % 3;
-      if (U.left && !A.wasL) A.skipPage = 0;
+      if (U.right && !A.wasR) ((A.skipPage = ((A.skipPage || 0) + 1) % 5), (A.gearSel = 0));
+      if (U.left && !A.wasL) ((A.skipPage = ((A.skipPage || 0) + 4) % 5), (A.gearSel = 0));
       ((A.wasL = U.left), (A.wasR = U.right));
-      if ((A.skipPage || 0) === 2) {
+      if ((A.skipPage || 0) === 4) {
         if (U.backE || U.mapE || Qe || U.rollE) {
           ((A.paused = !1), (A.skipPage = 0), D.sel());
           return;
@@ -18589,7 +18589,7 @@ ram_mem_amulet: [
         if (U.downE) A.gearSel = Math.min(GEAR_TABLE.length - 1, (A.gearSel || 0) + 1);
         return;
       }
-      if ((A.skipPage || 0) === 1) {
+      if ((A.skipPage || 0) === 3) {
         if (U.backE || U.mapE || Qe || U.rollE) {
           ((A.paused = !1), (A.skipPage = 0), D.sel());
           return;
@@ -18610,6 +18610,7 @@ ram_mem_amulet: [
             ((ee.dr_map = !0), ye("dr_wake")));
         return;
       }
+      if ((A.skipPage || 0) !== 1) return;
       let rows = ownedItems();
       if (!rows.length) return;
       if (U.upE) A.gearSel = ((A.gearSel || 0) + rows.length - 1) % rows.length;
@@ -20321,9 +20322,13 @@ ram_mem_amulet: [
     }
     function paintCooldown(el, id) {
       if (!el) return;
+      let cool = coolFrac(id);
+      el.style.setProperty("--cd", cool > 0.02 ? cool.toFixed(3) : "0");
       let bar = el.querySelector(".cd");
       bar || ((bar = document.createElement("i")), (bar.className = "cd"), el.appendChild(bar));
-      bar.style.width = Math.round((1 - coolFrac(id)) * 100) + "%";
+      cool <= 0.02
+        ? (bar.style.display = "none")
+        : ((bar.style.display = "block"), (bar.style.width = Math.round((1 - cool) * 100) + "%"));
     }
     function drawActHud() {
       let id =
@@ -21506,76 +21511,78 @@ ram_mem_amulet: [
           v(n, "BACK CLOSES", 160, 200, "#ffe0c0", 1, "center", "#000"));
         return;
       }
-      if ((A.skipPage || 0) === 2) {
+      if ((A.skipPage || 0) === 4) {
         drawGearTable();
         return;
       }
-      if ((A.skipPage || 0) === 1) {
+      if ((A.skipPage || 0) === 3) {
         drawCosmosGear();
         return;
       }
-      (I(0, 24, 320, 200, "#05040ce8"),
-        v(n, "PAUSED", 160, 30, "#ffcc33", 2, "center", X),
-        v(n, w.dungeon ? "" : w.name, 106, 52, "#ff9ae8", 1, "center", X),
-        fn(14, 62, 184, 110, !0),
-        na(206, 52, 106, 120, "#4ff0ff"),
-        v(n, "ITEMS", 259, 58, "#4ff0ff", 1, "center", ""));
-      let e = 72,
-        a = (i, s) => {
-          (n.drawImage(O.icon[i], 212, e - 4),
-            v(n, s, 232, e, "#ffffff", 1, "", ""),
-            (e += 16));
-        },
-        t = [];
-      (d.items.sword ? t.push("sword") : d.items.baton && t.push("baton"),
-        (d.items.bow || d.items.tbow) && t.push("bow"),
-        d.items.raygun && t.push("raygun"),
-        d.items.missile && t.push("missile"),
-        d.items.armor && t.push("armor"),
-        d.items.board && t.push("board"),
-        ownedItems().forEach((id, s) =>
-          v(
-            n,
-            ((A.gearSel || 0) === s ? ">" : " ") +
-              slotName(id, !0) +
-              (d.pri === id ? " X" : d.sec === id ? " Z" : ""),
-            212,
-            74 + s * 12,
-            "#ffffff",
-            1,
-            "",
-            "",
-          ),
-        ),
-        (e += 14),
-        t.length === 1 &&
-          v(
-            n,
-            d.items.sword ? "FLAME SWORD" : "STUN BATON",
-            232,
-            e - 16,
-            "#ffffff",
-            1,
-            "",
-            "",
-          ),
-        a("shard", "SHARDS " + d.shards + "/7"),
-        a("piece", "PIECES " + d.pieces + "/2"),
-        Xe.length &&
-          (v(n, "PARTY", 259, e - 2, "#4ff0ff", 1, "center", ""),
-          Xe.forEach((i, s) =>
-            n.drawImage(da(i, !1), 0, 0, 40, 40, 211 + s * 16, e + 6, 15, 15),
-          )),
-        v(n, "X " + slotName(slotsOn() ? d.pri : ""), 16, 176, "#ffcc33", 1, "", ""),
-        v(n, "Z " + slotName(slotsOn() ? d.sec : ""), 170, 176, "#4ff0ff", 1, "", ""),
-        riderLog().forEach((row, i) =>
-          v(n, row.text, 16, 156 + i * 8, row.text.indexOf("OK") === 0 ? "#3dff6a" : "#ffe0a0", 1, "", "#000"),
-        ),
-        v(n, "Q SWAPS. X SETS THE ROW.", 200, 168, "#c9d1e3", 1, "", ""),
-        skippyObjective()
-          ? v(n, skippyObjective(), 160, 208, "#ffe0a0", 1, "center", "#000")
-          : Math.floor(A.t * 2) % 2 &&
-            v(n, "ENTER TO CLOSE", 160, 208, "#ffcc33", 1, "center", ""));
+      if ((A.skipPage || 0) === 2) {
+        drawPauseJournal();
+        return;
+      }
+      if ((A.skipPage || 0) === 1) {
+        drawPauseItems();
+        return;
+      }
+      drawPauseMap();
+    function pt(text, x, y, scale, align, color) {
+      let sc = scale || 1,
+        label = String(text),
+        w = Ya(label.toUpperCase(), sc),
+        h = 7 * sc,
+        left = align === "center" ? Math.round(x - w / 2) : align === "right" ? x - w : x;
+      (A.pauseBoxes || (A.pauseBoxes = [])).push({ x: left, y: y, w: w, h: h, t: label });
+      v(n, label, x, y, color || "#fff6c0", sc, align || "", "#000");
+    }
+    function drawPauseMap() {
+      A.pauseBoxes = [];
+      I(0, 0, 320, 224, "#0c1020");
+      pt("MAP", 160, 10, 2, "center", "#ffcc33");
+      pt((w && !w.dungeon && w.name) || "DUNGEON", 160, 32, 1, "center", "#ff9ae8");
+      fn(16, 46, 288, 142, !0);
+      A.pauseBoxes.push({ x: 16, y: 46, w: 288, h: 142, t: "MAP PANEL" });
+      pt("RIGHT  ITEMS", 160, 204, 1, "center", "#c9d1e3");
+    }
+    function drawPauseItems() {
+      A.pauseBoxes = [];
+      I(0, 0, 320, 224, "#0c1020");
+      pt("ITEMS", 160, 10, 2, "center", "#ffcc33");
+      pt("X  " + slotName(slotsOn() ? d.pri : ""), 16, 38, 1, "", "#ffcc33");
+      pt("Z  " + slotName(slotsOn() ? d.sec : ""), 16, 52, 1, "", "#4ff0ff");
+      let rows = ownedItems(),
+        sel = Math.min(A.gearSel || 0, Math.max(0, rows.length - 1)),
+        start = Math.max(0, sel - 4);
+      for (let i = 0; i < 6 && start + i < rows.length; i++) {
+        let id = rows[start + i],
+          on = start + i === sel;
+        pt(
+          (on ? "> " : "  ") + slotName(id) + (d.pri === id ? "  X" : d.sec === id ? "  Z" : ""),
+          16,
+          74 + i * 14,
+          1,
+          "",
+          on ? "#fff6c0" : "#c9d1e3",
+        );
+      }
+      pt("SHARDS  " + (d.shards || 0) + "/7", 16, 170, 1, "", "#ffe0a0");
+      pt("PIECES  " + (d.pieces || 0) + "/2", 16, 186, 1, "", "#ffe0a0");
+      pt("RIGHT  JOURNAL", 160, 206, 1, "center", "#c9d1e3");
+    }
+    function drawPauseJournal() {
+      A.pauseBoxes = [];
+      I(0, 0, 320, 224, "#0c1020");
+      pt("JOURNAL", 160, 10, 2, "center", "#ffcc33");
+      let obj = skippyObjective(),
+        lines = obj ? Nn(obj, 26) : ["THE ROAD IS QUIET."];
+      lines.slice(0, 3).forEach((line, i) => pt(line, 16, 40 + i * 14, 1, "", "#ffe0a0"));
+      riderLog().forEach((row, i) =>
+        pt(row.text, 16, 100 + i * 24, 1, "", row.text.indexOf("OK") === 0 ? "#3dff6a" : "#fff6c0"),
+      );
+      pt("RIGHT  COSMOS", 160, 206, 1, "center", "#c9d1e3");
+    }
     }
     function Ua(e) {
       let a = n.createLinearGradient(0, 0, 0, 224);
@@ -21614,7 +21621,7 @@ ram_mem_amulet: [
       let e = A.t;
       (v(n, "SPACE RIDERS", 160, 14, "#ff4fd8", 3, "center", "#2a0a3a"),
         v(n, "SKIPPY'S QUEST", 160, 42, "#ffcc33", 2, "center", "#2a0a3a"),
-        v(n, window.__SQ_BUILD || "b31", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
+        v(n, window.__SQ_BUILD || "b31a", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
       let a = (s, E, f, c, S) => {
         let y = Ue(s, S, 0);
         n.drawImage(
@@ -21967,20 +21974,30 @@ ram_mem_amulet: [
           );
         return tabs;
       }
-      if (A.state === "play" && A.paused && (A.skipPage || 0) === 1)
-        return ["WEAPON", "ARMOR", "BOARD", "SPELL", "VISOR", "GALACTIC MAP", "BOTTLE", "ITEMS"].map((label, i) => ({
+      if (A.state === "play" && A.paused && A.story === "skippy") {
+        let tabs = ["MAP", "ITEMS", "JOURNAL", "COSMOS", "TABLE"].map((label, i) => ({
           label: label,
           enabled: !0,
-          on: (A.gearSel || 0) === i,
+          on: (A.skipPage || 0) === i,
         }));
-      if (A.state === "play" && A.paused)
-        return ownedItems()
-          .map((id, i) => ({
-            label: slotName(id) + (d.wep === id ? "  ARMED" : d.tool === id ? "  HELD" : ""),
-            enabled: !0,
-            on: (A.gearSel || 0) === i,
-          }))
-          .concat([{ label: "GEAR", enabled: !0, on: !1 }]);
+        if ((A.skipPage || 0) === 3)
+          return tabs.concat(
+            ["WEAPON", "ARMOR", "BOARD", "SPELL", "VISOR", "GALACTIC MAP", "BOTTLE"].map((label, i) => ({
+              label: label,
+              enabled: !0,
+              on: (A.gearSel || 0) === i,
+            })),
+          );
+        if ((A.skipPage || 0) === 1)
+          return tabs.concat(
+            ownedItems().map((id, i) => ({
+              label: slotName(id) + (d.wep === id ? "  ARMED" : d.tool === id ? "  HELD" : ""),
+              enabled: !0,
+              on: (A.gearSel || 0) === i,
+            })),
+          );
+        return tabs;
+      }
       return [];
     }
     function touchPick(i) {
@@ -22059,17 +22076,20 @@ ram_mem_amulet: [
         }
         return;
       }
-      if (A.state === "play" && A.paused) {
+      if (A.state === "play" && A.paused && A.story === "skippy") {
+        if (i < 5) {
+          ((A.skipPage = i), (A.gearSel = 0));
+          return;
+        }
+        let row = i - 5;
+        if ((A.skipPage || 0) === 3) {
+          ((A.gearSel = row), cosmosGearAct(row));
+          return;
+        }
         if ((A.skipPage || 0) === 1) {
-          i === 7 ? (A.skipPage = 0) : ((A.gearSel = i), cosmosGearAct(i));
-          return;
+          let id = ownedItems()[row];
+          id && (weaponish(id) ? (d.wep = id) : (d.tool = id), splitHands(), D.sel(), xe());
         }
-        if (i === ownedItems().length) {
-          ((A.skipPage = 1), (A.gearSel = 0));
-          return;
-        }
-        let id = ownedItems()[i];
-        id && (weaponish(id) ? (d.wep = id) : (d.tool = id), splitHands(), D.sel(), xe());
       }
     }
     function touchContext() {
@@ -24571,6 +24591,7 @@ ram_mem_amulet: [
         chapters: () => STORY_ROWS.map((r) => ({ id: r.id, status: chapterStatus(r.id), sub: rowSub(r) })),
         riderLog: () => riderLog(),
         gearTable: () => GEAR_TABLE,
+        pauseBoxes: () => (A.pauseBoxes || []).slice(),
         nextRoad: () => nextRoad(),
         basement: () => basementOpen(),
         quests: () => (A.story === "ros" ? rosQuestRows() : []),
@@ -24605,7 +24626,7 @@ ram_mem_amulet: [
           enterStory(id);
           return Bt();
         },
-        build: () => window.__SQ_BUILD || "b31",
+        build: () => window.__SQ_BUILD || "b31a",
         cast: () => castSpell(),
         hud: () => hudBits(),
         fightHud: () => fightHud(),
@@ -24874,6 +24895,8 @@ html.srml [data-b=magic]{border-color:#c9a0ff;color:#ffe0ff;border-radius:999px;
 html.srml [data-b=swap]{border-color:#ffe650;color:#fff8d0;font-size:11px}
 html.srml [data-b=map]{border-color:#b7c3e6;color:#eef2ff;font-size:10px}
 html.srml .srml-b.dim{opacity:.38}
+html.srml .srml-b .cd{display:none!important}
+html.srml .srml-b.atk::before,html.srml .srml-b.itm::before{content:"";position:absolute;inset:5px;border-radius:50%;pointer-events:none;background:conic-gradient(from -90deg,#3dff6a calc(var(--cd,0)*360deg),transparent 0);-webkit-mask:radial-gradient(circle,transparent 66%,#000 68%);mask:radial-gradient(circle,transparent 66%,#000 68%)}
 html.srml #stick{display:none;position:fixed;z-index:6;margin:0;touch-action:none;border-radius:50%;border:3px solid rgba(61,255,106,.9);background:radial-gradient(circle,rgba(26,33,64,.55) 0,rgba(8,10,20,.42) 72%);box-shadow:inset 0 0 0 8px rgba(61,255,106,.16);opacity:.88}
 html.srml #stick.on{filter:brightness(1.3)}
 html.srml #knob{background:rgba(42,52,86,.8);border-color:#3dff6a}
@@ -24947,14 +24970,22 @@ function layout(){
   function hideRows(){
     if(rows.style.display!=="none"){rows.style.display="none";rows.dataset.sig="";rows.innerHTML="";}
   }
-  function cluster(){
+  function cluster(limitLeft){
     var S=56,A=74,G=10;
     var need=S+G+A+G+S, room=H-sat-sab-18;
     if(need>room){G=6;A=66;S=56;}
-    var right=W-sar-12, bottom=H-sab-12;
+    var right=W-sar-8, bottom=H-sab-12;
+    function span(){return A+G+S;}
+    if(limitLeft){
+      while(span()>right-limitLeft && A>64) A-=2;
+    }
     var item={w:S,h:S}, atk={w:A,h:A}, talk={w:S,h:S}, swap={w:S,h:S}, board={w:S,h:S};
     item.x=right-S;
     atk.x=item.x-G-A;
+    if(limitLeft && atk.x<limitLeft && item.x+S<=right){
+      var shift=Math.min(limitLeft-atk.x, right-(item.x+S));
+      if(shift>0){atk.x+=shift; item.x+=shift;}
+    }
     board.y=bottom-S;
     var mid=board.y-G;
     atk.y=mid-A;
@@ -24999,9 +25030,10 @@ function layout(){
     return;
   }
   if(mode==="play"||mode==="dialog"){
-    placeGame(land?0:sat+56, 0, 0, 0, land?"mid":"top");
+    var box=placeGame(land?0:sat+56, 0, 0, 0, land?"mid":"top");
     hideRows();
-    var c=cluster();
+    var gutter=box.x+box.w+4;
+    var c=cluster(W-gutter>=130?gutter:0);
     if(by.roll) by.roll.dataset.b=R.dataset.rollact==="board"?"board":"roll";
     var actLabel=mode==="dialog"?"ACTION":(R.dataset.actlabel||"ACTION");
     var rollLabel=R.dataset.rolllabel||"ROLL";
@@ -25016,6 +25048,8 @@ function layout(){
     var pauseS=48;
     if(by.map) show(by.map, sal+10, sat+8, pauseS, pauseS, "PAUSE", false);
     var stickS=Math.max(112, Math.min(land?148:132, Math.round(H*0.42)));
+    var stickRoom=box.x-8-(sal+12);
+    if(stickRoom>=96) stickS=Math.min(stickS, stickRoom);
     var stickX=sal+12;
     var stickY=Math.round(H*0.62-stickS/2);
     if(stickY<sat+pauseS+16) stickY=sat+pauseS+16;
