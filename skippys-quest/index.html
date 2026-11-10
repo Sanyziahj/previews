@@ -3,7 +3,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script>window.__SQ_BUILD="b33";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b33(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b33");location.replace(u.href);}</script>
+<script>window.__SQ_BUILD="b34";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b34(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b34");location.replace(u.href);}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Space Riders: Skippy's Quest</title><link rel="icon" href="data:,">
 <meta name="description" content="Space Riders: Skippy's Quest - a free 16-bit top-down action adventure browser game. The Red King is missing. Ride with ROS through the Sand Dungeon, take Cash's portals to the Seaport and Ramshackle the Viking, win Ronin's flaming sword, beat the house at the Andromeda Casino and stop the Overlord on the Moon, survive the meteor shower with Blaze and earn your space board at the Crossroad and cross the mirror into the Dark World, then storm Fright's castle and bring the Red King home. Chapters 1-9 (Complete) out now.">
@@ -890,6 +890,9 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           { k: "saloon", x: 34, y: 2 },
           { k: "stairs", x: 23, y: 3 },
           { k: "latch", id: "desert", x: 6, y: 16, gift: "boots" },
+          // NEXUS 1 entrance. Cash stands here after the centipede (boss_d1).
+          // This door is the main story. It is not the basement and needs no blaster.
+          { k: "portal", x: 16.2, y: 19.2, need: "boss_d1", to: "desert_hub", label: "NEXUS", main: 1 },
           { k: "portal", x: 37, y: 7, need: "tale_ros" },
         ],
         signs: [
@@ -1106,13 +1109,14 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         ],
         warps: [
           { x: 9, y: 11, w: 2, h: 1, to: "d3", tx: 9.5, ty: 1.2, dir: 0 },
-          { x: 9, y: 2, w: 2, h: 2, to: "desert", tx: 23.5, ty: 8.2, dir: 0 },
+          { x: 9, y: 2, w: 2, h: 2, to: "desert", tx: 15, ty: 21.2, dir: 1, need: "boss_d1" },
         ],
       },
     },
     je = {
-      d4_desert: { to: "desert", tx: 23.5, ty: 8.2, dir: 0 },
-      desert_nx: { to: "nexus", tx: 4, ty: 5.2, dir: 0 },
+      d4_desert: { to: "desert", tx: 15, ty: 21.2, dir: 1 },
+      desert_hub: { to: "hub", tx: 6.5, ty: 6.2, dir: 3 },
+      desert_nx: { to: "hub", tx: 5.2, ty: 4.2, dir: 0 },
     },
     Ka = { sand: { name: "SAND DUNGEON", cols: 4, rows: 3 } },
     Ce = {
@@ -1676,7 +1680,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
     },
   });
   Object.assign(je, {
-    nx_desert: { to: "desert", tx: 23.5, ty: 8.2, dir: 0 },
+    nx_desert: { to: "desert", tx: 15, ty: 21.2, dir: 1 },
     nx_sea: { to: "seaport", tx: 3.5, ty: 5.2, dir: 0 },
     sea_nx: { to: "nexus", tx: 15, ty: 5.2, dir: 0 },
     s4_sea: { to: "seaport", tx: 34.5, ty: 14.4, dir: 0 },
@@ -9193,6 +9197,25 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
     { id: "gloves", name: "GRIP GLOVES", tier: 1, from: "SECRET", where: "SEAPORT THICKET", opens: "A SURE GRIP" },
     { id: "boots", name: "JET BOOTS", tier: 1, from: "SECRET", where: "DESERT LATCH", opens: "A QUICKER STEP" },
   ];
+  // Where the two portal rooms are. Realm doors are not listed twice.
+  var NEXUS_TABLE = [
+    {
+      n: 1,
+      id: "hub",
+      name: "THE PORTAL NEXUS",
+      where: "IN THE DESERT, BESIDE CASH, AFTER THE CENTIPEDE",
+      gate: "NONE",
+      doors: "DESERT, SEAPORT, SAKURA, CASINO, MOON, ORBIT, CROSSROAD, CARNIVAL, CASTLE",
+    },
+    {
+      n: 2,
+      id: "nexus",
+      name: "CASH'S BASEMENT",
+      where: "UNDER THE PIONEER POUR",
+      gate: "HEAVY BLASTER OPENS THE STAIRS",
+      doors: "COSMOS",
+    },
+  ];
   var TALES = [
     {
       id: "ros",
@@ -9756,7 +9779,69 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       cosmos_sak: { to: "village", tx: 8, ty: 8, dir: 0 },
     });
     Ie.nexus.props.push({ k: "portal", x: 7.2, y: 9.4, to: "nx_cosmos", label: "COSMOS" });
+    // Two nexuses. Do not fold them back into one room.
+    // NEXUS 1, area id "hub", name THE PORTAL NEXUS.
+    //   Where: the desert, beside Cash, after the Void-Eye Centipede (boss_d1).
+    //   The door there is labeled NEXUS. No blaster, no tale item.
+    //   Inside: the main-story realm doors (DESERT, SEAPORT, SAKURA, CASINO,
+    //   MOON, ORBIT, CROSSROAD, CARNIVAL, CASTLE). Chapter returns land here.
+    // NEXUS 2, area id "nexus", name CASH'S BASEMENT.
+    //   Where: under the Pioneer Pour. The stairs open when the heavy blaster
+    //   breaks the case. Optional. It keeps COSMOS (and only COSMOS).
+    //   The same realm names are not repeated down here.
     (function layoutHubs() {
+      let mainDoor = {
+        DESERT: 1, SEAPORT: 1, SAKURA: 1, CASINO: 1, MOON: 1,
+        ORBIT: 1, CROSSROAD: 1, CARNIVAL: 1, CASTLE: 1,
+      };
+      let hubDoors = [];
+      Ie.nexus.props = (Ie.nexus.props || []).filter(function (p) {
+        if (p.k === "portal" && mainDoor[p.label]) {
+          hubDoors.push(p);
+          return false;
+        }
+        return true;
+      });
+      let hubSpots = {
+        DESERT: [4, 3],
+        SEAPORT: [15, 3],
+        SAKURA: [4, 8.5],
+        CASINO: [15, 8.5],
+        MOON: [7, 1.8],
+        ORBIT: [12, 1.8],
+        CROSSROAD: [2.2, 6],
+        CARNIVAL: [16.8, 6],
+        CASTLE: [9.5, 9.4],
+      };
+      for (let prop of hubDoors)
+        if (hubSpots[prop.label]) {
+          prop.x = hubSpots[prop.label][0];
+          prop.y = hubSpots[prop.label][1];
+        }
+      Ie.hub = {
+        id: "hub",
+        name: "THE PORTAL NEXUS",
+        theme: "nexus",
+        realm: "nexus",
+        music: "nexus",
+        npcs: [{ id: "wizard", x: 9.6, y: 5.4, dir: 0, talk: "cash_nexus" }],
+        props: hubDoors,
+        onEnter: "nexus_intro",
+      };
+      Zs.hub = [
+        "####################",
+        "#..................#",
+        "#..o............o..#",
+        "#..................#",
+        "#..................#",
+        "#..................#",
+        "#..................#",
+        "#..................#",
+        "#..................#",
+        "#..o............o..#",
+        "#..................#",
+        "####################",
+      ];
       let spots = {
         DESERT: [2.5, 2.4],
         ORBIT: [7.2, 2.4],
@@ -9816,22 +9901,23 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         "####..####",
       ];
       let back = {
-        desert_nx: [4.2, 3.6, 0],
-        dock_nx: [8.2, 3.6, 0],
-        moon_nx: [11, 3.6, 0],
-        sea_nx: [15.2, 3.6, 0],
-        cross_nx: [4.2, 6.2, 3],
-        carn_nx: [14.8, 6.2, 2],
-        village_nx: [4.2, 8.2, 0],
-        cosmos_nx: [8.6, 8.2, 1],
-        cgate_nx: [11, 8.2, 1],
-        casino_nx: [15.2, 8.2, 0],
+        desert_nx: ["hub", 5.2, 4.2, 0],
+        dock_nx: ["hub", 11, 3.2, 0],
+        moon_nx: ["hub", 8, 3.2, 0],
+        sea_nx: ["hub", 14, 4.2, 0],
+        cross_nx: ["hub", 3.2, 6.2, 3],
+        carn_nx: ["hub", 16, 6.2, 2],
+        village_nx: ["hub", 5.2, 7.2, 0],
+        cgate_nx: ["hub", 9.5, 8.2, 1],
+        casino_nx: ["hub", 14, 7.2, 0],
+        cosmos_nx: ["nexus", 8.6, 8.2, 1],
       };
       for (let id in back)
         if (je[id]) {
-          je[id].tx = back[id][0];
-          je[id].ty = back[id][1];
-          je[id].dir = back[id][2];
+          je[id].to = back[id][0];
+          je[id].tx = back[id][1];
+          je[id].ty = back[id][2];
+          je[id].dir = back[id][3];
         }
     })();
     Ie.teashop.name = "SHADOW'S TEA HOUSE";
@@ -10085,7 +10171,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       dice_high: [{ t: "fn", f: "diceHigh" }],
       dice_low: [{ t: "fn", f: "diceLow" }],
       dice_no: [h("ros", "THEN DON'T TOSS. THE SARSAPARILLA IS STILL SWEET.")],
-      road_on1: [h("skippy", "THE SEA ROAD IS OPEN. NO PORTAL. I CAN WALK IT.")],
+      road_on1: [h("skippy", "CASH IS IN THE DESERT. THE NEXUS DOOR IS RIGHT BESIDE HIM.")],
       road_on2: [h("skippy", "SAKURA IS AHEAD ON THE ROAD. THE SHARD IS STILL THE WAY.")],
       road_on3: [h("skippy", "THE CASINO LIGHTS ARE DOWN THE ROAD. COINS STAY IN MY POCKET.")],
       road_on4: [h("skippy", "THE MOON LIFT IS A DOCK, NOT A PORTAL. I STILL HAVE MY FEET.")],
@@ -15669,7 +15755,7 @@ ram_mem_amulet: [
     }
     function nextRoad() {
       let routes = {
-        1: ["seaport", 3.5, 5.2, 0],
+        1: ["desert", 15, 21.2, 1],
         2: ["village", 3.5, 5.2, 0],
         3: ["casino", 2, 13.4, 0],
         4: ["moon", 3, 5.2, 0],
@@ -17748,7 +17834,7 @@ ram_mem_amulet: [
       for (let a = 0; a < 16; a++)
         I((a * 23) % 320, 20 + ((a * 17) % 70), 2, 2, "#fff2c8");
       (v(n, "SPACE RIDERS", 160, 8, "#ff4fd8", 2, "center", "#2a0a14"),
-        v(n, window.__SQ_BUILD || "b33", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
+        v(n, window.__SQ_BUILD || "b34", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
         v(n, "SIDE QUESTS COME HOME", 160, 28, "#ffcc33", 1, "center", "#2a0a14"));
       let a = 58;
       for (let t = 0; t < STORY_ROWS.length; t++) {
@@ -21661,7 +21747,7 @@ ram_mem_amulet: [
       let e = A.t;
       (v(n, "SPACE RIDERS", 160, 14, "#ff4fd8", 3, "center", "#2a0a3a"),
         v(n, "SKIPPY'S QUEST", 160, 42, "#ffcc33", 2, "center", "#2a0a3a"),
-        v(n, window.__SQ_BUILD || "b33", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
+        v(n, window.__SQ_BUILD || "b34", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
       let a = (s, E, f, c, S) => {
         let y = Ue(s, S, 0);
         n.drawImage(
@@ -22950,7 +23036,7 @@ ram_mem_amulet: [
             "#ff9ae8",
             1.5,
           ),
-        w && w.id === "nexus")
+        w && (w.id === "nexus" || w.id === "hub" || e.main))
       ) {
         let name = f ? "LOCKED" : e.label || "";
         if (name) {
@@ -24655,6 +24741,7 @@ ram_mem_amulet: [
         chapters: () => STORY_ROWS.map((r) => ({ id: r.id, status: chapterStatus(r.id), sub: rowSub(r) })),
         riderLog: () => riderLog(),
         gearTable: () => GEAR_TABLE,
+        nexuses: () => NEXUS_TABLE.map((r) => Object.assign({}, r)),
         speechInk: () => A.speechInk || null,
         frameInk: () => (A.frameInk || []).slice(),
         toastInk: () => A.toastInk || null,
@@ -24697,7 +24784,7 @@ ram_mem_amulet: [
           enterStory(id);
           return Bt();
         },
-        build: () => window.__SQ_BUILD || "b33",
+        build: () => window.__SQ_BUILD || "b34",
         cast: () => castSpell(),
         hud: () => hudBits(),
         fightHud: () => fightHud(),
