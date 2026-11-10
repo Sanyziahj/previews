@@ -9192,7 +9192,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         realm: "nexus",
         music: "nexus",
         npcs: [{ id: "kal", x: 9, y: 4, dir: 0, talk: "ac_kal" }],
-        signs: [{ x: 9, y: 7, text: "GALACTIC MAP BRIEFING. STARS ARE $STAR. THE RIDE IS STILL OURS.", kind: "sign" }],
+        signs: [{ x: 9, y: 7, text: "GALACTIC MAP BRIEFING. COINS ARE STARS. THE RIDE IS STILL OURS.", kind: "sign" }],
         warps: [{ x: 1, y: 5, w: 1, h: 2, to: "ac_hub", tx: 20, ty: 6.5, dir: 2 }],
       },
       ac_camp: {
@@ -11363,7 +11363,7 @@ ram_mem_amulet: [
     (I(0, 24, 320, 200, "#14081f"),
       v(n, "GEAR", 160, 32, "#ff4fd8", 2, "center", "#1a0820"),
       v(n, "LET'S RIDE!", 160, 50, "#c9a0ff", 1, "center", "#1a0820"),
-      v(n, "$STAR " + d.coins + "   PART " + (d.part || 0), 160, 64, "#ff9ae8", 1, "center", "#1a0820"));
+      v(n, "STARS " + d.coins + "   PART " + (d.part || 0), 160, 64, "#ff9ae8", 1, "center", "#1a0820"));
     for (let i = 0; i < rows.length; i++)
       v(n, (sel === i ? "> " : "  ") + rows[i], 28, 80 + i * 14, sel === i ? "#ff4fd8" : "#f4e8ff", 1, "", "#14081f");
     v(n, "X CYCLES. F CASTS. RIGHT CLOSES GEAR.", 160, 188, "#c9a0ff", 1, "center", "#14081f");
@@ -12395,9 +12395,11 @@ ram_mem_amulet: [
             ee["bt_" + e + "_" + f + "_" + E] &&
             (De[E][f] = ".");
       if (
-        ((d.x = p(a)),
+        (        (d.x = p(a)),
         (d.y = p(t)),
         (d.dir = i),
+        (A.toast = ""),
+        (A.toastT = 0),
         (d.safeX = d.x),
         (d.safeY = d.y),
         (d.roll = 0),
@@ -18742,12 +18744,46 @@ ram_mem_amulet: [
         (I(x, 20, 16, 2, "#3a2a20"),
         I(x, 20, Math.max(1, Math.floor(16 * (1 - cool))), 2, "#3dff6a"));
     }
+    function hudBits() {
+      let spell = (d.spell === "ward" ? "WARD" : "LANTERN") + ((d.ward || 0) ? " " + d.ward : ""),
+        bits = [{ id: "bar", x: 4, y: 24, w: 48, h: 5 }],
+        x = 56;
+      bits.push({ id: "spell", x, y: 24, w: spell.length * 6, h: 8, text: spell });
+      x += spell.length * 6 + 8;
+      if (w.surf) {
+        let rings = "RINGS " + ((A.surf && A.surf.rings) || 0);
+        bits.push({ id: "rings", x, y: 24, w: rings.length * 6, h: 8, text: rings });
+        x += rings.length * 6 + 8;
+      } else if (A.story === "skippy") {
+        bits.push({ id: "star", x, y: 24, w: 30, h: 8, text: "STARS" });
+        x += 38;
+      }
+      if (slotsOn()) {
+        let xl = "X " + slotName(weaponNow(), !0),
+          zl = "Z " + slotName(toolNow(), !0),
+          sx = Math.max(x, 156);
+        bits.push({ id: "xname", x: sx, y: 24, w: xl.length * 6, h: 8, text: xl });
+        bits.push({ id: "q", x: sx + xl.length * 6 + 6, y: 24, w: 6, h: 8, text: "Q" });
+        bits.push({ id: "zname", x: sx + xl.length * 6 + 18, y: 24, w: zl.length * 6, h: 8, text: zl });
+      }
+      return bits;
+    }
+    function drawHudRow() {
+      for (let bit of hudBits())
+        bit.text &&
+          v(
+            n,
+            bit.text,
+            bit.x,
+            bit.y,
+            bit.id === "zname" ? "#4ff0ff" : bit.id === "xname" ? "#ffe0a0" : bit.id === "star" ? "#c9a0ff" : "#ff9ae8",
+            1,
+            "",
+            "#000",
+          );
+    }
     function drawSlotHud() {
-      (drawSlotMark(weaponNow(), 96),
-        drawSlotMark(toolNow(), 118),
-        v(n, "X " + slotName(weaponNow(), !0), 4, 26, "#ffe0a0", 1, "", "#000"),
-        v(n, "Q", 86, 26, "#c8b090", 1, "", "#000"),
-        v(n, "Z " + slotName(toolNow(), !0), 140, 26, "#4ff0ff", 1, "", "#000"));
+      (drawSlotMark(weaponNow(), 96), drawSlotMark(toolNow(), 118));
       paintCooldown(document.querySelector("[data-b=attack]"), weaponNow());
       paintCooldown(document.querySelector("[data-b=item]"), toolNow());
     }
@@ -18813,12 +18849,10 @@ ram_mem_amulet: [
         }
         d.pieces && I(92, 20, 2, 2, "#8ae878");
       }
-      (I(4, 24, 64, 5, "#2a1848"),
-        I(4, 24, Math.max(0, Math.floor(64 * ((d.magic || 0) / (d.magicMax || 8)))), 5, "#c060ff"),
-        I(4, 24, 64, 1, "#ff9ae8"),
-        v(n, (d.spell === "ward" ? "WARD" : "LANTERN") + ((d.ward || 0) ? " " + d.ward : ""), 70, 23, "#ff9ae8", 1, "", ""),
-        A.story === "skippy" && v(n, "$STAR", 168, 23, "#c9a0ff", 1, "", ""),
-        w.surf && v(n, "RINGS " + ((A.surf && A.surf.rings) || 0), 210, 23, "#ff4fd8", 1, "", ""));
+      (I(4, 24, 48, 5, "#2a1848"),
+        I(4, 24, Math.max(0, Math.floor(48 * ((d.magic || 0) / (d.magicMax || 8)))), 5, "#c060ff"),
+        I(4, 24, 48, 1, "#ff9ae8"),
+        drawHudRow());
       let a = (t, i, s) => {
         (I(t, 3, 18, 18, "#1a1630"),
           I(t, 3, 18, 1, "#ffcc33"),
@@ -22614,6 +22648,8 @@ ram_mem_amulet: [
         }),
         load: () => Bt(),
         cast: () => castSpell(),
+        hud: () => hudBits(),
+        toast: () => ({ text: A.toastT > 0 ? A.toast || "" : "", t: A.toastT || 0 }),
         hurt: (n = 1) => be(n, d.x, d.y + 20),
         drink: (i = 0) => drinkBottle(i),
         gearAct: (i) => cosmosGearAct(i),
@@ -22925,33 +22961,49 @@ function layout(){
     scr.style.marginTop=Math.max(8,sat+8)+"px";
   }else if(play){
     var gap=10;
-    var atk=land?76:Math.max(68,Math.min(80,Math.round(Math.min(W,H)*0.2)));
-    var itemD=Math.max(56,Math.round(atk*0.78));
-    var rollD=itemD, swapD=48;
-    var acx=right-atk/2, acy=H-bot-atk/2;
-    var boxes=[];
     function spot(cx,cy,d){return {cx:cx,cy:cy,r:d/2};}
-    function shove(box,others){
-      for(var n=0;n<8;n++){
-        for(var i=0;i<others.length;i++){
-          var o=others[i], dx=box.cx-o.cx, dy=box.cy-o.cy, dist=Math.hypot(dx,dy)||0.01, need=box.r+o.r+gap;
-          if(dist<need){box.cx+=dx/dist*(need-dist); box.cy+=dy/dist*(need-dist);}
-        }
-      }
+    function onScreen(b){
+      if(b.cx-b.r<left-0.5||b.cx+b.r>right+0.5)return false;
+      if(b.cy+b.r>H-bot+0.5||b.cy-b.r<top)return false;
+      if(b.cx+b.r>right-48-gap&&b.cy-b.r<top+48+gap)return false;
+      return true;
     }
-    var primary=spot(acx,acy,atk);
-    var magD=Math.max(56,Math.round(atk*0.8));
-    var angI=22*Math.PI/180;
-    var itemBox=spot(acx-Math.cos(angI)*(atk/2+gap+itemD/2), acy-Math.sin(angI)*(atk/2+gap+itemD/2), itemD);
-    var angM=50*Math.PI/180;
-    var magicBox=spot(acx-Math.cos(angM)*(atk/2+gap+magD/2), acy-Math.sin(angM)*(atk/2+gap+magD/2), magD);
-    var angR=78*Math.PI/180;
-    var rollBox=spot(acx-Math.cos(angR)*(atk/2+gap+rollD/2), acy-Math.sin(angR)*(atk/2+gap+rollD/2), rollD);
-    shove(magicBox,[primary,itemBox]);
-    shove(rollBox,[primary,itemBox,magicBox]);
-    var sang=angI+0.55;
-    var swapBox=spot(itemBox.cx-Math.cos(sang)*(itemD/2+gap+swapD/2), itemBox.cy-Math.sin(sang)*(itemD/2+gap+swapD/2), swapD);
-    shove(swapBox,[primary,itemBox,magicBox,rollBox]);
+    function separated(list){
+      for(var i=0;i<list.length;i++)for(var j=i+1;j<list.length;j++){
+        var a=list[i],b=list[j];
+        if(Math.hypot(a.cx-b.cx,a.cy-b.cy)<a.r+b.r+gap-0.25)return false;
+      }
+      return true;
+    }
+    function tryPlace(atk,itemD,magD,rollD,swapD){
+      var acx=right-atk/2, acy=H-bot-atk/2;
+      var primary=spot(acx,acy,atk);
+      var angs=[16,48,80];
+      var diams=[itemD,magD,rollD];
+      for(var extra=0;extra<=110;extra+=4){
+        var placed=diams.map(function(d,i){
+          var R=atk/2+gap+d/2+extra, a=angs[i]*Math.PI/180;
+          return spot(acx-Math.cos(a)*R, acy-Math.sin(a)*R, d);
+        });
+        var item=placed[0], sang=angs[0]*Math.PI/180+0.65;
+        var swapBox=spot(item.cx-Math.cos(sang)*(itemD/2+gap+swapD/2), item.cy-Math.sin(sang)*(itemD/2+gap+swapD/2), swapD);
+        var all=[primary,placed[0],placed[1],placed[2],swapBox];
+        if(all.every(onScreen)&&separated(all))return {primary:primary,item:placed[0],magic:placed[1],roll:placed[2],swap:swapBox,atk:atk,itemD:itemD,magD:magD,rollD:rollD,swapD:swapD};
+      }
+      return null;
+    }
+    var atk0=land?76:Math.max(64,Math.min(78,Math.round(Math.min(W,H)*0.2)));
+    var pack=null;
+    for(var scale=1;scale>=0.62&&!pack;scale-=0.04){
+      var atk=Math.max(56,Math.round(atk0*scale));
+      var itemD=Math.max(48,Math.round(atk*0.78));
+      var magD=Math.max(48,Math.round(atk*0.84));
+      var rollD=itemD, swapD=48;
+      pack=tryPlace(atk,itemD,magD,rollD,swapD);
+    }
+    if(!pack)pack=tryPlace(56,48,48,48,48);
+    var primary=pack.primary, itemBox=pack.item, magicBox=pack.magic, rollBox=pack.roll, swapBox=pack.swap;
+    var atk=pack.atk, itemD=pack.itemD, magD=pack.magD, rollD=pack.rollD, swapD=pack.swapD;
     var talk=R.dataset.talk==="1";
     var shown=[primary];
     if(talk)show(by.talk,primary.cx-atk/2,primary.cy-atk/2,atk,atk,"TALK");

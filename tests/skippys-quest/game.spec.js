@@ -2170,10 +2170,23 @@ test.describe('magic button on the phone', () => {
     });
     expect(place.magic.on).toBe(true);
     expect(place.magic.w).toBeGreaterThanOrEqual(48);
+    expect(place.roll.w).toBeGreaterThanOrEqual(48);
     const dx = place.roll.cx - place.item.cx, dy = place.roll.cy - place.item.cy;
     const along = ((place.magic.cx - place.item.cx) * dx + (place.magic.cy - place.item.cy) * dy) / (dx * dx + dy * dy);
     expect(along).toBeGreaterThan(0.05);
     expect(along).toBeLessThan(0.95);
+    const portraitClip = await page.evaluate(() => {
+      const bad = [];
+      for (const el of document.querySelectorAll('.srml-b, #stick')) {
+        const r = el.getBoundingClientRect();
+        if (getComputedStyle(el).display === 'none' || r.width < 2) continue;
+        if (r.x < -0.5 || r.y < -0.5 || r.right > innerWidth + 0.5 || r.bottom > innerHeight + 0.5)
+          bad.push((el.textContent || el.id).trim());
+      }
+      return bad;
+    });
+    expect(portraitClip, 'portrait buttons clipped').toEqual([]);
+    await page.screenshot({ path: `${ART}/phone-portrait-after.png` });
     await page.screenshot({ path: `${ART}/phone-magic-portrait.png` });
     await page.setViewportSize({ width: 844, height: 390 });
     await page.evaluate(() => __SQ.step(2));
@@ -2191,7 +2204,133 @@ test.describe('magic button on the phone', () => {
     expect(land.w).toBeGreaterThanOrEqual(48);
     expect(land.along).toBeGreaterThan(0.05);
     expect(land.along).toBeLessThan(0.95);
+    const landClip = await page.evaluate(() => {
+      const bad = [];
+      for (const el of document.querySelectorAll('.srml-b, #stick')) {
+        const r = el.getBoundingClientRect();
+        if (getComputedStyle(el).display === 'none' || r.width < 2) continue;
+        if (r.x < -0.5 || r.y < -0.5 || r.right > innerWidth + 0.5 || r.bottom > innerHeight + 0.5)
+          bad.push((el.textContent || el.id).trim());
+      }
+      return bad;
+    });
+    expect(landClip, 'landscape buttons clipped').toEqual([]);
+    await page.screenshot({ path: `${ART}/phone-landscape-after.png` });
     await page.screenshot({ path: `${ART}/phone-magic-landscape.png` });
     expect(errors, errors.join('\n')).toEqual([]);
   });
+
+  test('narrow phones keep MAGIC, ITEM, ROLL and TALK fully on screen', async ({ page }) => {
+    const errors = await boot(page);
+    await page.waitForFunction(() => document.documentElement.classList.contains('srml'));
+    for (const [w, h] of [[360, 640], [390, 844], [640, 360], [844, 390]]) {
+      await page.setViewportSize({ width: w, height: h });
+      const fit = await page.evaluate(() => {
+        const S = __SQ;
+        S.G.state = 'play';
+        S.G.story = 'skippy';
+        S.G.paused = false;
+        S.P.items = { raygun: true, lasso: true };
+        S.P.wep = 'raygun';
+        S.P.tool = 'lasso';
+        S.P.pri = 'raygun';
+        S.P.sec = 'lasso';
+        S.flag('oe_teashop');
+        S.warp('teashop', 6, 6, 0);
+        S.step(2);
+        const npc = S.npcs.find((n) => n.id === 'x_tea');
+        if (npc) { S.P.x = npc.x; S.P.y = npc.y + 16; }
+        for (let i = 0; i < 12 && (S.script || S.dlg); i++) {
+          S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
+        }
+        S.step(2);
+        const clipped = [];
+        for (const el of document.querySelectorAll('.srml-b, #stick')) {
+          const r = el.getBoundingClientRect();
+          if (getComputedStyle(el).display === 'none' || r.width < 2) continue;
+          const label = (el.textContent || el.id).trim();
+          if (r.x < -0.5 || r.y < -0.5 || r.right > innerWidth + 0.5 || r.bottom > innerHeight + 0.5) clipped.push(label);
+          if (Math.min(r.width, r.height) < 48) clipped.push(label + ' small');
+        }
+        const labels = [...document.querySelectorAll('.srml-b, #stick')]
+          .filter((el) => getComputedStyle(el).display !== 'none')
+          .map((el) => (el.textContent || '').trim());
+        return { clipped, labels, talk: document.documentElement.dataset.talk };
+      });
+      expect(fit.talk, `${w}x${h} ${fit.labels.join(',')}`).toBe('1');
+      expect(fit.labels, `${w}x${h} ${fit.labels.join(',')}`).toEqual(expect.arrayContaining(['MAGIC', 'ITEM', 'ROLL', 'TALK']));
+      expect(fit.clipped, `${w}x${h} ${fit.clipped.join(',')}`).toEqual([]);
+    }
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+});
+
+test('HUD labels stay apart and toasts clear', async ({ page }) => {
+  const errors = await boot(page);
+  const hud = await page.evaluate(() => {
+    const S = __SQ;
+    S.G.state = 'play';
+    S.G.story = 'skippy';
+    S.G.paused = false;
+    S.P.items = { raygun: true, lasso: true };
+    S.P.wep = 'raygun';
+    S.P.tool = 'lasso';
+    S.P.pri = 'raygun';
+    S.P.sec = 'lasso';
+    S.P.spell = 'lantern';
+    S.flag('oe_desert');
+    S.warp('desert', 12, 10, 1);
+    S.step(2);
+    const bits = S.hud().filter((b) => b.text);
+    const hits = [];
+    for (let i = 0; i < bits.length; i++) {
+      for (let j = i + 1; j < bits.length; j++) {
+        const a = bits[i], b = bits[j];
+        const ix = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
+        const iy = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
+        if (ix > 0 && iy > 0) hits.push(a.text + ' / ' + b.text);
+      }
+    }
+    return { hits, texts: bits.map((b) => b.text) };
+  });
+  expect(hud.texts.join(' ')).toContain('LANTERN');
+  expect(hud.texts.join(' ')).toContain('X RAY');
+  expect(hud.texts.join(' ')).toContain('Z ROPE');
+  expect(hud.hits, hud.texts.join(' | ')).toEqual([]);
+
+  const timed = await page.evaluate(() => {
+    const S = __SQ;
+    S.G.toast = 'HELLO RIDER';
+    S.G.toastT = 1.8;
+    S.step(30);
+    const mid = S.toast().text;
+    S.step(120);
+    return { mid, later: S.toast().text };
+  });
+  expect(timed.mid).toBe('HELLO RIDER');
+  expect(timed.later).toBe('');
+
+  const cleared = await page.evaluate(() => {
+    const S = __SQ;
+    S.G.state = 'play';
+    S.G.story = 'skippy';
+    S.P.items.sword = true;
+    S.flag('oe_ac_range');
+    S.warp('ac_range', 4, 7, 1);
+    S.step(2);
+    for (const e of S.ents) {
+      S.P.x = e.x - 16; S.P.y = e.y + 4; S.P.dir = 3;
+      S.press('attack', true); S.step(2); S.press('attack', false); S.step(20);
+    }
+    S.step(2);
+    const tin = S.toast().text;
+    S.flag('oe_sky_city');
+    S.warp('sky_city', 8, 7, 0);
+    S.step(2);
+    return { tin, sky: S.toast().text, area: S.A.id };
+  });
+  expect(cleared.tin).toContain('VISOR');
+  expect(cleared.area).toBe('sky_city');
+  expect(cleared.sky).toBe('');
+  expect(errors, errors.join('\n')).toEqual([]);
 });
