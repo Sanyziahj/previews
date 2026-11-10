@@ -132,7 +132,7 @@ test.describe('world words and the attack split', () => {
       S.step(1);
       return { frames, jumps };
     });
-    const bad = walk.frames.filter((f) => !(f.n > 0 && f.dupes.length === 0 && f.whole && f.desert === 1 && f.cosmos === 1));
+    const bad = walk.frames.filter((f) => !(f.n === 1 && f.dupes.length === 0 && f.whole && f.desert === 0 && f.cosmos === 1));
     expect(bad, JSON.stringify(bad.slice(0, 2))).toEqual([]);
     expect(walk.jumps, JSON.stringify(walk.jumps)).toEqual([]);
     await page.screenshot({ path: `${ART}/b33-nexus.png` });

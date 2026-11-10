@@ -39,7 +39,7 @@ async function advance(page, n = 6) {
 test('version, home, and Cash leave the lanes clear', async ({ page }) => {
   const errors = await bootLive(page);
   const build = await page.evaluate(() => __SQ.build());
-  expect(build).toBe('b33');
+  expect(build).toBe('b34');
   const sub = await page.evaluate(() => __SQ.chapters().find((c) => c.id === 'skippy').sub);
   expect(sub).toContain('MAIN');
   await page.evaluate(() => {
@@ -139,13 +139,15 @@ test('Cash and the portals keep their own space', async ({ page }) => {
     } else {
       expect(desk.cash, area).toBe(true);
       if (area === 'nexus') {
-        expect(desk.labels.join(' '), area).toContain('DESERT');
         expect(desk.labels.join(' '), area).toContain('COSMOS');
         expect(desk.labels.join(' '), area).not.toContain('CASH');
-      } else expect(desk.labels, area).toEqual([]);
-      expect(desk.portals).toBeGreaterThan(3);
+        expect(desk.labels.join(' '), area).not.toContain('DESERT');
+        expect(desk.portals).toBeGreaterThanOrEqual(1);
+      } else {
+        expect(desk.labels, area).toEqual([]);
+        expect(desk.portals).toBeGreaterThan(3);
+      }
     }
-    if (area === 'nexus') expect(desk.portals).toBeGreaterThanOrEqual(10);
     await page.locator('#game').screenshot({ path: `${ART}/space-${area}-desktop.png` });
   }
   await page.setViewportSize({ width: 390, height: 844 });
@@ -1105,9 +1107,9 @@ test('Cash court sits downstairs of the Pour, and the heavy case opens', async (
   expect(court.id).toBe('nexus');
   expect(court.name).toBe("CASH'S BASEMENT");
   expect(court.cash).toBe(true);
-  expect(court.portals).toBeGreaterThanOrEqual(10);
+  expect(court.portals).toBeGreaterThanOrEqual(1);
   expect(court.labels.join(' ')).toContain('COSMOS');
-  expect(court.labels.join(' ')).toContain('DESERT');
+  expect(court.labels.join(' ')).not.toContain('DESERT');
   expect(court.labels.join(' ')).not.toContain('CASH');
   await page.locator('#game').screenshot({ path: `${ART}/b29-cash-court.png` });
 
@@ -1419,7 +1421,7 @@ test('the main road skips the tales, and gear, bosses, and labels stay honest', 
     const sealed = !(S.A.warps || []).some((w) => w.to === 'nexus' && !w.need);
     return { areas, sealed, basement: S.basement() };
   });
-  expect(road.areas[0]).toBe('seaport');
+  expect(road.areas[0]).toBe('desert');
   expect(road.areas[1]).toBe('village');
   expect(road.areas[7]).toBe('cgate');
   expect(road.areas).not.toContain('nexus');
