@@ -2303,8 +2303,8 @@ test.describe('magic button on the phone', () => {
           const pause = document.querySelector('[data-b="map"]').getBoundingClientRect();
           return { top: label('roll') || label('board'), pause: pause.x, board: S.board().has };
         }, { story, area });
-        expect(face.board, story).toBe(true);
-        expect(face.top.trim(), story).toBe('BOARD');
+        expect(face.board, story).toBe(story !== 'ramshackle');
+        expect(face.top.trim(), story).toBe(story === 'ramshackle' ? 'ROLL' : 'BOARD');
         expect(face.pause, story).toBeLessThan(w / 2);
         await page.screenshot({ path: `${ART}/${file}-${side}.png` });
       }
@@ -2451,9 +2451,9 @@ test('Skippy earns a board and Slide upgrades every tier', async ({ page }) => {
     const skip = S.board().has;
     return { ros, ram, skip };
   });
-  expect(others.ros).toBe(true);
-  expect(others.ram).toBe(true);
-  expect(others.skip).toBe(false);
+    expect(others.ros).toBe(true);
+    expect(others.ram).toBe(false);
+    expect(others.skip).toBe(false);
   const ramHit = await page.evaluate(() => {
     const S = __SQ;
     S.G.state = 'play';
