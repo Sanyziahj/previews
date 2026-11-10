@@ -135,6 +135,16 @@ test("hub, one lesson in each class, and the art studio", async ({ page }) => {
       const c = document.getElementById("art");
       return c && c.width > 10;
     });
+    if (who === "spike") {
+      const sep = await page.evaluate(() => {
+        const a = __AC.clientPoint("spikeBack");
+        const b = __AC.clientPoint("spikeMid");
+        const c = __AC.clientPoint("spikeFront");
+        const d = (p, q) => Math.hypot(p.x - q.x, p.y - q.y);
+        return Math.min(d(a, b), d(b, c), d(a, c));
+      });
+      expect(sep).toBeGreaterThan(18);
+    }
     await shot(page, `${who}-close-844x390`);
     await page.locator('[data-act="home"]').click();
   }

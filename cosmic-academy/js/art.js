@@ -482,28 +482,35 @@
     }
 
     if (spec.hat === "beanie") {
-      const base = cy - hr * 0.78;
-      const top = cy - hr * 1.5;
+      const cuffTop = cy - hr * 0.5;
       add(page, "beanie", "Beanie", spec.hatC, function (p) {
-        p.moveTo(cx - hr * 0.66, base);
-        p.quadraticCurveTo(cx - hr * 0.98, cy - hr * 1.05, cx - hr * 0.22, top + hr * 0.16);
-        p.quadraticCurveTo(cx, top, cx + hr * 0.22, top + hr * 0.16);
-        p.quadraticCurveTo(cx + hr * 0.98, cy - hr * 1.05, cx + hr * 0.66, base);
+        p.moveTo(cx - hr * 0.98, cuffTop);
+        p.quadraticCurveTo(cx - hr * 1.08, cy - hr * 1.0, cx - hr * 0.36, cy - hr * 1.36);
+        p.quadraticCurveTo(cx, cy - hr * 1.48, cx + hr * 0.36, cy - hr * 1.36);
+        p.quadraticCurveTo(cx + hr * 1.08, cy - hr * 1.0, cx + hr * 0.98, cuffTop);
         p.closePath();
-      }, cx, cy - hr * 1.15, Math.max(6, hr * 0.045));
-      add(page, "cuff", "Cuff", spec.hatC2, rr(cx - hr * 0.82, base - hr * 0.02, hr * 1.64, hr * 0.24, 6), cx, base + hr * 0.1, Math.max(5, hr * 0.04));
-      add(page, "patch", "SR patch", "#f7f7fb", rr(cx + hr * 0.22, base, hr * 0.46, hr * 0.18, 3), cx + hr * 0.45, base + hr * 0.09, Math.max(3, hr * 0.03));
+      }, cx, cy - hr * 1.0, Math.max(6, hr * 0.04));
+      add(page, "cuff", "Cuff", spec.hatC2, rr(cx - hr * 1.02, cuffTop, hr * 2.04, hr * 0.18, 7), cx, cuffTop + hr * 0.09, Math.max(5, hr * 0.032));
+      add(page, "patch", "SR patch", "#f7f7fb", rr(cx + hr * 0.32, cuffTop + hr * 0.01, hr * 0.4, hr * 0.14, 3), cx + hr * 0.52, cuffTop + hr * 0.08, Math.max(3, hr * 0.026));
     } else if (spec.hat === "mohawk") {
-      add(page, "mohawk", "Mohawk", spec.hatC, rr(cx - hr * 0.2, cy - hr * 1.7, hr * 0.4, hr * 1.02, 4), cx, cy - hr * 1.2, Math.max(6, hr * 0.045));
+      add(page, "mohawk", "Mohawk", spec.hatC, rr(cx - hr * 0.26, cy - hr * 1.28, hr * 0.52, hr * 0.48, 5), cx, cy - hr * 1.04, Math.max(6, hr * 0.04));
     } else if (spec.hat === "spikes") {
-      add(page, "spikeBack", "Back spike", spec.hatC, rr(cx - hr * 0.07, cy - hr * 1.78, hr * 0.14, hr * 0.9, 3), cx, cy - hr * 1.33, Math.max(4, hr * 0.03));
-      add(page, "spikeMid", "Middle spike", spec.hatC, rr(cx - hr * 0.09, cy - hr * 1.52, hr * 0.18, hr * 0.7, 3), cx, cy - hr * 1.17, Math.max(4, hr * 0.032));
-      add(page, "spikeFront", "Front spike", spec.hatC, rr(cx - hr * 0.08, cy - hr * 1.24, hr * 0.16, hr * 0.5, 3), cx, cy - hr * 0.99, Math.max(4, hr * 0.032));
+      function cone(id, name, tipX, tipY, x1, y1, x2, y2) {
+        add(page, id, name, spec.hatC, function (p) {
+          p.moveTo(tipX, tipY);
+          p.lineTo(x1, y1);
+          p.quadraticCurveTo((x1 + x2) / 2, Math.max(y1, y2) + hr * 0.05, x2, y2);
+          p.closePath();
+        }, (tipX * 2 + x1 + x2) / 4, (tipY + y1 + y2) / 3, Math.max(4, hr * 0.03));
+      }
+      cone("spikeBack", "Back spike", cx - hr * 0.28, cy - hr * 1.5, cx - hr * 0.48, cy - hr * 0.98, cx - hr * 0.08, cy - hr * 0.94);
+      cone("spikeMid", "Middle spike", cx + hr * 0.26, cy - hr * 1.32, cx + hr * 0.04, cy - hr * 0.86, cx + hr * 0.46, cy - hr * 0.84);
+      cone("spikeFront", "Front spike", cx - hr * 0.02, cy - hr * 1.05, cx - hr * 0.28, cy - hr * 0.58, cx + hr * 0.24, cy - hr * 0.55);
     } else if (spec.hat === "sheriff") {
-      add(page, "crown", "Hat crown", spec.hatC, rr(cx - hr * 0.4, cy - hr * 1.62, hr * 0.8, hr * 0.78, 5), cx, cy - hr * 1.22, Math.max(6, hr * 0.04));
-      add(page, "band", "Hat band", spec.hatC2, rr(cx - hr * 0.4, cy - hr * 0.92, hr * 0.8, hr * 0.14, 3), cx, cy - hr * 0.85, Math.max(4, hr * 0.03));
-      add(page, "brim", "Hat brim", spec.hatC, ell(cx, cy - hr * 0.86, hr * 1.5, hr * 0.13), cx, cy - hr * 0.86, Math.max(5, hr * 0.035));
-      add(page, "platehat", "SR plate", "#d5dbe6", rr(cx - hr * 0.16, cy - hr * 1.38, hr * 0.32, hr * 0.28, 3), cx, cy - hr * 1.24, Math.max(3, hr * 0.03));
+      add(page, "crown", "Hat crown", spec.hatC, rr(cx - hr * 0.4, cy - hr * 1.12, hr * 0.8, hr * 0.36, hr * 0.16), cx, cy - hr * 0.94, Math.max(6, hr * 0.035));
+      add(page, "band", "Hat band", spec.hatC2, rr(cx - hr * 0.42, cy - hr * 0.8, hr * 0.84, hr * 0.12, 3), cx, cy - hr * 0.74, Math.max(4, hr * 0.03));
+      add(page, "brim", "Hat brim", spec.hatC, ell(cx, cy - hr * 0.74, hr * 1.55, hr * 0.08), cx, cy - hr * 0.74, Math.max(5, hr * 0.03));
+      add(page, "platehat", "SR plate", "#d5dbe6", rr(cx - hr * 0.13, cy - hr * 1.02, hr * 0.26, hr * 0.18, 3), cx, cy - hr * 0.93, Math.max(3, hr * 0.028));
     } else if (spec.hat === "wizard") {
       add(page, "cone", "Wizard hat", spec.hatC, function (p) {
         p.moveTo(cx - hr * 0.2, cy - hr * 0.78);
@@ -572,9 +579,14 @@
       add(page, "slitL", "Eye slit", "#ffffff", ell(cx - ex, eyeY, hr * 0.045, hr * 0.12), cx - ex, eyeY, lw * 0.35);
       add(page, "slitR", "Eye slit", "#ffffff", ell(cx + ex, eyeY, hr * 0.045, hr * 0.12), cx + ex, eyeY, lw * 0.35);
     } else if (spec.eyes === "half") {
-      add(page, "eyeL", "Eye", "#1a1a22", ell(cx - ex, eyeY, hr * 0.18, hr * 0.1), cx - ex, eyeY, lw * 0.55);
-      add(page, "eyeR", "Eye", "#1a1a22", ell(cx + ex, eyeY, hr * 0.18, hr * 0.1), cx + ex, eyeY, lw * 0.55);
-    } else if (spec.eyes === "oval" || spec.eyes === "green" || spec.eyes === "gslit") {
+      const hx = hr * 0.4;
+      add(page, "eyeL", "Eye", "#1a1a22", ell(cx - hx, eyeY, hr * 0.22, hr * 0.07), cx - hx, eyeY, Math.max(4, hr * 0.035));
+      add(page, "eyeR", "Eye", "#1a1a22", ell(cx + hx, eyeY, hr * 0.22, hr * 0.07), cx + hx, eyeY, Math.max(4, hr * 0.035));
+    } else if (spec.eyes === "green") {
+      const gx = hr * 0.42;
+      add(page, "eyeL", "Eye", "#3dff6a", ell(cx - gx, eyeY, hr * 0.18, hr * 0.07), cx - gx, eyeY, Math.max(4, hr * 0.032));
+      add(page, "eyeR", "Eye", "#3dff6a", ell(cx + gx, eyeY, hr * 0.18, hr * 0.07), cx + gx, eyeY, Math.max(4, hr * 0.032));
+    } else if (spec.eyes === "oval" || spec.eyes === "gslit") {
       const col = spec.eyes === "oval" ? "#1a1a22" : "#3dff6a";
       const ry = spec.eyes === "gslit" ? hr * 0.08 : hr * 0.16;
       const rx = spec.eyes === "gslit" ? hr * 0.2 : hr * 0.16;
@@ -717,7 +729,7 @@
       if (spec.hat === "beanie") {
         ctx.fillStyle = "#1a1a22";
         ctx.font = "700 " + Math.round(hr * 0.12) + "px Trebuchet MS, DejaVu Sans, sans-serif";
-        ctx.fillText("SR", cx + hr * 0.45, cy - hr * 0.68);
+        ctx.fillText("SR", cx + hr * 0.52, cy - hr * 0.41);
       }
       ctx.restore();
     });
@@ -803,10 +815,9 @@
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
     page.regions.forEach(function (r) {
+      ctx.shadowBlur = 0;
       ctx.fillStyle = (fills && fills[r.id]) || (mode === "official" ? r.official : paperColor(page, r));
       ctx.fill(r.path);
-    });
-    page.regions.forEach(function (r) {
       if (r.id === "paper") return;
       ctx.lineWidth = r.lw;
       if (page.flavor === "neon") {
