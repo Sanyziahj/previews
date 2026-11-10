@@ -1554,57 +1554,6 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       brows: !0,
       extra: "jet",
     },
-    bjorn: {
-      name: "BJORN",
-      head: ["#e07020", "#f0a060", "#8a4010"],
-      suit: "#6a3a1a",
-      suit2: "#e0b040",
-      gloves: "#3a2414",
-      boots: "#3a2414",
-      hat: "viking",
-      hatC: "#c8ccd4",
-      hatC2: "#f0e6c8",
-      eyes: "half",
-      eyeC: "",
-      mouth: "grin",
-      cheek: "#f7a8d8",
-      brows: !0,
-      extra: "jet",
-    },
-    sigrid: {
-      name: "SIGRID",
-      head: ["#3a6ad8", "#7aa0f0", "#1a3080"],
-      suit: "#1a6a8a",
-      suit2: "#e0e8f0",
-      gloves: "#1a2430",
-      boots: "#1a2430",
-      hat: "viking",
-      hatC: "#d8dce4",
-      hatC2: "#f0e6c8",
-      eyes: "oval",
-      eyeC: "",
-      mouth: "line",
-      cheek: "#f7a8d8",
-      brows: !0,
-      extra: "jet",
-    },
-    halvar: {
-      name: "HALVAR",
-      head: ["#3a9a4a", "#70d080", "#1a5a28"],
-      suit: "#2a4a30",
-      suit2: "#e0c060",
-      gloves: "#1a2418",
-      boots: "#1a2418",
-      hat: "viking",
-      hatC: "#e8e8ee",
-      hatC2: "#f0e6c8",
-      eyes: "half",
-      eyeC: "",
-      mouth: "grin",
-      cheek: "#f7a8d8",
-      brows: !0,
-      extra: "jet",
-    },
     x_sailor: {
       name: "SAILOR",
       head: ["#1fb8a8", "#5ae8d8", "#0a7a6a"],
@@ -8964,21 +8913,24 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       { s: "ram_tale_offer" },
     ],
     spike_dreamland: [{ s: "spike_ram" }],
-    bjorn_mars: [
-      { need: "shield_got", s: "bjorn_free" },
-      { s: "bjorn_locked" },
+    mikall_mars: [{ s: "mikall_ram" }],
+    shadow_mars: [{ s: "shadow_ram" }],
+    al_jup: [{ s: "al_ram" }],
+    buck_jup: [{ s: "buck_ram" }],
+    draco_jup: [{ s: "draco_ram" }],
+    eye_climb: [{ s: "eye_ram" }],
+    cash_city: [
+      { need: "ram_home_end", s: "cash_ram_open" },
+      { s: "cash_ram_wait" },
     ],
-    sigrid_jup: [{ s: "sigrid_cloud" }],
-    halvar_city: [
-      { need: "ram_home_end", s: "halvar_home" },
-      { s: "halvar_wait" },
-    ],
+    fright_vis: [{ s: "fright_ram" }],
+    over_vis: [{ s: "over_ram" }],
   });
   Object.assign(oa, {
     ram_tale_offer: [
       h("ramshackle", "SKIPPY. THE DOCK IS QUIET. MY MEMORY IS NOT."),
-      h("ramshackle", "I FELL FROM A MOUNTAIN ABOVE THE CLOUDS. A HACK OPENED THE SKY. I AM TRYING TO GO HOME."),
-      h("ramshackle", "WILL YOU SIT AND HEAR THE JOURNEY?"),
+      h("ramshackle", "I FELL FROM A MOUNTAIN ABOVE THE CLOUDS. SOMETHING OPENED THE SKY. I DO NOT KNOW THE WHOLE OF IT."),
+      h("ramshackle", "WILL YOU SIT AND HEAR WHAT I HAVE?"),
       { t: "choice", a: "tale_ram_choice", tale: "ram" },
     ],
     tale_ram_yes: [
@@ -8987,241 +8939,826 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
     ],
     tale_ram_no: [h("ramshackle", "THE TALE WILL KEEP. THE SEA IS STILL HERE.")],
     tale_ram_told: [
-      h("ramshackle", "YOU HEARD IT. THE CITY STANDS. THE HACK IS NOT THE LAST DOOR."),
+      h("ramshackle", "YOU HEARD IT. THE DOOR IS SEALED. FRIGHT IS NOT BACK IN EXILE. MY BROTHERS ARE STILL UNSOUGHT."),
       { t: "choice", a: "tale_ram_choice", tale: "ram" },
     ],
     tale_ram_keep: [h("ramshackle", "RIDE YOUR OWN ROAD. I WILL BE ON THIS DOCK.")],
     tale_ram_close: [
       h("ramshackle", "AND THAT IS THE JOURNEY HOME."),
-      h("ramshackle", "THE MOUNTAIN STANDS. THE HACK DOES NOT HOLD IT."),
-      h("ramshackle", "SPACE RIDERS RISE. YOUR ROAD IS STILL YOURS, SKIPPY."),
-      h("skippy", "I'LL REMEMBER THE AXE. AND THE CITY ABOVE THE STARS."),
+      h("ramshackle", "THE HACK IS SEALED. FRIGHT IS ALREADY FREE. THE BROTHERHOOD IS STILL SCATTERED."),
+      h("ramshackle", "SPACE RIDERS RISE. THAT SEARCH IS ANOTHER DAY. YOUR ROAD IS STILL YOURS, SKIPPY."),
+      h("skippy", "I'LL REMEMBER THE DOOR. AND THE CITY ABOVE THE STARS."),
       { t: "flag", f: "tale_ram" },
       { t: "save" },
     ],
     ram_wake: [
       h("ramshackle", "THE DOCK. I HIT IT HARD ENOUGH TO FORGET THE SKY."),
-      h("ramshackle", "SPACE RIDERS RISE. THAT WAS OURS, I THINK."),
-      h("ramshackle", "EAST IS A DREAM THAT STILL KNOWS MY NAME. A SIGN BEHIND ME OPENS THE MEMORY."),
+      h("ramshackle", "SPACE RIDERS RISE. THAT WAS OURS, I THINK. I CANNOT FIND THE OTHERS."),
+      h("ramshackle", "A SIGN OPENS THE MEMORY. EAST OF HERE THE DREAM STILL KNOWS MY NAME."),
       { t: "flag", f: "ram_woke" },
       { t: "save" },
     ],
     mem_glitch: [
-      h("ramshackle", "THE SKY ABOVE CENTER MOUNTAIN TEARS LIKE A BAD SIGNAL."),
-      h("overlord", "YOUR REALM IS OPEN. THE BROTHERHOOD LEAVES."),
-      h("ramshackle", "WE ARE CAST OUT. I CANNOT YET REMEMBER THEIR FACES."),
+      h("ramshackle", "THE CITY ABOVE THE CLOUDS TEARS LIKE A BAD SIGNAL."),
+      h("overlord", "THIS REALM IS A DOOR. I AM OPENING AN EXILE."),
+      h("fright", "THE DARK CASTLE IS NOT A PRISON IF THE MOUNTAIN BREAKS."),
+      h("ramshackle", "I DO NOT UNDERSTAND. WE ARE CAST OUT. MY BROTHERS ARE THROWN FARTHER THAN I CAN SEE."),
       { t: "flag", f: "mem_hack" },
       { t: "save" },
     ],
-    mem_axe: [
-      h("ramshackle", "THE AXE REMEMBERS THE GATE. A PIECE OF THE MOUNTAIN COMES BACK."),
+    mem_axe_go: [{ t: "warp", area: "ram_mem_axe", x: 5, y: 6, dir: 3 }],
+    mem_axe_scene: [
+      h("overlord", "THE GATE IS THE CONDUIT. HOLD IT OPEN."),
+      h("fright", "I SEE THE CASTLE FROM THE OTHER SIDE OF THE EXILE."),
+      h("ramshackle", "THE AXE WAS IN MY HAND. I STILL DO NOT KNOW WHAT THE DOOR WAS FOR."),
       { t: "flag", f: "mem_axe" },
+      { t: "warp", area: "ram_d1", x: 12, y: 6, dir: 2 },
     ],
-    mem_shield: [
-      h("ramshackle", "THE SHIELD HOLDS A LASER AND ANSWERS IT. BJORN'S VOICE COMES WITH IT."),
+    mem_shield_go: [{ t: "warp", area: "ram_mem_shield", x: 5, y: 6, dir: 3 }],
+    mem_shield_scene: [
+      h("eyereenia", "A BEAM THROUGH A REALM IS HOW A DOOR IS FORCED. I HAVE SEEN VOID DOORS. THIS ONE WAS YOURS."),
+      h("ramshackle", "THEN THE SHIELD DID NOT ONLY GUARD ME. IT ANSWERED SOMETHING."),
       { t: "flag", f: "mem_shield" },
-      { t: "flag", f: "bjorn_free" },
+      { t: "warp", area: "ram_m1", x: 12, y: 6, dir: 2 },
     ],
-    mem_amulet: [
-      h("ramshackle", "THE AMULET SPEAKS IN THUNDER. THE CLIMB IS OPEN."),
+    mem_amulet_go: [{ t: "warp", area: "ram_mem_amulet", x: 5, y: 6, dir: 3 }],
+    mem_amulet_scene: [
+      h("overlord", "THE MOUNTAIN FREED WHAT I COULD NOT REACH. FRIGHT WALKS."),
+      h("fright", "I AM NOT IN YOUR CITY. I AM IN MY CASTLE. THE EXILE IS ALREADY BROKEN."),
+      h("ramshackle", "SO THAT IS THE SHAPE OF IT. MY REALM WAS USED. MY BROTHERS ARE STILL LOST. I CAN STILL SEAL THE HACK."),
       { t: "flag", f: "mem_amulet" },
+      { t: "warp", area: "ram_j1", x: 12, y: 6, dir: 2 },
     ],
     spike_ram: [
       h("spike", "THIS DREAM IS YOURS. THE FEAR WEARS YOUR HELMET. IT IS NOT FRIGHT. HE STAYS IN HIS CASTLE."),
-      h("spike", "THE AXE IS IN THE TENT TO THE EAST. THROW IT. A HATCHET CANNOT REACH THAT FEAR."),
+      h("spike", "THE MIDWAY MIRRORS ARE A SIDE PATH. THE AXE IS IN THE TENT. THROW IT. A HATCHET CANNOT REACH THAT FEAR."),
     ],
-    bjorn_locked: [h("bjorn", "BJORN. THE COLONY LOCKED THE CANYON. THE SHIELD SINGS IN THE CORE. I WILL WAIT.")],
-    bjorn_free: [h("bjorn", "THE SHIELD IS YOURS. I REMEMBER THE MOUNTAIN. I WILL MEET YOU ABOVE THE STORMS.")],
-    sigrid_cloud: [h("sigrid", "SIGRID. THE LIGHTNING KEEPS THE AMULET. WHEN IT THUNDERS, THE EYE OF THE STORM BLINKS.")],
-    halvar_wait: [h("halvar", "HALVAR. SPACE RIDERS RISE. THE THRONE ROOM IS A HACK, NOT A GRAVE. WALK IN.")],
-    halvar_home: [h("halvar", "THE CITY IS OURS TO STAND IN. THE OVERLORD IS NOT FINISHED. HE ONLY LOST THIS DOOR.")],
-    draco_mars: [h("draco", "THE GREEN DRAGON IS PARKED ON MARS. HOT NOODLES. NO WAGERS. THE CANYON CORE IS EAST.")],
-    al_jup: [h("al", "LISTEN. THE AMULET HUMS WHERE THE LIGHTNING RESTS. I DO NOT CLIMB. YOU DO.")],
-    buck_jup: [h("buck", "THE BRIGADE DOES NOT SAIL CLOUDS. I CAME TO SAY THE HACK IS NOT THE WHOLE WAR.")],
-    shadow_climb: [h("shadow", "THE CONTRACT WAS THE MOUNTAIN. I WILL NOT COLLECT YOU. CLIMB. STEADY HAND.")],
+    mikall_ram: [
+      h("mikall", "MIKALL. A COLD TRAIL RUNS UNDER THIS CANYON. NOT A GHOST. A HACK."),
+      h("mikall", "CLEAR THE SCOUTS IN THE DOME YARD. THEN THE CORE WILL TAKE A REFLECTED BEAM."),
+    ],
+    shadow_ram: [
+      h("shadow", "AN OVERLORD AGENT WEARS A VOID FACE IN THE YARD. I TRACK IT. I DO NOT COLLECT YOU."),
+      h("shadow", "THE CAVENDISH BROADCAST TO THE SOUTH IS A TRIAL. RED, GOLD, BLUE. IN THAT ORDER."),
+    ],
+    al_ram: [
+      h("al", "LISTEN. THE STORM EYE WANTS THUNDER BEFORE IT WILL TAKE THE AXE. I DO NOT CLIMB. YOU DO."),
+    ],
+    buck_ram: [
+      h("buck", "THE BRIGADE DOES NOT SAIL CLOUDS. I CAME BECAUSE THE HACK IS NOT THE WHOLE WAR. FRIGHT IS ALREADY LOOSE."),
+    ],
+    draco_ram: [
+      h("draco", "THE GREEN DRAGON PARKED ON A CLOUD. HOT NOODLES. NO WAGERS."),
+      h("draco", "THREE BOWLS IN THE BACK. THE MIDDLE ONE IS THE TRUE BROTH. THE OTHERS BITE."),
+    ],
+    eye_ram: [
+      h("eyereenia", "I LEFT THE VOID. I STILL SEE ITS DOORS. THIS MOUNTAIN WAS USED TO OPEN ONE."),
+      h("eyereenia", "FRIGHT IS NOT HERE. HE IS IN THE CASTLE. THE RUNE GATES AHEAD ANSWER THE AMULET."),
+    ],
+    cash_ram_wait: [h("cash", "THE PORTAL IS DARK UNTIL THE HACK IS SEALED. I KEEP THE DOORS. I DO NOT CHOOSE WHAT WALKS THROUGH THEM.")],
+    cash_ram_open: [h("cash", "THE SEAL HOLDS. STEP THROUGH. SKIPPY'S DOCK IS ON THE OTHER SIDE.")],
+    fright_ram: [h("fright", "...")],
+    over_ram: [h("overlord", "THE DOOR IS ALREADY USED.")],
     fear_down: [
-      h("spike", "THE FEAR SHATTERS INTO STARDUST. YOU REMEMBER THE GATE."),
-      h("ramshackle", "MARS IS NORTH. A BROTHER IS THERE."),
+      h("spike", "THE FEAR SHATTERS INTO STARDUST. THAT WAS AN ECHO. FRIGHT DID NOT LEAVE HIS CASTLE FOR YOU."),
+      h("ramshackle", "THE AXE REMEMBERS A GATE. MARS IS NORTH."),
       { t: "save" },
     ],
     colony_down: [
-      h("ramshackle", "THE CORE GOES DARK. THE SHIELD ANSWERED THE LASER."),
-      h("bjorn", "JUPITER IS NORTH. SIGRID KEPT THE STORM."),
+      h("shadow", "THE CORE WAS A PIECE OF THE CONDUIT. NOT THE WHOLE HACK."),
+      h("ramshackle", "JUPITER IS NORTH. I STILL DO NOT KNOW WHAT THE DOOR FREED."),
       { t: "save" },
     ],
     storm_down: [
-      h("sigrid", "THE EYE BLINKS. THE AMULET IS AWAKE. THE CLIMB IS NORTH."),
+      h("al", "THE EYE BLINKS. YOU HAVE THE NAME NOW. THE CLIMB CAN SEAL WHAT IS LEFT."),
       { t: "save" },
     ],
     hack_down: [
       { t: "flag", f: "ram_home_end" },
       h("sys", "THE HACK SHATTERS INTO STARDUST."),
-      h("overlord", "THIS MOUNTAIN IS A DOOR. I WILL FIND ANOTHER."),
-      h("ramshackle", "STEADY HAND AND MIGHTY VALOR. THE CITY IS OURS AGAIN. THE WAR IS NOT OVER."),
-      h("halvar", "SPACE RIDERS RISE!"),
-      { t: "flag", f: "ram_home_end" },
+      h("overlord", "THE DOOR ALREADY OPENED. FRIGHT IS OUT. I WILL FIND ANOTHER."),
+      h("ramshackle", "THE CITY IS SEALED. MY BROTHERS ARE STILL SCATTERED. THAT SEARCH IS ANOTHER DAY."),
+      h("cash", "STEADY HAND. THE PORTAL HOME IS IN THE SQUARE."),
       { t: "save" },
+    ],
+    mars_switch: [
+      { t: "flag", f: "door_mars" },
+      h("sys", "THE CANYON LOCK TURNS."),
+    ],
+    bowl_bad: [h("draco", "WRONG BOWL. THE BROTH BITES. TRY THE MIDDLE.")],
+    bowl_good: [
+      h("draco", "TRUE BROTH. NO WAGERS. THE STORM EYE IS NORTH OF THE WIND LANE."),
+      { t: "flag", f: "noodle_ram" },
     ],
   });
   Object.assign(Se, {
-    memory: { name: "THE FORGOTTEN", sub: "A FEAR IN YOUR HELMET. NOT FRIGHT.", flag: "boss_memory", shard: "note", shardFlag: "boss_memory", contFlag: "ram_nocont", down: "fear_down", get: "fear_down", shardAt: [], contAt: [], upload: !1 },
-    colony: { name: "COLONY CORE", sub: "REFLECT THE BEAM.", flag: "boss_colony", shard: "note", shardFlag: "boss_colony", contFlag: "ram_nocont", down: "colony_down", get: "colony_down", shardAt: [], contAt: [], upload: !1 },
+    memory: { name: "FRIGHT'S ECHO", sub: "A FEAR. NOT THE MAN. HE IS IN HIS CASTLE.", flag: "boss_memory", shard: "note", shardFlag: "boss_memory", contFlag: "ram_nocont", down: "fear_down", get: "fear_down", shardAt: [], contAt: [], upload: !1 },
+    colony: { name: "VOID CORE", sub: "A CONDUIT PIECE. REFLECT THE BEAM.", flag: "boss_colony", shard: "note", shardFlag: "boss_colony", contFlag: "ram_nocont", down: "colony_down", get: "colony_down", shardAt: [], contAt: [], upload: !1 },
     stormeye: { name: "STORM EYE", sub: "THUNDER, THEN THE AXE.", flag: "boss_storm", shard: "note", shardFlag: "boss_storm", contFlag: "ram_nocont", down: "storm_down", get: "storm_down", shardAt: [], contAt: [], upload: !1 },
-    hack: { name: "VOV ECHO", sub: "A HACK, NOT THE OVERLORD HIMSELF.", flag: "boss_hack", shard: "note", shardFlag: "boss_hack", contFlag: "ram_nocont", down: "hack_down", get: "hack_down", shardAt: [], contAt: [], upload: !1 },
+    hack: { name: "THE HACK", sub: "SEAL THE DOOR. THE OVERLORD IS NOT ENDED.", flag: "boss_hack", shard: "note", shardFlag: "boss_hack", contFlag: "ram_nocont", down: "hack_down", get: "hack_down", shardAt: [], contAt: [], upload: !1 },
   });
   Object.assign(Ie, {
     ram_dock: {
       id: "ram_dock", name: "FALLEN DOCK", theme: "sea", realm: "ram", music: "sea", peace: !0,
-      signs: [{ x: 4, y: 6, text: "REMEMBER THE SKY.", kind: "sign", script: "mem_glitch" }],
+      signs: [{ x: 6, y: 4, text: "REMEMBER THE SKY.", kind: "sign" }],
+      props: [{ k: "booth", x: 10, y: 4, c: "#c8a060" }],
       warps: [
         { x: 4, y: 5, w: 1, h: 1, to: "ram_memory", tx: 6, ty: 6, dir: 0 },
-        { x: 21, y: 6, w: 1, h: 2, to: "ram_dream", tx: 2, ty: 8, dir: 3 },
+        { x: 27, y: 6, w: 1, h: 2, to: "ram_dream", tx: 2, ty: 8, dir: 3 },
       ],
       onEnter: "ram_wake",
     },
     ram_memory: {
-      id: "ram_memory", name: "A BROKEN SKY", theme: "dark", realm: "ram", music: "dark", peace: !0,
-      signs: [
-        { x: 6, y: 3, text: "CENTER MOUNTAIN. THE SKY GLITCHES.", kind: "sign" },
-        { x: 10, y: 8, text: "THE BROTHERHOOD IS CAST OUT.", kind: "sign" },
+      id: "ram_memory", name: "A BROKEN SKY", theme: "divine", realm: "ram", music: "ramcity", peace: !0,
+      npcs: [
+        { id: "overlord", x: 12, y: 4, dir: 0, talk: "over_vis" },
+        { id: "fright", x: 8, y: 6, dir: 3, talk: "fright_vis" },
       ],
-      warps: [{ x: 6, y: 11, w: 2, h: 1, to: "ram_dock", tx: 6, ty: 8, dir: 0 }],
+      props: [{ k: "arch", x: 6, y: 3 }, { k: "glitch", x: 14, y: 7 }, { k: "glitch", x: 10, y: 8 }],
+      signs: [{ x: 4, y: 8, text: "THE BROTHERHOOD IS CAST OUT. THEY ARE NOT HERE.", kind: "sign" }],
+      warps: [{ x: 6, y: 12, w: 2, h: 1, to: "ram_dock", tx: 6, ty: 8, dir: 0 }],
       onEnter: "mem_glitch",
     },
     ram_dream: {
-      id: "ram_dream", name: "DREAMLAND", theme: "dark", realm: "ram", music: "dark",
+      id: "ram_dream", name: "DREAMLAND MIDWAY", theme: "carnival", realm: "ram", music: "ramdream",
       gates: { G: "axe_got" },
-      npcs: [{ id: "spike", x: 8, y: 6, dir: 0, talk: "spike_dreamland" }],
-      enemies: [{ k: "fear", x: 14, y: 8 }, { k: "fear", x: 16, y: 5 }],
-      signs: [{ x: 6, y: 4, text: "SPIKE'S CARNIVAL. FRIGHT STAYS IN HIS CASTLE.", kind: "sign" }],
+      npcs: [{ id: "spike", x: 10, y: 5, dir: 0, talk: "spike_dreamland" }],
+      enemies: [{ k: "hclown", x: 18, y: 8 }, { k: "hclown", x: 22, y: 6 }, { k: "fear", x: 16, y: 12 }],
+      props: [
+        { k: "tent", x: 4, y: 3, c: "#ff4fd8" },
+        { k: "tent", x: 8, y: 3, c: "#4ff0ff" },
+        { k: "wheel", x: 26, y: 5 },
+        { k: "booth", x: 14, y: 13, c: "#ffe070" },
+      ],
+      signs: [{ x: 6, y: 6, text: "SPIKE'S CARNIVAL. THE FUNHOUSE IS EAST. FRIGHT STAYS IN HIS CASTLE.", kind: "sign" }],
       warps: [
-        { x: 0, y: 8, w: 1, h: 2, to: "ram_dock", tx: 18, ty: 6, dir: 2 },
-        { x: 23, y: 8, w: 1, h: 2, to: "ram_d1", tx: 2, ty: 6, dir: 3 },
-        { x: 11, y: 0, w: 2, h: 1, to: "ram_mars", tx: 12, ty: 13, dir: 1 },
+        { x: 0, y: 8, w: 1, h: 2, to: "ram_dock", tx: 24, ty: 6, dir: 2 },
+        { x: 31, y: 8, w: 1, h: 2, to: "ram_fun", tx: 2, ty: 6, dir: 3 },
+        { x: 14, y: 0, w: 2, h: 1, to: "ram_mars", tx: 12, ty: 16, dir: 1 },
+      ],
+    },
+    ram_fun: {
+      id: "ram_fun", name: "FUNHOUSE", theme: "carnival", realm: "ram", music: "ramdream",
+      props: [
+        { k: "mirror", x: 4, y: 4, n: 1 },
+        { k: "mirror", x: 10, y: 8, n: 2 },
+        { k: "mirror", x: 15, y: 5, n: 3 },
+      ],
+      signs: [{ x: 6, y: 6, text: "MIRRORS: ONE, THEN TWO, THEN THREE. A WRONG STEP RESETS.", kind: "sign" }],
+      warps: [
+        { x: 0, y: 6, w: 1, h: 2, to: "ram_dream", tx: 28, ty: 8, dir: 2 },
+        { x: 19, y: 6, w: 1, h: 2, to: "ram_d1", tx: 2, ty: 6, dir: 3 },
       ],
     },
     ram_d1: {
-      id: "ram_d1", name: "DREAM TENT", theme: "dungeon", realm: "ram", music: "cave",
+      id: "ram_d1", name: "AXE TENT", theme: "carnival", realm: "ram", music: "ramdream",
       locks: { D: { flag: "door_dream", key: "small" } },
       chests: [
         { id: "ram_dkey", x: 4, y: 4, item: "key", n: 1 },
         { id: "ram_axe", x: 14, y: 4, item: "axe", n: 1 },
       ],
+      props: [{ k: "tent", x: 8, y: 8, c: "#ffe070" }],
       signs: [{ x: 12, y: 4, text: "THE ETERNAL AXE.", kind: "sign" }],
       warps: [
-        { x: 0, y: 6, w: 1, h: 2, to: "ram_dream", tx: 20, ty: 8, dir: 2 },
-        { x: 9, y: 0, w: 2, h: 1, to: "ram_fear", tx: 8, ty: 9, dir: 1 },
+        { x: 0, y: 6, w: 1, h: 2, to: "ram_fun", tx: 16, ty: 6, dir: 2 },
+        { x: 9, y: 0, w: 2, h: 1, to: "ram_fear", tx: 8, ty: 8, dir: 1 },
       ],
     },
     ram_fear: {
-      id: "ram_fear", name: "THE FORGOTTEN", theme: "dark", realm: "ram", music: "dark", boss: "memory",
-      warps: [{ x: 8, y: 11, w: 2, h: 1, to: "ram_d1", tx: 9, ty: 3, dir: 0 }],
+      id: "ram_fear", name: "FRIGHT'S ECHO", theme: "carnival", realm: "ram", music: "ramdream", boss: "memory",
+      warps: [{ x: 8, y: 12, w: 2, h: 1, to: "ram_d1", tx: 6, ty: 6, dir: 0 }],
     },
     ram_mars: {
-      id: "ram_mars", name: "MARS FRONTIER", theme: "desert", realm: "ram", music: "west",
+      id: "ram_mars", name: "MARS CANYONS", theme: "mars", realm: "ram", music: "rammars",
       gates: { G: "shield_got" },
       npcs: [
-        { id: "bjorn", x: 6, y: 6, dir: 3, talk: "bjorn_mars" },
-        { id: "draco", x: 16, y: 8, dir: 2, talk: "draco_mars" },
+        { id: "mikall", x: 6, y: 6, dir: 3, talk: "mikall_mars" },
+        { id: "shadow", x: 10, y: 10, dir: 0, talk: "shadow_mars" },
       ],
-      enemies: [{ k: "redcoat", x: 18, y: 5 }, { k: "vov", x: 20, y: 10, v: 1 }],
-      signs: [{ x: 10, y: 4, text: "CAVENDISH BROADCAST: THE GAMES SEE A MOUNTAIN ABOVE THE STORMS.", kind: "sign" }],
+      enemies: [{ k: "redcoat", x: 20, y: 6 }, { k: "vov", x: 30, y: 8, v: 1 }, { k: "hclown", x: 8, y: 14 }],
+      props: [
+        { k: "dome", x: 6, y: 4 },
+        { k: "rover", x: 22, y: 8 },
+        { k: "dome", x: 28, y: 12 },
+      ],
+      signs: [{ x: 12, y: 6, text: "CAVENDISH BROADCAST: TRIAL SOUTH-EAST. ORDER IS RED, GOLD, BLUE.", kind: "sign" }],
       warps: [
-        { x: 12, y: 15, w: 2, h: 1, to: "ram_dream", tx: 12, ty: 2, dir: 0 },
-        { x: 25, y: 7, w: 1, h: 2, to: "ram_m1", tx: 2, ty: 6, dir: 3 },
-        { x: 12, y: 0, w: 2, h: 1, to: "ram_jup", tx: 10, ty: 11, dir: 1 },
+        { x: 12, y: 18, w: 2, h: 1, to: "ram_dream", tx: 14, ty: 2, dir: 0 },
+        { x: 35, y: 7, w: 1, h: 2, to: "ram_colony", tx: 2, ty: 6, dir: 3 },
+        { x: 12, y: 0, w: 2, h: 1, to: "ram_jup", tx: 10, ty: 12, dir: 1 },
       ],
     },
-    ram_m1: {
-      id: "ram_m1", name: "MARS CANYON", theme: "dungeon", realm: "ram", music: "cave",
-      locks: { D: { flag: "door_mars", key: "small" } },
-      chests: [
-        { id: "ram_mkey", x: 4, y: 3, item: "key", n: 1 },
-        { id: "ram_shield", x: 14, y: 4, item: "shield", n: 1 },
-      ],
-      signs: [{ x: 12, y: 4, text: "THE SHIELD.", kind: "sign" }],
+    ram_colony: {
+      id: "ram_colony", name: "DOME YARD", theme: "mars", realm: "ram", music: "rammars",
+      gates: { G: "colony_clear" },
+      enemies: [{ k: "vov", x: 8, y: 5, v: 2 }, { k: "vov", x: 12, y: 8, v: 1 }, { k: "redcoat", x: 16, y: 6 }],
+      props: [{ k: "dome", x: 10, y: 3 }, { k: "rover", x: 6, y: 9 }],
+      signs: [{ x: 4, y: 4, text: "OVERLORD SCOUTS. SHATTER THEM. THEY DO NOT BLEED.", kind: "sign" }],
       warps: [
-        { x: 0, y: 6, w: 1, h: 2, to: "ram_mars", tx: 22, ty: 7, dir: 2 },
-        { x: 9, y: 0, w: 2, h: 1, to: "ram_core", tx: 8, ty: 9, dir: 1 },
+        { x: 0, y: 6, w: 1, h: 2, to: "ram_mars", tx: 32, ty: 7, dir: 2 },
+        { x: 21, y: 6, w: 1, h: 2, to: "ram_trial", tx: 2, ty: 6, dir: 3 },
+        { x: 10, y: 0, w: 2, h: 1, to: "ram_m1", tx: 2, ty: 6, dir: 3 },
+      ],
+    },
+    ram_trial: {
+      id: "ram_trial", name: "BROADCAST TRIAL", theme: "mars", realm: "ram", music: "rammars",
+      props: [
+        { k: "pad", x: 4, y: 4, n: 1, c: "#ff4455" },
+        { k: "pad", x: 8, y: 8, n: 2, c: "#ffe070" },
+        { k: "pad", x: 13, y: 5, n: 3, c: "#4ff0ff" },
+      ],
+      signs: [{ x: 6, y: 6, text: "CAVENDISH BROADCAST: RED, THEN GOLD, THEN BLUE.", kind: "sign" }],
+      warps: [{ x: 0, y: 6, w: 1, h: 2, to: "ram_colony", tx: 18, ty: 6, dir: 2 }],
+    },
+    ram_m1: {
+      id: "ram_m1", name: "CANYON LOCK", theme: "mars", realm: "ram", music: "rammars",
+      chests: [{ id: "ram_mkey", x: 6, y: 4, item: "key", n: 1 }],
+      signs: [{ x: 8, y: 8, text: "THE KEY OPENS THE FAR ROOM. THE SWITCH IS PAST IT.", kind: "sign" }],
+      props: [{ k: "dome", x: 14, y: 4 }],
+      warps: [
+        { x: 0, y: 6, w: 1, h: 2, to: "ram_colony", tx: 4, ty: 6, dir: 0 },
+        { x: 19, y: 6, w: 1, h: 2, to: "ram_m2", tx: 2, ty: 6, dir: 3 },
+      ],
+    },
+    ram_m2: {
+      id: "ram_m2", name: "CANYON SWITCH", theme: "mars", realm: "ram", music: "rammars",
+      locks: { D: { flag: "door_mars", key: "small" } },
+      chests: [{ id: "ram_shield", x: 12, y: 5, item: "shield", n: 1 }],
+      signs: [{ x: 8, y: 8, text: "THE SHIELD. THEN THE CORE, NORTH.", kind: "sign" }],
+      triggers: [{ x: 8, y: 4, w: 2, h: 2, script: "mars_switch", once: "mars_sw" }],
+      warps: [
+        { x: 0, y: 5, w: 1, h: 2, to: "ram_m1", tx: 16, ty: 6, dir: 2 },
+        { x: 9, y: 0, w: 2, h: 1, to: "ram_core", tx: 8, ty: 10, dir: 1 },
       ],
     },
     ram_core: {
-      id: "ram_core", name: "COLONY CORE", theme: "dungeon", realm: "ram", music: "cave", boss: "colony",
-      warps: [{ x: 8, y: 11, w: 2, h: 1, to: "ram_m1", tx: 9, ty: 3, dir: 0 }],
+      id: "ram_core", name: "VOID CORE", theme: "mars", realm: "ram", music: "rammars", boss: "colony",
+      warps: [{ x: 8, y: 12, w: 2, h: 1, to: "ram_m2", tx: 4, ty: 6, dir: 0 }],
     },
     ram_jup: {
-      id: "ram_jup", name: "JUPITER STORMS", theme: "sea", realm: "ram", music: "sea",
+      id: "ram_jup", name: "CLOUD CHAIN", theme: "jove", realm: "ram", music: "ramjove",
       gates: { G: "amulet_got" },
-      npcs: [
-        { id: "sigrid", x: 6, y: 6, dir: 3, talk: "sigrid_jup" },
-        { id: "al", x: 14, y: 5, dir: 0, talk: "al_jup" },
-        { id: "buck", x: 16, y: 8, dir: 2, talk: "buck_jup" },
-      ],
-      enemies: [{ k: "jelly", x: 12, y: 7 }, { k: "vov", x: 18, y: 6, v: 2 }],
+      npcs: [{ id: "al", x: 6, y: 5, dir: 3, talk: "al_jup" }],
+      enemies: [{ k: "jelly", x: 16, y: 6 }, { k: "vov", x: 20, y: 8, v: 2 }],
+      props: [{ k: "booth", x: 14, y: 4, c: "#f0d090" }],
+      signs: [{ x: 8, y: 8, text: "WIND LANES PUSH EAST. LIGHTNING BITES IF YOU STAND IN IT.", kind: "sign" }],
       warps: [
-        { x: 10, y: 13, w: 2, h: 1, to: "ram_mars", tx: 12, ty: 2, dir: 0 },
-        { x: 21, y: 6, w: 1, h: 2, to: "ram_j1", tx: 2, ty: 6, dir: 3 },
-        { x: 10, y: 0, w: 2, h: 1, to: "ram_climb", tx: 10, ty: 11, dir: 1 },
+        { x: 10, y: 14, w: 2, h: 1, to: "ram_mars", tx: 12, ty: 2, dir: 0 },
+        { x: 27, y: 6, w: 1, h: 2, to: "ram_jup2", tx: 2, ty: 5, dir: 3 },
+        { x: 4, y: 8, w: 2, h: 1, to: "ram_noodle", tx: 8, ty: 8, dir: 1 },
+        { x: 10, y: 0, w: 2, h: 1, to: "ram_climb", tx: 10, ty: 12, dir: 1 },
       ],
     },
+    ram_jup2: {
+      id: "ram_jup2", name: "LIGHTNING GAP", theme: "jove", realm: "ram", music: "ramjove",
+      npcs: [{ id: "buck", x: 8, y: 4, dir: 0, talk: "buck_jup" }],
+      enemies: [{ k: "vov", x: 14, y: 8, v: 3 }],
+      warps: [
+        { x: 0, y: 5, w: 1, h: 2, to: "ram_jup", tx: 24, ty: 6, dir: 2 },
+        { x: 21, y: 5, w: 1, h: 2, to: "ram_jup3", tx: 2, ty: 6, dir: 3 },
+      ],
+    },
+    ram_jup3: {
+      id: "ram_jup3", name: "FAR CLOUD", theme: "jove", realm: "ram", music: "ramjove",
+      signs: [{ x: 8, y: 4, text: "NO BROTHER HERE. ONLY THE STORM, AND THE WAY TO THE EYE.", kind: "sign" }],
+      warps: [
+        { x: 0, y: 5, w: 1, h: 2, to: "ram_jup2", tx: 18, ty: 5, dir: 2 },
+        { x: 17, y: 6, w: 1, h: 2, to: "ram_j1", tx: 2, ty: 6, dir: 3 },
+      ],
+    },
+    ram_noodle: {
+      id: "ram_noodle", name: "GREEN DRAGON", theme: "jove", realm: "ram", music: "ramjove", peace: !0,
+      npcs: [{ id: "draco", x: 8, y: 4, dir: 0, talk: "draco_jup" }],
+      props: [
+        { k: "booth", x: 4, y: 6, c: "#ff4455", n: 9 },
+        { k: "booth", x: 8, y: 6, c: "#3dff6a", n: 9 },
+        { k: "booth", x: 12, y: 6, c: "#4ff0ff", n: 9 },
+      ],
+      triggers: [
+        { x: 4, y: 7, w: 1, h: 1, script: "bowl_bad", once: "bowl_l" },
+        { x: 8, y: 7, w: 1, h: 1, script: "bowl_good", once: "bowl_m" },
+        { x: 12, y: 7, w: 1, h: 1, script: "bowl_bad", once: "bowl_r" },
+      ],
+      warps: [{ x: 8, y: 10, w: 2, h: 1, to: "ram_jup", tx: 8, ty: 8, dir: 0 }],
+    },
     ram_j1: {
-      id: "ram_j1", name: "LIGHTNING LOFT", theme: "dungeon", realm: "ram", music: "cave",
+      id: "ram_j1", name: "AMULET LOFT", theme: "jove", realm: "ram", music: "ramjove",
       locks: { D: { flag: "door_jup", key: "small" } },
       chests: [
-        { id: "ram_jkey", x: 4, y: 3, item: "key", n: 1 },
+        { id: "ram_jkey", x: 4, y: 4, item: "key", n: 1 },
         { id: "ram_amulet", x: 14, y: 4, item: "amulet", n: 1 },
       ],
       signs: [{ x: 12, y: 4, text: "THE POWER AMULET.", kind: "sign" }],
       warps: [
-        { x: 0, y: 6, w: 1, h: 2, to: "ram_jup", tx: 18, ty: 6, dir: 2 },
-        { x: 9, y: 0, w: 2, h: 1, to: "ram_eye", tx: 8, ty: 9, dir: 1 },
+        { x: 0, y: 6, w: 1, h: 2, to: "ram_jup3", tx: 14, ty: 6, dir: 2 },
+        { x: 9, y: 0, w: 2, h: 1, to: "ram_eye", tx: 8, ty: 10, dir: 1 },
       ],
     },
     ram_eye: {
-      id: "ram_eye", name: "STORM EYE", theme: "sea", realm: "ram", music: "sea", boss: "stormeye",
-      warps: [{ x: 8, y: 11, w: 2, h: 1, to: "ram_j1", tx: 9, ty: 3, dir: 0 }],
+      id: "ram_eye", name: "STORM EYE", theme: "jove", realm: "ram", music: "ramjove", boss: "stormeye",
+      warps: [{ x: 8, y: 12, w: 2, h: 1, to: "ram_j1", tx: 9, ty: 3, dir: 0 }],
     },
     ram_climb: {
-      id: "ram_climb", name: "CENTER MOUNTAIN", theme: "dungeon", realm: "ram", music: "cave",
-      npcs: [{ id: "shadow", x: 6, y: 6, dir: 3, talk: "shadow_climb" }],
-      enemies: [{ k: "vov", x: 14, y: 6, v: 3 }],
-      signs: [{ x: 8, y: 4, text: "THE HIGHEST MOUNTAIN. THE CITY IS ABOVE THE STARS.", kind: "sign" }],
+      id: "ram_climb", name: "THE ASCENT", theme: "snow", realm: "ram", music: "rammount",
+      npcs: [
+        { id: "shadow", x: 5, y: 6, dir: 3, talk: "shadow_mars" },
+        { id: "eyereenia", x: 14, y: 6, dir: 2, talk: "eye_climb" },
+      ],
+      enemies: [{ k: "vov", x: 18, y: 8, v: 4 }],
+      props: [{ k: "glitch", x: 12, y: 8 }],
+      signs: [{ x: 8, y: 4, text: "CENTER MOUNTAIN. THE CITY IS ABOVE THE STORMS.", kind: "sign" }],
       warps: [
-        { x: 10, y: 13, w: 2, h: 1, to: "ram_jup", tx: 10, ty: 2, dir: 0 },
-        { x: 10, y: 0, w: 2, h: 1, to: "ram_city", tx: 10, ty: 11, dir: 1 },
+        { x: 10, y: 14, w: 2, h: 1, to: "ram_jup", tx: 10, ty: 2, dir: 0 },
+        { x: 10, y: 0, w: 2, h: 1, to: "ram_snow", tx: 10, ty: 10, dir: 1 },
+      ],
+    },
+    ram_snow: {
+      id: "ram_snow", name: "CLOUD SNOW", theme: "snow", realm: "ram", music: "rammount",
+      enemies: [{ k: "vov", x: 8, y: 6, v: 1 }, { k: "vov", x: 16, y: 8, v: 2 }],
+      props: [{ k: "arch", x: 10, y: 4 }],
+      warps: [
+        { x: 10, y: 12, w: 2, h: 1, to: "ram_climb", tx: 10, ty: 2, dir: 0 },
+        { x: 10, y: 0, w: 2, h: 1, to: "ram_gate", tx: 8, ty: 8, dir: 1 },
+      ],
+    },
+    ram_gate: {
+      id: "ram_gate", name: "RUNE GATES", theme: "snow", realm: "ram", music: "rammount",
+      gates: { G: "amulet_got" },
+      signs: [{ x: 6, y: 5, text: "THE AMULET OPENS THE GOLDEN GATE.", kind: "sign" }],
+      props: [{ k: "arch", x: 8, y: 3 }],
+      warps: [
+        { x: 8, y: 10, w: 2, h: 1, to: "ram_snow", tx: 10, ty: 2, dir: 0 },
+        { x: 8, y: 0, w: 2, h: 1, to: "ram_city", tx: 10, ty: 12, dir: 1 },
       ],
     },
     ram_city: {
-      id: "ram_city", name: "THE CITY ABOVE", theme: "nexus", realm: "ram", music: "nexus",
-      npcs: [{ id: "halvar", x: 8, y: 6, dir: 3, talk: "halvar_city" }],
-      enemies: [{ k: "vov", x: 14, y: 8, v: 2 }, { k: "vov", x: 16, y: 5, v: 4 }],
-      props: [{ k: "portal", x: 18, y: 6, need: "ram_home_end", to: "ram_home" }],
-      signs: [{ x: 6, y: 3, text: "A DIVINE CITY BEYOND THE CLOUDS.", kind: "sign" }],
+      id: "ram_city", name: "THE CITY ABOVE", theme: "divine", realm: "ram", music: "ramcity",
+      npcs: [{ id: "wizard", x: 8, y: 8, dir: 0, talk: "cash_city" }],
+      enemies: [{ k: "vov", x: 16, y: 8, v: 2 }, { k: "vov", x: 22, y: 6, v: 4 }],
+      props: [
+        { k: "arch", x: 6, y: 4 },
+        { k: "arch", x: 14, y: 4 },
+        { k: "arch", x: 22, y: 10 },
+        { k: "glitch", x: 16, y: 8 },
+        { k: "glitch", x: 20, y: 6 },
+        { k: "portal", x: 18, y: 6, need: "ram_home_end", to: "ram_home" },
+      ],
+      signs: [{ x: 5, y: 6, text: "A CITY BEYOND THE CLOUDS AND THE STARS. THE HACK STILL STAINS THE STONE.", kind: "sign" }],
       warps: [
-        { x: 10, y: 13, w: 2, h: 1, to: "ram_climb", tx: 10, ty: 2, dir: 0 },
-        { x: 10, y: 0, w: 2, h: 1, to: "ram_throne", tx: 8, ty: 9, dir: 1 },
+        { x: 10, y: 14, w: 2, h: 1, to: "ram_gate", tx: 8, ty: 2, dir: 0 },
+        { x: 10, y: 0, w: 2, h: 1, to: "ram_throne", tx: 8, ty: 10, dir: 1 },
       ],
     },
     ram_throne: {
-      id: "ram_throne", name: "THE HACKED THRONE", theme: "dark", realm: "ram", music: "dark", boss: "hack",
-      warps: [{ x: 8, y: 11, w: 2, h: 1, to: "ram_city", tx: 10, ty: 3, dir: 0 }],
+      id: "ram_throne", name: "THE HACKED SEAL", theme: "carnival", realm: "ram", music: "ramdream", boss: "hack",
+      props: [{ k: "glitch", x: 6, y: 4 }, { k: "arch", x: 12, y: 4 }],
+      warps: [{ x: 8, y: 12, w: 2, h: 1, to: "ram_city", tx: 10, ty: 3, dir: 0 }],
+    },
+    ram_mem_axe: {
+      id: "ram_mem_axe", name: "MEMORY: THE GATE", theme: "divine", realm: "ram", music: "ramcity", peace: !0,
+      npcs: [
+        { id: "overlord", x: 10, y: 4, dir: 0, talk: "over_vis" },
+        { id: "fright", x: 7, y: 6, dir: 3, talk: "fright_vis" },
+      ],
+      props: [{ k: "arch", x: 5, y: 3 }, { k: "glitch", x: 12, y: 6 }],
+      onEnter: "mem_axe_scene",
+    },
+    ram_mem_shield: {
+      id: "ram_mem_shield", name: "MEMORY: THE BEAM", theme: "divine", realm: "ram", music: "ramcity", peace: !0,
+      npcs: [{ id: "eyereenia", x: 8, y: 5, dir: 0, talk: "eye_climb" }],
+      props: [{ k: "glitch", x: 12, y: 6 }],
+      onEnter: "mem_shield_scene",
+    },
+    ram_mem_amulet: {
+      id: "ram_mem_amulet", name: "MEMORY: THE EXILE", theme: "divine", realm: "ram", music: "ramcity", peace: !0,
+      npcs: [
+        { id: "overlord", x: 11, y: 4, dir: 0, talk: "over_vis" },
+        { id: "fright", x: 6, y: 6, dir: 3, talk: "fright_vis" },
+      ],
+      props: [{ k: "arch", x: 8, y: 3 }, { k: "glitch", x: 10, y: 7 }],
+      onEnter: "mem_amulet_scene",
     },
   });
   Object.assign(Zs, {
-    ram_dock: RM(22, 14, (r) => { gap(r, 4, 5); gap(r, 21, 6); gap(r, 21, 7); }),
-    ram_memory: RM(16, 12, (r) => { gap(r, 6, 11); gap(r, 7, 11); }),
-    ram_dream: RM(24, 16, (r) => { gap(r, 0, 8); gap(r, 0, 9); gap(r, 23, 8); gap(r, 23, 9); gap(r, 11, 0, "G"); gap(r, 12, 0, "G"); }),
-    ram_d1: RM(18, 12, (r) => { gap(r, 0, 6); gap(r, 0, 7); gap(r, 9, 0, "D"); gap(r, 10, 0, "D"); }),
-    ram_fear: RM(16, 12, (r) => { gap(r, 8, 11); gap(r, 9, 11); }),
-    ram_mars: RM(26, 16, (r) => { gap(r, 12, 15); gap(r, 13, 15); gap(r, 25, 7); gap(r, 25, 8); gap(r, 12, 0, "G"); gap(r, 13, 0, "G"); }),
-    ram_m1: RM(18, 12, (r) => { gap(r, 0, 6); gap(r, 0, 7); gap(r, 9, 0, "D"); gap(r, 10, 0, "D"); }),
-    ram_core: RM(16, 12, (r) => { gap(r, 8, 11); gap(r, 9, 11); }),
-    ram_jup: RM(22, 14, (r) => { gap(r, 10, 13); gap(r, 11, 13); gap(r, 21, 6); gap(r, 21, 7); gap(r, 10, 0, "G"); gap(r, 11, 0, "G"); r[8][8] = "r"; r[8][9] = "r"; }),
-    ram_j1: RM(18, 12, (r) => { gap(r, 0, 6); gap(r, 0, 7); gap(r, 9, 0, "D"); gap(r, 10, 0, "D"); }),
-    ram_eye: RM(16, 12, (r) => { gap(r, 8, 11); gap(r, 9, 11); }),
-    ram_climb: RM(20, 14, (r) => { gap(r, 10, 13); gap(r, 11, 13); gap(r, 10, 0); gap(r, 11, 0); }),
-    ram_city: RM(22, 14, (r) => { gap(r, 10, 13); gap(r, 11, 13); gap(r, 10, 0); gap(r, 11, 0); }),
-    ram_throne: RM(16, 12, (r) => { gap(r, 8, 11); gap(r, 9, 11); }),
+
+ram_dock: [
+      "############################",
+      "#..........................#",
+      "#..........................#",
+      "#.......######....#####....#",
+      "#.......######....#####....#",
+      "#.......######....#####....#",
+      "#.................#####.....",
+      "#...........................",
+      "#..........................#",
+      "#..........................#",
+      "#..........................#",
+      "#..........................#",
+      "#..........................#",
+      "#..........................#",
+      "#..........................#",
+      "############################"
+    ],
+ram_memory: [
+      "########################",
+      "#......................#",
+      "#.......########.......#",
+      "#.......########.......#",
+      "#......................#",
+      "#......................#",
+      "#......................#",
+      "#......................#",
+      "#......................#",
+      "#......................#",
+      "#......................#",
+      "#......................#",
+      "#......................#",
+      "########################"
+    ],
+ram_dream: [
+      "##############GG################",
+      "#..............................#",
+      "#..###.###............###.###..#",
+      "#..###.###............###.###..#",
+      "#..............................#",
+      "#..............................#",
+      "#..............................#",
+      "#..............................#",
+      "................................",
+      "................................",
+      "#..............................#",
+      "#..............................#",
+      "#...........########...........#",
+      "#...........########...........#",
+      "#..............................#",
+      "#..............................#",
+      "#..............................#",
+      "################################"
+    ],
+ram_fun: [
+      "####################",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "....................",
+      "....................",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "####################",
+    ],
+ram_d1: [
+      "#########DD#########",
+      "#..................#",
+      "#..................#",
+      "#.......####.......#",
+      "#.......####.......#",
+      "#.......####.......#",
+      "...................#",
+      "...................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "####################"
+    ],
+ram_fear: [
+      "####################",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "####################"
+    ],
+ram_mars: [
+      "############GG######################",
+      "#..................................#",
+      "#...............#.........#........#",
+      "#...#####.......#.........#........#",
+      "#...#####.......#..................#",
+      "#...............#..................#",
+      "#.........................#........#",
+      "#.........................#.........",
+      "#.........................#.........",
+      "#...............#..................#",
+      "#...............#..................#",
+      "#...............#.........#........#",
+      "#.........................#........#",
+      "#.........................#........#",
+      "#...............#...#######........#",
+      "#...............#...#######........#",
+      "#...............#.........#........#",
+      "#...............#.........#........#",
+      "#..................................#",
+      "####################################"
+    ],
+ram_colony: [
+      "##########GG##########",
+      "#....................#",
+      "#.......######.......#",
+      "#.......######.......#",
+      "#....................#",
+      "#....................#",
+      "......................",
+      "......................",
+      "#....................#",
+      "#....................#",
+      "#....................#",
+      "#....................#",
+      "#....................#",
+      "######################",
+    ],
+ram_trial: [
+      "##################",
+      "#................#",
+      "#................#",
+      "#................#",
+      "#................#",
+      "#................#",
+      ".................#",
+      ".................#",
+      "#................#",
+      "#................#",
+      "#................#",
+      "#................#",
+      "#................#",
+      "##################"
+    ],
+ram_m1: [
+      "####################",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "....................",
+      "....................",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "####################"
+    ],
+ram_m2: [
+      "#########DD#######",
+      "#................#",
+      "#................#",
+      "#.....######.....#",
+      "#.....######.....#",
+      ".................#",
+      ".................#",
+      "#................#",
+      "#................#",
+      "#................#",
+      "#................#",
+      "##################"
+    ],
+ram_core: [
+      "####################",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "####################"
+    ],
+ram_jup: [
+      "##########GG################",
+      "#..........................#",
+      "#..........................#",
+      "#...##....##....##....##...#",
+      "#...##....##....##....##...#",
+      "#...##....##....##....##...#",
+      "#...........................",
+      "#...........................",
+      "#..........................#",
+      "#..........................#",
+      "#.nnnnnnnnnn...............#",
+      "#..........................#",
+      "#..........................#",
+      "#..........................#",
+      "#..........................#",
+      "############################",
+    ],
+ram_jup2: [
+      "######################",
+      "#....................#",
+      "#....................#",
+      "#....................#",
+      "#....................#",
+      "......................",
+      "....r.r.r.r.r.r.r.....",
+      "#....................#",
+      "#....................#",
+      "#....................#",
+      "#....................#",
+      "######################"
+    ],
+ram_jup3: [
+      "##################",
+      "#................#",
+      "#................#",
+      "#................#",
+      "#................#",
+      "..................",
+      "..................",
+      "#................#",
+      "#................#",
+      "#................#",
+      "#................#",
+      "##################",
+    ],
+ram_noodle: [
+      "################",
+      "#..............#",
+      "#.....####.....#",
+      "#.....####.....#",
+      "#..............#",
+      "#..............#",
+      "#..............#",
+      "#..............#",
+      "#..............#",
+      "#..............#",
+      "#..............#",
+      "################"
+    ],
+ram_j1: [
+      "#########DD#########",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "...................#",
+      "...................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "####################"
+    ],
+ram_eye: [
+      "####################",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "####################"
+    ],
+ram_climb: [
+      "##########..############",
+      "#......................#",
+      "#.......#..............#",
+      "#.......#..............#",
+      "#.......#..............#",
+      "#.......#..............#",
+      "#......................#",
+      "#......................#",
+      "#......................#",
+      "#.......#..............#",
+      "#.......#..............#",
+      "#.......#..............#",
+      "#.......#..............#",
+      "#.......#..............#",
+      "#......................#",
+      "########################"
+    ],
+ram_snow: [
+      "##########..##########",
+      "#....................#",
+      "#....................#",
+      "#...####.............#",
+      "#...####.............#",
+      "#....................#",
+      "#....................#",
+      "#....................#",
+      "#.............####...#",
+      "#.............####...#",
+      "#....................#",
+      "#....................#",
+      "#....................#",
+      "######################"
+    ],
+ram_gate: [
+      "########GG########",
+      "#................#",
+      "#................#",
+      "#................#",
+      "#................#",
+      "#................#",
+      "#................#",
+      "#................#",
+      "#................#",
+      "#................#",
+      "#................#",
+      "##################"
+    ],
+ram_city: [
+      "##########..################",
+      "#..........................#",
+      "#..........................#",
+      "#...####....####...........#",
+      "#...####....####...........#",
+      "#..........................#",
+      "#..........................#",
+      "#..........................#",
+      "#..........................#",
+      "#..........................#",
+      "#...................####...#",
+      "#...................####...#",
+      "#..........................#",
+      "#..........................#",
+      "#..........................#",
+      "############################"
+    ],
+ram_throne: [
+      "####################",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "####################"
+    ],
+ram_mem_axe: [
+      "################",
+      "#..............#",
+      "#..............#",
+      "#..............#",
+      "#..............#",
+      "#..............#",
+      "#..............#",
+      "#..............#",
+      "#..............#",
+      "#..............#",
+      "#..............#",
+      "################"
+    ],
+ram_mem_shield: [
+      "################",
+      "#..............#",
+      "#..............#",
+      "#..............#",
+      "#..............#",
+      "#..............#",
+      "#..............#",
+      "#..............#",
+      "#..............#",
+      "#..............#",
+      "#..............#",
+      "################"
+    ],
+ram_mem_amulet: [
+      "################",
+      "#..............#",
+      "#..............#",
+      "#..............#",
+      "#..............#",
+      "#..............#",
+      "#..............#",
+      "#..............#",
+      "#..............#",
+      "#..............#",
+      "#..............#",
+      "################"
+    ]
   });
   Object.assign(Ge, {
     partner: {
@@ -11066,17 +11603,17 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
             (ee[w.boss && Se[w.boss] ? Se[w.boss].contFlag : "cont_got"] = !0));
           break;
         case "axe":
-          ((d.items.axe = !0), (ee.axe_got = !0), (d.wep = "axe"), (d.pri = "axe"), splitHands(), ye("mem_axe"));
+          ((d.items.axe = !0), (ee.axe_got = !0), (d.wep = "axe"), (d.pri = "axe"), splitHands(), ye("mem_axe_go"));
           break;
         case "shield":
           ((d.items.shield = !0),
             (ee.shield_got = !0),
             d.sec !== "amulet" && (d.sec = "shield"),
             splitHands(),
-            ye("mem_shield"));
+            ye("mem_shield_go"));
           break;
         case "amulet":
-          ((d.items.amulet = !0), (ee.amulet_got = !0), (d.sec = "amulet"), splitHands(), ye("mem_amulet"));
+          ((d.items.amulet = !0), (ee.amulet_got = !0), (d.sec = "amulet"), splitHands(), ye("mem_amulet_go"));
           break;
         case "armor":
         case "board":
@@ -12407,6 +12944,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         ur(e),
         Sr(e),
         Rr(e),
+        ramWorld(e),
         Vr(e));
       for (let f of Ta)
         (f.drop > 0 && (f.drop = Math.max(0, f.drop - e * 0.9)),
@@ -14500,6 +15038,36 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         bpm: 104,
         style: "",
       },
+      ramdream: {
+        ch: [[60, 1], [67, 0], [64, 1], [55, 1]],
+        mel: [76, 0, 79, 0, 84, 0, 79, 0, 88, 0, 84, 0, 79, 0, 0, 0, 76, 0, 72, 0, 75, 0, 79, 0, 84, 0, 79, 0, 76, 0, 0, 0],
+        bpm: 118,
+        style: "soft",
+      },
+      rammars: {
+        ch: [[45, 0], [52, 1], [49, 0], [42, 1]],
+        mel: [64, 0, 61, 0, 57, 0, 61, 0, 64, 0, 69, 0, 64, 0, 0, 0, 57, 0, 61, 0, 64, 0, 68, 0, 64, 0, 61, 0, 57, 0, 0, 0],
+        bpm: 92,
+        style: "",
+      },
+      ramjove: {
+        ch: [[48, 0], [55, 1], [51, 0], [46, 1]],
+        mel: [72, 0, 75, 0, 79, 0, 75, 0, 82, 0, 79, 0, 75, 0, 0, 0, 70, 0, 74, 0, 77, 0, 82, 0, 79, 0, 74, 0, 70, 0, 0, 0],
+        bpm: 126,
+        style: "",
+      },
+      rammount: {
+        ch: [[41, 1], [48, 0], [45, 1], [36, 1]],
+        mel: [60, 0, 64, 0, 67, 0, 64, 0, 72, 0, 67, 0, 64, 0, 0, 0, 60, 0, 62, 0, 65, 0, 69, 0, 65, 0, 62, 0, 60, 0, 0, 0],
+        bpm: 76,
+        style: "soft",
+      },
+      ramcity: {
+        ch: [[60, 1], [64, 0], [67, 1], [55, 1]],
+        mel: [79, 0, 84, 0, 88, 0, 84, 0, 91, 0, 88, 0, 84, 0, 0, 0, 79, 0, 83, 0, 86, 0, 91, 0, 88, 0, 84, 0, 79, 0, 0, 0],
+        bpm: 96,
+        style: "piano",
+      },
       pourw: {
         ch: [
           [53, 0],
@@ -15109,64 +15677,110 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         });
       },
     };
-    function ramBoss(kind, fire) {
-      return {
-        init: () => {
-          ((ee.ram_nocont = !0),
-            (r.hp = r.max = kind === "hack" ? 10 : 6),
-            (r.x = p(8)),
-            (r.y = p(5)),
-            (r.a = 0),
-            (r.eyeT = 0.4));
-        },
-        upd: (e) => {
-          ((r.a += e),
-            (r.x = p(8) + Math.sin(r.a * 1.3) * 28),
-            (r.eyeT -= e));
-          if (r.eyeT <= 0) {
-            r.eyeT = fire;
-            let i = Math.atan2(d.y - 8 - r.y, d.x - r.x);
-            Oe.push({
-              x: r.x,
-              y: r.y - 8,
-              vx: Math.cos(i) * 90,
-              vy: Math.sin(i) * 90,
-              t: 0,
-              kind: "orb",
-              dir: 0,
-            });
-          }
-        },
-        parts: (e) => {
-          e.push([r.x, r.y - 8, 12, 1, 0]);
-        },
-        hit: (e, a) => {
-          if (kind === "memory")
-            a === "axe" ? Fe(2) : (D.tink(), Q("THE HATCHET CANNOT REACH THIS FEAR."));
-          else if (kind === "colony")
-            a === "echo" ? Fe(3) : (D.tink(), Q("REFLECT THE BEAM."));
-          else if (kind === "stormeye")
-            (d.rune || 0) > 0 ? Fe(2) : (D.tink(), Q("THE EYE WANTS THUNDER."));
-          else Fe(a === "axe" ? 2 : 1);
-        },
-        draw: (e, a, t) => {
-          e.push({
-            y: r.y,
-            f: () => {
-              let i = a(r.x),
-                s = t(r.y);
-              (R(n, i, s - 10, 12, 12, r.flash > 0 ? "#ffffff" : kind === "hack" ? "#2a0840" : "#6a3a8a"),
-                R(n, i, s - 10, 5, 5, kind === "colony" ? "#ff4455" : "#4ff0ff"),
-                kind === "hack" && I(i - 8, s - 18, 16, 2, Math.floor(A.t * 8) % 2 ? "#ff4fd8" : "#4ff0ff"));
-            },
-          });
-        },
-      };
+    function ramShot(speed, spread) {
+      let base = Math.atan2(d.y - 8 - r.y, d.x - r.x);
+      for (let k = -spread; k <= spread; k++) {
+        let i = base + k * 0.35;
+        Oe.push({ x: r.x, y: r.y - 8, vx: Math.cos(i) * speed, vy: Math.sin(i) * speed, t: 0, kind: "orb", dir: 0 });
+      }
     }
-    Le.memory = ramBoss("memory", 1.4);
-    Le.colony = ramBoss("colony", 0.7);
-    Le.stormeye = ramBoss("stormeye", 1.2);
-    Le.hack = ramBoss("hack", 1.1);
+    Le.memory = {
+      init: () => { ((ee.ram_nocont = !0), (r.hp = r.max = 8), (r.x = p(8)), (r.y = p(4)), (r.a = 0), (r.eyeT = 1)); },
+      upd: (e) => {
+        r.a += e;
+        r.eyeT -= e;
+        if (r.eyeT <= 0) {
+          r.eyeT = r.phase === 2 ? 0.7 : 1.3;
+          r.x = p(4 + Math.floor(Math.random() * 8));
+          r.y = p(3 + Math.floor(Math.random() * 4));
+          ramShot(70, r.phase === 2 ? 2 : 1);
+          D.roar();
+        }
+      },
+      parts: (e) => { e.push([r.x, r.y - 8, 12, 1, 0]); },
+      hit: (e, a) => { a === "axe" ? Fe(2) : (D.tink(), Q("THE HATCHET CANNOT REACH THIS FEAR.")); },
+      draw: (e, a, t) => {
+        e.push({ y: r.y, f: () => {
+          let i = a(r.x), s = t(r.y);
+          (R(n, i, s - 12, 11, 11, r.flash > 0 ? "#ffffff" : "#6a2a8a"),
+            R(n, i - 6, s - 18, 3, 5, "#e8e8ee"),
+            R(n, i + 6, s - 18, 3, 5, "#e8e8ee"),
+            I(i - 4, s - 10, 8, 4, "#e07a2a"));
+        } });
+      },
+    };
+    Le.colony = {
+      init: () => { ((ee.ram_nocont = !0), (r.hp = r.max = 8), (r.x = p(8)), (r.y = p(5)), (r.a = 0), (r.eyeT = 0.8)); },
+      upd: (e) => {
+        r.a += e * (r.phase === 2 ? 1.8 : 1);
+        r.x = p(8) + Math.cos(r.a) * 40;
+        r.y = p(5) + Math.sin(r.a * 2) * 16;
+        r.eyeT -= e;
+        if (r.eyeT <= 0) { r.eyeT = r.phase === 2 ? 0.45 : 0.9; ramShot(r.phase === 2 ? 120 : 80, r.phase === 2 ? 2 : 1); }
+      },
+      parts: (e) => { e.push([r.x, r.y - 6, 14, 1, 0]); },
+      hit: (e, a) => { a === "echo" ? Fe(3) : (D.tink(), Q("REFLECT THE BEAM.")); },
+      draw: (e, a, t) => {
+        e.push({ y: r.y, f: () => {
+          let i = a(r.x), s = t(r.y);
+          (I(i - 14, s - 10, 28, 12, r.flash > 0 ? "#ffffff" : "#8a3030"),
+            R(n, i, s - 12, 8, 6, "#e8eef4"),
+            I(i - 2, s - 14, 4, 3, "#ff4455"));
+        } });
+      },
+    };
+    Le.stormeye = {
+      init: () => { ((ee.ram_nocont = !0), (r.hp = r.max = 8), (r.x = p(8)), (r.y = p(3)), (r.a = 0), (r.eyeT = 0.6)); },
+      upd: (e) => {
+        r.a += e;
+        r.x = p(8) + Math.sin(r.a) * 36;
+        r.y = p(3) + Math.sin(r.a * 2) * 10;
+        r.eyeT -= e;
+        if (r.eyeT <= 0) {
+          r.eyeT = r.phase === 2 ? 0.35 : 0.7;
+          Oe.push({ x: r.x, y: r.y, vx: 0, vy: r.phase === 2 ? 140 : 90, t: 0, kind: "orb", dir: 0 });
+          Oe.push({ x: r.x - 16, y: r.y, vx: 0, vy: 80, t: 0, kind: "orb", dir: 0 });
+          Oe.push({ x: r.x + 16, y: r.y, vx: 0, vy: 80, t: 0, kind: "orb", dir: 0 });
+        }
+      },
+      parts: (e) => { e.push([r.x, r.y - 4, 12, 1, 0]); },
+      hit: (e, a) => { (d.rune || 0) > 0 && a === "axe" ? Fe(2) : (D.tink(), Q("THE EYE WANTS THUNDER, THEN THE AXE.")); },
+      draw: (e, a, t) => {
+        e.push({ y: r.y + 20, f: () => {
+          let i = a(r.x), s = t(r.y);
+          (R(n, i, s, 16, 8, "#f0d090"),
+            R(n, i, s - 2, 6, 4, r.flash > 0 ? "#ffffff" : "#fff6c0"),
+            I(i - 1, s - 20, 2, 16, "#fff6c088"));
+        } });
+      },
+    };
+    Le.hack = {
+      init: () => { ((ee.ram_nocont = !0), (r.hp = r.max = 12), (r.x = p(8)), (r.y = p(4)), (r.a = 0), (r.eyeT = 1), (r.summoned = 0)); },
+      upd: (e) => {
+        r.a += e * (r.phase === 2 ? 2.2 : 1);
+        r.x = p(8) + Math.sin(r.a * (r.phase === 2 ? 2 : 0.6)) * (r.phase === 2 ? 48 : 24);
+        r.y = p(4) + Math.cos(r.a) * 8;
+        r.eyeT -= e;
+        if (r.phase === 2 && !r.summoned) {
+          r.summoned = 1;
+          ce.push(qe({ k: "vov", x: 4, y: 8, v: 1 }));
+          ce.push(qe({ k: "vov", x: 12, y: 8, v: 2 }));
+          Q("THE HACK CALLS A PAIR.");
+        }
+        if (r.eyeT <= 0) { r.eyeT = r.phase === 2 ? 0.4 : 1.1; ramShot(r.phase === 2 ? 130 : 75, r.phase === 2 ? 2 : 0); }
+      },
+      parts: (e) => { e.push([r.x, r.y - 10, 14, 1, 0]); },
+      hit: (e, a) => { Fe(a === "axe" ? 2 : 1); },
+      draw: (e, a, t) => {
+        e.push({ y: r.y, f: () => {
+          let i = a(r.x), s = t(r.y);
+          (I(i - 10, s - 22, 20, 24, r.flash > 0 ? "#ffffff" : "#1a0830"),
+            I(i - 8, s - 16, 16, 3, Math.floor(A.t * 10) % 2 ? "#ff4fd8" : "#4ff0ff"),
+            I(i - 6, s - 8, 12, 3, "#ffffff"),
+            R(n, i, s - 24, 6, 4, "#ff4fd8"));
+        } });
+      },
+    };
     Le.sparkb = {
       init: () => {
         ((ee.sparkb_nocont = !0),
@@ -15297,20 +15911,59 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       return "THE TALE IS TOLD. THE PORTAL IS OUT BACK.";
     }
     function ramObjective() {
-      if (!Z("mem_hack")) return "DOCK: REMEMBER THE HACK";
+      let id = (w && w.id) || "";
+      if (id === "ram_memory" || id.indexOf("ram_mem") === 0) return "MEMORY: THE HACK ON THE MOUNTAIN";
+      if (id === "ram_dock") return Z("mem_hack") ? "EAST: THE DREAMLAND MIDWAY" : "THE DOCK: STEP INTO THE MEMORY";
+      if (id === "ram_dream" || id === "ram_fun" || id === "ram_d1" || id === "ram_fear")
+        return Z("axe_got") ? "DREAMLAND: NORTH GATE TO MARS" : "DREAMLAND: THROW THE AXE AT THE FEAR";
+      if (id === "ram_mars" || id === "ram_colony" || id === "ram_trial" || id === "ram_m1" || id === "ram_m2" || id === "ram_core")
+        return Z("shield_got") ? "MARS: NORTH TO JUPITER" : "MARS: REFLECT THE CORE. THE SCOUTS GUARD IT";
+      if (id === "ram_jup" || id === "ram_jup2" || id === "ram_jup3" || id === "ram_noodle" || id === "ram_j1" || id === "ram_eye")
+        return Z("amulet_got") ? "JUPITER: THE CLIMB IS OPEN" : "JUPITER: THUNDER OPENS THE STORM EYE";
+      if (id === "ram_climb" || id === "ram_snow" || id === "ram_gate") return "CENTER MOUNTAIN: THE RUNE GATES";
+      if (id === "ram_city" || id === "ram_throne")
+        return Z("ram_home_end") ? "THE PORTAL HOME IS OPEN" : "THE CITY: BREAK THE HACK";
       if (!Z("axe_got")) return "DREAMLAND: THE ETERNAL AXE";
       if (!Z("shield_got")) return "MARS: THE SHIELD";
       if (!Z("amulet_got")) return "JUPITER: THE POWER AMULET";
       if (!Z("ram_home_end")) return "CENTER MOUNTAIN: CLIMB TO THE CITY";
       return "THE CITY IS QUIET. THE PORTAL HOME IS OPEN.";
     }
+    function ramWorld(e) {
+      if (A.story !== "ramshackle" || !w || A.paused) return;
+      let tile = ie(Math.floor(d.x / 16), Math.floor((d.y - 2) / 16));
+      if (tile === "n") d.x += 90 * e;
+      if (w.id === "ram_colony" && !Z("colony_clear")) {
+        let scouts = ce.filter((f) => f.k === "vov" || f.k === "redcoat");
+        scouts.length &&
+          scouts.every((f) => f.dead) &&
+          ((ee.colony_clear = !0), D.door(), Q("THE SCOUTS SHATTER. THE CORE DOOR OPENS."));
+      }
+      let step = ee.mir_step || 0,
+        pad = null;
+      for (let f of w.props || [])
+        if ((f.k === "mirror" || f.k === "pad") && ae(d.x, d.y, p(f.x), p(f.y)) < 10) pad = f;
+      if (pad) {
+        if (ee.mir_hold !== pad.n) {
+          ee.mir_hold = pad.n;
+          if (pad.n === step + 1) {
+            ee.mir_step = pad.n;
+            D.sel();
+            pad.n === 3 &&
+              ((ee[pad.k === "pad" ? "cv_ram" : "mir_done"] = !0),
+              Q(pad.k === "pad" ? "THE TRIAL HEARS YOU." : "THE MIRROR OPENS."),
+              (ee.mir_step = 0));
+          } else ((ee.mir_step = 0), Q("OUT OF ORDER. IT RESETS."));
+        }
+      } else ee.mir_hold = 0;
+    }
     function ramSaga() {
       return [
-        ["THE HACK", "mem_hack", "The sky glitched. The brotherhood fell."],
-        ["THE AXE", "axe_got", "It remembers the gate."],
-        ["THE SHIELD", "shield_got", "It holds a laser and answers it."],
-        ["THE AMULET", "amulet_got", "Thunder enough to climb."],
-        ["THE CITY", "ram_home_end", "The hack is expelled. The Overlord is not ended."],
+        ["THE HACK", "mem_hack", "The sky tore. Something exiled came through."],
+        ["THE AXE", "axe_got", "The gate remembers a door, not a weapon."],
+        ["THE SHIELD", "shield_got", "A beam was sent back. The conduit is real."],
+        ["THE AMULET", "amulet_got", "Thunder names it: the mountain freed Fright."],
+        ["THE CITY", "ram_home_end", "The hack is sealed. Fright is already free. The brothers are still lost."],
       ];
     }
     function rosQuestRows() {
@@ -17043,7 +17696,11 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
               (I(140 + s * 10, 12, 8, 8, on ? "#ffcc33" : "#3a2a20"),
                 I(142 + s * 10, 14, 4, 4, on ? "#fff6c0" : "#1a140c"));
             }))
-          : (n.drawImage(O.icon.coin, 140, 4),
+          : A.story === "ramshackle"
+            ? (v(n, Z("axe_got") ? "AXE" : "HATCHET", 140, 2, "#ffe070", 1, "", ""),
+              v(n, Z("shield_got") ? "SHIELD" : "SHIELD --", 140, 12, Z("shield_got") ? "#4ff0ff" : "#6a6a8a", 1, "", ""),
+              v(n, Z("amulet_got") ? "AMULET" : "AMULET --", 196, 12, Z("amulet_got") ? "#ff4fd8" : "#6a6a8a", 1, "", ""))
+            : (n.drawImage(O.icon.coin, 140, 4),
             v(n, String(d.coins).padStart(3, "0"), 154, 9, "#ffe070", 1, "", ""),
             n.drawImage(O.icon.arrows, 174, 4),
             v(n, String(d.arrows).padStart(2, "0"), 188, 9, "#ffffff", 1, "", "")),
@@ -17095,6 +17752,67 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         n.ellipse(e, a, t, t * 0.4, 0, 0, 6.283),
         n.fill());
     }
+    function drawRamProp(f, E, i, s) {
+      let ks = { tent: 1, wheel: 1, dome: 1, rover: 1, arch: 1, glitch: 1, mirror: 1, booth: 1, pad: 1 };
+      if (!ks[f.k]) return !1;
+      let c = i(p(f.x)),
+        S = s(p(f.y)),
+        col = f.c || "#ff4fd8";
+      E.push({
+        y: p(f.y) + 8,
+        f: () => {
+          if (f.k === "tent") {
+            (P(n, [c - 14, S + 8, c, S - 16, c + 14, S + 8], col),
+              I(c - 3, S - 2, 6, 10, "#1a1020"),
+              I(c - 14, S + 6, 28, 3, "#2a2030"));
+          } else if (f.k === "wheel") {
+            let a = A.t * 1.4;
+            (R(n, c, S - 6, 12, 12, "#2a2a3a"),
+              R(n, c, S - 6, 3, 3, "#ffe070"));
+            for (let k = 0; k < 6; k++) {
+              let ang = a + k * 1.047;
+              I(c + Math.cos(ang) * 10 - 2, S - 6 + Math.sin(ang) * 10 - 2, 4, 4, k % 2 ? "#ff4fd8" : "#4ff0ff");
+            }
+            I(c - 1, S + 4, 2, 8, "#8a8a92");
+          } else if (f.k === "dome") {
+            (R(n, c, S, 14, 8, "#c8d0d8"),
+              R(n, c, S - 2, 10, 5, "#e8f4ff"),
+              I(c - 3, S + 2, 6, 4, "#6a4030"),
+              I(c - 16, S + 6, 32, 3, "#a05040"));
+          } else if (f.k === "rover") {
+            (I(c - 10, S - 2, 20, 6, "#d0d4dc"),
+              I(c - 4, S - 8, 8, 6, "#8aa0b0"),
+              I(c - 8, S + 4, 4, 4, "#2a2a32"),
+              I(c + 4, S + 4, 4, 4, "#2a2a32"),
+              I(c + 8, S - 4, 6, 2, "#ff4455"));
+          } else if (f.k === "arch") {
+            (I(c - 12, S - 18, 4, 22, "#f4e6c0"),
+              I(c + 8, S - 18, 4, 22, "#f4e6c0"),
+              I(c - 12, S - 20, 24, 4, "#fff6e0"),
+              I(c - 4, S - 16, 8, 2, "#e0b040"));
+          } else if (f.k === "glitch") {
+            let on = !Z("ram_home_end");
+            (I(c - 8, S - 10, 16, 14, on ? "#2a0848" : "#fff6e0"),
+              I(c - 6, S - 6, 12, 2, on && Math.floor(A.t * 8) % 2 ? "#ff4fd8" : "#4ff0ff"),
+              I(c - 4, S - 2, 8, 2, on ? "#ffffff" : "#e0b040"));
+          } else if (f.k === "mirror") {
+            (I(c - 6, S - 14, 12, 16, "#d8f4ff"),
+              I(c - 6, S - 14, 12, 2, "#ffffff"),
+              I(c - 1, S + 2, 2, 6, "#8a8a92"),
+              v(n, String(f.n || ""), c, S - 18, "#1a2040", 1, "center", ""));
+          } else if (f.k === "pad") {
+            (R(n, c, S, 8, 5, col),
+              R(n, c, S, 4, 2, "#ffffff"),
+              v(n, String(f.n || ""), c, S - 10, "#fff6c0", 1, "center", "#000"));
+          } else if (f.k === "booth") {
+            (I(c - 12, S - 10, 24, 12, col),
+              I(c - 10, S - 8, 20, 4, "#fff6e0"),
+              I(c - 4, S - 2, 8, 6, "#3a2418"));
+          }
+        },
+      });
+      return !0;
+    }
     function ts() {
       let e = A.shake > 0 ? (Math.random() - 0.5) * 4 : 0,
         a = Math.round(he.x + e),
@@ -17105,7 +17823,8 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         E = [];
       for (let f of w.props || [])
         if (!(f.need && !Z(f.need) && !f.ghost))
-          if (f.k === "house")
+          if (drawRamProp(f, E, i, s)) {}
+          else if (f.k === "house")
             E.push({
               y: p(f.y + 4),
               f: () => n.drawImage(O.house, i(f.x * 16), s(f.y * 16) - 16),
@@ -18520,6 +19239,51 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         wf: "#2a0a2a",
         wd: "#050208",
       },
+      carnival: {
+        f: "#2a1848",
+        f2: "#321e58",
+        sp: "#ff4fd8",
+        hi: "#4ff0ff",
+        w: "#140820",
+        wf: "#3a1050",
+        wd: "#080410",
+      },
+      mars: {
+        f: "#c45a3a",
+        f2: "#b04e32",
+        sp: "#8a3020",
+        hi: "#e88860",
+        w: "#6a2818",
+        wf: "#4a1c10",
+        wd: "#2a1008",
+      },
+      jove: {
+        f: "#6a4a28",
+        f2: "#5a3e22",
+        sp: "#c8a060",
+        hi: "#f0d090",
+        w: "#3a2858",
+        wf: "#2a1848",
+        wd: "#140820",
+      },
+      snow: {
+        f: "#e8eef8",
+        f2: "#d4deee",
+        sp: "#b8c8e0",
+        hi: "#ffffff",
+        w: "#8aa0c0",
+        wf: "#5a7098",
+        wd: "#3a5070",
+      },
+      divine: {
+        f: "#f8f0d8",
+        f2: "#f4e6c4",
+        sp: "#e0c070",
+        hi: "#fffef8",
+        w: "#f0e6c8",
+        wf: "#c8a050",
+        wd: "#8a6828",
+      },
       casino: {
         f: "#8a1a2a",
         f2: "#801826",
@@ -18551,6 +19315,11 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       club: !0,
       casino: !0,
       vault: !0,
+      carnival: !0,
+      mars: !0,
+      jove: !0,
+      snow: !0,
+      divine: !0,
     };
     function cs(e, a, t, i) {
       if (ps(e, a, t, i)) return !0;
@@ -18637,6 +19406,26 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           ["#2a1040", "#102a40", "#401030", "#1a1a3a"][t % 4],
         ),
           o(a, 1, 1, 14, 1, "#ffffff22"));
+      else if (e === "carnival")
+        (o(a, 0, 14, 16, 2, t % 2 ? s.sp : s.hi),
+          t % 4 === 0 && o(a, 6, 6, 4, 4, "#ffe07055"),
+          t % 5 === 1 && o(a, 2, 4, 2, 2, "#ffffff"));
+      else if (e === "mars") {
+        for (let E = 0; E < 5; E++)
+          o(a, Math.floor(i() * 14), Math.floor(i() * 14), 2, 1, i() < 0.5 ? s.sp : s.hi);
+        t % 6 === 0 && o(a, 4, 10, 6, 2, "#e8c070");
+      } else if (e === "jove")
+        (o(a, 0, 12, 16, 4, s.hi),
+          o(a, 2, 8, 12, 2, "#ffffff33"),
+          t % 3 === 0 && o(a, 7, 4, 2, 6, "#fff6c0"));
+      else if (e === "snow") {
+        for (let E = 0; E < 4; E++)
+          o(a, Math.floor(i() * 14), Math.floor(i() * 14), 1, 1, s.hi);
+        t % 4 === 0 && o(a, 3, 8, 8, 2, s.sp);
+      } else if (e === "divine")
+        (o(a, 0, 0, 16, 1, s.sp),
+          o(a, 0, 15, 16, 1, s.sp),
+          o(a, 7, 7, 2, 2, t % 2 ? "#fffef8" : "#e0c070"));
       else if (e === "casino")
         for (let E = 0; E < 16; E += 8)
           for (let f = 0; f < 16; f += 8)

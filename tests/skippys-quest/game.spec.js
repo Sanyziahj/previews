@@ -1577,18 +1577,39 @@ test('Ramshackle chapter: relics, worlds, bosses, and the road home', async ({ p
       S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
     }
   });
-  expect(await page.evaluate(() => __SQ.objective())).toContain('DREAMLAND');
+  expect(await page.evaluate(() => __SQ.objective())).toContain('MEMORY');
 
-  for (const [id, file] of [['ram_dream', 'dream.png'], ['ram_mars', 'mars.png'], ['ram_jup', 'jupiter.png'], ['ram_city', 'city.png']]) {
-    await page.evaluate((area) => {
+  for (const [id, file, prep] of [
+    ['ram_dream', 'dream.png', 'early'],
+    ['ram_fun', 'funhouse.png', 'early'],
+    ['ram_mars', 'mars.png', 'axe'],
+    ['ram_colony', 'colony.png', 'axe'],
+    ['ram_jup', 'jupiter.png', 'shield'],
+    ['ram_noodle', 'noodle.png', 'shield'],
+    ['ram_snow', 'snow.png', 'amulet'],
+    ['ram_city', 'city.png', 'amulet'],
+  ]) {
+    await page.evaluate(({ area, prep }) => {
       const S = __SQ;
-      for (let i = 0; i < 6 && (S.script || S.dlg); i++) {
+      for (let i = 0; i < 8 && (S.script || S.dlg); i++) {
         S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
+      }
+      if (prep === 'axe' || prep === 'shield' || prep === 'amulet') {
+        S.P.items.axe = true; S.flag('axe_got'); S.P.wep = 'axe'; S.P.pri = 'axe';
+      }
+      if (prep === 'shield' || prep === 'amulet') {
+        S.P.items.shield = true; S.flag('shield_got'); S.P.tool = 'shield'; S.P.sec = 'shield';
+      }
+      if (prep === 'amulet') {
+        S.P.items.amulet = true; S.flag('amulet_got');
       }
       S.warp(area, 8, 6, 3);
       S.step(3);
-    }, id);
-    expect(await page.evaluate(() => __SQ.A.id)).toBe(id);
+    }, { area: id, prep });
+    const seen = await page.evaluate(() => ({ id: __SQ.A.id, obj: __SQ.objective() }));
+    expect(seen.id).toBe(id);
+    if (id === 'ram_mars') expect(seen.obj).toContain('MARS');
+    if (id === 'ram_city') expect(seen.obj).toContain('CITY');
     await page.screenshot({ path: `${RAM}/${file}` });
   }
   await page.evaluate(() => { __SQ.warp('ram_d1', 12, 5, 2); __SQ.step(2); });
@@ -1642,7 +1663,7 @@ test('Ramshackle chapter: relics, worlds, bosses, and the road home', async ({ p
 
   const amulet = await page.evaluate(() => {
     const S = __SQ;
-    S.warp('ram_eye', 6, 6, 3);
+    S.warp('ram_eye', 8, 5, 1);
     S.step(110);
     S.P.items.axe = true;
     S.P.items.amulet = true;
@@ -1657,7 +1678,10 @@ test('Ramshackle chapter: relics, worlds, bosses, and the road home', async ({ p
     const still = S.B.hp;
     S.press('item', true); S.step(1); S.press('item', false); S.step(1);
     const rune = S.P.rune || 0;
-    S.press('attack', true); S.step(1); S.press('attack', false); S.step(24);
+    for (let n = 0; n < 6 && S.B.hp >= locked; n++) {
+      S.P.rune = 1.8;
+      S.press('attack', true); S.step(1); S.press('attack', false); S.step(18);
+    }
     return { locked, still, rune, after: S.B.hp, fight: S.B.state };
   });
   expect(amulet.fight).toBe('fight');
@@ -1665,6 +1689,21 @@ test('Ramshackle chapter: relics, worlds, bosses, and the road home', async ({ p
   expect(amulet.rune).toBeGreaterThan(0);
   expect(amulet.after).toBeLessThan(amulet.locked);
 
+  for (const [area, file] of [['ram_fear', 'boss-fear.png'], ['ram_core', 'boss-core.png'], ['ram_eye', 'boss-eye.png'], ['ram_throne', 'boss-hack.png']]) {
+    await page.evaluate((id) => {
+      const S = __SQ;
+      for (let i = 0; i < 6 && (S.script || S.dlg); i++) {
+        S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
+      }
+      S.warp(id, 8, 6, 1);
+      S.step(2);
+      for (let i = 0; i < 6 && (S.script || S.dlg); i++) {
+        S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
+      }
+      for (let i = 0; i < 160 && S.B.state !== 'fight'; i++) S.step(1);
+    }, area);
+    await page.screenshot({ path: `${RAM}/${file}` });
+  }
   const bosses = await page.evaluate(() => {
     const S = __SQ;
     const out = {};
@@ -1803,7 +1842,7 @@ test.describe('Ramshackle phone layout', () => {
         S.flag('axe_got');
         S.flag('shield_got');
         S.flag('amulet_got');
-        S.warp('ram_mars', 10, 8, 1);
+        S.warp('ram_mars', 24, 8, 1);
         S.step(3);
         for (let i = 0; i < 6 && (S.script || S.dlg); i++) {
           S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
