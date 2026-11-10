@@ -3,7 +3,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script>window.__SQ_BUILD="b31a";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b31a(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b31a");location.replace(u.href);}</script>
+<script>window.__SQ_BUILD="b31b";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b31b(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b31b");location.replace(u.href);}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Space Riders: Skippy's Quest</title><link rel="icon" href="data:,">
 <meta name="description" content="Space Riders: Skippy's Quest - a free 16-bit top-down action adventure browser game. The Red King is missing. Ride with ROS through the Sand Dungeon, take Cash's portals to the Seaport and Ramshackle the Viking, win Ronin's flaming sword, beat the house at the Andromeda Casino and stop the Overlord on the Moon, survive the meteor shower with Blaze and earn your space board at the Crossroad and cross the mirror into the Dark World, then storm Fright's castle and bring the Red King home. Chapters 1-9 (Complete) out now.">
@@ -209,14 +209,23 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
     (H && M(O, O, H), M(0, 0, n));
   }
   function Nn(m, u) {
-    let l = m.split(" "),
+    let l = String(m || "").split(" "),
       T = [],
-      n = "";
-    for (let O of l)
-      (n + " " + O).trim().length > u
-        ? (T.push(n), (n = O))
+      n = "",
+      cols = Math.max(1, u | 0);
+    for (let O of l) {
+      while (O.length > cols) {
+        n && T.push(n);
+        T.push(O.slice(0, cols));
+        O = O.slice(cols);
+        n = "";
+      }
+      if (!O) continue;
+      (n + " " + O).trim().length > cols
+        ? (n && T.push(n), (n = O))
         : (n = (n + " " + O).trim());
-    return (n && T.push(n), T);
+    }
+    return (n && T.push(n), T.length ? T : [""]);
   }
   function Vs(m) {
     return (u, l, T, n, O) => {
@@ -12511,7 +12520,13 @@ ram_mem_amulet: [
       n.fillStyle = (i + Math.floor((A.t || 0) * 18)) % 2 ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)";
       n.fillRect((i * 53 + Math.floor((A.t || 0) * 80)) % 320, (i * 31) % 190, 3, 1);
     }
-    v(n, "RADIO: YOU ARE AT THE ACADEMY. THIS ALREADY HAPPENED.", 160, 188, "#fff6c0", 1, "center", "#000");
+    A.radioInk = drawBoxed(
+      "RADIO: YOU ARE AT THE ACADEMY. THIS ALREADY HAPPENED.",
+      160,
+      176,
+      220,
+      "#9ff0ea",
+    );
   }
   function dsWorld(e) {
     if (A.story !== "drill" || !w) return;
@@ -13958,10 +13973,12 @@ ram_mem_amulet: [
       a && ((Ae = a), (La = 0), (Ca = 0), (Va = !1));
     }
     function Oa(e, a) {
-      let t = Nn(a, 40),
+      let g = speechGeom(e === "sys"),
+        t = Nn(a, g.cols),
         i = [];
-      for (let s = 0; s < t.length; s += 3) i.push(t.slice(s, s + 3));
-      ((A.toastT = 0), (q = { who: e, pages: i, page: 0, n: 0 }));
+      for (let s = 0; s < t.length; s += g.maxLines) i.push(t.slice(s, s + g.maxLines));
+      ((A.toastT = 0),
+        (q = { who: e, pages: i.length ? i : [[""]], page: 0, n: 0, raw: a, cols: g.cols }));
     }
     function za(e) {
       for (let a of Ta) if (a.id === e) return a;
@@ -17796,7 +17813,7 @@ ram_mem_amulet: [
       for (let a = 0; a < 16; a++)
         I((a * 23) % 320, 20 + ((a * 17) % 70), 2, 2, "#fff2c8");
       (v(n, "SPACE RIDERS", 160, 8, "#ff4fd8", 2, "center", "#2a0a14"),
-        v(n, window.__SQ_BUILD || "b31a", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
+        v(n, window.__SQ_BUILD || "b31b", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
         v(n, "SIDE QUESTS COME HOME", 160, 28, "#ffcc33", 1, "center", "#2a0a14"));
       let a = 58;
       for (let t = 0; t < STORY_ROWS.length; t++) {
@@ -17990,15 +18007,22 @@ ram_mem_amulet: [
       if (!A.choice) return;
       let spec = CHOICES[A.choice.id];
       if (!spec) return;
-      (I(36, 48, 248, 128, "#140c08"),
-        v(n, "THE TALE", 160, 60, "#ffcc33", 1, "center", "#000"));
+      let ink = [],
+        box = { x: 36, y: 48, w: 248, h: 36 + spec.opts.length * 18 + 28 };
+      (I(box.x, box.y, box.w, box.h, "#140c08"),
+        v(n, "THE TALE", 160, box.y + 12, "#ffcc33", 1, "center", "#000"),
+        ink.push(inkOf("THE TALE", 160, box.y + 12, "center")));
       spec.opts.forEach((row, i) => {
-        let y = 88 + i * 18,
-          on = A.choice.sel === i;
-        (on && I(56, y - 3, 208, 14, "#3a2818"),
-          v(n, (on ? "> " : "  ") + row[0], 160, y, on ? "#ffcc33" : "#ffffff", 1, "center", "#000"));
+        let y = box.y + 40 + i * 18,
+          on = A.choice.sel === i,
+          label = Nn((on ? "> " : "  ") + row[0], 28)[0];
+        (on && I(box.x + 16, y - 3, box.w - 32, 14, "#3a2818"),
+          v(n, label, 160, y, on ? "#ffcc33" : "#ffffff", 1, "center", "#000"),
+          ink.push(inkOf(label, 160, y, "center")));
       });
-      v(n, "X CHOOSES   BACK CANCELS", 160, 156, "#c8b090", 1, "center", "#000");
+      (v(n, "X CHOOSES   BACK CANCELS", 160, box.y + box.h - 16, "#c8b090", 1, "center", "#000"),
+        ink.push(inkOf("X CHOOSES   BACK CANCELS", 160, box.y + box.h - 16, "center")),
+        (A.choiceInk = { box: box, lines: ink }));
     }
     function publishLive() {
       let e = document.getElementById("sr-live");
@@ -21334,44 +21358,92 @@ ram_mem_amulet: [
       for (let S = E; S < E + c; S += 2) I(s, S, f, 1, "#00000033");
       n.restore();
     }
+    function speechGeom(sys) {
+      let phone = dn(),
+        x = phone ? 8 : 4,
+        y = phone ? 36 : 152,
+        w = phone ? 304 : 312,
+        h = phone ? 66 : 68,
+        textX = sys ? 14 : 56,
+        textRight = x + w - 18,
+        cols = Math.max(12, Math.floor((textRight - textX) / 6));
+      return {
+        x, y, w, h, textX,
+        textY: y + (sys ? 12 : 20),
+        lineH: 12,
+        cols,
+        maxLines: 3,
+        arrowX: x + w - 14,
+        arrowY: y + h - 14,
+        face: !sys,
+      };
+    }
+    function reflowSay() {
+      if (!q || !q.raw) return;
+      let g = speechGeom(q.who === "sys");
+      if (q.cols === g.cols) return;
+      let lines = Nn(q.raw, g.cols),
+        pages = [];
+      for (let i = 0; i < lines.length; i += g.maxLines) pages.push(lines.slice(i, i + g.maxLines));
+      ((q.pages = pages.length ? pages : [[""]]),
+        (q.cols = g.cols),
+        q.page >= q.pages.length && (q.page = q.pages.length - 1));
+    }
+    function inkOf(text, x, y, align) {
+      let w = Ya(String(text).toUpperCase(), 1),
+        left = align === "center" ? Math.round(x - w / 2) : align === "right" ? x - w : x;
+      return { text: String(text), x: left, y: y, w: w, h: 7 };
+    }
+    function drawBoxed(text, cx, cy, maxW, color) {
+      let cols = Math.max(8, Math.floor((maxW - 12) / 6)),
+        lines = Nn(text, cols).slice(0, 3),
+        tw = Math.min(maxW, Math.max.apply(null, lines.map((l) => Ya(l.toUpperCase(), 1))) + 12),
+        th = 8 + lines.length * 10,
+        x = Math.max(4, Math.min(316 - tw, Math.round(cx - tw / 2))),
+        y = Math.max(4, Math.round(cy));
+      na(x, y, tw, th, color || "#ffcc33");
+      let ink = lines.map((l, i) => {
+        v(n, l, x + tw / 2, y + 4 + i * 10, "#fff6c0", 1, "center", "#000");
+        return inkOf(l, x + tw / 2, y + 4 + i * 10, "center");
+      });
+      return { box: { x: x, y: y, w: tw, h: th }, lines: ink };
+    }
     function ss() {
       if (!q) return;
-      let phone = dn(),
-        e = phone ? 36 : 152,
-        bw = phone ? 236 : 312,
-        bh = phone ? 58 : 68;
-      na(4, e, bw, bh, "#ffcc33");
-      let a = q.pages[q.page],
+      reflowSay();
+      let g = speechGeom(q.who === "sys"),
+        a = q.pages[q.page] || [""],
         t = Math.floor(q.n),
-        i = q.who === "sys";
-      if (!i) {
+        lines = [];
+      na(g.x, g.y, g.w, g.h, "#ffcc33");
+      n.save();
+      n.beginPath();
+      n.rect(g.x + 2, g.y + 2, g.w - 4, g.h - 4);
+      n.clip();
+      if (g.face) {
         let E = t < a.join(" ").length && Math.floor(A.t * 10) % 2 === 0;
-        (I(9, e + 8, 42, 42, "#1a1630"),
-          n.drawImage(da(q.who, E), 10, e + 9),
+        (I(g.x + 5, g.y + 8, 42, 42, "#1a1630"),
+          n.drawImage(da(q.who, E), g.x + 6, g.y + 9),
           (Rt = q.who),
           (bt = E));
-        let f = Ge[q.who];
-        v(n, f ? f.name : q.who.toUpperCase(), 56, e + 6, "#ffcc33", 1, "", X);
+        let f = Ge[q.who],
+          name = f ? f.name : q.who.toUpperCase();
+        (v(n, name, g.textX, g.y + 6, "#ffcc33", 1, "", X),
+          lines.push(inkOf(name, g.textX, g.y + 6, "")));
       }
-      let s = i ? 14 : 56;
       for (let E = 0; E < a.length; E++) {
         let f = a[E],
-          c = f.slice(0, Math.max(0, t));
+          c = f.slice(0, Math.max(0, t)),
+          ly = g.textY + E * g.lineH;
         ((t -= f.length + 1),
-          v(n, c, s, e + (i ? 12 : 20) + E * 12, "#ffffff", 1, "", X));
+          v(n, c, g.textX, ly, "#ffffff", 1, "", X),
+          lines.push(inkOf(f, g.textX, ly, "")));
       }
+      n.restore();
       q.n >= a.join(" ").length &&
         Math.floor(A.t * 3) % 2 &&
-        v(
-          n,
-          q.page < q.pages.length - 1 ? ">" : "*",
-          bw - 16,
-          e + bh - 14,
-          "#ffcc33",
-          1,
-          "",
-          "",
-        );
+        v(n, q.page < q.pages.length - 1 ? ">" : "*", g.arrowX, g.arrowY, "#ffcc33", 1, "", "");
+      A.speechInk = { box: { x: g.x, y: g.y, w: g.w, h: g.h }, lines: lines, page: q.page, pages: q.pages.length };
     }
     function os() {
       if (!le) return;
@@ -21380,7 +21452,9 @@ ram_mem_amulet: [
         t = Math.min(170, Math.max(112, 62 + (e.length + 1) * a)),
         i = Math.max(14, Math.round(90 - t / 2) + 4);
       (na(56, i, 208, t, "#ff9a3d"),
+        (A.shopInk = { box: { x: 56, y: i, w: 208, h: t }, lines: [] }),
         v(n, nt[le.id].title, 160, i + 8, "#ff9a3d", 1, "center", X),
+        A.shopInk.lines.push(inkOf(nt[le.id].title, 160, i + 8, "center")),
         n.drawImage(O.icon.coin, 70, i + 20),
         v(n, String(d.coins), 86, i + 24, "#ffe070", 1, "", ""));
       let s = {
@@ -21405,7 +21479,7 @@ ram_mem_amulet: [
           (n.drawImage(O.icon[y ? "travel" : s[S.id] || "coin"], 70, f - 4),
             v(
               n,
-              N ? "???" : S.name,
+              N ? "???" : Nn(S.name, 16)[0],
               90,
               f,
               k ? "#6a6a7a" : "#ffffff",
@@ -21413,6 +21487,8 @@ ram_mem_amulet: [
               "",
               "",
             ),
+            A.shopInk &&
+              A.shopInk.lines.push(inkOf(N ? "???" : Nn(S.name, 16)[0], 90, f, "")),
             v(
               n,
               y ? (N ? "LOCKED" : "GO") : k ? "SOLD OUT" : S.price + "C",
@@ -21621,7 +21697,7 @@ ram_mem_amulet: [
       let e = A.t;
       (v(n, "SPACE RIDERS", 160, 14, "#ff4fd8", 3, "center", "#2a0a3a"),
         v(n, "SKIPPY'S QUEST", 160, 42, "#ffcc33", 2, "center", "#2a0a3a"),
-        v(n, window.__SQ_BUILD || "b31a", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
+        v(n, window.__SQ_BUILD || "b31b", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
       let a = (s, E, f, c, S) => {
         let y = Ue(s, S, 0);
         n.drawImage(
@@ -22251,17 +22327,22 @@ ram_mem_amulet: [
         rs(),
         A.bannerT > 0 && !q)
       ) {
-        let e = Ee(A.bannerT, 0, 1);
+        let e = Ee(A.bannerT, 0, 1),
+          lines = Nn(A.banner, 28).slice(0, 2),
+          bw = Math.min(304, Math.max.apply(null, lines.map((l) => Ya(l.toUpperCase(), 1))) + 16),
+          bh = 10 + lines.length * 12,
+          bx = Math.round(160 - bw / 2);
         ((n.globalAlpha = e),
-          na(70, 34, 180, 26, "#ffcc33"),
-          v(n, A.banner, 160, 41, "#ffcc33", 1, "center", X),
+          na(bx, 34, bw, bh, "#ffcc33"),
+          lines.forEach((l, i) => v(n, l, 160, 40 + i * 12, "#ffcc33", 1, "center", X)),
+          (A.bannerInk = {
+            box: { x: bx, y: 34, w: bw, h: bh },
+            lines: lines.map((l, i) => inkOf(l, 160, 40 + i * 12, "center")),
+          }),
           (n.globalAlpha = 1));
       }
-      if ((os(), ys(), Us(), ss(), fs(), A.toastT > 0 && A.toast)) {
-        let e = Ya(A.toast, 1) + 12;
-        (na(160 - e / 2, 128, e, 15, "#4ff0ff"),
-          v(n, A.toast, 160, 132, "#ffffff", 1, "center", X));
-      }
+      if ((os(), ys(), Us(), ss(), fs(), A.toastT > 0 && A.toast))
+        A.toastInk = drawBoxed(A.toast, 160, 124, 292, "#4ff0ff");
       if (
         (A.paused && is(),
         A.fade > 0.001 &&
@@ -24591,6 +24672,12 @@ ram_mem_amulet: [
         chapters: () => STORY_ROWS.map((r) => ({ id: r.id, status: chapterStatus(r.id), sub: rowSub(r) })),
         riderLog: () => riderLog(),
         gearTable: () => GEAR_TABLE,
+        speechInk: () => A.speechInk || null,
+        toastInk: () => A.toastInk || null,
+        shopInk: () => A.shopInk || null,
+        choiceInk: () => A.choiceInk || null,
+        bannerInk: () => A.bannerInk || null,
+        radioInk: () => A.radioInk || null,
         pauseBoxes: () => (A.pauseBoxes || []).slice(),
         nextRoad: () => nextRoad(),
         basement: () => basementOpen(),
@@ -24626,7 +24713,7 @@ ram_mem_amulet: [
           enterStory(id);
           return Bt();
         },
-        build: () => window.__SQ_BUILD || "b31a",
+        build: () => window.__SQ_BUILD || "b31b",
         cast: () => castSpell(),
         hud: () => hudBits(),
         fightHud: () => fightHud(),
