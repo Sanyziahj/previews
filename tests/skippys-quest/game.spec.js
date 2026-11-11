@@ -83,7 +83,7 @@ test('main yard, lasers, and coming home to the order', async ({ page }) => {
   const shots = await page.evaluate(() => {
     const S = __SQ;
     for (let i = 0; i < 6; i++) { S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(2); }
-    S.press('item', true); S.step(2); S.press('item', false); S.step(4);
+    S.press('attack', true); S.step(2); S.press('attack', false); S.step(4);
     return S.shots.filter((s) => s.kind === 'stun').length;
   });
   expect(shots).toBeGreaterThanOrEqual(2);
@@ -94,8 +94,8 @@ test('main yard, lasers, and coming home to the order', async ({ page }) => {
       S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(2);
     }
     for (const e of S.ents.filter((en) => !en.dead)) {
-      S.P.x = e.x - 18; S.P.y = e.y + 4; S.P.dir = 3; S.P.arrowCd = 0;
-      S.press('item', true); S.step(2); S.press('item', false); S.step(12);
+      S.P.x = e.x - 18; S.P.y = e.y + 4; S.P.dir = 3; S.P.arrowCd = 0; S.P.cds = {};
+      S.press('attack', true); S.step(2); S.press('attack', false); S.step(12);
     }
     S.step(8);
   });
@@ -129,7 +129,7 @@ test('weapons and boards do different work', async ({ page }) => {
     const S = __SQ;
     S.G.state = 'play'; S.G.story = 'ros';
     S.warp('ros_desert', 8, 8, 3);
-    S.P.items.blasters = true; S.P.items.justice = true; S.P.items.lasso = true; S.P.items.brand = true;
+    S.P.items.blasters = true; S.P.items.justice = true; S.P.items.lasso = true; S.P.items.bomb = true;
     S.P.wep = ''; S.P.melee = ''; S.P.pri = 'lasers'; S.P.sec = 'justice'; S.P.tool = 'justice'; S.P.z = 'lasso';
     S.step(5);
   });
@@ -149,13 +149,19 @@ test('weapons and boards do different work', async ({ page }) => {
   await page.evaluate(() => { __SQ.P.arrowCd = 0; __SQ.G.paused = false; });
   const lasers = await page.evaluate(() => {
     const S = __SQ;
-    S.P.sec = 'lasers';
-    S.P.tool = 'lasers';
+    S.P.sec = 'lasso';
+    S.P.tool = 'lasso';
+    S.P.cds = {};
     S.shots.length = 0;
-    S.press('item', true); S.step(2); S.press('item', false); S.step(3);
-    return S.shots.filter((s) => s.kind === 'stun').length;
+    S.press('item', true); S.step(2); S.press('item', false); S.step(2);
+    const fromItem = S.shots.filter((s) => s.kind === 'stun').length;
+    S.shots.length = 0;
+    S.P.cds = {};
+    S.press('attack', true); S.step(2); S.press('attack', false); S.step(3);
+    return { fromItem, lasers: S.shots.filter((s) => s.kind === 'stun').length };
   });
-  expect(lasers).toBeGreaterThanOrEqual(2);
+  expect(lasers.fromItem).toBe(0);
+  expect(lasers.lasers).toBeGreaterThanOrEqual(2);
   await page.evaluate(() => { __SQ.G.paused = true; __SQ.G.rosPage = 2; __SQ.step(1); });
   await page.screenshot({ path: `${ART}/ros-gear.png` });
   await page.evaluate(() => { __SQ.G.paused = false; });
@@ -167,15 +173,16 @@ test('weapons and boards do different work', async ({ page }) => {
       if (!S.script) break;
       S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(2);
     }
-    S.P.sec = 'brand';
-    S.P.tool = 'brand';
-    S.P.items.brand = true;
-    S.P.arrowCd = 0;
+    S.P.sec = 'bomb';
+    S.P.tool = 'bomb';
+    S.P.items.bomb = true;
+    S.flag('bomb_got');
+    S.P.cds = {};
     const foe = S.ents.find((e) => !e.dead);
-    if (foe) { S.P.x = foe.x; S.P.y = foe.y; }
+    if (foe) { S.P.x = foe.x - 28; S.P.y = foe.y; S.P.dir = 3; }
     const before = S.ents.filter((e) => !e.dead).length;
-    S.press('item', true); S.step(2); S.press('item', false); S.step(24);
-    return { before, after: S.ents.filter((e) => !e.dead).length };
+    S.press('item', true); S.step(2); S.press('item', false); S.step(55);
+    return { before, after: S.ents.filter((e) => !e.dead).length, kinds: S.shots.map((s) => s.kind) };
   });
   expect(brand.after).toBeLessThan(brand.before);
   const speed = await page.evaluate(() => {
@@ -838,52 +845,43 @@ test('a save standing on the SuperNova rock can walk again', async ({ page }) =>
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
-test('the Brand sleeps four seconds and then wakes', async ({ page }) => {
+test('the bomb arcs and then blows, and lasers stay on attack', async ({ page }) => {
   const errors = await boot(page);
   const out = await page.evaluate(() => {
     const S = __SQ;
     S.G.state = 'play';
     S.G.story = 'ros';
     S.P.items.blasters = true;
-    S.P.items.brand = true;
-    S.P.pri = 'lasers';
-    S.P.sec = 'brand';
+    S.P.items.bomb = true;
+    S.flag('bomb_got');
+    S.P.pri = 'bomb';
+    S.P.sec = 'bomb';
+    S.P.tool = 'bomb';
     S.P.cds = {};
+    S.flag('oe_ros_yard');
     S.warp('ros_yard', 4, 8, 3);
     S.step(2);
     for (let i = 0; i < 8 && (S.script || S.dlg); i++) {
       S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(2);
     }
-    S.press('item', true); S.step(2); S.press('item', false); S.step(2);
-    const first = (S.G.toast || '').indexOf('STAR BRAND') >= 0 || (S.G.brands || []).length > 0;
-    const sleeping = S.P.brandCd > 3;
-    S.P.sec = 'lasers';
-    S.P.tool = 'lasers';
+    S.ents.forEach((e) => { e.x = 400; e.y = 400; });
+    S.P.dir = 3;
     S.shots.length = 0;
-    S.press('item', true); S.step(2); S.press('item', false); S.step(2);
-    const stun = S.shots.filter((s) => s.kind === 'stun').length;
-    S.P.sec = 'brand';
-    S.P.tool = 'brand';
-    S.press('item', true); S.step(2); S.press('item', false); S.step(1);
-    const refused = (S.G.toast || '').indexOf('SLEEPING') >= 0;
-    S.G.paused = true;
-    const held = S.P.brandCd;
-    S.step(90);
-    const paused = Math.abs(S.P.brandCd - held) < 0.02;
-    S.G.paused = false;
-    S.step(260);
-    const ready = S.P.brandCd === 0 && (S.G.toast || '').indexOf('BRAND READY') >= 0;
-    S.press('item', true); S.step(2); S.press('item', false); S.step(2);
-    const again = (S.G.toast || '').indexOf('STAR BRAND') >= 0;
-    return { first, sleeping, refused, paused, ready, again, cd: S.P.brandCd, lasersWhileSleeping: stun };
+    S.press('item', true); S.step(2); S.press('item', false); S.step(4);
+    const bomb = S.shots.find((s) => s.kind === 'bomb');
+    const tossed = !!(bomb && bomb.vy < 0);
+    const named = (S.G.toast || '').indexOf('STAR BRAND') < 0 && (S.G.toast || '').indexOf('SLEEPING') < 0;
+    S.P.cds = {};
+    S.shots.length = 0;
+    S.press('attack', true); S.step(2); S.press('attack', false); S.step(2);
+    const lasers = S.shots.filter((s) => s.kind === 'stun' && s.laser).length;
+    return { tossed, named, lasers, kit: S.kit() };
   });
-  expect(out.first, JSON.stringify(out)).toBe(true);
-  expect(out.sleeping, JSON.stringify(out)).toBe(true);
-  expect(out.refused, JSON.stringify(out)).toBe(true);
-  expect(out.paused, JSON.stringify(out)).toBe(true);
-  expect(out.ready, JSON.stringify(out)).toBe(true);
-  expect(out.again, JSON.stringify(out)).toBe(true);
-  expect(out.lasersWhileSleeping, JSON.stringify(out)).toBeGreaterThan(0);
+  expect(out.tossed, JSON.stringify(out)).toBe(true);
+  expect(out.named, JSON.stringify(out)).toBe(true);
+  expect(out.lasers, JSON.stringify(out)).toBeGreaterThanOrEqual(2);
+  expect(out.kit).toContain('bomb');
+  expect(out.kit).not.toContain('brand');
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
@@ -893,8 +891,12 @@ test('swap cycles items and attack stays a weapon', async ({ page }) => {
     const S = __SQ;
     S.G.state = 'play';
     S.G.story = 'ros';
+    S.flag('oe_ros_desert');
     S.warp('ros_desert', 6, 8, 3);
     S.step(3);
+    for (let i = 0; i < 8 && (S.script || S.dlg); i++) {
+      S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
+    }
     S.ents.forEach((e) => { e.dead = true; });
     S.P.items = { blasters: true };
     S.P.wep = '';
@@ -908,15 +910,16 @@ test('swap cycles items and attack stays a weapon', async ({ page }) => {
     }
     S.shots.length = 0;
     edge('attack');
-    const attackQuiet = S.shots.filter((s) => s.kind === 'stun' || s.kind === 'justice').length === 0;
+    const lasers = S.shots.filter((s) => s.kind === 'stun' && s.laser).length;
+    const swung = S.P.swingKind === 'melee';
     S.shots.length = 0;
     edge('item');
-    const lasers = S.shots.filter((s) => s.kind === 'stun').length;
+    const itemQuiet = S.shots.filter((s) => s.kind === 'stun' || s.kind === 'justice').length === 0;
     S.P.items.lasso = true;
-    S.P.items.brand = true;
+    S.P.items.bomb = true;
     S.P.items.justice = true;
     S.flag('lasso_got');
-    S.flag('brand_got');
+    S.flag('bomb_got');
     S.flag('justice_got');
     S.P.tool = 'lasso';
     S.P.sec = 'lasso';
@@ -928,33 +931,35 @@ test('swap cycles items and attack stays a weapon', async ({ page }) => {
       order.push(S.hands().item);
     }
     const swappedClean = order.every((id) => meleeNames.indexOf(id) < 0);
-    S.P.sec = 'brand';
-    S.P.tool = 'brand';
-    S.P.brandCd = 0;
+    S.P.sec = 'bomb';
+    S.P.tool = 'bomb';
     S.P.cds = {};
     S.shots.length = 0;
     edge('item');
-    const brand = (S.G.toast || '').indexOf('STAR BRAND') >= 0;
+    const brand = S.shots.some((s) => s.kind === 'bomb');
     S.P.sec = 'justice';
     S.P.tool = 'justice';
     S.P.charge = 0;
     S.shots.length = 0;
     S.press('item', true); S.step(40); S.press('item', false); S.step(2);
     const justice = S.shots.some((s) => s.kind === 'justice');
+    S.P.cds = {};
     S.shots.length = 0;
     edge('attack');
-    const attackStillQuiet = S.shots.filter((s) => s.kind === 'stun' || s.kind === 'justice').length === 0;
-    return { attackQuiet, lasers, order, swappedClean, brand, justice, attackStillQuiet, melee: S.melee() };
+    const attackStill = S.shots.filter((s) => s.kind === 'stun' && s.laser).length;
+    return { lasers, swung, itemQuiet, order, swappedClean, brand, justice, attackStill, melee: S.melee() };
   });
-  expect(out.attackQuiet, JSON.stringify(out)).toBe(true);
-  expect(out.lasers).toBeGreaterThan(0);
+  expect(out.lasers, JSON.stringify(out)).toBeGreaterThanOrEqual(2);
+  expect(out.swung, JSON.stringify(out)).toBe(false);
+  expect(out.itemQuiet, JSON.stringify(out)).toBe(true);
   expect(out.swappedClean, JSON.stringify(out)).toBe(true);
   expect(out.order[0]).toBe('lasso');
+  expect(out.order).not.toContain('lasers');
   expect(new Set(out.order).size).toBeGreaterThan(1);
   expect(out.brand).toBe(true);
   expect(out.justice).toBe(true);
-  expect(out.attackStillQuiet).toBe(true);
-  expect(out.melee).toBe('strike');
+  expect(out.attackStill, JSON.stringify(out)).toBeGreaterThanOrEqual(2);
+  expect(out.melee).toBe('');
   const skippy = await page.evaluate(() => {
     const S = __SQ;
     S.G.story = 'skippy';
@@ -969,6 +974,7 @@ test('swap cycles items and attack stays a weapon', async ({ page }) => {
     S.P.tool = 'lasso';
     S.P.pri = 'raygun';
     S.P.sec = 'lasso';
+    S.P.atk = 0;
     S.P.cds = {};
     function edge(name) {
       S.press(name, true); S.step(2); S.press(name, false); S.step(1);
@@ -1020,10 +1026,13 @@ test('the rope locker is labeled and an old kit migrates', async ({ page }) => {
     cd: __SQ.P.brandCd || 0,
     slots: __SQ.slots(),
   }));
-  expect(migrated.kit).toEqual(expect.arrayContaining(['lasers', 'lasso', 'brand']));
+  expect(migrated.kit).toEqual(expect.arrayContaining(['lasso']));
+  expect(migrated.kit).not.toContain('strike');
+  expect(migrated.kit).not.toContain('lasers');
+  expect(migrated.kit).not.toContain('brand');
   expect(migrated.cd).toBe(0);
-  expect(migrated.slots.pri).toBe('lasers');
-  expect(migrated.slots.sec).toBe('lasso');
+  expect(migrated.slots.pri).toBe('lasso');
+  expect(migrated.slots.sec).not.toBe('lasers');
   await page.evaluate(() => {
     const S = __SQ;
     S.flag('lasso_got', false);
@@ -2569,6 +2578,11 @@ test.describe('swap chip on the diamond', () => {
       if (story === 'ramshackle') {
         expect(face.after.pri, story).not.toBe('hatchet');
         expect(face.after.sec, story).not.toBe('hatchet');
+      } else if (story === 'ros') {
+        expect(face.after.pri, story).not.toBe('lasers');
+        expect(face.after.pri, story).not.toBe('lasso');
+        expect(face.hud.join(' '), story).toMatch(/X LASERS/);
+        expect(face.hud.join(' '), story).not.toMatch(/X STUN/);
       } else {
         expect(face.after.pri, story).toBe(pri);
         expect(face.after.sec, story).not.toBe(face.before);

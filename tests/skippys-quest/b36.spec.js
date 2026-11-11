@@ -85,7 +85,7 @@ test.describe('Spike DreamLand chapter', () => {
       ds: DS_SAVE,
     });
     await page.waitForFunction(() => document.documentElement.classList.contains('srml'));
-    expect(await page.evaluate(() => __SQ.build())).toBe('b39');
+    expect(await page.evaluate(() => __SQ.build())).toBe('b40');
     await enterContinue(page);
     const heard = await page.evaluate(() => {
       const S = __SQ;

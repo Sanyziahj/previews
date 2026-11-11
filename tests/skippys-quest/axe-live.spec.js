@@ -123,9 +123,9 @@ test('Skippy and ROS still attack from the keyboard', async ({ page }) => {
     S.warp('ros_desert', 10, 8, 3);
   });
   await page.waitForTimeout(400);
-  await press(page, 'KeyZ');
+  await press(page, 'KeyX');
   await page.waitForTimeout(250);
-  const ros = await page.evaluate(() => __SQ.shots.some((s) => s.kind === 'stun'));
+  const ros = await page.evaluate(() => __SQ.shots.some((s) => s.kind === 'stun' && s.laser && s.col === '#3dff6a'));
   expect(ros).toBe(true);
   expect(errors, errors.join('\n')).toEqual([]);
 });

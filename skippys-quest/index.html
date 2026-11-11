@@ -3,7 +3,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script>window.__SQ_BUILD="b39";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b39(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b39");location.replace(u.href);}</script>
+<script>window.__SQ_BUILD="b40";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b40(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b40");location.replace(u.href);}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Space Riders: Skippy's Quest</title><link rel="icon" href="data:,">
 <meta name="description" content="Space Riders: Skippy's Quest - a free 16-bit top-down action adventure browser game. The Red King is missing. Ride with ROS through the Sand Dungeon, take Cash's portals to the Seaport and Ramshackle the Viking, win Ronin's flaming sword, beat the house at the Andromeda Casino and stop the Overlord on the Moon, survive the meteor shower with Blaze and earn your space board at the Crossroad and cross the mirror into the Dark World, then storm Fright's castle and bring the Red King home. Chapters 1-9 (Complete) out now.">
@@ -8255,7 +8255,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
   Object.assign(Ea, {
     blasters: {
       name: "GREEN LASER BLASTERS",
-      desc: "TWIN GREEN LASERS. Z / ITEM TO FIRE. THEY STUN. NOBODY DIES.",
+      desc: "TWIN GREEN LASERS. X / ATTACK TO FIRE. THEY STUN. NOBODY DIES.",
       jingle: "item",
     },
     lasso: {
@@ -11350,8 +11350,8 @@ ram_mem_amulet: [
     dust: { name: "DUST DEVIL", desc: "FAST BOARD. OUTRUNS A HUNT. WIDE TURNS.", jingle: "item" },
     hopper: { name: "MESA HOPPER", desc: "THE BOARD LEAPS A GAP. NOT THE FASTEST.", jingle: "item" },
     skimmer: { name: "SAND SKIMMER", desc: "HIDDEN IN STORM AND DEEP SAND. SLOWER.", jingle: "item" },
-    justice: { name: "JUSTICE SHOT", desc: "HOLD X. ONE HEAVY LASER. SLOW.", jingle: "item" },
-    brand: { name: "STAR BRAND", desc: "Z PLANTS A BURST. AREA, THEN A WAIT.", jingle: "item" },
+    justice: { name: "JUSTICE SHOT", desc: "HOLD Z. ONE HEAVY LASER. SLOW.", jingle: "item" },
+    bomb: { name: "BOMB", desc: "Z THROWS IT. IT ARCS, THEN IT BLOWS. THEY SHATTER. NOBODY DIES.", jingle: "item" },
     receipt: { name: "TIME RECEIPT", desc: "GREEN DRAGON. THE HOUR OF THE ORDER.", jingle: "item" },
     botlog: { name: "OBSERVER LOG", desc: "SKIPPY-BOTS REPORT TO THE OVERLORD.", jingle: "item" },
     ping: { name: "REALM PING", desc: "MOON CELLS. SIGNAL CUT.", jingle: "item" },
@@ -11444,7 +11444,7 @@ ram_mem_amulet: [
         { id: "deejay", x: 6, y: 10, dir: 3, talk: "deejay_pass" },
       ],
       enemies: [{ k: "redcoat", x: 16, y: 6 }],
-      signs: [{ x: 18, y: 4, text: "CANYON RUN. EAST. BRING THE BOARD BACK CLEAN.", kind: "sign" }],
+      signs: [{ x: 18, y: 4, text: "RIDE THE CANYON TO THE EAST. KEEP YOUR WANTED STARS UNDER FOUR. SLIDE GIVES YOU THE DUST DEVIL.", kind: "sign" }],
       warps: [
         { x: 0, y: 7, w: 1, h: 2, to: "ros_desert", tx: 27, ty: 7, dir: 2 },
         { x: 23, y: 6, w: 1, h: 2, to: "ros_canyon", tx: 2, ty: 5, dir: 3 },
@@ -11850,8 +11850,8 @@ ram_mem_amulet: [
   });
   Object.assign(oa, {
     yard_intro: [
-      h("ros", "THREE DROIDS. GREEN LASERS. Z. THEY SHATTER. THEY DO NOT BLEED."),
-      h("ros", "C IS THE BOARD. E TALKS. ENTER IS THE BOOK. THE POUR IS THROUGH THE GATE WHEN THEY ARE DOWN."),
+      h("ros", "THREE DROIDS. ATTACK IS THE GREEN LASERS. X. THEY SHATTER. THEY DO NOT BLEED."),
+      h("ros", "THEY IMPOUNDED MY BOARD. THIS IS THE SPARE. C STILL RIDES. E TALKS. ENTER IS THE BOOK."),
     ],
     yard_open: [h("ros", "GATE'S OPEN. HOME."), { t: "save" }],
     pour_order: [
@@ -11862,7 +11862,7 @@ ram_mem_amulet: [
       h("ros", "I GOTTA GO, BOY. WE'RE REBUILDING..."),
       { t: "party", who: "nuke" },
       { t: "flag", f: "nuke_joined" },
-      h("al", "THE LAND DEAL IS IN A MACHINE UNDER THE STORM. YOUR BOARD WAS SEIZED AT GOLDEN STONE. YOUR ROPE IS IN THE LABELED LOCKER ON THE EAST WALL. STAND ON IT AND PRESS E."),
+      h("al", "THE LAND DEAL IS IN A MACHINE UNDER THE STORM. THEY SEIZED YOUR GOOD BOARD AT GOLDEN STONE. THE SPARE UNDER YOUR FEET STILL RIDES. YOUR ROPE IS IN THE LOCKER ON THE EAST WALL. STAND ON IT AND PRESS E."),
       h("buck", "THE BRIGADE DID NOT SIGN THAT. KAL DID. I AM OFF THE DECK UNTIL I UNDERSTAND IT."),
       { t: "flag", f: "accused_done" },
       { t: "save" },
@@ -11886,12 +11886,13 @@ ram_mem_amulet: [
     drill_brand: [
       h("drill", "THE SLUGGER WANTED THIS LAND AS A FAVOR TO ME. HE SAW A HENCHMAN. THEN HE WAS GONE. I WILL NOT INVENT THE HAND THAT TOOK HIM."),
       h("drill", "I OFFERED SKIPPY THE ELITE UNIT. HE HAS NOT ANSWERED. THAT IS HIS TO CARRY. YOU ALREADY KNOW YOUR RESOLVE."),
-      h("drill", "STAR BRAND. PLANT IT. IT CLEARS A CIRCLE, THEN IT SLEEPS. PUSH FORWARD."),
-      { t: "give", item: "brand" },
+      h("drill", "A BOMB. THROW IT. IT ARCS, THEN IT BLOWS. THEY SHATTER INTO STARDUST. NOBODY DIES."),
+      { t: "give", item: "bomb" },
+      { t: "flag", f: "bomb_got" },
       { t: "flag", f: "brand_got" },
       { t: "save" },
     ],
-    drill_later: [h("drill", "I GO BACK TO THE ACADEMY. THE BRAND IS YOURS. DO NOT WASTE THE CIRCLE.")],
+    drill_later: [h("drill", "I GO BACK TO THE ACADEMY. THE BOMB IS YOURS. THROW IT. DON'T PLANT IT.")],
     nuke_home: [h("ros", "STAY CLOSE.")],
     mikall_trail: [h("mikall", "MIKALL. I HUNT COLD TRAILS. THIS ONE IS NOT A GHOST YET. IF A SCAN NAMES A PLACE, BELIEVE THE PLACE, NOT A RUMOR.")],
     clue_hench: [h("ros", "NUKE FOUND A SCRAP. A RED COAT ASKED FOR THE SLUGGER THE HOUR THE POSTERS WENT UP. IT DOES NOT NAME A JAILER.")],
@@ -11915,11 +11916,11 @@ ram_mem_amulet: [
       { t: "show", who: "shadow" },
       { t: "save" },
     ],
-    slide_impound: [h("slide", "THEY IMPOUNDED YOUR BOARD AT MY DOCK. I DON'T SELL IT BACK. THE CANYON EAST IS THE TEST. FINISH UNDER FOUR STARS AND THE DUST DEVIL IS YOURS.")],
+    slide_impound: [h("slide", "THEY IMPOUNDED THE GOOD BOARD. NOT THE SPARE UNDER YOUR FEET. I DON'T SELL THE GOOD ONE BACK. RIDE THE CANYON TO THE EAST. KEEP YOUR WANTED STARS UNDER FOUR AND THE DUST DEVIL IS YOURS. SHE IS THE FAST ONE.")],
     blaze_station: [h("blaze", "I BLAST THE ROCK SO THE RUN STAYS OPEN. I DON'T BLAST SHERIFFS. RIDE.")],
     deejay_pass: [h("deejay", "THE BOSS SENT ME TO SEE THE BOARD STAYED LOCKED. I AM NOT STAYING. I DID NOT SEE A JAILER. I SAW A WHITE FACE WITH A BEANIE THAT WAS NOT A BOY.")],
     canyon_check: [{ t: "fn", f: "canyonEnd" }],
-    canyon_fail: [h("ros", "TOO HOT. THE STARS ARE UP. RIDE IT AGAIN CLEAN.")],
+    canyon_fail: [h("ros", "WANTED STARS HIT FOUR. RIDE THE CANYON EAST AGAIN AND KEEP THEM LOWER.")],
     canyon_win: [
       h("slide", "CLEAN ENOUGH. DUST DEVIL. SHE IS FAST AND SHE IS LOUD. OUTRUN THEM. DON'T TRY TO HIDE ON HER."),
       { t: "give", item: "dust" },
@@ -11932,7 +11933,7 @@ ram_mem_amulet: [
     storm_locked: [h("ros", "LATCHED. THE ROPE FROM THE LOCKER CATCHES IT.")],
     storm_opened: [h("ros", "THE LASSO CATCHES. THE STORM OPENS.")],
     sentinel_down: [
-      h("ros", "THE CORE OPENS. KAL'S ORDER AND SILAS'S DEED, SAME HOUR. NO JAILER. A LENS COMES FREE. THAT IS THE JUSTICE SHOT. HOLD X."),
+      h("ros", "THE CORE OPENS. KAL'S ORDER AND SILAS'S DEED, SAME HOUR. NO JAILER. A LENS COMES FREE. THAT IS THE JUSTICE SHOT. HOLD Z."),
       { t: "give", item: "proof1" },
       { t: "flag", f: "proof1" },
       { t: "give", item: "justice" },
@@ -13987,7 +13988,7 @@ ram_mem_amulet: [
         visited: ua,
         wanted: A.story === "ros" ? A.wanted || 0 : void 0,
         wep: A.story === "ros" ? d.wep || "lasers" : void 0,
-        tool: A.story === "ros" ? d.tool || "lasers" : void 0,
+        tool: A.story === "ros" ? d.tool || "" : void 0,
         act: A.story === "ros" ? d.act || "" : void 0,
         pri: slotsOn() ? d.pri || "" : void 0,
         sec: slotsOn() ? d.sec || "" : void 0,
@@ -14156,7 +14157,7 @@ ram_mem_amulet: [
           A.story === "ros" &&
             ((A.wanted = e.wanted || 0),
             (d.wep = e.wep || "lasers"),
-            (d.tool = e.tool || "lasers"),
+            (d.tool = e.tool && e.tool !== "lasers" && e.tool !== "strike" ? e.tool : ""),
             (d.boardId =
               e.boardId ||
               (e.items && e.items.skimmer
@@ -14174,7 +14175,7 @@ ram_mem_amulet: [
             (d.charge = 0),
             migrateSlots(e),
             grantStoryBoard(),
-            ee.ros_lasers_default || armRosBlasters(),
+            ee.ros_attack_lasers || armRosBlasters(),
             xe(),
             e.migrated && Q("THE ROAD SHIFTED. YOUR GEAR CAME WITH YOU.")),
           A.story !== "ros" &&
@@ -14323,7 +14324,8 @@ ram_mem_amulet: [
           ((d.items.justice = !0), (ee.justice_got = !0));
           break;
         case "brand":
-          ((d.items.brand = !0), (ee.brand_got = !0));
+        case "bomb":
+          ((d.items.bomb = !0), (d.items.brand = !1), (ee.bomb_got = !0), (ee.brand_got = !0));
           break;
         case "receipt":
         case "botlog":
@@ -14347,7 +14349,7 @@ ram_mem_amulet: [
           ((d.items[e] = !0), (ee[e] = !0));
           break;
       }
-      noteItem(e === "blasters" ? "lasers" : e === "tbow" || e === "axe" ? (e === "axe" ? "sword" : "bow") : e);
+      noteItem(e === "blasters" ? "lasers" : e === "brand" ? "bomb" : e === "tbow" || e === "axe" ? (e === "axe" ? "sword" : "bow") : e);
       let s = Ea[e] ? Ea[e].jingle : "coin";
       ((D[s] || D.coin)(),
         t &&
@@ -14808,9 +14810,7 @@ ram_mem_amulet: [
       }
       (d.atk > 0 && (d.atk -= e),
         d.arrowCd > 0 && (d.arrowCd -= e),
-        (d.brandCd || 0) > 0 &&
-          ((d.brandCd = Math.max(0, d.brandCd - e)),
-          d.brandCd === 0 && Q("BRAND READY.")),
+        (d.brandCd || 0) > 0 && (d.brandCd = Math.max(0, d.brandCd - e)),
         (d.shield || 0) > 0 && (d.shield = Math.max(0, d.shield - e)),
         (d.plasma || 0) > 0 && (d.plasma = Math.max(0, d.plasma - e)),
         (d.rune || 0) > 0 &&
@@ -15265,6 +15265,12 @@ ram_mem_amulet: [
             ae(a.x, a.y, d.x, d.y - 6) < 12 && (a.t = 99);
           }
           a.t > 1.4 && (a.t = 99);
+          continue;
+        }
+        if (a.kind === "bomb") {
+          a.vy += 260 * e;
+          a.spin = (a.spin || 0) + e * 8;
+          ((a.t > 0.08 && Wt(i, s)) || a.t >= (a.fuse || 0.78)) && (explodeBomb(a), (a.t = 99));
           continue;
         }
         if (a.kind === "echo") {
@@ -17951,21 +17957,15 @@ ram_mem_amulet: [
         Ke(row.id === "ros" ? "west" : row.id === "ramshackle" ? "sea" : "title"));
     }
     function armRosBlasters() {
-      let off = "";
-      for (let id of [d.sec, d.tool, d.act, d.pri])
-        if (id && id !== "lasers" && !isMelee(id) && ownedItem(id)) {
-          off = id;
-          break;
-        }
       ((d.items.blasters = !0),
-        (d.melee = "strike"),
+        (d.melee = ""),
         (d.wep = "lasers"),
-        (d.tool = "lasers"),
-        (d.act = "lasers"),
-        (d.pri = "lasers"),
-        (d.sec = off),
-        d.z === "lasso" && (d.z = "bow"),
+        rosItemOk(d.tool) || (d.tool = ""),
+        rosItemOk(d.act) || (d.act = ""),
+        rosItemOk(d.pri) || (d.pri = ""),
+        rosItemOk(d.sec) || (d.sec = ""),
         (ee.ros_lasers_default = !0),
+        (ee.ros_attack_lasers = !0),
         settleHands());
     }
     function EtRos() {
@@ -18141,7 +18141,7 @@ ram_mem_amulet: [
       for (let a = 0; a < 16; a++)
         I((a * 23) % 320, 20 + ((a * 17) % 70), 2, 2, "#fff2c8");
       (v(n, "SPACE RIDERS", 160, 8, "#ff4fd8", 2, "center", "#2a0a14"),
-        v(n, window.__SQ_BUILD || "b39", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
+        v(n, window.__SQ_BUILD || "b40", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
         v(n, "SIDE QUESTS COME HOME", 160, 28, "#ffcc33", 1, "center", "#2a0a14"));
       let a = 58;
       for (let t = 0; t < STORY_ROWS.length; t++) {
@@ -18728,7 +18728,8 @@ ram_mem_amulet: [
       if (id === "lasers") return !!d.items.blasters;
       if (id === "justice") return !!(d.items.justice || Z("justice_got"));
       if (id === "lasso") return !!(d.items.lasso || Z("lasso_got"));
-      if (id === "brand") return !!(d.items.brand || Z("brand_got"));
+      if (id === "bomb") return !!(d.items.bomb || Z("bomb_got") || Z("brand_got") || d.items.brand);
+      if (id === "brand") return !1;
       if (id === "dust") return !!(d.items.dust || Z("dust_got") || d.items.board);
       if (id === "hopper") return !!(d.items.hopper || Z("hopper_got"));
       if (id === "skimmer") return !!(d.items.skimmer || Z("skimmer_got"));
@@ -18738,7 +18739,7 @@ ram_mem_amulet: [
       if (!Z("yard_clear")) return "YARD: SHATTER THE THREE TRAINING DROIDS";
       if (!Z("accused_done")) return "POUR: HEAR THE ORDER";
       if (!Z("lasso_got")) return "EAST WALL: ROPE LOCKER. PRESS E";
-      if (!Z("dust_got")) return "GOLDEN STONE: RUN THE CANYON UNDER FOUR STARS";
+      if (!Z("dust_got")) return "CANYON EAST: KEEP WANTED STARS UNDER FOUR";
       if (!Z("proof1")) return "SANDSTORM HOLLOW: THE SENTINEL KEEPS THE LOG";
       if (!Z("cv_ping")) return "POUR BOOTH: EARN CAVENDISH'S REALM SCAN";
       if (!Z("truce"))
@@ -18828,7 +18829,7 @@ ram_mem_amulet: [
         ["YARD", "yard_clear", "Lasers. Three droids. Then the gate."],
         ["THE ORDER", "accused_done", "Silas speaks. Kal signed. The chair stays empty."],
         ["LASSO", "lasso_got", "East wall locker. Press E. You keep every item."],
-        ["DUST DEVIL", "dust_got", "Canyon. Fast board. Loud. Drops stars when you run."],
+        ["DUST DEVIL", "dust_got", "Ride the canyon east. Keep wanted stars under four."],
         ["SENTINEL", "proof1", "The log. Then the Justice Shot."],
         ["MESA", "hopper_got", "Lasso one gap. The board hops two. Skimmer waits past them."],
         ["GREEN DRAGON", "noodle_done", "Future, present, past. Wrong bowl rewinds."],
@@ -18854,6 +18855,12 @@ ram_mem_amulet: [
           xe());
         return;
       }
+      if (id === "lasers") {
+        rosOwned("lasers")
+          ? (D.sel(), Q("ATTACK " + slotName("lasers")), xe())
+          : (D.nope(), Q("NOT EARNED."));
+        return;
+      }
       if (!ownedItem(id)) {
         (D.nope(), Q("NOT EARNED."));
         return;
@@ -18867,36 +18874,36 @@ ram_mem_amulet: [
         names = ["MAP", "QUESTS", "GEAR"];
       (I(0, 24, 320, 200, "#140c08"),
         v(n, names[page], 160, 32, "#ffcc33", 2, "center", "#000"),
-        v(n, rosObjective(), 160, 50, "#ffe0a0", 1, "center", "#000"));
+        drawCrisp(rosObjective(), 160, 50, "#ffe0a0", "center"));
       if (page === 0) fn(40, 64, 240, 120, !0);
       else if (page === 1) {
         let rows = rosQuestRows(),
-          start = Math.max(0, (A.gearSel || 0) - 6);
-        for (let i = 0; i < 7 && start + i < rows.length; i++) {
+          sel = Math.min(A.gearSel || 0, Math.max(0, rows.length - 1)),
+          start = Math.max(0, sel - 5);
+        for (let i = 0; i < 6 && start + i < rows.length; i++) {
           let r = rows[start + i],
-            y = 66 + i * 16,
+            y = 66 + i * 14,
             on = Z(r[1]);
-          v(n, (on ? "OK " : "-- ") + r[0], 16, y, on ? "#3dff6a" : "#ffffff", 1, "", "");
-          A.gearSel === start + i &&
-            v(n, r[2], 16, y + 8, "#c8b090", 1, "", "");
+          v(n, (sel === start + i ? "> " : "  ") + (on ? "OK " : "-- ") + r[0], 16, y, on ? "#3dff6a" : "#ffffff", 1, "", "");
         }
+        rows[sel] && drawCrisp(rows[sel][2], 16, 158, "#c8b090", "");
       } else {
         let gear = [
           ["lasers", "GREEN LASERS"],
           ["justice", "JUSTICE SHOT"],
           ["lasso", "ROPE"],
-          ["brand", "STAR BRAND"],
+          ["bomb", "BOMB"],
           ["dust", "DUST DEVIL"],
           ["hopper", "MESA HOPPER"],
           ["skimmer", "SAND SKIMMER"],
         ];
-        (v(n, "X " + slotName(meleeNow()), 12, 64, "#ffcc33", 1, "", ""),
+        (v(n, "X " + slotName(weaponNow()), 12, 64, "#ffcc33", 1, "", ""),
           v(n, "Z " + slotName(heldItem()), 170, 64, "#4ff0ff", 1, "", ""));
         let sel = A.gearSel || 0;
         for (let i = 0; i < gear.length; i++) {
           let g = gear[i],
             y = 78 + i * 14,
-            mark = meleeNow() === g[0] ? " X" : heldItem() === g[0] ? " Z" : d.boardId === g[0] ? " ON" : "";
+            mark = g[0] === "lasers" ? " X" : heldItem() === g[0] ? " Z" : d.boardId === g[0] ? " ON" : "";
           v(
             n,
             (sel === i ? "> " : "  ") + g[1] + mark,
@@ -18995,7 +19002,7 @@ ram_mem_amulet: [
       if (U.downE) A.gearSel = ((A.gearSel || 0) + 1) % nRows;
       if (U.swapE) cycleTool();
       if ((A.rosPage || 0) === 2 && U.attackE) {
-        let ids = ["lasers", "justice", "lasso", "brand", "dust", "hopper", "skimmer"];
+        let ids = ["lasers", "justice", "lasso", "bomb", "dust", "hopper", "skimmer"];
         equipGear(ids[A.gearSel || 0]);
       }
     }
@@ -19070,7 +19077,7 @@ ram_mem_amulet: [
       ["lasers", "GREEN LASERS"],
       ["justice", "JUSTICE SHOT"],
       ["lasso", "ROPE"],
-      ["brand", "STAR BRAND"],
+      ["bomb", "BOMB"],
     ];
     function ownedActs() {
       return ROS_ACTS.filter((a) => rosOwned(a[0]));
@@ -19080,8 +19087,8 @@ ram_mem_amulet: [
     }
     function ownedItem(id) {
       if (!id) return !1;
-      if (id === "strike") return A.story === "ros";
-      if (id === "lasers" || id === "justice" || id === "brand" || id === "dust" || id === "hopper" || id === "skimmer")
+      if (id === "lasers" || id === "strike") return !1;
+      if (id === "bomb" || id === "justice" || id === "dust" || id === "hopper" || id === "skimmer")
         return rosOwned(id);
       if (id === "bow") return !!(d.items.bow || d.items.tbow);
       if (id === "baton") return !!d.items.baton;
@@ -19108,7 +19115,8 @@ ram_mem_amulet: [
           lasers: "GREEN LASERS",
           justice: "JUSTICE SHOT",
           lasso: "ROPE",
-          brand: "STAR BRAND",
+          bomb: "BOMB",
+          brand: "BOMB",
           bow: "BOW",
           raygun: "RAYGUN",
           missile: "MISSILES",
@@ -19128,7 +19136,8 @@ ram_mem_amulet: [
           lasers: "LASERS",
           justice: "JUSTICE",
           lasso: "ROPE",
-          brand: "BRAND",
+          bomb: "BOMB",
+          brand: "BOMB",
           bow: "BOW",
           raygun: "RAY",
           missile: "MISSILE",
@@ -19146,19 +19155,17 @@ ram_mem_amulet: [
     function itemIcon(id) {
       return id === "lasers" || id === "justice"
         ? "blasters"
-        : id === "brand"
+        : id === "bomb" || id === "brand"
           ? ""
           : id === "bow"
             ? "bow"
             : id || "";
     }
     function itemLeft(id) {
-      if (id === "brand") return d.brandCd || 0;
       return slotsOn() ? (d.cds && d.cds[id]) || 0 : d.arrowCd || 0;
     }
     function spend(id, t) {
-      if (id === "brand") d.brandCd = t;
-      else if (slotsOn()) ((d.cds = d.cds || {}), (d.cds[id] = t));
+      if (slotsOn()) ((d.cds = d.cds || {}), (d.cds[id] = t));
       else d.arrowCd = t;
     }
     function coolFrac(id) {
@@ -19167,7 +19174,7 @@ ram_mem_amulet: [
         lasers: 0.22,
         justice: 0.7,
         lasso: 0.4,
-        brand: 4,
+        bomb: 0.45,
         bow: 0.3,
         raygun: 0.32,
         missile: 0.5,
@@ -19183,6 +19190,10 @@ ram_mem_amulet: [
       return Math.min(1, itemLeft(id) / max);
     }
     function syncLegacy() {
+      if (A.story === "ros") {
+        ((d.wep = "lasers"), (d.melee = ""));
+        return;
+      }
       ((d.pri === "lasers" || d.pri === "justice") && (d.wep = d.pri),
         (d.sec === "lasso" || d.sec === "brand" || d.pri === "lasso" || d.pri === "brand") &&
           (d.tool = d.sec === "lasso" || d.sec === "brand" ? d.sec : d.pri),
@@ -19204,7 +19215,7 @@ ram_mem_amulet: [
     }
     function toolish(id) {
       return (
-        ["lasers", "justice", "lasso", "brand", "bow", "raygun", "missile", "shield", "amulet", "blast", "heavy", "disc"].indexOf(
+        ["lasers", "justice", "lasso", "bomb", "bow", "raygun", "missile", "shield", "amulet", "blast", "heavy", "disc"].indexOf(
           id,
         ) >= 0
       );
@@ -19224,8 +19235,8 @@ ram_mem_amulet: [
           (e && e.act) ||
           (d.wep === "justice" && ownedItem("justice")
             ? "justice"
-            : d.tool === "brand" && ownedItem("brand")
-              ? "brand"
+            : (d.tool === "bomb" || d.tool === "brand") && ownedItem("bomb")
+              ? "bomb"
               : d.tool === "lasso" && ownedItem("lasso")
                 ? "lasso"
                 : "lasers");
@@ -19308,7 +19319,7 @@ ram_mem_amulet: [
     function useItem(id) {
       if (id === "lasers") fireLasers();
       else if (id === "lasso") itemLeft("lasso") <= 0 && (lassoUse(), spend("lasso", 0.4));
-      else if (id === "brand") placeBrand();
+      else if (id === "bomb" || id === "brand") throwBomb();
       else if (id === "bow") fireBow();
       else if (id === "raygun") fireRay();
       else if (id === "missile") wr();
@@ -19499,10 +19510,13 @@ ram_mem_amulet: [
       }
     }
     function isMelee(id) {
-      return id === "baton" || id === "sword" || id === "hatchet" || id === "axe" || id === "plasma" || id === "strike";
+      return id === "baton" || id === "sword" || id === "hatchet" || id === "axe" || id === "plasma";
+    }
+    function rosItemOk(id) {
+      return !!(id && id !== "lasers" && id !== "strike" && !isMelee(id) && ownedItem(id));
     }
     function ownedMelee() {
-      if (A.story === "ros") return ["strike"];
+      if (A.story === "ros") return [];
       let ids =
         A.story === "ramshackle"
           ? ["axe", "hatchet"]
@@ -19514,7 +19528,7 @@ ram_mem_amulet: [
     function ownedGear() {
       let ids =
         A.story === "ros"
-          ? ["lasers", "justice", "lasso", "brand"]
+          ? ["lasso", "bomb", "justice"]
           : A.story === "ramshackle"
             ? ["shield", "amulet"]
             : A.story === "drill"
@@ -19529,6 +19543,7 @@ ram_mem_amulet: [
       return ownedGear();
     }
     function meleeNow() {
+      if (A.story === "ros") return "";
       if (isMelee(d.melee) && ownedItem(d.melee)) return d.melee;
       if (isMelee(d.wep) && ownedItem(d.wep)) return d.wep;
       let list = ownedMelee();
@@ -19540,7 +19555,6 @@ ram_mem_amulet: [
         if (d.sec && !isMelee(d.sec) && ownedItem(d.sec)) return d.sec;
         if (d.act && !isMelee(d.act) && ownedItem(d.act)) return d.act;
         if (d.pri && !isMelee(d.pri) && ownedItem(d.pri)) return d.pri;
-        if (ownedItem("lasers")) return "lasers";
       } else {
         if (d.sec && !isMelee(d.sec) && ownedItem(d.sec)) return d.sec;
         if (d.pri && !isMelee(d.pri) && ownedItem(d.pri)) return d.pri;
@@ -19550,6 +19564,7 @@ ram_mem_amulet: [
       return list.length ? list[0] : "";
     }
     function weaponNow() {
+      if (A.story === "ros") return "lasers";
       return meleeNow();
     }
     function toolNow() {
@@ -19563,22 +19578,26 @@ ram_mem_amulet: [
       else if (isMelee(d.sec) && ownedItem(d.sec)) melee = d.sec;
       else melee = ownedMelee()[0] || "";
       if (A.story === "ros") {
-        let selected =
-          d.tool && !isMelee(d.tool) && ownedItem(d.tool)
-            ? d.tool
-            : d.act && !isMelee(d.act) && ownedItem(d.act)
-              ? d.act
-              : ownedItem("lasers")
-                ? "lasers"
-                : "";
+        let selected = "";
+        for (let id of [d.tool, d.act, d.sec, d.pri])
+          if (rosItemOk(id)) {
+            selected = id;
+            break;
+          }
+        if (!selected)
+          for (let id of ["lasso", "bomb", "justice"])
+            if (rosItemOk(id)) {
+              selected = id;
+              break;
+            }
         let off = "";
-        for (let id of [d.sec, d.pri])
-          if (id && id !== selected && !isMelee(id) && ownedItem(id)) {
+        for (let id of ownedGear())
+          if (id !== selected) {
             off = id;
             break;
           }
-        ((d.melee = melee || "strike"),
-          (d.wep = selected === "justice" ? "justice" : "lasers"),
+        ((d.melee = ""),
+          (d.wep = "lasers"),
           (d.pri = selected),
           (d.sec = off),
           (d.tool = selected),
@@ -19591,12 +19610,7 @@ ram_mem_amulet: [
         if (id && !isMelee(id) && ownedItem(id) && items.indexOf(id) < 0) items.push(id);
       for (let id of ownedGear()) if (items.indexOf(id) < 0 && items.length < 2) items.push(id);
       ((d.melee = melee),
-        (d.wep =
-          A.story === "ros"
-            ? d.wep === "justice" && ownedItem("justice")
-              ? "justice"
-              : "lasers"
-            : melee),
+        (d.wep = melee),
         (d.pri = items[0] || ""),
         (d.sec = items[1] || ""),
         (d.tool = d.sec || d.pri || ""),
@@ -19617,6 +19631,7 @@ ram_mem_amulet: [
       else ((d.atk = 0.26), (ft = []), (it = !1), D.swing());
     }
     function cycleMelee() {
+      if (A.story === "ros") return;
       let list = ownedMelee();
       if (!list.length) {
         Q("NO MELEE YET.");
@@ -19630,6 +19645,23 @@ ram_mem_amulet: [
       let gear = ownedGear();
       if (!gear.length) {
         Q(A.story === "ros" ? "NO ITEM YET. THE ROPE LOCKER IS ON THE EAST WALL." : "NO ITEM YET.");
+        return;
+      }
+      if (A.story === "ros") {
+        let cur = gear.indexOf(heldItem()),
+          next = gear[(cur + 1) % gear.length],
+          off = gear.length > 1 ? gear[(cur + 2) % gear.length] : "";
+        off === next && (off = "");
+        ((d.melee = ""),
+          (d.wep = "lasers"),
+          (d.pri = next),
+          (d.sec = off),
+          (d.tool = next),
+          (d.act = next),
+          next === "lasso" ? (d.z = "lasso") : d.z === "lasso" && (d.z = "bow"),
+          D.sel(),
+          Q(slotName(next)),
+          xe());
         return;
       }
       if (!d.pri || isMelee(d.pri) || !ownedItem(d.pri)) d.pri = gear[0];
@@ -19649,7 +19681,9 @@ ram_mem_amulet: [
         else if ((d.charge || 0) >= 0.45) (fireJustice(), (d.charge = 0));
         else d.charge = 0;
       else d.charge = 0;
-      (U.attackE && d.roll <= 0 && d.atk <= 0 && swingMelee(meleeNow()),
+      (A.story === "ros"
+        ? U.attackE && d.roll <= 0 && d.atk <= 0 && fireLasers()
+        : U.attackE && d.roll <= 0 && d.atk <= 0 && swingMelee(meleeNow()),
         U.itemE && d.roll <= 0 && it && it !== "justice" && !isMelee(it) && useItem(it),
         U.itemE && d.roll <= 0 && !it && Q("NO ITEM."),
         (U.swapE || U.priE) && cycleTool());
@@ -19663,16 +19697,20 @@ ram_mem_amulet: [
       if (id === "lasers") fireLasers();
       else if (id === "lasso") {
         if ((d.arrowCd || 0) <= 0) (lassoUse(), (d.arrowCd = 0.4));
-      } else if (id === "brand") placeBrand();
+      } else if (id === "bomb" || id === "brand") throwBomb();
     }
     function migrateRosKit() {
       ((d.items.blasters = !0),
-        (d.melee = "strike"),
-        (ee.lasso_got || d.items.lasso || ee.brand_got || d.items.brand) &&
-          ((d.items.lasso = !0),
-          (d.items.brand = !0),
-          (ee.lasso_got = !0),
-          (ee.brand_got = !0)),
+        (d.melee = ""),
+        (ee.lasso_got || d.items.lasso) && ((d.items.lasso = !0), (ee.lasso_got = !0)),
+        (ee.brand_got || d.items.brand || ee.bomb_got || d.items.bomb) &&
+          ((d.items.bomb = !0),
+          (d.items.brand = !1),
+          (ee.bomb_got = !0)),
+        d.tool === "brand" && (d.tool = "bomb"),
+        d.act === "brand" && (d.act = "bomb"),
+        d.pri === "brand" && (d.pri = "bomb"),
+        d.sec === "brand" && (d.sec = "bomb"),
         (ee.justice_got || d.items.justice) &&
           ((d.items.justice = !0), (ee.justice_got = !0)),
         (ee.dust_got || d.items.dust || d.items.board) &&
@@ -19681,19 +19719,36 @@ ram_mem_amulet: [
         (ee.skimmer_got || d.items.skimmer) && (d.items.skimmer = !0));
     }
     function rosTool() {
-      if ((d.tool || "lasso") === "brand" && rosOwned("brand")) placeBrand();
+      if ((d.tool || "lasso") === "bomb" && rosOwned("bomb")) throwBomb();
       else if (rosOwned("lasso")) lassoUse();
       else Q("NO TOOL YET. THE ROPE LOCKER IS ON THE EAST WALL.");
     }
-    function placeBrand() {
-      if ((d.brandCd || 0) > 0) {
-        Q("THE BRAND IS SLEEPING.");
+    function throwBomb() {
+      if (w.peace) {
+        Q("NOT ON THIS FLOOR.");
         return;
       }
-      ((A.brands = A.brands || []).push({ x: d.x, y: d.y, t: 2.4, pulse: 0.35 }),
-        (d.brandCd = 4),
-        D.shard(),
-        Q("STAR BRAND."));
+      if (itemLeft("bomb") > 0) return;
+      let C = Ne[d.dir];
+      Oe.push({
+        x: d.x + C[0] * 8,
+        y: d.y - 12,
+        vx: C[0] * 120,
+        vy: C[1] * 40 - 96,
+        t: 0,
+        kind: "bomb",
+        fuse: 0.78,
+        dir: d.dir,
+      });
+      spend("bomb", 0.45);
+      D.swing();
+    }
+    function explodeBomb(a) {
+      (D.boom(),
+        (A.shake = Math.max(A.shake || 0, 0.12)),
+        ne(a.x, a.y, 18, ["#fff6c0", "#ffe080", "#ffffff", "#ff9a3d"], 36));
+      for (let f of ce)
+        !f.dead && ae(f.x, f.y, a.x, a.y) < 36 && _a(f, 2, a.x, a.y, 0.4);
     }
     function fireLasers() {
       if (w.peace) {
@@ -20711,10 +20766,10 @@ ram_mem_amulet: [
             : d.tool === "brand"
               ? "brand"
               : "lasers";
-      return id === "lasso" ? "lasso" : id === "brand" ? "" : "blasters";
+      return id === "lasso" ? "lasso" : id === "bomb" || id === "brand" ? "" : "blasters";
     }
     function drawSlotMark(id, x) {
-      if (id === "brand") (I(x + 5, 7, 6, 6, "#ffcc33"), I(x + 3, 9, 10, 2, "#fff6c0"));
+      if (id === "bomb") (I(x + 5, 8, 6, 6, "#2a241c"), I(x + 7, 5, 2, 3, "#ff9a3d"));
       if (id === "justice") I(x + 4, 8, 8, 2, "#fff6c0");
       let cool = coolFrac(id);
       cool > 0 &&
@@ -20738,7 +20793,8 @@ ram_mem_amulet: [
         x += 38;
       }
       if (slotsOn()) {
-        let xl = "X " + (meleeNow() ? slotName(meleeNow(), !0) : "STRIKE"),
+        let atkId = A.story === "ros" ? weaponNow() : meleeNow(),
+          xl = "X " + (atkId ? slotName(atkId, !0) : "STRIKE"),
           zl = "Z " + (heldItem() ? slotName(heldItem(), !0) : "NONE"),
           sx = Math.max(x, 132),
           cap = 246,
@@ -20768,6 +20824,15 @@ ram_mem_amulet: [
         });
       }
       return bits;
+    }
+    function drawCrisp(text, x, y, color, align) {
+      let label = String(text || "");
+      if (!label) return;
+      let w = Ya(label.toUpperCase(), 1),
+        left = align === "center" ? Math.round(x - w / 2) : align === "right" ? Math.round(x - w) : Math.round(x);
+      y = Math.round(y);
+      I(left - 2, y - 1, w + 4, 9, "#140c08");
+      v(n, label, align === "center" ? left + Math.round(w / 2) : x, y, color, 1, align || "", "");
     }
     function drawHudRow() {
       for (let bit of hudBits())
@@ -20811,8 +20876,8 @@ ram_mem_amulet: [
         cool = coolFrac(id);
       (v(n, name, 127, 26, "#ffe0a0", 1, "", "#000"),
         v(n, "Q/TOOL", 188, 26, "#c8b090", 1, "", "#000"));
-      if (id === "brand")
-        (I(124, 7, 6, 6, "#ffcc33"), I(122, 9, 10, 2, "#fff6c0"));
+      if (id === "bomb" || id === "brand")
+        (I(124, 8, 6, 6, "#2a241c"), I(126, 5, 2, 3, "#ff9a3d"));
       if (id === "justice") I(123, 8, 8, 2, "#fff6c0");
       cool > 0 &&
         (I(119, 20, 16, 2, "#3a2a20"),
@@ -20897,22 +20962,23 @@ ram_mem_amulet: [
         A.story === "ros" &&
           !A.paused &&
           !A.ev &&
-          v(n, rosObjective(), 160, 208, "#ffe0a0", 1, "center", "#000"),
+          !q &&
+          drawCrisp(rosObjective(), 160, 208, "#ffe0a0", "center"),
         A.story === "ramshackle" &&
           !A.paused &&
           !q &&
-          v(n, ramObjective(), 160, 208, "#ffe0a0", 1, "center", "#000"),
+          drawCrisp(ramObjective(), 160, 208, "#ffe0a0", "center"),
         A.story === "drill" &&
           !A.paused &&
           !q &&
           !A.radioInk &&
-          v(n, dsObjective(), 160, 208, "#ffe0a0", 1, "center", "#000"),
+          drawCrisp(dsObjective(), 160, 208, "#ffe0a0", "center"),
         A.story === "skippy" &&
           !A.paused &&
           !A.choice &&
           !q &&
           skippyObjective() &&
-          v(n, skippyObjective(), 160, 208, "#ffe0a0", 1, "center", "#000"),
+          drawCrisp(skippyObjective(), 160, 208, "#ffe0a0", "center"),
         A.ev && drawEvidence(),
         A.choice && drawChoice());
     }
@@ -21422,6 +21488,19 @@ ram_mem_amulet: [
               (n.fillStyle = "#4ff0ff"),
               n.fillRect(-2, -1, 4, 2),
               n.restore());
+          } else if (f.kind === "bomb") {
+            (n.save(),
+              n.translate(c, S),
+              n.rotate(f.spin || 0),
+              (n.fillStyle = "#2a241c"),
+              n.beginPath(),
+              n.arc(0, 0, 4, 0, 6.283),
+              n.fill(),
+              (n.fillStyle = "#6a5848"),
+              n.fillRect(-1, -6, 2, 3),
+              (n.fillStyle = "#ff9a3d"),
+              n.fillRect(-1, -8, 2, 2),
+              n.restore());
           } else if (f.kind === "green") {
             let y = Math.atan2(f.vy, f.vx);
             ((n.strokeStyle = "#3dff6a"),
@@ -21513,22 +21592,6 @@ ram_mem_amulet: [
             (n.globalAlpha = 1));
       }
     }
-    function drawStunStrike(e, a) {
-      if (weaponNow() !== "strike" || d.swingKind !== "melee" || !(d.atk > 0)) return;
-      let base = [Math.PI / 2, -Math.PI / 2, Math.PI, 0][d.dir],
-        swing = 1 - Math.min(1, d.atk / 0.26),
-        ang = base - 1.15 + swing * 2.3,
-        hx = e + Math.cos(ang) * 16,
-        hy = a - 12 + Math.sin(ang) * 16;
-      ((n.strokeStyle = "rgba(61,255,106,0.95)"),
-        (n.lineWidth = 3),
-        n.beginPath(),
-        n.arc(e, a - 12, 16, ang - 0.85, ang + 0.25),
-        n.stroke(),
-        I(hx - 2, hy - 2, 4, 4, "#ffffff"),
-        Math.random() < 0.7 &&
-          oe(hx + he.x, hy + he.y - 24, (Math.random() - 0.5) * 30, (Math.random() - 0.5) * 30, 0.22, "#3dff6a", 1.5));
-    }
     function drawHeldAxe(e, a) {
       let id = weaponNow();
       if (A.story !== "ramshackle" || (id !== "axe" && id !== "hatchet")) return;
@@ -21562,7 +21625,7 @@ ram_mem_amulet: [
       }
     }
     function drawHeldLasers(e, a) {
-      if (A.story !== "ros" || heldItem() !== "lasers") return;
+      if (A.story !== "ros" || weaponNow() !== "lasers") return;
       let dir = Ne[d.dir] || [1, 0],
         ang = Math.atan2(dir[1], dir[0]),
         hot = (d.cds && d.cds.lasers) > 0.05;
@@ -21674,7 +21737,6 @@ ram_mem_amulet: [
         Aa(ga(), e, a - (hasSpaceBoard() ? 2 : 0), d.dir, (d.boardDash || 0) > 0 ? 1 : t, 1),
         drawVisorAt(e, a),
         drawCompanion(e, a),
-        drawStunStrike(e, a),
         drawHeldAxe(e, a),
         drawHeldBlast(e, a),
         drawHeldLasers(e, a),
@@ -22208,7 +22270,7 @@ ram_mem_amulet: [
       let e = A.t;
       (v(n, "SPACE RIDERS", 160, 14, "#ff4fd8", 3, "center", "#2a0a3a"),
         v(n, "SKIPPY'S QUEST", 160, 42, "#ffcc33", 2, "center", "#2a0a3a"),
-        v(n, window.__SQ_BUILD || "b39", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
+        v(n, window.__SQ_BUILD || "b40", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
       let a = (s, E, f, c, S) => {
         let y = Ue(s, S, 0);
         n.drawImage(
@@ -22536,7 +22598,7 @@ ram_mem_amulet: [
             ["lasers", "GREEN LASERS"],
             ["justice", "JUSTICE SHOT"],
             ["lasso", "ROPE"],
-            ["brand", "STAR BRAND"],
+            ["bomb", "BOMB"],
             ["dust", "DUST DEVIL"],
             ["hopper", "MESA HOPPER"],
             ["skimmer", "SAND SKIMMER"],
@@ -22545,7 +22607,7 @@ ram_mem_amulet: [
             gear.map((g, i) => ({
               label:
                 g[1] +
-                (heldItem() === g[0] ? "  Z" : d.boardId === g[0] ? "  ON" : ""),
+                (g[0] === "lasers" ? "  X" : heldItem() === g[0] ? "  Z" : d.boardId === g[0] ? "  ON" : ""),
               enabled: rosOwned(g[0]),
               on: (A.gearSel || 0) === i,
             })),
@@ -22661,7 +22723,7 @@ ram_mem_amulet: [
         let row = i - 3;
         A.gearSel = row;
         if ((A.rosPage || 0) === 2) {
-          let ids = ["lasers", "justice", "lasso", "brand", "dust", "hopper", "skimmer"];
+          let ids = ["lasers", "justice", "lasso", "bomb", "dust", "hopper", "skimmer"];
           equipGear(ids[row]);
         }
         return;
@@ -22848,19 +22910,16 @@ ram_mem_amulet: [
         rs(),
         A.bannerT > 0 && !q)
       ) {
-        let e = Ee(A.bannerT, 0, 1),
-          lines = Nn(A.banner, 28).slice(0, 2),
+        let lines = Nn(A.banner, 28).slice(0, 2),
           bw = Math.min(304, Math.max.apply(null, lines.map((l) => Ya(l.toUpperCase(), 1))) + 16),
           bh = 10 + lines.length * 12,
           bx = Math.round(160 - bw / 2);
-        ((n.globalAlpha = e),
-          na(bx, 34, bw, bh, "#ffcc33"),
-          lines.forEach((l, i) => v(n, l, 160, 40 + i * 12, "#ffcc33", 1, "center", X)),
+        (na(bx, 34, bw, bh, "#ffcc33"),
+          lines.forEach((l, i) => v(n, l, 160, 40 + i * 12, "#fff6c0", 1, "center", "")),
           (A.bannerInk = noteInk("banner", {
             box: { x: bx, y: 34, w: bw, h: bh },
             lines: lines.map((l, i) => inkOf(l, 160, 40 + i * 12, "center")),
-          })),
-          (n.globalAlpha = 1));
+          })));
       }
       if ((os(), ys(), Us(), ss(), fs(), A.toastT > 0 && A.toast))
         A.toastInk = drawBoxed(A.toast, 160, 124, 292, "#4ff0ff");
@@ -25253,7 +25312,7 @@ ram_mem_amulet: [
           enterStory(id);
           return Bt();
         },
-        build: () => window.__SQ_BUILD || "b39",
+        build: () => window.__SQ_BUILD || "b40",
         cast: () => castSpell(),
         hud: () => hudBits(),
         fightHud: () => fightHud(),

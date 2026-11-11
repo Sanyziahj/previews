@@ -82,11 +82,11 @@ async function openRos(page) {
   await tap(page, 'attack');
 }
 
-test('ROS starts on his green laser blasters, and ITEM fires them', async ({ page }) => {
+test('ROS starts with lasers on ATTACK, and ITEM does not fire them', async ({ page }) => {
   const errors = await boot(page);
   const cache = await page.evaluate(() => document.querySelector('script').textContent);
-  expect(cache).toContain('window.__SQ_BUILD="b39"');
-  expect(cache).toContain('v=b39');
+  expect(cache).toContain('window.__SQ_BUILD="b40"');
+  expect(cache).toContain('v=b40');
 
   await openRos(page);
   const born = await page.evaluate(() => {
@@ -109,21 +109,22 @@ test('ROS starts on his green laser blasters, and ITEM fires them', async ({ pag
       build: S.build(),
     };
   });
-  expect(born.build).toBe('b39');
+  expect(born.build).toBe('b40');
   expect(born.state).toBe('play');
   expect(born.area).toBe('ros_yard');
   expect(born.hero).toBe('ros');
-  expect(born.item).toBe('lasers');
-  expect(born.melee).toBe('strike');
-  expect(born.tool).toBe('lasers');
+  expect(born.item).toBe('');
+  expect(born.melee).toBe('');
+  expect(born.tool).toBe('');
   expect(born.wep).toBe('lasers');
-  expect(born.pri).toBe('lasers');
+  expect(born.pri).toBe('');
   expect(born.sec).not.toBe('lasso');
   expect(born.blasters).toBe(true);
   expect(born.board).toBe(true);
   expect(born.roll).toBe('BOARD');
-  expect(born.hud).toMatch(/X STUN/);
-  expect(born.hud).toMatch(/Z LASERS/);
+  expect(born.hud).toMatch(/X LASERS/);
+  expect(born.hud).not.toMatch(/X STUN/);
+  expect(born.hud).not.toMatch(/Z LASERS/);
 
   await page.evaluate(() => {
     const S = __SQ;
@@ -136,8 +137,9 @@ test('ROS starts on his green laser blasters, and ITEM fires them', async ({ pag
   });
   const gear = await page.evaluate(() => (window.__SQ_TOUCH.rows || []).map((r) => r.label).join(' '));
   expect(gear).toContain('GREEN LASERS');
-  expect(gear).not.toMatch(/STUN BLAST/);
-  expect(gear).toMatch(/GREEN LASERS\s+Z/);
+  expect(gear).not.toMatch(/STUN/);
+  expect(gear).toMatch(/GREEN LASERS\s+X/);
+  expect(gear).not.toMatch(/GREEN LASERS\s+Z/);
 
   await page.evaluate(() => {
     const S = __SQ;
@@ -168,18 +170,19 @@ test('ROS starts on his green laser blasters, and ITEM fires them', async ({ pag
     board: __SQ.board().has,
     hud: __SQ.hud().map((b) => b.text).join(' '),
   }));
-  expect(armed.item).toBe('lasers');
-  expect(armed.melee).toBe('strike');
+  expect(armed.item).toBe('');
+  expect(armed.melee).toBe('');
   expect(armed.board).toBe(true);
-  expect(armed.hud).toMatch(/Z LASERS/);
+  expect(armed.hud).toMatch(/X LASERS/);
+  expect(armed.hud).not.toMatch(/X STUN/);
   await shot(page, 'b39-ros-green-lasers.png');
 
   const fired = await page.evaluate(() => {
     const S = __SQ;
     const before = S.shots.length;
-    S.press('item', true);
+    S.press('attack', true);
     S.step(2);
-    S.press('item', false);
+    S.press('attack', false);
     S.step(6);
     const shots = S.shots.map((s) => ({ kind: s.kind, col: s.col, laser: !!s.laser }));
     return {
@@ -191,8 +194,8 @@ test('ROS starts on his green laser blasters, and ITEM fires them', async ({ pag
     };
   });
   expect(fired.before).toBe(0);
-  expect(fired.item).toBe('lasers');
-  expect(fired.melee).toBe('strike');
+  expect(fired.item).toBe('');
+  expect(fired.melee).toBe('');
   expect(fired.swing).not.toBe('melee');
   expect(fired.shots.filter((s) => s.kind === 'stun' && s.laser && s.col === '#3dff6a').length).toBe(2);
   await shot(page, 'b39-ros-laser-fire.png');
@@ -229,12 +232,11 @@ test('ROS starts on his green laser blasters, and ITEM fires them', async ({ pag
       board: S.board().has,
     };
   });
-  expect(struck.melee).toBe('strike');
-  expect(struck.item).toBe('lasers');
+  expect(struck.melee).toBe('');
+  expect(struck.item).toBe('');
   expect(struck.board).toBe(true);
-  expect(struck.swing).toBe('melee');
+  expect(struck.swing).not.toBe('melee');
   expect(struck.dead, JSON.stringify(struck)).toBe(true);
-  expect(struck.shots.join(',')).not.toMatch(/stun|justice/);
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
@@ -263,7 +265,7 @@ test('an existing ROS save equips the green lasers and keeps the rope and board'
     S.P.dir = 3;
     S.P.cds = {};
     S.shots.length = 0;
-    S.press('item', true); S.step(2); S.press('item', false); S.step(2);
+    S.press('attack', true); S.step(2); S.press('attack', false); S.step(2);
     const shots = S.shots.map((s) => ({ kind: s.kind, col: s.col, laser: !!s.laser }));
     S.press('swap', true); S.step(2); S.press('swap', false); S.step(2);
     const swapped = S.hands().item;
@@ -291,17 +293,19 @@ test('an existing ROS save equips the green lasers and keeps the rope and board'
     };
   });
   expect(back.area).toBe('ros_pour');
-  expect(back.hands).toBe('lasers');
-  expect(back.melee).toBe('strike');
+  expect(back.hands).toBe('lasso');
+  expect(back.melee).toBe('');
   expect(back.lasso).toBe(true);
   expect(back.blasters).toBe(true);
-  expect(back.kit).toEqual(expect.arrayContaining(['strike', 'lasers', 'lasso']));
+  expect(back.kit).toEqual(expect.arrayContaining(['lasso']));
+  expect(back.kit).not.toContain('strike');
+  expect(back.kit).not.toContain('lasers');
   expect(back.board).toBe(true);
   expect(back.boardId).toBe('dust');
   expect(back.wanted).toBe(1);
   expect(back.shots.filter((s) => s.kind === 'stun' && s.laser && s.col === '#3dff6a').length).toBeGreaterThanOrEqual(2);
   expect(back.swapped).not.toBe('strike');
-  expect(['lasso', 'brand', 'justice', 'lasers']).toContain(back.swapped);
+  expect(['lasso', 'bomb', 'justice']).toContain(back.swapped);
   expect(back.swapped).not.toBe('lasers');
   expect(back.keys.skippy).toBe(SKIPPY_SAVE);
   expect(back.keys.ram).toBe(RAM_SAVE);
@@ -309,15 +313,17 @@ test('an existing ROS save equips the green lasers and keeps the rope and board'
   const saved = JSON.parse(back.savedRos);
   expect(saved.items.blasters).toBe(true);
   expect(saved.items.lasso).toBe(true);
-  expect(saved.tool).toBe('lasers');
+  expect(saved.tool).toBe('lasso');
+  expect(saved.melee).not.toBe('strike');
   expect(saved.flags.ros_lasers_default).toBe(true);
+  expect(saved.flags.ros_attack_lasers).toBe(true);
   expect(saved.flags.lasso_got).toBe(true);
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
 test.describe('phone landscape', () => {
   test.use({ viewport: { width: 844, height: 390 }, hasTouch: true, isMobile: true });
-  test('the landscape ITEM button fires the green lasers', async ({ page }) => {
+  test('the landscape ATTACK button fires the green lasers', async ({ page }) => {
     const errors = await boot(page);
     await page.waitForFunction(() => document.documentElement.classList.contains('srml'));
     await page.evaluate(() => {
@@ -361,7 +367,7 @@ test.describe('phone landscape', () => {
     expect(layout.item).toBe('ITEM');
     expect(layout.attack).toBe('ATTACK');
     expect(layout.roll).toBe('BOARD');
-    await page.locator('[data-b="item"]').tap();
+    await page.locator('[data-b="attack"]').tap();
     await page.evaluate(() => __SQ.step(6));
     const hit = await page.evaluate(() => ({
       shots: __SQ.shots.map((s) => ({ kind: s.kind, col: s.col, laser: !!s.laser })),
@@ -369,8 +375,8 @@ test.describe('phone landscape', () => {
       melee: __SQ.melee(),
       swing: __SQ.P.swingKind,
     }));
-    expect(hit.item).toBe('lasers');
-    expect(hit.melee).toBe('strike');
+    expect(hit.item).toBe('lasso');
+    expect(hit.melee).toBe('');
     expect(hit.swing).not.toBe('melee');
     expect(hit.shots.filter((s) => s.kind === 'stun' && s.laser && s.col === '#3dff6a').length).toBeGreaterThanOrEqual(2);
     await page.screenshot({ path: `${ART}/b39-ros-laser-phone.png` });
