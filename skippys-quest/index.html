@@ -3,7 +3,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script>window.__SQ_BUILD="b40";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b40(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b40");location.replace(u.href);}</script>
+<script>window.__SQ_BUILD="b41";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b41(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b41");location.replace(u.href);}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Space Riders: Skippy's Quest</title><link rel="icon" href="data:,">
 <meta name="description" content="Space Riders: Skippy's Quest - a free 16-bit top-down action adventure browser game. The Red King is missing. Ride with ROS through the Sand Dungeon, take Cash's portals to the Seaport and Ramshackle the Viking, win Ronin's flaming sword, beat the house at the Andromeda Casino and stop the Overlord on the Moon, survive the meteor shower with Blaze and earn your space board at the Crossroad and cross the mirror into the Dark World, then storm Fright's castle and bring the Red King home. Chapters 1-9 (Complete) out now.">
@@ -11623,10 +11623,10 @@ ram_mem_amulet: [
       npcs: [{ id: "spike", x: 8, y: 3, dir: 0, talk: "spike_dream" }],
       enemies: [{ k: "fear", x: 5, y: 8 }, { k: "fear", x: 12, y: 8 }],
       props: [
-        { k: "poster", id: "p1", x: 4, y: 5 },
-        { k: "poster", id: "p2", x: 8, y: 6 },
-        { k: "poster", id: "p3", x: 12, y: 5 },
-        { k: "poster", id: "p4", x: 10, y: 9 },
+        { k: "poster", id: "p1", x: 4, y: 5, hat: !0, face: "#7b3fd0" },
+        { k: "poster", id: "p2", x: 8, y: 6, face: "#f08a2a" },
+        { k: "poster", id: "p3", x: 12, y: 5, face: "#3aa0c8" },
+        { k: "poster", id: "p4", x: 10, y: 9, face: "#e8c040" },
       ],
       signs: [{ x: 6, y: 3, text: "LASSO THE POSTERS. LASERS FEED THE FEAR.", kind: "sign" }],
       onEnter: "dream_in",
@@ -15462,6 +15462,7 @@ ram_mem_amulet: [
         (A.st += e),
         A.bannerT > 0 && (A.bannerT -= e),
         A.toastT > 0 && (A.toastT -= e),
+        A.ropeT > 0 && (A.ropeT -= e),
         A.saveT > 0 && (A.saveT -= e),
         A.shake > 0 && (A.shake -= e),
         A.flash > 0 && (A.flash -= e),
@@ -18075,17 +18076,32 @@ ram_mem_amulet: [
           return;
         }
       }
-      for (let prop of w.props || [])
-        if (
-          prop.k === "poster" &&
-          ae(d.x, d.y, p(prop.x), p(prop.y)) < 32
-        ) {
-          ((ee[prop.id] = !0),
-            Z("p1") && Z("p2") && Z("p3") && Z("p4") && !Z("dream_win")
-              ? ye("dream_win")
-              : Q("POSTER DOWN."));
-          return;
-        }
+      let caught = null,
+        caughtD = 53;
+      for (let prop of w.props || []) {
+        if (prop.k !== "poster" || !prop.id || Z(prop.id)) continue;
+        let px = p(prop.x),
+          py = p(prop.y),
+          dx = px - d.x,
+          dy = py - (d.y - 4),
+          dist = Math.hypot(dx, dy),
+          ahead = dx * e[0] + dy * e[1];
+        dist <= 52 &&
+          dist < caughtD &&
+          (dist <= 24 || ahead > -18) &&
+          ((caught = prop), (caughtD = dist));
+      }
+      if (caught) {
+        ((ee[caught.id] = !0),
+          (A.ropeX = p(caught.x)),
+          (A.ropeY = p(caught.y) - 14),
+          (A.ropeT = 0.6),
+          D.arrow(),
+          Z("p1") && Z("p2") && Z("p3") && Z("p4") && !Z("dream_win")
+            ? ye("dream_win")
+            : Q("POSTER DOWN."));
+        return;
+      }
       let a = !1;
       for (let t = 1; t <= 3; t++) {
         let i = Er(
@@ -18097,14 +18113,21 @@ ram_mem_amulet: [
           break;
         }
       }
+      let fearHit = !1;
       for (let t of ce)
         !t.dead &&
           ae(t.x, t.y, d.x + e[0] * 28, d.y + e[1] * 20) < 36 &&
-          ((t.stun = Math.max(t.stun, 1.3)), (t.flash = 0.2), (a = !0));
+          ((t.stun = Math.max(t.stun, 1.3)),
+          (t.flash = 0.2),
+          (a = !0),
+          t.k === "fear" && (fearHit = !0));
       let t = d.x + e[0] * 28,
         i = d.y + e[1] * 20;
       ja(t, i, 5, 5, 2, !1, []) || ((d.x = t), (d.y = i), (a = !0));
-      (D.arrow(), Q(a ? "LASSO!" : "THE ROPE FINDS NOTHING.", 1.2));
+      (D.arrow(),
+        fearHit && !ee.fear_rope
+          ? ((ee.fear_rope = !0), Q("THAT IS FEAR. LASSO THE POSTERS."))
+          : Q(a ? "LASSO!" : "THE ROPE FINDS NOTHING.", 1.2));
     }
     function drawNukeWorld(e, a) {
       let t = Math.floor(_.walkT * 8) % 2 ? 1 : 0;
@@ -18141,7 +18164,7 @@ ram_mem_amulet: [
       for (let a = 0; a < 16; a++)
         I((a * 23) % 320, 20 + ((a * 17) % 70), 2, 2, "#fff2c8");
       (v(n, "SPACE RIDERS", 160, 8, "#ff4fd8", 2, "center", "#2a0a14"),
-        v(n, window.__SQ_BUILD || "b40", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
+        v(n, window.__SQ_BUILD || "b41", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
         v(n, "SIDE QUESTS COME HOME", 160, 28, "#ffcc33", 1, "center", "#2a0a14"));
       let a = 58;
       for (let t = 0; t < STORY_ROWS.length; t++) {
@@ -21053,6 +21076,33 @@ ram_mem_amulet: [
       });
       return !0;
     }
+    function drawDreamPoster(c, S, hat, face) {
+      c = Math.round(c);
+      S = Math.round(S);
+      (I(c - 2, S - 4, 4, 16, "#3a2414"),
+        I(c - 1, S - 4, 1, 16, "#6a4428"),
+        I(c - 8, S - 31, 20, 28, "#140810"),
+        I(c - 10, S - 34, 20, 28, "#5a3418"),
+        I(c - 9, S - 33, 18, 26, "#fff1c8"),
+        I(c - 9, S - 33, 18, 4, "#8a1e1e"),
+        I(c - 9, S - 30, 18, 1, "#f0c040"),
+        I(c - 4, S - 24, 8, 8, face),
+        I(c - 4, S - 24, 1, 1, "#fff1c8"),
+        I(c + 3, S - 24, 1, 1, "#fff1c8"),
+        I(c - 4, S - 17, 1, 1, "#fff1c8"),
+        I(c + 3, S - 17, 1, 1, "#fff1c8"),
+        I(c - 3, S - 22, 2, 2, "#1a120c"),
+        I(c + 1, S - 22, 2, 2, "#1a120c"),
+        I(c - 4, S - 19, 2, 2, "#f7a8d8"),
+        I(c + 2, S - 19, 2, 2, "#f7a8d8"),
+        I(c - 5, S - 16, 10, 3, "#2a1a14"));
+      hat &&
+        (I(c - 4, S - 44, 8, 8, "#7a4a26"),
+        I(c - 4, S - 44, 8, 1, "#9a6a3a"),
+        I(c - 2, S - 42, 4, 2, "#2a1a10"),
+        I(c - 14, S - 37, 28, 4, "#7a4a26"),
+        I(c - 14, S - 37, 28, 1, "#9a6a3a"));
+    }
     function ts() {
       let e = A.shake > 0 ? (Math.random() - 0.5) * 4 : 0,
         a = Math.round(he.x + e),
@@ -21170,6 +21220,15 @@ ram_mem_amulet: [
                 "#ff9ae8",
                 1.5,
               );
+          } else if (f.k === "poster") {
+            if (!Z(f.id)) {
+              let c = i(p(f.x)),
+                S = s(p(f.y));
+              E.push({
+                y: p(f.y),
+                f: () => drawDreamPoster(c, S, !!f.hat, f.face || "#f0c8a0"),
+              });
+            }
           } else Os(f, E, i, s);
       for (let f of w.signs || []) {
         let c = i(f.x * 16),
@@ -21440,6 +21499,20 @@ ram_mem_amulet: [
         Ds(E, i, s),
         E.sort((f, c) => f.y - c.y));
       for (let f of E) f.f();
+      if ((A.ropeT || 0) > 0) {
+        let x0 = i(d.x),
+          y0 = s(d.y) - 12,
+          x1 = i(A.ropeX),
+          y1 = s(A.ropeY);
+        ((n.strokeStyle = "#c8a060"),
+          (n.lineWidth = 2),
+          n.beginPath(),
+          n.moveTo(x0, y0),
+          n.lineTo(x1, y1),
+          n.stroke(),
+          I(x1 - 2, y1 - 2, 4, 4, "#f0c040"),
+          I(x0 - 1, y0 - 1, 3, 3, "#6a4a2a"));
+      }
       for (let f of Oe) {
         let c = i(f.x),
           S = s(f.y);
@@ -22270,7 +22343,7 @@ ram_mem_amulet: [
       let e = A.t;
       (v(n, "SPACE RIDERS", 160, 14, "#ff4fd8", 3, "center", "#2a0a3a"),
         v(n, "SKIPPY'S QUEST", 160, 42, "#ffcc33", 2, "center", "#2a0a3a"),
-        v(n, window.__SQ_BUILD || "b40", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
+        v(n, window.__SQ_BUILD || "b41", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
       let a = (s, E, f, c, S) => {
         let y = Ue(s, S, 0);
         n.drawImage(
@@ -25312,7 +25385,7 @@ ram_mem_amulet: [
           enterStory(id);
           return Bt();
         },
-        build: () => window.__SQ_BUILD || "b40",
+        build: () => window.__SQ_BUILD || "b41",
         cast: () => castSpell(),
         hud: () => hudBits(),
         fightHud: () => fightHud(),
