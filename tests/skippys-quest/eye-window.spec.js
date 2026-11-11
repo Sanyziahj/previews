@@ -76,7 +76,7 @@ test('a hatchet in X still drops the Eye during lightning', async ({ page }) => 
   const errors = await bootLive(page);
   await page.locator('#game').screenshot({ path: `${ART}/build-tag.png` });
   const build = await page.evaluate(() => __SQ.build());
-  expect(build).toBe('b38');
+  expect(build).toBe('b39');
   await readyEye(page, {
     items: { hatchet: true, amulet: true },
     pri: 'hatchet',

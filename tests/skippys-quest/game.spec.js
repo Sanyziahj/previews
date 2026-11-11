@@ -1540,7 +1540,7 @@ test.describe('context touch layouts', () => {
 
       await page.evaluate(() => { __SQ.G.rosPage = 2; __SQ.step(1); });
       const gear = await controlAudit(page);
-      expect(gear.labels.join(' '), JSON.stringify(gear)).toContain('TWIN LASERS');
+      expect(gear.labels.join(' '), JSON.stringify(gear)).toContain('GREEN LASERS');
       expect(gear.labels.join(' ')).not.toMatch(/ATTACK|SWAP|ROLL/);
       expect(gear.hits, JSON.stringify(gear)).toEqual([]);
       expect(gear.onCanvas, JSON.stringify(gear)).toEqual([]);

@@ -3,7 +3,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script>window.__SQ_BUILD="b38";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b38(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b38");location.replace(u.href);}</script>
+<script>window.__SQ_BUILD="b39";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b39(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b39");location.replace(u.href);}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Space Riders: Skippy's Quest</title><link rel="icon" href="data:,">
 <meta name="description" content="Space Riders: Skippy's Quest - a free 16-bit top-down action adventure browser game. The Red King is missing. Ride with ROS through the Sand Dungeon, take Cash's portals to the Seaport and Ramshackle the Viking, win Ronin's flaming sword, beat the house at the Andromeda Casino and stop the Overlord on the Moon, survive the meteor shower with Blaze and earn your space board at the Crossroad and cross the mirror into the Dark World, then storm Fright's castle and bring the Red King home. Chapters 1-9 (Complete) out now.">
@@ -7358,10 +7358,14 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           o(l, 3, 10, 4, 3, "#2a3a3a"));
         break;
       case "blasters":
-        (o(l, 2, 6, 5, 3, "#c8ccd4"),
-          o(l, 9, 6, 5, 3, "#c8ccd4"),
-          o(l, 6, 7, 2, 2, "#3dff6a"),
-          o(l, 12, 7, 2, 2, "#3dff6a"));
+        (o(l, 1, 6, 6, 3, "#d8dce6"),
+          o(l, 8, 6, 6, 3, "#d8dce6"),
+          o(l, 1, 6, 6, 1, "#ffffff"),
+          o(l, 8, 6, 6, 1, "#ffffff"),
+          o(l, 6, 6, 3, 3, "#3dff6a"),
+          o(l, 13, 6, 3, 3, "#3dff6a"),
+          o(l, 7, 7, 2, 1, "#f4fff6"),
+          o(l, 14, 7, 2, 1, "#f4fff6"));
         break;
     }
     return fe(u, !0);
@@ -8250,8 +8254,8 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
   });
   Object.assign(Ea, {
     blasters: {
-      name: "STUN BLASTERS",
-      desc: "TWIN GREEN STUN SHOTS. Z TO FIRE. NOBODY DIES.",
+      name: "GREEN LASER BLASTERS",
+      desc: "TWIN GREEN LASERS. Z / ITEM TO FIRE. THEY STUN. NOBODY DIES.",
       jingle: "item",
     },
     lasso: {
@@ -11846,7 +11850,7 @@ ram_mem_amulet: [
   });
   Object.assign(oa, {
     yard_intro: [
-      h("ros", "THREE DROIDS. TWIN LASERS. X. THEY SHATTER. THEY DO NOT BLEED."),
+      h("ros", "THREE DROIDS. GREEN LASERS. Z. THEY SHATTER. THEY DO NOT BLEED."),
       h("ros", "C IS THE BOARD. E TALKS. ENTER IS THE BOOK. THE POUR IS THROUGH THE GATE WHEN THEY ARE DOWN."),
     ],
     yard_open: [h("ros", "GATE'S OPEN. HOME."), { t: "save" }],
@@ -13983,7 +13987,7 @@ ram_mem_amulet: [
         visited: ua,
         wanted: A.story === "ros" ? A.wanted || 0 : void 0,
         wep: A.story === "ros" ? d.wep || "lasers" : void 0,
-        tool: A.story === "ros" ? d.tool || "lasso" : void 0,
+        tool: A.story === "ros" ? d.tool || "lasers" : void 0,
         act: A.story === "ros" ? d.act || "" : void 0,
         pri: slotsOn() ? d.pri || "" : void 0,
         sec: slotsOn() ? d.sec || "" : void 0,
@@ -14151,8 +14155,8 @@ ram_mem_amulet: [
           ba(e.area, e.x / 16 - 0.5, e.y / 16 - 0.5, e.dir),
           A.story === "ros" &&
             ((A.wanted = e.wanted || 0),
-            (d.wep = e.wep || (e.items && e.items.justice ? "justice" : "lasers")),
-            (d.tool = e.tool || (e.items && e.items.brand ? "brand" : "lasso")),
+            (d.wep = e.wep || "lasers"),
+            (d.tool = e.tool || "lasers"),
             (d.boardId =
               e.boardId ||
               (e.items && e.items.skimmer
@@ -14162,7 +14166,6 @@ ram_mem_amulet: [
                   : e.items && (e.items.dust || e.items.board)
                     ? "dust"
                     : "")),
-            (d.z = "lasso"),
             (d.act = e.act || ""),
             migrateRosKit(),
             (d.cds = {}),
@@ -14171,6 +14174,8 @@ ram_mem_amulet: [
             (d.charge = 0),
             migrateSlots(e),
             grantStoryBoard(),
+            ee.ros_lasers_default || armRosBlasters(),
+            xe(),
             e.migrated && Q("THE ROAD SHIFTED. YOUR GEAR CAME WITH YOU.")),
           A.story !== "ros" &&
             ((d.cds = {}),
@@ -15373,7 +15378,7 @@ ram_mem_amulet: [
             Math.abs(f.x - a.x) < f.def.w / 2 + 2 &&
             Math.abs(f.y - 5 - a.y) < f.def.h / 2 + 3
           ) {
-            (_a(f, a.kind === "justice" ? 3 : E, a.x - a.vx, a.y - a.vy, 0),
+            (_a(f, a.kind === "justice" ? 3 : E, a.x - a.vx, a.y - a.vy, a.kind === "stun" ? 0.55 : 0),
               (a.t = 99),
               (t || a.kind === "blast" || a.kind === "heavy") &&
                 ne(a.x, a.y, 10, ["#ffe066", "#ff9a3d", "#ffffff"], 50));
@@ -17945,22 +17950,33 @@ ram_mem_amulet: [
         (A.menu = A.hasSave ? 1 : 0),
         Ke(row.id === "ros" ? "west" : row.id === "ramshackle" ? "sea" : "title"));
     }
+    function armRosBlasters() {
+      let off = "";
+      for (let id of [d.sec, d.tool, d.act, d.pri])
+        if (id && id !== "lasers" && !isMelee(id) && ownedItem(id)) {
+          off = id;
+          break;
+        }
+      ((d.items.blasters = !0),
+        (d.melee = "strike"),
+        (d.wep = "lasers"),
+        (d.tool = "lasers"),
+        (d.act = "lasers"),
+        (d.pri = "lasers"),
+        (d.sec = off),
+        d.z === "lasso" && (d.z = "bow"),
+        (ee.ros_lasers_default = !0),
+        settleHands());
+    }
     function EtRos() {
       (Kt(),
         (d.coins = 0),
         (d.arrows = 0),
         (A.wanted = 0),
         (A.spot = !1),
-        (d.items.blasters = !0),
-        (d.melee = "strike"),
-        (d.wep = "lasers"),
-        (d.tool = "lasso"),
-        (d.act = "lasers"),
-        (d.pri = "lasers"),
-        (d.sec = ""),
         (d.cds = {}),
-        (d.z = "lasso"),
         (d.brandCd = 0),
+        armRosBlasters(),
         (A.state = "play"),
         (A.st = 0),
         grantStoryBoard(),
@@ -18125,7 +18141,7 @@ ram_mem_amulet: [
       for (let a = 0; a < 16; a++)
         I((a * 23) % 320, 20 + ((a * 17) % 70), 2, 2, "#fff2c8");
       (v(n, "SPACE RIDERS", 160, 8, "#ff4fd8", 2, "center", "#2a0a14"),
-        v(n, window.__SQ_BUILD || "b38", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
+        v(n, window.__SQ_BUILD || "b39", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
         v(n, "SIDE QUESTS COME HOME", 160, 28, "#ffcc33", 1, "center", "#2a0a14"));
       let a = 58;
       for (let t = 0; t < STORY_ROWS.length; t++) {
@@ -18866,7 +18882,7 @@ ram_mem_amulet: [
         }
       } else {
         let gear = [
-          ["lasers", "TWIN LASERS"],
+          ["lasers", "GREEN LASERS"],
           ["justice", "JUSTICE SHOT"],
           ["lasso", "ROPE"],
           ["brand", "STAR BRAND"],
@@ -18874,13 +18890,13 @@ ram_mem_amulet: [
           ["hopper", "MESA HOPPER"],
           ["skimmer", "SAND SKIMMER"],
         ];
-        (v(n, "X " + slotName(d.pri), 12, 64, "#ffcc33", 1, "", ""),
-          v(n, "Z " + slotName(d.sec), 170, 64, "#4ff0ff", 1, "", ""));
+        (v(n, "X " + slotName(meleeNow()), 12, 64, "#ffcc33", 1, "", ""),
+          v(n, "Z " + slotName(heldItem()), 170, 64, "#4ff0ff", 1, "", ""));
         let sel = A.gearSel || 0;
         for (let i = 0; i < gear.length; i++) {
           let g = gear[i],
             y = 78 + i * 14,
-            mark = d.pri === g[0] ? " X" : d.sec === g[0] ? " Z" : d.boardId === g[0] ? " ON" : "";
+            mark = meleeNow() === g[0] ? " X" : heldItem() === g[0] ? " Z" : d.boardId === g[0] ? " ON" : "";
           v(
             n,
             (sel === i ? "> " : "  ") + g[1] + mark,
@@ -19051,7 +19067,7 @@ ram_mem_amulet: [
       A.brands = A.brands.filter((b) => b.t > 0);
     }
     let ROS_ACTS = [
-      ["lasers", "TWIN LASERS"],
+      ["lasers", "GREEN LASERS"],
       ["justice", "JUSTICE SHOT"],
       ["lasso", "ROPE"],
       ["brand", "STAR BRAND"],
@@ -19089,7 +19105,7 @@ ram_mem_amulet: [
     function slotName(id, short) {
       let full = {
           strike: "STUN STRIKE",
-          lasers: "TWIN LASERS",
+          lasers: "GREEN LASERS",
           justice: "JUSTICE SHOT",
           lasso: "ROPE",
           brand: "STAR BRAND",
@@ -19519,9 +19535,17 @@ ram_mem_amulet: [
       return list.length ? list[0] : "";
     }
     function heldItem() {
-      if (d.sec && !isMelee(d.sec) && ownedItem(d.sec)) return d.sec;
-      if (d.pri && !isMelee(d.pri) && ownedItem(d.pri)) return d.pri;
-      if (d.tool && !isMelee(d.tool) && ownedItem(d.tool)) return d.tool;
+      if (A.story === "ros") {
+        if (d.tool && !isMelee(d.tool) && ownedItem(d.tool)) return d.tool;
+        if (d.sec && !isMelee(d.sec) && ownedItem(d.sec)) return d.sec;
+        if (d.act && !isMelee(d.act) && ownedItem(d.act)) return d.act;
+        if (d.pri && !isMelee(d.pri) && ownedItem(d.pri)) return d.pri;
+        if (ownedItem("lasers")) return "lasers";
+      } else {
+        if (d.sec && !isMelee(d.sec) && ownedItem(d.sec)) return d.sec;
+        if (d.pri && !isMelee(d.pri) && ownedItem(d.pri)) return d.pri;
+        if (d.tool && !isMelee(d.tool) && ownedItem(d.tool)) return d.tool;
+      }
       let list = ownedGear();
       return list.length ? list[0] : "";
     }
@@ -19538,6 +19562,30 @@ ram_mem_amulet: [
       else if (isMelee(d.pri) && ownedItem(d.pri)) melee = d.pri;
       else if (isMelee(d.sec) && ownedItem(d.sec)) melee = d.sec;
       else melee = ownedMelee()[0] || "";
+      if (A.story === "ros") {
+        let selected =
+          d.tool && !isMelee(d.tool) && ownedItem(d.tool)
+            ? d.tool
+            : d.act && !isMelee(d.act) && ownedItem(d.act)
+              ? d.act
+              : ownedItem("lasers")
+                ? "lasers"
+                : "";
+        let off = "";
+        for (let id of [d.sec, d.pri])
+          if (id && id !== selected && !isMelee(id) && ownedItem(id)) {
+            off = id;
+            break;
+          }
+        ((d.melee = melee || "strike"),
+          (d.wep = selected === "justice" ? "justice" : "lasers"),
+          (d.pri = selected),
+          (d.sec = off),
+          (d.tool = selected),
+          (d.act = selected),
+          selected === "lasso" ? (d.z = "lasso") : d.z === "lasso" && (d.z = "bow"));
+        return;
+      }
       let items = [];
       for (let id of [d.pri, d.sec, d.tool, d.wep])
         if (id && !isMelee(id) && ownedItem(id) && items.indexOf(id) < 0) items.push(id);
@@ -19587,12 +19635,12 @@ ram_mem_amulet: [
       if (!d.pri || isMelee(d.pri) || !ownedItem(d.pri)) d.pri = gear[0];
       let rest = gear.filter((id) => id !== d.pri);
       if (!rest.length) {
-        ((d.sec = ""), (d.tool = d.pri), D.sel(), Q(slotName(d.pri)), xe());
+        ((d.sec = ""), (d.tool = d.pri), (d.act = d.pri), D.sel(), Q(slotName(d.pri)), xe());
         return;
       }
       let cur = rest.indexOf(d.sec) >= 0 ? d.sec : rest[0],
         next = rest[(rest.indexOf(cur) + 1) % rest.length];
-      ((d.sec = next), (d.tool = next), D.sel(), Q(slotName(next)), xe());
+      ((d.sec = next), (d.tool = next), (d.act = next), D.sel(), Q(slotName(next)), xe());
     }
     function slotCombat(e) {
       let it = heldItem();
@@ -19666,8 +19714,11 @@ ram_mem_amulet: [
           vy: C[1] * 260,
           t: 0,
           kind: "stun",
+          laser: !0,
+          col: "#3dff6a",
           dir: d.dir,
         });
+        oe(d.x + C[0] * 16 + px, d.y - 8 + C[1] * 10 + py, C[0] * 30, C[1] * 30, 0.16, "#3dff6a", 2);
       }
       ((d.swingKind = ""), spend("lasers", 0.22), (d.atk = 0.1), (A.shake = 0.05), D.laser());
     }
@@ -21463,7 +21514,7 @@ ram_mem_amulet: [
       }
     }
     function drawStunStrike(e, a) {
-      if (weaponNow() !== "strike" || !(d.atk > 0)) return;
+      if (weaponNow() !== "strike" || d.swingKind !== "melee" || !(d.atk > 0)) return;
       let base = [Math.PI / 2, -Math.PI / 2, Math.PI, 0][d.dir],
         swing = 1 - Math.min(1, d.atk / 0.26),
         ang = base - 1.15 + swing * 2.3,
@@ -21508,6 +21559,28 @@ ram_mem_amulet: [
           n.beginPath(),
           n.arc(e, a - 12, 18, ang - 0.9, ang + 0.15),
           n.stroke());
+      }
+    }
+    function drawHeldLasers(e, a) {
+      if (A.story !== "ros" || heldItem() !== "lasers") return;
+      let dir = Ne[d.dir] || [1, 0],
+        ang = Math.atan2(dir[1], dir[0]),
+        hot = (d.cds && d.cds.lasers) > 0.05;
+      for (let side of [-1, 1]) {
+        let x = e + dir[0] * 10 - dir[1] * side * 6,
+          y = a - 14 + dir[1] * 6 + dir[0] * side * 5;
+        (n.save(),
+          n.translate(x, y),
+          n.rotate(ang),
+          (n.fillStyle = "#e8e8ee"),
+          n.fillRect(-7, -2, 8, 3),
+          (n.fillStyle = "#9aa0aa"),
+          n.fillRect(-7, -2, 8, 1),
+          (n.fillStyle = hot ? "#d8ffe0" : "#3dff6a"),
+          n.fillRect(0, -2, 5, 3),
+          (n.fillStyle = "#ffffff"),
+          n.fillRect(3, -1, 2, 1),
+          n.restore());
       }
     }
     function drawHeldBlast(e, a) {
@@ -21604,6 +21677,7 @@ ram_mem_amulet: [
         drawStunStrike(e, a),
         drawHeldAxe(e, a),
         drawHeldBlast(e, a),
+        drawHeldLasers(e, a),
         d.arrowCd > 0.12 && d.z === "raygun" && d.items.raygun)
       ) {
         let c = e + i[0] * 9,
@@ -22134,7 +22208,7 @@ ram_mem_amulet: [
       let e = A.t;
       (v(n, "SPACE RIDERS", 160, 14, "#ff4fd8", 3, "center", "#2a0a3a"),
         v(n, "SKIPPY'S QUEST", 160, 42, "#ffcc33", 2, "center", "#2a0a3a"),
-        v(n, window.__SQ_BUILD || "b38", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
+        v(n, window.__SQ_BUILD || "b39", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
       let a = (s, E, f, c, S) => {
         let y = Ue(s, S, 0);
         n.drawImage(
@@ -22459,7 +22533,7 @@ ram_mem_amulet: [
           return tabs.concat([{ label: "RETURN TO SKIPPY", enabled: !0, on: !1 }]);
         if (page === 2) {
           let gear = [
-            ["lasers", "TWIN LASERS"],
+            ["lasers", "GREEN LASERS"],
             ["justice", "JUSTICE SHOT"],
             ["lasso", "ROPE"],
             ["brand", "STAR BRAND"],
@@ -22471,7 +22545,7 @@ ram_mem_amulet: [
             gear.map((g, i) => ({
               label:
                 g[1] +
-                (d.wep === g[0] ? "  ARMED" : d.tool === g[0] ? "  HELD" : d.boardId === g[0] ? "  ON" : ""),
+                (heldItem() === g[0] ? "  Z" : d.boardId === g[0] ? "  ON" : ""),
               enabled: rosOwned(g[0]),
               on: (A.gearSel || 0) === i,
             })),
@@ -23626,15 +23700,23 @@ ram_mem_amulet: [
     }
     function Hs(e, a, t) {
       if (e.kind === "stun" || e.kind === "justice") {
-        let i = Math.atan2(e.vy, e.vx);
+        let i = Math.atan2(e.vy, e.vx),
+          beam = e.kind === "justice" ? 14 : 22,
+          col = e.kind === "justice" ? "#fff6c0" : e.col || "#3dff6a";
         return (
-          (n.strokeStyle = e.kind === "justice" ? "#fff6c0" : "#3dff6a"),
-          (n.lineWidth = e.kind === "justice" ? 4 : 2),
+          (n.strokeStyle = col),
+          (n.lineWidth = e.kind === "justice" ? 4 : 4),
           n.beginPath(),
-          n.moveTo(a - Math.cos(i) * 8, t - Math.sin(i) * 8),
+          n.moveTo(a - Math.cos(i) * beam, t - Math.sin(i) * beam),
           n.lineTo(a, t),
           n.stroke(),
-          I(a - 1, t - 1, 3, 3, "#d8ffe0"),
+          (n.strokeStyle = "#ffffff"),
+          (n.lineWidth = 1),
+          n.beginPath(),
+          n.moveTo(a - Math.cos(i) * (beam - 6), t - Math.sin(i) * (beam - 6)),
+          n.lineTo(a, t),
+          n.stroke(),
+          I(a - 1, t - 1, 3, 3, e.kind === "justice" ? "#fff6c0" : "#f4fff6"),
           !0
         );
       }
@@ -25171,7 +25253,7 @@ ram_mem_amulet: [
           enterStory(id);
           return Bt();
         },
-        build: () => window.__SQ_BUILD || "b38",
+        build: () => window.__SQ_BUILD || "b39",
         cast: () => castSpell(),
         hud: () => hudBits(),
         fightHud: () => fightHud(),

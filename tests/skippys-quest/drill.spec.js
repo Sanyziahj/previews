@@ -39,7 +39,7 @@ async function advance(page, n = 6) {
 test('version, home, and Cash leave the lanes clear', async ({ page }) => {
   const errors = await bootLive(page);
   const build = await page.evaluate(() => __SQ.build());
-  expect(build).toBe('b38');
+  expect(build).toBe('b39');
   const sub = await page.evaluate(() => __SQ.chapters().find((c) => c.id === 'skippy').sub);
   expect(sub).toContain('MAIN');
   await page.evaluate(() => {
