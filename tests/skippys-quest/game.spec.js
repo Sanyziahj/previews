@@ -68,6 +68,15 @@ test('chapter select keeps Santt last and the page unlisted', async ({ page }) =
 
 test('main yard, lasers, and coming home to the order', async ({ page }) => {
   const errors = await boot(page);
+  await page.evaluate(() => {
+    const raw = localStorage.getItem('sq_save_v1');
+    const save = raw ? JSON.parse(raw) : {
+      v: 1, area: 'home', x: 160, y: 160, dir: 0, hp: 6, maxHp: 6,
+      items: {}, keys: {}, bigKeys: {}, party: [], visited: {}, flags: {},
+    };
+    save.flags = Object.assign({}, save.flags, { ros_home_end: true });
+    localStorage.setItem('sq_save_v1', JSON.stringify(save));
+  });
   await page.evaluate(() => __SQ.step(20));
   await tap(page, 'down');
   await tap(page, 'attack');
@@ -1115,7 +1124,12 @@ test('active play frame work stays inside a 60fps budget', async ({ page }) => {
 
 test('the chair ends the tale and the road home stays open', async ({ page }) => {
   const errors = await boot(page, { save: { skippy: DONE_SKIPPY } });
-  await page.evaluate(() => { __SQ.G.state = 'stories'; __SQ.G.menu = 1; __SQ.G.st = 1; __SQ.step(2); });
+  await page.evaluate(() => {
+    const save = JSON.parse(localStorage.getItem('sq_save_v1'));
+    save.flags = Object.assign({}, save.flags, { ros_home_end: true });
+    localStorage.setItem('sq_save_v1', JSON.stringify(save));
+    __SQ.G.state = 'stories'; __SQ.G.menu = 1; __SQ.G.st = 1; __SQ.step(2);
+  });
   await page.waitForTimeout(320);
   await page.evaluate(() => { __SQ.press('attack', true); __SQ.step(2); __SQ.press('attack', false); __SQ.step(2); });
   await page.waitForTimeout(320);
@@ -1280,7 +1294,13 @@ test('the chair ends the tale and the road home stays open', async ({ page }) =>
 
 test('a tale with no Skippy save returns to the chapter list', async ({ page }) => {
   const errors = await boot(page);
-  await page.evaluate(() => { __SQ.G.state = 'stories'; __SQ.G.menu = 1; __SQ.G.st = 1; __SQ.step(2); });
+  await page.evaluate(() => {
+    localStorage.setItem('sq_save_ros_v1', JSON.stringify({
+      v: 1, area: 'ros_yard', x: 80, y: 96, dir: 3, hp: 6, maxHp: 6,
+      items: {}, keys: {}, bigKeys: {}, party: [], visited: {}, flags: { woke: true },
+    }));
+    __SQ.G.state = 'stories'; __SQ.G.menu = 1; __SQ.G.st = 1; __SQ.step(2);
+  });
   await page.waitForTimeout(320);
   await page.evaluate(() => { __SQ.press('attack', true); __SQ.step(2); __SQ.press('attack', false); __SQ.step(2); });
   await page.waitForTimeout(320);
@@ -1579,6 +1599,9 @@ test('Ramshackle chapter: relics, worlds, bosses, and the road home', async ({ p
   fs.mkdirSync(RAM, { recursive: true });
   const errors = await boot(page, { save: { skippy: DONE_SKIPPY } });
   await page.evaluate(() => {
+    const save = JSON.parse(localStorage.getItem('sq_save_v1'));
+    save.flags = Object.assign({}, save.flags, { ram_home_end: true });
+    localStorage.setItem('sq_save_v1', JSON.stringify(save));
     const S = __SQ;
     S.G.state = 'stories';
     S.G.menu = 5;

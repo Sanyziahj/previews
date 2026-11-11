@@ -3,7 +3,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script>window.__SQ_BUILD="b41";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b41(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b41");location.replace(u.href);}</script>
+<script>window.__SQ_BUILD="b42";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b42(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b42");location.replace(u.href);}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Space Riders: Skippy's Quest</title><link rel="icon" href="data:,">
 <meta name="description" content="Space Riders: Skippy's Quest - a free 16-bit top-down action adventure browser game. The Red King is missing. Ride with ROS through the Sand Dungeon, take Cash's portals to the Seaport and Ramshackle the Viking, win Ronin's flaming sword, beat the house at the Andromeda Casino and stop the Overlord on the Moon, survive the meteor shower with Blaze and earn your space board at the Crossroad and cross the mirror into the Dark World, then storm Fright's castle and bring the Red King home. Chapters 1-9 (Complete) out now.">
@@ -3265,6 +3265,15 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           talk: "drill_moon",
           hide: "drill_joined",
         },
+        {
+          id: "drill_teller",
+          look: "drill",
+          x: 5,
+          y: 7,
+          dir: 1,
+          talk: "drill_tale_talk",
+          show: "ch5_done",
+        },
         { id: "kal", x: 21.5, y: 4, dir: 0, talk: "kal_moon" },
         { id: "al", x: 3, y: 13, dir: 3, talk: "al_moon" },
         { id: "x_colonist", x: 16.5, y: 7, dir: 0, talk: "x_col1" },
@@ -3933,7 +3942,11 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
     m.to === "nx_orbit" && (m.label = "ORBIT");
   });
   Object.assign(Ce, {
-    cash_nexus: [{ need: "ch5_done", s: "cash_n6" }].concat(Ce.cash_nexus),
+    cash_nexus: [
+      { need: "tale_drill", s: "cash_n6" },
+      { need: "ch5_done", not: "drill_colony_hint", s: "cash_drill_back" },
+      { need: "ch5_done", s: "cash_n6" },
+    ].concat(Ce.cash_nexus),
     blaze_talk: [{ s: "blaze_talk" }],
     santt_orbit: [{ s: "santt_orbit" }],
     rusty_dock: [{ s: "rusty_dock" }],
@@ -3941,6 +3954,18 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
     kal_dock: [{ s: "kal_dock" }],
   });
   Object.assign(oa, {
+    cash_drill_back: [
+      h(
+        "wizard",
+        "THE ORBIT PORTAL TAKES YOU TO THE ORBITAL DOCK. MIND THE ROCKS, SKIPPY.",
+      ),
+      h(
+        "wizard",
+        "DRILL IS BACK AT MOON COLONY 7, IF YOU WANT HIS TALE. THE ROAD STILL GOES FORWARD.",
+      ),
+      { t: "flag", f: "drill_colony_hint" },
+      { t: "fn", f: "heal" },
+    ],
     cash_n6: [
       h(
         "wizard",
@@ -9529,13 +9554,13 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       save: "sq_save_ds_v1",
       need: "ch5_done",
       heard: "tale_drill",
-      area: "ac_hub",
-      x: 12,
-      y: 10,
+      area: "moon",
+      x: 5,
+      y: 7,
       face: 1,
-      objective: "ACADEMY: DRILL IS ON THE RADIO",
+      objective: "MOON COLONY: DRILL HAS A TALE",
       close: "THE MEMORY ENDS. THE BLASTER STAYS.",
-      place: "A CALL FROM THE ACADEMY",
+      place: "A TALE AT THE MOON COLONY",
     },
   ];
   var CHOICES = {
@@ -10362,10 +10387,10 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         h("drill", "THE MEMORY IS YOURS. THE BLASTER IS ON YOUR BELT. THE LASER ROW STILL TRAINS."),
       ],
       tale_drill_yes: [
-        h("drill", "THEN SIT. YOU WILL WAKE HERE, WITH THE BLASTER."),
+        h("drill", "THEN SIT. YOU WILL WAKE IN BASIC TRAINING, WITH THE BLASTER."),
         { t: "fn", f: "taleYes" },
       ],
-      tale_drill_no: [h("drill", "THE RADIO STAYS OPEN. COME BACK WHEN YOU CAN SIT.")],
+      tale_drill_no: [h("drill", "THE MEMORY KEEPS. COME BACK WHEN YOU CAN SIT.")],
       shadow_ram_hand: [
         h("shadow", "THE SHERIFF'S TALE IS TOLD. THERE IS ANOTHER."),
         h("shadow", "RAMSHACKLE FELL FROM ABOVE THE SKY. I KEPT THE DOOR. I DO NOT KEEP THE MAN."),
@@ -10457,6 +10482,10 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       { need: "tale_ram", s: "tale_ram_told" },
       { s: "ram_tale_offer" },
     ],
+    drill_tale_talk: [
+      { need: "tale_drill", s: "tale_drill_told" },
+      { s: "drill_tale_offer" },
+    ],
     spike_dreamland: [{ s: "spike_ram" }],
     mikall_mars: [{ s: "mikall_ram" }],
     shadow_mars: [{ s: "shadow_ram" }],
@@ -10486,6 +10515,16 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
     tale_ram_told: [
       h("ramshackle", "YOU HEARD IT. THE DOOR IS SEALED. FRIGHT IS NOT BACK IN EXILE. MY BROTHERS ARE STILL UNSOUGHT."),
       { t: "choice", a: "tale_ram_choice", tale: "ram" },
+    ],
+    drill_tale_offer: [
+      h("drill", "RIDER. THE COLONY IS HOLDING. I KEPT A MEMORY."),
+      h("drill", "MOON, MARS, CANDY, PLUTO. I WALKED THEM. THIS IS NOT A TRICK."),
+      h("drill", "SIT. YOU WAKE IN BASIC TRAINING, WITH THE BLASTER."),
+      { t: "choice", a: "tale_drill_choice", tale: "drill" },
+    ],
+    tale_drill_told: [
+      h("drill", "YOU SAT THE MEMORY. THE BLASTER STAYS ON YOUR BELT. I AM STILL HERE."),
+      { t: "choice", a: "tale_drill_choice", tale: "drill" },
     ],
     tale_ram_keep: [h("ramshackle", "RIDE YOUR OWN ROAD. I WILL BE ON THIS DOCK.")],
     tale_ram_close: [
@@ -15480,7 +15519,7 @@ ram_mem_amulet: [
             ((A.menu = (A.menu + STORY_ROWS.length - 1) % STORY_ROWS.length),
               D.sel());
           if ((U.attackE || U.talkE || U.mapE || Qe) && A.st > 0.3)
-            STORY_ROWS[A.menu].play
+            chapterMenuOpen(STORY_ROWS[A.menu])
               ? (M(), ht(), enterStory(STORY_ROWS[A.menu].id))
               : D.nope();
         }
@@ -15842,6 +15881,46 @@ ram_mem_amulet: [
         return !1;
       }
     }
+    function taleRowId(id) {
+      return id === "ros" || id === "ramshackle" || id === "drill";
+    }
+    function taleSaveKey(id) {
+      return id === "ros"
+        ? "sq_save_ros_v1"
+        : id === "ramshackle"
+          ? "sq_save_ram_v1"
+          : id === "drill"
+            ? "sq_save_ds_v1"
+            : "";
+    }
+    function taleHeardId(id) {
+      return id === "ramshackle" ? "ram" : id === "drill" ? "drill" : id === "ros" ? "ros" : "";
+    }
+    function taleHomeFlag(id) {
+      return id === "ros" ? "ros_home_end" : id === "ramshackle" ? "ram_home_end" : id === "drill" ? "ds_home_end" : "";
+    }
+    function saveFlags(key) {
+      try {
+        let s = JSON.parse(localStorage.getItem(key) || "null");
+        return s && s.flags ? s.flags : null;
+      } catch (e) {
+        return null;
+      }
+    }
+    function chapterMenuOpen(row) {
+      if (!row || !row.play) return !1;
+      if (!taleRowId(row.id)) return !0;
+      if (taleHeard(taleHeardId(row.id))) return !0;
+      let end = taleHomeFlag(row.id),
+        skip = saveFlags("sq_save_v1");
+      if (skip && skip[end]) return !0;
+      let tale = saveFlags(taleSaveKey(row.id));
+      if (tale && tale[end]) return !0;
+      try {
+        if (localStorage.getItem(taleSaveKey(row.id))) return !0;
+      } catch (e) {}
+      return !1;
+    }
     function skippyPostgame() {
       try {
         let raw = localStorage.getItem("sq_save_v1");
@@ -15878,7 +15957,7 @@ ram_mem_amulet: [
       return [
         { id: "ros", text: mark("tale_ros", reached("ch2_done")) + " ROS  AFTER CHAPTER 2" },
         { id: "ram", text: mark("tale_ram", reached("ch3_done")) + " RAM  AFTER CHAPTER 3" },
-        { id: "drill", text: mark("tale_drill", reached("ch5_done")) + " DRILL  THE ACADEMY RADIO" },
+        { id: "drill", text: mark("tale_drill", reached("ch5_done")) + " DRILL  MOON COLONY" },
       ];
     }
     function chapterStatus(id) {
@@ -15907,6 +15986,7 @@ ram_mem_amulet: [
       return "";
     }
     function rowSub(i) {
+      if (taleRowId(i.id) && !chapterMenuOpen(i)) return "HEAR IT ON SKIPPY'S RIDE";
       if ((i.id === "ros" || i.id === "ramshackle" || i.id === "drill") && (taleHeard(i.id === "ramshackle" ? "ram" : i.id === "drill" ? "drill" : "ros") || chapterStatus(i.id) === "COMPLETE"))
         return "THE TALE IS TOLD";
       let st = chapterStatus(i.id);
@@ -16044,7 +16124,7 @@ ram_mem_amulet: [
       Bt() || Et();
       ((ee.tale_drill = !0), (ee.heavy_got = !0));
       (grantHeavy(),
-        ba("ac_hub", 12, 10, 1),
+        ba("moon", 5, 8, 1),
         (ue = { item: "heavy", n: 1, t: 0 }),
         (d.hold = "heavy"),
         (d.holdT = 8),
@@ -18164,18 +18244,19 @@ ram_mem_amulet: [
       for (let a = 0; a < 16; a++)
         I((a * 23) % 320, 20 + ((a * 17) % 70), 2, 2, "#fff2c8");
       (v(n, "SPACE RIDERS", 160, 8, "#ff4fd8", 2, "center", "#2a0a14"),
-        v(n, window.__SQ_BUILD || "b41", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
+        v(n, window.__SQ_BUILD || "b42", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
         v(n, "SIDE QUESTS COME HOME", 160, 28, "#ffcc33", 1, "center", "#2a0a14"));
       let a = 58;
       for (let t = 0; t < STORY_ROWS.length; t++) {
         let i = STORY_ROWS[t],
           s = a + t * 16,
           E = A.menu === t,
-          f = i.play ? (E ? "#ffcc33" : "#ffffff") : "#6a6478";
+          open = chapterMenuOpen(i),
+          f = open ? (E ? "#ffcc33" : "#ffffff") : "#6a6478";
         (E && I(28, s - 3, 264, 15, "#2a0a14cc"),
           v(n, i.name, 160, s, f, 1, "center", "#000"),
-          !i.play && v(n, "SOON", 286, s, "#6a6478", 1, "right", ""),
-          i.play &&
+          !open && v(n, i.play ? "LOCKED" : "SOON", 286, s, "#6a6478", 1, "right", ""),
+          open &&
             v(n, chapterStatus(i.id) || "NEW", 286, s, "#3dff6a", 1, "right", ""),
           E &&
             Math.floor(A.t * 4) % 2 &&
@@ -18388,7 +18469,7 @@ ram_mem_amulet: [
       if (A.state === "stories")
         e.textContent =
           "RIDER CHAPTERS\n" +
-          STORY_ROWS.map((a) => a.name + " " + rowSub(a) + (a.play ? "" : " SOON")).join("\n") +
+          STORY_ROWS.map((a) => a.name + " " + rowSub(a) + (chapterMenuOpen(a) ? "" : a.play ? " LOCKED" : " SOON")).join("\n") +
           "\nmenu " +
           A.menu;
       else if (A.state === "title")
@@ -22343,7 +22424,7 @@ ram_mem_amulet: [
       let e = A.t;
       (v(n, "SPACE RIDERS", 160, 14, "#ff4fd8", 3, "center", "#2a0a3a"),
         v(n, "SKIPPY'S QUEST", 160, 42, "#ffcc33", 2, "center", "#2a0a3a"),
-        v(n, window.__SQ_BUILD || "b41", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
+        v(n, window.__SQ_BUILD || "b42", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
       let a = (s, E, f, c, S) => {
         let y = Ue(s, S, 0);
         n.drawImage(
@@ -22626,8 +22707,8 @@ ram_mem_amulet: [
         return [{ label: A.state === "poster" ? "TITLE" : ue ? "OK" : "NEXT", enabled: !0, on: !0 }];
       if (A.state === "stories")
         return STORY_ROWS.map((r, i) => ({
-          label: r.name + (r.play ? "  " + (chapterStatus(r.id) || "NEW") : "  SOON"),
-          enabled: !!r.play,
+          label: r.name + (chapterMenuOpen(r) ? "  " + (chapterStatus(r.id) || "NEW") : r.play ? "  LOCKED" : "  SOON"),
+          enabled: chapterMenuOpen(r),
           on: A.menu === i,
         }));
       if (A.state === "title")
@@ -22760,7 +22841,7 @@ ram_mem_amulet: [
       }
       if (A.state === "stories") {
         let row = STORY_ROWS[i];
-        if (!row || !row.play) return;
+        if (!row || !chapterMenuOpen(row)) return;
         ((A.menu = i), M(), ht(), enterStory(row.id));
         return;
       }
@@ -25339,7 +25420,7 @@ ram_mem_amulet: [
         cycleMelee: () => cycleMelee(),
         objective: () =>
           A.story === "ros" ? rosObjective() : A.story === "ramshackle" ? ramObjective() : A.story === "drill" ? dsObjective() : skippyObjective(),
-        chapters: () => STORY_ROWS.map((r) => ({ id: r.id, status: chapterStatus(r.id), sub: rowSub(r) })),
+        chapters: () => STORY_ROWS.map((r) => ({ id: r.id, status: chapterStatus(r.id), sub: rowSub(r), open: chapterMenuOpen(r) })),
         riderLog: () => riderLog(),
         gearTable: () => GEAR_TABLE,
         nexuses: () => NEXUS_TABLE.map((r) => Object.assign({}, r)),
@@ -25385,7 +25466,7 @@ ram_mem_amulet: [
           enterStory(id);
           return Bt();
         },
-        build: () => window.__SQ_BUILD || "b41",
+        build: () => window.__SQ_BUILD || "b42",
         cast: () => castSpell(),
         hud: () => hudBits(),
         fightHud: () => fightHud(),
