@@ -60,10 +60,10 @@ function shot(page, name) {
 test('after the credits Skippy lands at Cash, and home still opens DreamLand', async ({ page }) => {
   test.setTimeout(90000);
   const errors = await boot(page, { ros: ROS_SAVE, ram: RAM_SAVE, ds: DS_SAVE });
-  expect(await page.evaluate(() => __SQ.build())).toBe('b39');
+  expect(await page.evaluate(() => __SQ.build())).toBe('b40');
   const cache = await page.evaluate(() => document.querySelector('script').textContent);
-  expect(cache).toContain('window.__SQ_BUILD="b39"');
-  expect(cache).toContain('v=b39');
+  expect(cache).toContain('window.__SQ_BUILD="b40"');
+  expect(cache).toContain('v=b40');
 
   await page.evaluate(() => {
     const S = __SQ;
@@ -221,7 +221,7 @@ async function placeRos(page) {
   });
 }
 
-test('keyboard ATTACK is ROS stun strike and ITEM still fires the blasters', async ({ page }) => {
+test('keyboard ATTACK fires ROS lasers and does not melee', async ({ page }) => {
   const errors = await boot(page);
   await placeRos(page);
   await page.locator('#game').focus();
@@ -229,11 +229,13 @@ test('keyboard ATTACK is ROS stun strike and ITEM still fires the blasters', asy
     melee: __SQ.melee(),
     hands: __SQ.hands(),
     attackon: document.documentElement.dataset.attackon,
+    hud: __SQ.hud().map((b) => b.text).join(' '),
   }));
-  expect(before.melee).toBe('strike');
-  expect(before.hands.item).not.toBe('strike');
-  expect(before.hands.melee).toBe('strike');
-  expect(['lasers', 'lasso']).toContain(before.hands.item);
+  expect(before.melee).toBe('');
+  expect(before.hands.melee).toBe('');
+  expect(before.hands.item).toBe('lasso');
+  expect(before.hud).toMatch(/X LASERS/);
+  expect(before.hud).not.toMatch(/X STUN/);
   await page.keyboard.down('KeyX');
   await page.waitForTimeout(80);
   await page.keyboard.up('KeyX');
@@ -243,14 +245,13 @@ test('keyboard ATTACK is ROS stun strike and ITEM still fires the blasters', asy
     return {
       dead: !!(foe && foe.dead),
       hp: foe && foe.hp,
-      shots: __SQ.shots.map((s) => s.kind),
+      shots: __SQ.shots.map((s) => ({ kind: s.kind, col: s.col, laser: !!s.laser })),
       swing: __SQ.P.swingKind,
       wep: __SQ.gear().wep,
     };
   });
   expect(struck.dead, JSON.stringify(struck)).toBe(true);
-  expect(struck.shots.join(',')).not.toMatch(/stun|justice/);
-  expect(struck.swing).toBe('melee');
+  expect(struck.swing).not.toBe('melee');
   expect(struck.wep).toBe('lasers');
 
   await page.evaluate(() => {
@@ -258,13 +259,14 @@ test('keyboard ATTACK is ROS stun strike and ITEM still fires the blasters', asy
     const foe = S.ents.find((e) => e.k === 'dummy' && e.x !== 160) || S.ents.find((e) => e.k === 'dummy');
     foe.dead = false;
     foe.hp = 1;
-    foe.x = 160;
+    foe.x = 220;
     foe.y = 96;
-    S.P.x = 160;
+    S.P.x = 96;
     S.P.y = 112;
-    S.P.dir = 1;
+    S.P.dir = 3;
     S.P.atk = 0;
     S.P.roll = 0;
+    S.P.cds = {};
     S.shots.length = 0;
     S.setManual(true);
     S.step(1);
@@ -274,9 +276,8 @@ test('keyboard ATTACK is ROS stun strike and ITEM still fires the blasters', asy
   await shot(page, 'b38-ros-attack.png');
   await page.keyboard.up('KeyX');
   const arc = await page.evaluate(() => ({ atk: __SQ.P.atk, swing: __SQ.P.swingKind, shots: __SQ.shots.map((s) => s.kind) }));
-  expect(arc.swing).toBe('melee');
-  expect(arc.atk).toBeGreaterThan(0);
-  expect(arc.shots.join(',')).not.toMatch(/stun/);
+  expect(arc.swing).not.toBe('melee');
+  expect(arc.shots.filter((k) => k === 'stun').length).toBeGreaterThanOrEqual(2);
 
   await page.evaluate(() => {
     const S = __SQ;
@@ -291,9 +292,9 @@ test('keyboard ATTACK is ROS stun strike and ITEM still fires the blasters', asy
     S.P.dir = 3;
     S.P.atk = 0;
     S.P.cds = {};
+    S.P.tool = 'lasso';
+    S.P.pri = 'lasso';
     S.P.sec = '';
-    S.P.tool = 'lasers';
-    S.P.pri = 'lasers';
     S.shots.length = 0;
     S.press('item', true);
     S.step(2);
@@ -305,15 +306,15 @@ test('keyboard ATTACK is ROS stun strike and ITEM still fires the blasters', asy
     melee: __SQ.melee(),
     item: __SQ.hands().item,
   }));
-  expect(item.shots.filter((k) => k === 'stun').length).toBeGreaterThanOrEqual(2);
-  expect(item.melee).toBe('strike');
-  expect(item.item).toBe('lasers');
+  expect(item.shots.filter((k) => k === 'stun').length).toBe(0);
+  expect(item.melee).toBe('');
+  expect(item.item).toBe('lasso');
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
 test.describe('phone ATTACK', () => {
-  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
-  test('the ATTACK button strikes and stays off ITEM', async ({ page }) => {
+  test.use({ viewport: { width: 844, height: 390 }, hasTouch: true, isMobile: true });
+  test('the ATTACK button fires ROS lasers and stays off ITEM', async ({ page }) => {
     const errors = await boot(page);
     await page.waitForFunction(() => document.documentElement.classList.contains('srml'));
     await placeRos(page);
@@ -331,9 +332,18 @@ test.describe('phone ATTACK', () => {
     expect(armed.item).toBe('ITEM');
     expect(armed.attackon).toBe('1');
     expect(armed.dim).toBe(false);
-    await page.evaluate(() => __SQ.setManual(true));
+    await page.evaluate(() => {
+      const S = __SQ;
+      S.ents.forEach((e) => { e.x = 400; e.y = 400; });
+      S.P.dir = 3;
+      S.P.atk = 0;
+      S.P.cds = {};
+      S.shots.length = 0;
+      S.setManual(true);
+      S.step(1);
+    });
     await page.locator('[data-b="attack"]').tap();
-    await page.evaluate(() => __SQ.step(4));
+    await page.evaluate(() => __SQ.step(3));
     const hit = await page.evaluate(() => {
       const foe = __SQ.ents.find((e) => e.x === 160);
       return {
@@ -344,11 +354,10 @@ test.describe('phone ATTACK', () => {
         item: __SQ.hands().item,
       };
     });
-    expect(hit.melee).toBe('strike');
-    expect(hit.item).not.toBe('strike');
-    expect(hit.swing).toBe('melee');
-    expect(hit.shots.join(',')).not.toMatch(/stun|justice|lasso/);
-    expect(hit.dead, JSON.stringify(hit)).toBe(true);
+    expect(hit.melee).toBe('');
+    expect(hit.item).toBe('lasso');
+    expect(hit.swing).not.toBe('melee');
+    expect(hit.shots.filter((k) => k === 'stun').length).toBeGreaterThanOrEqual(2);
     await page.screenshot({ path: `${ART}/b38-ros-attack-phone.png` });
     fs.copyFileSync(`${ART}/b38-ros-attack-phone.png`, `${ROOT}/b38-ros-attack-phone.png`);
     expect(errors, errors.join('\n')).toEqual([]);
