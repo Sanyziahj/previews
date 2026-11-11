@@ -84,6 +84,16 @@ async function tap(page, name) {
 }
 
 async function openRos(page) {
+  await page.evaluate(() => {
+    if (localStorage.getItem('sq_save_ros_v1')) return;
+    const raw = localStorage.getItem('sq_save_v1');
+    const save = raw ? JSON.parse(raw) : {
+      v: 1, area: 'home', x: 160, y: 160, dir: 0, hp: 6, maxHp: 6,
+      items: {}, keys: {}, bigKeys: {}, party: [], visited: {}, flags: {},
+    };
+    save.flags = Object.assign({}, save.flags, { ros_home_end: true });
+    localStorage.setItem('sq_save_v1', JSON.stringify(save));
+  });
   await page.evaluate(() => __SQ.step(8));
   await tap(page, 'down');
   await tap(page, 'attack');
@@ -99,8 +109,8 @@ test.use({ viewport: { width: 944, height: 661 } });
 test('a new ROS game puts the green lasers on ATTACK', async ({ page }) => {
   const errors = await boot(page);
   const cache = await page.evaluate(() => document.querySelector('script').textContent);
-  expect(cache).toContain('window.__SQ_BUILD="b41"');
-  expect(cache).toContain('v=b41');
+  expect(cache).toContain('window.__SQ_BUILD="b42"');
+  expect(cache).toContain('v=b42');
   await openRos(page);
   const born = await page.evaluate(() => {
     const S = __SQ;
@@ -123,7 +133,7 @@ test('a new ROS game puts the green lasers on ATTACK', async ({ page }) => {
       build: S.build(),
     };
   });
-  expect(born.build).toBe('b41');
+  expect(born.build).toBe('b42');
   expect(born.state).toBe('play');
   expect(born.story).toBe('ros');
   expect(born.area).toBe('ros_yard');

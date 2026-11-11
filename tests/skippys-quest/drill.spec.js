@@ -39,7 +39,7 @@ async function advance(page, n = 6) {
 test('version, home, and Cash leave the lanes clear', async ({ page }) => {
   const errors = await bootLive(page);
   const build = await page.evaluate(() => __SQ.build());
-  expect(build).toBe('b41');
+  expect(build).toBe('b42');
   const sub = await page.evaluate(() => __SQ.chapters().find((c) => c.id === 'skippy').sub);
   expect(sub).toContain('MAIN');
   await page.evaluate(() => {
@@ -493,6 +493,13 @@ async function fightBoss(page, area, file) {
 test('Drill Sergeant walks the memories and gifts the heavy blaster', async ({ page }) => {
   test.setTimeout(180000);
   const errors = await bootLive(page);
+  await page.evaluate(() => {
+    localStorage.setItem('sq_save_v1', JSON.stringify({
+      v: 1, area: 'home', x: 160, y: 160, dir: 0, hp: 6, maxHp: 6,
+      items: {}, keys: {}, bigKeys: {}, party: [], visited: {},
+      flags: { woke: true, ds_home_end: true },
+    }));
+  });
   await page.waitForTimeout(400);
   for (let i = 0; i < 3; i++) await press(page, 'ArrowDown');
   await press(page, 'KeyX');

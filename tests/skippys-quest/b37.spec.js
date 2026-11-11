@@ -109,13 +109,13 @@ test.describe('DreamLand return home', () => {
       ram: RAM_SAVE,
       ds: DS_SAVE,
     });
-    expect(await page.evaluate(() => __SQ.build())).toBe('b41');
+    expect(await page.evaluate(() => __SQ.build())).toBe('b42');
     const cache = await page.evaluate(() => {
       const tag = document.querySelector('script');
       return tag ? tag.textContent : '';
     });
-    expect(cache).toContain('window.__SQ_BUILD="b41"');
-    expect(cache).toContain('v=b41');
+    expect(cache).toContain('window.__SQ_BUILD="b42"');
+    expect(cache).toContain('v=b42');
     await enterContinue(page);
     const opened = await page.evaluate(() => {
       const S = __SQ;
