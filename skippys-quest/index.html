@@ -3,7 +3,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script>window.__SQ_BUILD="b35";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b35(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b35");location.replace(u.href);}</script>
+<script>window.__SQ_BUILD="b36";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b36(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b36");location.replace(u.href);}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Space Riders: Skippy's Quest</title><link rel="icon" href="data:,">
 <meta name="description" content="Space Riders: Skippy's Quest - a free 16-bit top-down action adventure browser game. The Red King is missing. Ride with ROS through the Sand Dungeon, take Cash's portals to the Seaport and Ramshackle the Viking, win Ronin's flaming sword, beat the house at the Andromeda Casino and stop the Overlord on the Moon, survive the meteor shower with Blaze and earn your space board at the Crossroad and cross the mirror into the Dark World, then storm Fright's castle and bring the Red King home. Chapters 1-9 (Complete) out now.">
@@ -806,6 +806,17 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         realm: "desert",
         music: "home",
         chests: [{ id: "c_home", x: 17, y: 3, item: "coins", n: 10 }],
+        npcs: [
+          {
+            id: "spike",
+            x: 13,
+            y: 5,
+            dir: 2,
+            talk: "spike_dl_talk",
+            show: "ch9_done",
+            hide: "dl_left",
+          },
+        ],
         warps: [
           { x: 9, y: 11, w: 2, h: 1, to: "desert", tx: 5.5, ty: 7.4, dir: 0 },
         ],
@@ -3755,7 +3766,24 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       mouth: "fang",
       cheek: "#f7a8d8",
       brows: !1,
-      extra: "jet wings tail fcape collar",
+        extra: "jet wings tail fcape collar",
+    },
+    overlord: {
+      name: "THE OVERLORD",
+      head: ["#ff2830", "#ff6860", "#4a0610"],
+      suit: "#101014",
+      suit2: "#e01018",
+      gloves: "#0c0c10",
+      boots: "#07070a",
+      hat: "none",
+      hatC: "#16161c",
+      hatC2: "",
+      eyes: "closed",
+      eyeC: "",
+      mouth: "line",
+      cheek: "",
+      brows: !1,
+      extra: "eyehead",
     },
     skippy2: {
       name: "SKIPPY",
@@ -5033,6 +5061,118 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       ),
     ],
   });
+  Object.assign(Ce, {
+    spike_dl_talk: [
+      { need: "dl_ronin", s: "dl_plans_again" },
+      { need: "dl_left", s: "spike_dl_here" },
+      { s: "spike_dl_call" },
+    ],
+    dl_plans_read: [
+      { need: "dl_ronin", s: "dl_plans_again" },
+      { s: "dl_plans_first" },
+    ],
+  });
+  Object.assign(oa, {
+    spike_dl_call: [
+      { t: "flag", f: "dl_called" },
+      h("spike", "SKIPPY, HURRY, RETURN TO DREAMLAND."),
+      { t: "fade", m: "white" },
+      { t: "flag", f: "dl_arrive_said" },
+      { t: "fn", f: "toDreamland" },
+      { t: "fade", m: "in" },
+      h(
+        "skippy",
+        "RED ELECTRICITY BELTS. ENEMIES EVERYWHERE. THE OVERLORD HAS TAKEN DREAMLAND.",
+      ),
+      h(
+        "spike",
+        "HE IS DOWNLOADING FRIGHT THROUGH THE NIGHTMARE REALM. HE MEANS TO BRING FRIGHT BACK.",
+      ),
+      h("skippy", "THE THRONE IS SEALED. WE LOOK FOR ANOTHER ROOM."),
+    ],
+    spike_dl_here: [
+      h("spike", "THE THRONE IS SEALED. THE OTHER ROOM MAY HOLD THE DOWNLOAD PLANS."),
+    ],
+    dl_blocked: [
+      h("spike", "THE BELTS SEAL THE THRONE. I CANNOT GO THROUGH."),
+      h(
+        "skippy",
+        "NEITHER CAN I. HE IS DOWNLOADING FRIGHT THROUGH THE NIGHTMARE REALM, TO BRING FRIGHT BACK.",
+      ),
+    ],
+    dl_plans_first: [
+      h(
+        "skippy",
+        "SPIKE, TAKE THE DOWNLOAD PLANS TO RONIN. THEY SHOW A FIRE SEAL AND A PORTAL.",
+      ),
+      h("spike", "I WILL RIDE THEM TO RONIN."),
+      { t: "flag", f: "dl_ronin" },
+      { t: "save" },
+    ],
+    dl_plans_again: [
+      h(
+        "spike",
+        "RONIN GETS THE PLANS. THE FIRE SEAL AND THE PORTAL.",
+      ),
+    ],
+  });
+  Object.assign(Ie, {
+    dl_yard: {
+      id: "dl_yard",
+      name: "DREAMLAND",
+      theme: "dream",
+      realm: "dreamland",
+      music: "dream",
+      npcs: [
+        { id: "spike", x: 6, y: 10, dir: 3, talk: "spike_dl_talk" },
+        { id: "overlord", x: 20, y: 2, dir: 0, talk: "dl_blocked" },
+        { id: "fright", x: 8, y: 2, dir: 0, talk: "dl_blocked" },
+      ],
+      enemies: [
+        { k: "vov", x: 6, y: 7, v: 0 },
+        { k: "vov", x: 18, y: 8, v: 1 },
+        { k: "vov", x: 22, y: 11, v: 2 },
+        { k: "vov", x: 14, y: 10, v: 4 },
+        { k: "vov", x: 24, y: 6, v: 5 },
+      ],
+      props: [{ k: "beam", x: 8, y: 2 }],
+      signs: [
+        {
+          x: 14,
+          y: 6,
+          text: "THE THRONE ROOM. RED BELTS HOLD IT. THE DOWNLOAD IS BRINGING FRIGHT BACK.",
+          kind: "sign",
+        },
+      ],
+      triggers: [
+        { x: 1, y: 5, w: 26, h: 1, script: "dl_blocked", once: "dl_blocked" },
+      ],
+      warps: [
+        { x: 26, y: 12, w: 2, h: 2, to: "dl_plans", tx: 2, ty: 6, dir: 3 },
+      ],
+    },
+    dl_plans: {
+      id: "dl_plans",
+      name: "THE DOWNLOAD PLANS",
+      theme: "dream",
+      realm: "dreamland",
+      music: "station",
+      npcs: [{ id: "spike", x: 15, y: 7, dir: 2, talk: "dl_plans_read" }],
+      props: [{ k: "plans", x: 4, y: 3 }],
+      signs: [
+        {
+          x: 4,
+          y: 4,
+          text: "DOWNLOAD PLANS.",
+          kind: "sign",
+          script: "dl_plans_read",
+        },
+      ],
+      warps: [
+        { x: 0, y: 5, w: 1, h: 2, to: "dl_yard", tx: 24, ty: 12, dir: 2 },
+      ],
+    },
+  });
   var Zs = {
       dream: [
         "############################################",
@@ -5794,6 +5934,38 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         "#~................~#",
         "####################",
       ],
+      dl_yard: [
+        "############################",
+        "#..........................#",
+        "#..........................#",
+        "#..........................#",
+        "#RRRRRRRRRRRRRRRRRRRRRRRRRR#",
+        "#..........................#",
+        "#..RRRRRR......RRRRRRRR....#",
+        "#..........................#",
+        "#........RRRR..............#",
+        "#..R..................RR...#",
+        "#..R.......................#",
+        "#..RRRRRR......RRRR........#",
+        "#...........................",
+        "#...........................",
+        "#..........................#",
+        "############################",
+      ],
+      dl_plans: [
+        "####################",
+        "#..................#",
+        "#..................#",
+        "#..................#",
+        "#..................#",
+        "...................#",
+        "...................#",
+        "#..................#",
+        "#..................#",
+        "#..................#",
+        "#..................#",
+        "####################",
+      ],
     },
     L = "#0b0716";
   function Bn(m, u, l, T, n, O, x) {
@@ -6343,6 +6515,59 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
     }
   }
   var xa = {};
+  function overlordWorld(H, dir, frame) {
+    let bob = frame ? 1 : 0;
+    (o(H, 3, 16 + bob, 16, 12, "#101014"),
+      o(H, 4, 17 + bob, 14, 8, "#1a1a20"),
+      o(H, 2, 20 + bob, 4, 6, "#0c0c10"),
+      o(H, 16, 20 + bob, 4, 6, "#0c0c10"),
+      o(H, 5, 26 + (frame ? 0 : 1), 4, 4, "#07070a"),
+      o(H, 13, 26 + (frame ? 1 : 0), 4, 4, "#07070a"));
+    if (dir === 1) {
+      (P(H, [11, 2, 3, 10, 19, 10], "#14141a"),
+        o(H, 4, 8, 14, 10, "#101014"),
+        o(H, 6, 10, 10, 6, "#0a0a0e"),
+        o(H, 9, 12, 4, 2, "#8a1018"));
+      return;
+    }
+    let ex = dir === 2 ? 9 : 11;
+    (P(H, [11, 1, 2, 11, 20, 11], "#16161c"),
+      o(H, 3, 8, 16, 9, "#121218"),
+      o(H, 4, 7, 14, 4, "#0e0e14"),
+      dir === 2
+        ? P(H, [4, 6, 1, 3, 3, 9], "#101014")
+        : P(H, [16, 6, 20, 3, 18, 9], "#101014"),
+      R(H, ex, 12, 6.2, 5.6, "#4a0610"),
+      R(H, ex, 12, 5.4, 4.8, "#c01018"),
+      R(H, ex, 11.6, 4.6, 4.2, "#ff2428"),
+      R(H, ex, 11.4, 3.6, 3.4, "#ff4a40"),
+      o(H, ex - 1, 8, 2, 8, "#140208"),
+      o(H, ex + 2, 9, 2, 2, "#ffffff"),
+      o(H, ex + 3, 9, 1, 1, "#fff6e8"),
+      o(H, 6, 17, 10, 2, "#0a0a0e"),
+      R(H, 11, 20 + bob, 3.1, 3.1, "#1a1a1e"),
+      R(H, 11, 20 + bob, 2.3, 2.3, "#e01018"),
+      o(H, 10, 18 + bob, 2, 4, "#120208"),
+      o(H, 12, 19 + bob, 1, 1, "#ffffff"));
+  }
+  function overlordBust(O) {
+    (o(O, 4, 8, 32, 20, "#121218"),
+      P(O, [20, 0, 6, 14, 34, 14], "#16161c"),
+      P(O, [30, 8, 38, 2, 36, 14], "#101014"),
+      R(O, 20, 16, 13, 12, "#3a0610"),
+      R(O, 20, 16, 11.5, 10.5, "#d01018"),
+      R(O, 20, 15.5, 10, 9, "#ff2830"),
+      o(O, 18, 8, 4, 16, "#120208"),
+      o(O, 26, 10, 5, 4, "#ffffff"),
+      o(O, 28, 10, 2, 2, "#fff8e8"),
+      o(O, 2, 26, 36, 14, "#0c0c10"),
+      o(O, 8, 26, 24, 3, "#1a1a20"),
+      o(O, 10, 28, 20, 3, "#08080c"),
+      R(O, 20, 34, 5.5, 5.5, "#1a1a1e"),
+      R(O, 20, 34, 4, 4, "#e01018"),
+      o(O, 18, 30, 4, 8, "#140208"),
+      o(O, 22, 32, 2, 2, "#ffffff"));
+  }
   function Ue(m, u, l) {
     let T = m + u + "_" + l,
       n = xa[T];
@@ -6350,6 +6575,13 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
     if (u === 3) {
       let W = Fs(Ue(m, 2, l));
       return ((xa[T] = W), W);
+    }
+    if (m === "overlord") {
+      let x = re(22, 31),
+        H = x.c;
+      overlordWorld(H, u, l === 1 ? 1 : 0);
+      let F = fe(x, !0);
+      return ((xa[T] = F), F);
     }
     let O = Ge[m];
     if (!O) {
@@ -6499,6 +6731,11 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
     let n = re(40, 40),
       O = n.c;
     if (m === "sys" || !Ge[m]) return ((xa[l] = n.cv), n.cv);
+    if (m === "overlord") {
+      overlordBust(O);
+      let bust = fe(n, !0);
+      return ((xa[l] = bust), bust);
+    }
     let x = Ge[m];
     if (
       (o(O, 4, 33, 32, 7, x.suit),
@@ -7852,7 +8089,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
     },
   });
   var Mt = "sq_save_v1",
-    o0 = "#ToH=PvcbspXzLMQktnFmeO",
+    o0 = "#ToH=PvcbspXzLMQktnFmeOR",
     ka = { "<": [-1, 0], ">": [1, 0], "^": [0, -1], _: [0, 1] },
     p = (m) => (m + 0.5) * 16,
     Ne = [
@@ -13643,6 +13880,12 @@ ram_mem_amulet: [
         Fr(),
         spawnClear(),
         w.onEnter && !ee["oe_" + e] && ((ee["oe_" + e] = !0), ye(w.onEnter)),
+        e === "home" &&
+          A.story === "skippy" &&
+          Z("ch9_done") &&
+          !Z("dl_called") &&
+          !Z("dl_left") &&
+          ye("spike_dl_call"),
         armEye(),
         (Z("woke") || A.story === "ros" || A.story === "ramshackle" || A.story === "drill") && e !== "dream" && xe());
     }
@@ -13862,6 +14105,16 @@ ram_mem_amulet: [
           (ee["oe_" + e.area] = !0),
           (A.state = "play"),
           (A.st = 0),
+          A.story === "skippy" &&
+            ee.ch9_done &&
+            !ee.dl_called &&
+            !ee.dl_left &&
+            e.area === "throne" &&
+            ((ee.oe_home = !0),
+            (e.area = "home"),
+            (e.x = p(8.2)),
+            (e.y = p(8.4)),
+            (e.dir = 3)),
           ba(e.area, e.x / 16 - 0.5, e.y / 16 - 0.5, e.dir),
           A.story === "ros" &&
             ((A.wanted = e.wanted || 0),
@@ -14325,7 +14578,7 @@ ram_mem_amulet: [
         if (Math.abs(a - s) < 12 && Math.abs(t - E) < 14)
           return (
             i.script && (i.kind !== "kiosk" || d.items.board)
-              ? ye(i.script)
+              ? sr(i.script)
               : ((Ae = [h("sys", i.text)]), (La = 0)),
             !0
           );
@@ -14394,8 +14647,8 @@ ram_mem_amulet: [
           ne(
             e.x,
             e.y - 4,
-            A.story === "ros" ? 22 : 14,
-            A.story === "ros"
+            A.story === "ros" || (w && w.realm === "dreamland") ? 22 : 14,
+            A.story === "ros" || (w && w.realm === "dreamland")
               ? ["#fff6c0", "#ffe080", "#ffffff", "#7ad0ff"]
               : e.k === "dummy"
                 ? ["#e8c070", "#d8323a"]
@@ -15232,11 +15485,13 @@ ram_mem_amulet: [
       if (A.state === "poster") {
         ((U.mapE || Qe) &&
           A.st > 0.5 &&
-          ((A.state = "title"),
-          (A.st = 0),
-          (A.menu = A.hasSave ? 1 : 0),
-          l.onPoster(!1),
-          Ke("title")),
+          (A.story === "skippy" && Z("ch9_done") && !Z("dl_called") && !Z("dl_left")
+            ? (l.onPoster(!1), beginSequel())
+            : ((A.state = "title"),
+              (A.st = 0),
+              (A.menu = A.hasSave ? 1 : 0),
+              l.onPoster(!1),
+              Ke("title"))),
           Ze());
         return;
       }
@@ -15559,8 +15814,20 @@ ram_mem_amulet: [
       return null;
     }
     function skippyObjective() {
+      if (Z("dl_called") && !Z("dl_ronin"))
+        return "FIND THE DOWNLOAD PLANS. THE THRONE IS SEALED.";
       let t = activeTale();
       return t ? t.objective : "";
+    }
+    function beginSequel() {
+      ((A.state = "play"),
+        (A.st = 0),
+        (A.paused = !1),
+        (A.story = "skippy"),
+        (Mt = "sq_save_v1"),
+        (ee.oe_home = !0),
+        (d.sit = !1),
+        ba("home", 8.2, 8.4, 3));
     }
     function reached(flag) {
       if (Z(flag)) return !0;
@@ -17832,7 +18099,7 @@ ram_mem_amulet: [
       for (let a = 0; a < 16; a++)
         I((a * 23) % 320, 20 + ((a * 17) % 70), 2, 2, "#fff2c8");
       (v(n, "SPACE RIDERS", 160, 8, "#ff4fd8", 2, "center", "#2a0a14"),
-        v(n, window.__SQ_BUILD || "b35", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
+        v(n, window.__SQ_BUILD || "b36", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
         v(n, "SIDE QUESTS COME HOME", 160, 28, "#ffcc33", 1, "center", "#2a0a14"));
       let a = 58;
       for (let t = 0; t < STORY_ROWS.length; t++) {
@@ -19536,6 +19803,12 @@ ram_mem_amulet: [
           Ke("credits"),
           (Ae = null),
           (q = null));
+      }),
+      (Ia.toDreamland = () => {
+        ((ee.dl_left = !0),
+          (ee.oe_dl_yard = !0),
+          (d.sit = !1),
+          ba("dl_yard", 10, 13, 1));
       }));
     let ge = { gust: 0, warn: 0, gdx: 0, gdy: 1 };
     Le.fright = {
@@ -20149,6 +20422,26 @@ ram_mem_amulet: [
             }
             continue;
           }
+          if (y === "R") {
+            n.drawImage(He(t, Y), N, k);
+            let horiz = ie(S - 1, c) === "R" || ie(S + 1, c) === "R",
+              vert = ie(S, c - 1) === "R" || ie(S, c + 1) === "R";
+            horiz || vert || (horiz = !0);
+            let phase = Math.floor(A.t * 14 + S * 3 + c) % 2,
+              hot = phase ? "#ff2418" : "#ffe090",
+              core = phase ? "#fff6e0" : "#ff5030";
+            horiz &&
+              (I(N, k + 5, 16, 6, "#1a0408"),
+              I(N, k + 6, 16, 3, hot),
+              I(N + (phase ? 1 : 8), k + 7, 5, 1, core));
+            vert &&
+              (I(N + 5, k, 6, 16, "#1a0408"),
+              I(N + 6, k, 3, 16, hot),
+              I(N + 7, k + (phase ? 1 : 8), 1, 5, core));
+            Math.random() < 0.22 &&
+              I(N + 3 + Math.random() * 10, k + 3 + Math.random() * 10, 2, 2, "#ffffff");
+            continue;
+          }
           if (y === "r") {
             (n.drawImage(He(t, Y), N, k), I(N + 1, k + 1, 14, 14, "#0a3a4a"));
             for (let me = 0; me < 16; me += 4)
@@ -20655,12 +20948,43 @@ ram_mem_amulet: [
             I(c, S, 32, 16, "#2a1a10");
             for (let y = 0; y < 4; y++)
               I(c + 2, S + 2 + y * 3, 28, 2, y % 2 ? "#5a3a20" : "#7a5030");
-          } else if (f.k === "flag")
+          }           else if (f.k === "flag")
             E.push({
               y: p(f.y),
               f: () => n.drawImage(O.icon.flag, i(p(f.x)) - 8, s(p(f.y)) - 14),
             });
-          else if (f.k === "portal" && !f.label) {
+          else if (f.k === "beam") {
+            let c = i(p(f.x)),
+              S = s(p(f.y));
+            E.push({
+              y: p(f.y) - 12,
+              f: () => {
+                (I(c - 16, S - 78, 32, 86, "#ff181844"),
+                  I(c - 8, S - 76, 16, 82, "#ff383866"));
+                for (let row = 0; row < 9; row++) {
+                  let yy = S - 74 + ((row * 8 + Math.floor(A.t * 40)) % 78);
+                  I(c - 14, yy, 28, 2, row % 2 ? "#ff4040" : "#ffe0a0");
+                }
+                R(n, c, S - 40, 12, 18, "#ff303055");
+              },
+            });
+          } else if (f.k === "plans") {
+            let c = i(p(f.x)),
+              S = s(p(f.y));
+            E.push({
+              y: p(f.y),
+              f: () => {
+                (I(c - 12, S - 4, 24, 10, "#3a2418"),
+                  I(c - 10, S - 10, 20, 12, "#f4efe2"),
+                  I(c - 8, S - 8, 16, 1, "#ff3030"),
+                  I(c - 8, S - 6, 10, 1, "#ff3030"),
+                  I(c - 8, S - 4, 12, 1, "#2a1818"),
+                  R(n, c - 4, S - 1, 2.2, 2.2, "#ff9a3d"),
+                  R(n, c + 4, S - 1, 3, 3, "#4ff0ff"),
+                  R(n, c + 4, S - 1, 1.4, 1.4, "#041018"));
+              },
+            });
+          } else if (f.k === "portal" && !f.label) {
             let c = i(p(f.x)),
               S = s(p(f.y));
             for (let y = 3; y >= 0; y--)
@@ -21745,7 +22069,7 @@ ram_mem_amulet: [
       let e = A.t;
       (v(n, "SPACE RIDERS", 160, 14, "#ff4fd8", 3, "center", "#2a0a3a"),
         v(n, "SKIPPY'S QUEST", 160, 42, "#ffcc33", 2, "center", "#2a0a3a"),
-        v(n, window.__SQ_BUILD || "b35", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
+        v(n, window.__SQ_BUILD || "b36", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
       let a = (s, E, f, c, S) => {
         let y = Ue(s, S, 0);
         n.drawImage(
@@ -22025,7 +22349,7 @@ ram_mem_amulet: [
           A.state === "gameover" ||
           A.state === "poster")
       )
-        return [{ label: A.state === "poster" ? "TITLE" : ue ? "OK" : "NEXT", enabled: !0, on: !0 }];
+        return [{ label: A.state === "poster" ? (A.story === "skippy" && Z("ch9_done") && !Z("dl_called") && !Z("dl_left") ? "HOME" : "TITLE") : ue ? "OK" : "NEXT", enabled: !0, on: !0 }];
       if (A.state === "stories")
         return STORY_ROWS.map((r, i) => ({
           label: r.name + (r.play ? "  " + (chapterStatus(r.id) || "NEW") : "  SOON"),
@@ -24782,7 +25106,7 @@ ram_mem_amulet: [
           enterStory(id);
           return Bt();
         },
-        build: () => window.__SQ_BUILD || "b35",
+        build: () => window.__SQ_BUILD || "b36",
         cast: () => castSpell(),
         hud: () => hudBits(),
         fightHud: () => fightHud(),
