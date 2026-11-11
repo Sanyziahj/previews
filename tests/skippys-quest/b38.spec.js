@@ -60,10 +60,10 @@ function shot(page, name) {
 test('after the credits Skippy lands at Cash, and home still opens DreamLand', async ({ page }) => {
   test.setTimeout(90000);
   const errors = await boot(page, { ros: ROS_SAVE, ram: RAM_SAVE, ds: DS_SAVE });
-  expect(await page.evaluate(() => __SQ.build())).toBe('b40');
+  expect(await page.evaluate(() => __SQ.build())).toBe('b41');
   const cache = await page.evaluate(() => document.querySelector('script').textContent);
-  expect(cache).toContain('window.__SQ_BUILD="b40"');
-  expect(cache).toContain('v=b40');
+  expect(cache).toContain('window.__SQ_BUILD="b41"');
+  expect(cache).toContain('v=b41');
 
   await page.evaluate(() => {
     const S = __SQ;
