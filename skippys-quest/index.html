@@ -3,7 +3,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script>window.__SQ_BUILD="b37";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b37(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b37");location.replace(u.href);}</script>
+<script>window.__SQ_BUILD="b38";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b38(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b38");location.replace(u.href);}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Space Riders: Skippy's Quest</title><link rel="icon" href="data:,">
 <meta name="description" content="Space Riders: Skippy's Quest - a free 16-bit top-down action adventure browser game. The Red King is missing. Ride with ROS through the Sand Dungeon, take Cash's portals to the Seaport and Ramshackle the Viking, win Ronin's flaming sword, beat the house at the Andromeda Casino and stop the Overlord on the Moon, survive the meteor shower with Blaze and earn your space board at the Crossroad and cross the mirror into the Dark World, then storm Fright's castle and bring the Red King home. Chapters 1-9 (Complete) out now.">
@@ -4937,6 +4937,26 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         "wizard",
         "RIDE THE DESERT AGAIN. EAST OF YOUR HOUSE, BY THE PIONEER POUR, THE HEAT HAS BEEN KEEPING A STORY.",
       ),
+      h(
+        "wizard",
+        "GET SOME REST WHEN YOU WANT IT. YOUR HOUSE WILL KEEP.",
+      ),
+    ],
+    cash_rest: [
+      { t: "flag", f: "cash_rest" },
+      h(
+        "wizard",
+        "THE RED KING IS HOME, AND THE REALMS ARE SINGING. YOU CAN RIDE ANYWHERE NOW, SKIPPY. ANYWHERE AT ALL.",
+      ),
+      h(
+        "wizard",
+        "RIDE THE DESERT AGAIN. EAST OF YOUR HOUSE, BY THE PIONEER POUR, THE HEAT HAS BEEN KEEPING A STORY.",
+      ),
+      h(
+        "wizard",
+        "GET SOME REST WHEN YOU WANT IT. YOUR HOUSE WILL KEEP.",
+      ),
+      { t: "save" },
     ],
     nexus_open9: [
       { t: "wait", s: 0.4 },
@@ -8231,7 +8251,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
   Object.assign(Ea, {
     blasters: {
       name: "STUN BLASTERS",
-      desc: "TWIN GREEN STUN SHOTS. X TO FIRE. NOBODY DIES.",
+      desc: "TWIN GREEN STUN SHOTS. Z TO FIRE. NOBODY DIES.",
       jingle: "item",
     },
     lasso: {
@@ -13894,6 +13914,12 @@ ram_mem_amulet: [
           !Z("dl_called") &&
           !Z("dl_left") &&
           ye("spike_dl_call"),
+        e === "hub" &&
+          A.story === "skippy" &&
+          Z("ch9_done") &&
+          !Z("cash_rest") &&
+          !Z("dl_called") &&
+          ye("cash_rest"),
         armEye(),
         (Z("woke") || A.story === "ros" || A.story === "ramshackle" || A.story === "drill") && e !== "dream" && xe());
     }
@@ -14118,11 +14144,10 @@ ram_mem_amulet: [
             !ee.dl_called &&
             !ee.dl_left &&
             e.area === "throne" &&
-            ((ee.oe_home = !0),
-            (e.area = "home"),
-            (e.x = p(8.2)),
-            (e.y = p(8.4)),
-            (e.dir = 3)),
+            ((e.area = "hub"),
+            (e.x = p(9.5)),
+            (e.y = p(7.2)),
+            (e.dir = 1)),
           ba(e.area, e.x / 16 - 0.5, e.y / 16 - 0.5, e.dir),
           A.story === "ros" &&
             ((A.wanted = e.wanted || 0),
@@ -14880,12 +14905,16 @@ ram_mem_amulet: [
             de.y + 2 > C[1] &&
             de.y - 12 < C[3] &&
             (ft.push(de),
-            _a(de, plasma ? 3 : te ? 2 : 1, d.x, d.y, te ? 0.2 : 0.7),
+            _a(de, plasma ? 3 : te ? 2 : 1, d.x, d.y, weaponNow() === "strike" ? 0.45 : te ? 0.2 : 0.7),
             ne(
               de.x,
               de.y - 6,
               6,
-              te ? ["#ff9a3d", "#ffe066"] : ["#4ff0ff", "#ffffff"],
+              weaponNow() === "strike"
+                ? ["#3dff6a", "#ffffff", "#d8ffe0"]
+                : te
+                  ? ["#ff9a3d", "#ffe066"]
+                  : ["#4ff0ff", "#ffffff"],
               50,
             ));
         for (let de = Math.floor(C[1] / 16); de <= Math.floor(C[3] / 16); de++)
@@ -15493,13 +15522,11 @@ ram_mem_amulet: [
       if (A.state === "poster") {
         ((U.mapE || Qe) &&
           A.st > 0.5 &&
-          (A.story === "skippy" && Z("ch9_done") && !Z("dl_called") && !Z("dl_left")
-            ? (l.onPoster(!1), beginSequel())
-            : ((A.state = "title"),
-              (A.st = 0),
-              (A.menu = A.hasSave ? 1 : 0),
-              l.onPoster(!1),
-              Ke("title"))),
+          ((A.state = "title"),
+          (A.st = 0),
+          (A.menu = A.hasSave ? 1 : 0),
+          l.onPoster(!1),
+          Ke("title")),
           Ze());
         return;
       }
@@ -15826,16 +15853,6 @@ ram_mem_amulet: [
         return "FIND THE DOWNLOAD PLANS. THE THRONE IS SEALED.";
       let t = activeTale();
       return t ? t.objective : "";
-    }
-    function beginSequel() {
-      ((A.state = "play"),
-        (A.st = 0),
-        (A.paused = !1),
-        (A.story = "skippy"),
-        (Mt = "sq_save_v1"),
-        (ee.oe_home = !0),
-        (d.sit = !1),
-        ba("home", 8.2, 8.4, 3));
     }
     function reached(flag) {
       if (Z(flag)) return !0;
@@ -17935,6 +17952,7 @@ ram_mem_amulet: [
         (A.wanted = 0),
         (A.spot = !1),
         (d.items.blasters = !0),
+        (d.melee = "strike"),
         (d.wep = "lasers"),
         (d.tool = "lasso"),
         (d.act = "lasers"),
@@ -18107,7 +18125,7 @@ ram_mem_amulet: [
       for (let a = 0; a < 16; a++)
         I((a * 23) % 320, 20 + ((a * 17) % 70), 2, 2, "#fff2c8");
       (v(n, "SPACE RIDERS", 160, 8, "#ff4fd8", 2, "center", "#2a0a14"),
-        v(n, window.__SQ_BUILD || "b37", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
+        v(n, window.__SQ_BUILD || "b38", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
         v(n, "SIDE QUESTS COME HOME", 160, 28, "#ffcc33", 1, "center", "#2a0a14"));
       let a = 58;
       for (let t = 0; t < STORY_ROWS.length; t++) {
@@ -19046,6 +19064,7 @@ ram_mem_amulet: [
     }
     function ownedItem(id) {
       if (!id) return !1;
+      if (id === "strike") return A.story === "ros";
       if (id === "lasers" || id === "justice" || id === "brand" || id === "dust" || id === "hopper" || id === "skimmer")
         return rosOwned(id);
       if (id === "bow") return !!(d.items.bow || d.items.tbow);
@@ -19069,6 +19088,7 @@ ram_mem_amulet: [
     }
     function slotName(id, short) {
       let full = {
+          strike: "STUN STRIKE",
           lasers: "TWIN LASERS",
           justice: "JUSTICE SHOT",
           lasso: "ROPE",
@@ -19088,6 +19108,7 @@ ram_mem_amulet: [
           disc: "BOOMERANG DISC",
         },
         sh = {
+          strike: "STUN",
           lasers: "LASERS",
           justice: "JUSTICE",
           lasso: "ROPE",
@@ -19462,9 +19483,10 @@ ram_mem_amulet: [
       }
     }
     function isMelee(id) {
-      return id === "baton" || id === "sword" || id === "hatchet" || id === "axe" || id === "plasma";
+      return id === "baton" || id === "sword" || id === "hatchet" || id === "axe" || id === "plasma" || id === "strike";
     }
     function ownedMelee() {
+      if (A.story === "ros") return ["strike"];
       let ids =
         A.story === "ramshackle"
           ? ["axe", "hatchet"]
@@ -19521,7 +19543,12 @@ ram_mem_amulet: [
         if (id && !isMelee(id) && ownedItem(id) && items.indexOf(id) < 0) items.push(id);
       for (let id of ownedGear()) if (items.indexOf(id) < 0 && items.length < 2) items.push(id);
       ((d.melee = melee),
-        (d.wep = melee),
+        (d.wep =
+          A.story === "ros"
+            ? d.wep === "justice" && ownedItem("justice")
+              ? "justice"
+              : "lasers"
+            : melee),
         (d.pri = items[0] || ""),
         (d.sec = items[1] || ""),
         (d.tool = d.sec || d.pri || ""),
@@ -19592,6 +19619,7 @@ ram_mem_amulet: [
     }
     function migrateRosKit() {
       ((d.items.blasters = !0),
+        (d.melee = "strike"),
         (ee.lasso_got || d.items.lasso || ee.brand_got || d.items.brand) &&
           ((d.items.lasso = !0),
           (d.items.brand = !0),
@@ -20019,13 +20047,18 @@ ram_mem_amulet: [
       ],
       qr = 4 + rn.length * 0.55;
     function Qr() {
-      (A.st > qr || (A.st > 3 && (U.attackE || U.talkE || Qe))) &&
-        ((A.state = "poster"),
-        (A.st = 0),
-        (ee.final = !0),
+      if (!(A.st > qr || (A.st > 3 && (U.attackE || U.talkE || Qe)))) return;
+      ((ee.final = !0),
         l.onFinal && l.onFinal(Ht().toDataURL("image/png")),
-        l.onPoster(!0),
-        Ke("title"));
+        l.onPoster && l.onPoster(!1),
+        (A.state = "play"),
+        (A.st = 0),
+        (A.paused = !1),
+        (A.story = "skippy"),
+        (Mt = "sq_save_v1"),
+        (d.sit = !1),
+        ba("hub", 9.5, 7.2, 1),
+        xe());
     }
     let St = null;
     function Ht() {
@@ -21429,6 +21462,22 @@ ram_mem_amulet: [
             (n.globalAlpha = 1));
       }
     }
+    function drawStunStrike(e, a) {
+      if (weaponNow() !== "strike" || !(d.atk > 0)) return;
+      let base = [Math.PI / 2, -Math.PI / 2, Math.PI, 0][d.dir],
+        swing = 1 - Math.min(1, d.atk / 0.26),
+        ang = base - 1.15 + swing * 2.3,
+        hx = e + Math.cos(ang) * 16,
+        hy = a - 12 + Math.sin(ang) * 16;
+      ((n.strokeStyle = "rgba(61,255,106,0.95)"),
+        (n.lineWidth = 3),
+        n.beginPath(),
+        n.arc(e, a - 12, 16, ang - 0.85, ang + 0.25),
+        n.stroke(),
+        I(hx - 2, hy - 2, 4, 4, "#ffffff"),
+        Math.random() < 0.7 &&
+          oe(hx + he.x, hy + he.y - 24, (Math.random() - 0.5) * 30, (Math.random() - 0.5) * 30, 0.22, "#3dff6a", 1.5));
+    }
     function drawHeldAxe(e, a) {
       let id = weaponNow();
       if (A.story !== "ramshackle" || (id !== "axe" && id !== "hatchet")) return;
@@ -21552,6 +21601,7 @@ ram_mem_amulet: [
         Aa(ga(), e, a - (hasSpaceBoard() ? 2 : 0), d.dir, (d.boardDash || 0) > 0 ? 1 : t, 1),
         drawVisorAt(e, a),
         drawCompanion(e, a),
+        drawStunStrike(e, a),
         drawHeldAxe(e, a),
         drawHeldBlast(e, a),
         d.arrowCd > 0.12 && d.z === "raygun" && d.items.raygun)
@@ -22084,7 +22134,7 @@ ram_mem_amulet: [
       let e = A.t;
       (v(n, "SPACE RIDERS", 160, 14, "#ff4fd8", 3, "center", "#2a0a3a"),
         v(n, "SKIPPY'S QUEST", 160, 42, "#ffcc33", 2, "center", "#2a0a3a"),
-        v(n, window.__SQ_BUILD || "b37", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
+        v(n, window.__SQ_BUILD || "b38", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
       let a = (s, E, f, c, S) => {
         let y = Ue(s, S, 0);
         n.drawImage(
@@ -22364,7 +22414,7 @@ ram_mem_amulet: [
           A.state === "gameover" ||
           A.state === "poster")
       )
-        return [{ label: A.state === "poster" ? (A.story === "skippy" && Z("ch9_done") && !Z("dl_called") && !Z("dl_left") ? "HOME" : "TITLE") : ue ? "OK" : "NEXT", enabled: !0, on: !0 }];
+        return [{ label: A.state === "poster" ? "TITLE" : ue ? "OK" : "NEXT", enabled: !0, on: !0 }];
       if (A.state === "stories")
         return STORY_ROWS.map((r, i) => ({
           label: r.name + (r.play ? "  " + (chapterStatus(r.id) || "NEW") : "  SOON"),
@@ -25121,7 +25171,7 @@ ram_mem_amulet: [
           enterStory(id);
           return Bt();
         },
-        build: () => window.__SQ_BUILD || "b37",
+        build: () => window.__SQ_BUILD || "b38",
         cast: () => castSpell(),
         hud: () => hudBits(),
         fightHud: () => fightHud(),

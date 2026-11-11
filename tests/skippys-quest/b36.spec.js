@@ -76,7 +76,7 @@ async function enterContinue(page) {
 test.describe('Spike DreamLand chapter', () => {
   test.use({ viewport: { width: 844, height: 390 }, hasTouch: true, isMobile: true });
 
-  test('a finished throne save starts at home, and other saves stay put', async ({ page }) => {
+  test('a finished throne save starts at the nexus, and other saves stay put', async ({ page }) => {
     test.setTimeout(90000);
     const errors = await boot(page, {
       skippy: THRONE_SAVE,
@@ -85,13 +85,19 @@ test.describe('Spike DreamLand chapter', () => {
       ds: DS_SAVE,
     });
     await page.waitForFunction(() => document.documentElement.classList.contains('srml'));
-    expect(await page.evaluate(() => __SQ.build())).toBe('b37');
+    expect(await page.evaluate(() => __SQ.build())).toBe('b38');
     await enterContinue(page);
-    await page.evaluate(() => {
+    const heard = await page.evaluate(() => {
       const S = __SQ;
-      for (let i = 0; i < 20 && !(S.dlg && S.dlg.raw); i++) S.step(2);
-      if (S.dlg) S.skipText();
-      S.step(2);
+      const lines = [];
+      for (let i = 0; i < 8; i++) {
+        for (let n = 0; n < 20 && !(S.dlg && S.dlg.raw); n++) S.step(2);
+        if (!S.dlg) break;
+        S.skipText();
+        lines.push(S.dlg.pages.map((p) => p.join(' ')).join(' '));
+        S.press('talk', true); S.step(1); S.press('talk', false); S.step(3);
+      }
+      return lines.join(' | ');
     });
     const home = await page.evaluate(() => {
       const S = __SQ;
@@ -100,7 +106,7 @@ test.describe('Spike DreamLand chapter', () => {
       return {
         area: S.A.id,
         name: S.A.name,
-        text,
+        text: text,
         spike: !!spike && spike.vis !== false,
         coins: S.P.coins,
         shards: S.P.shards,
@@ -113,11 +119,12 @@ test.describe('Spike DreamLand chapter', () => {
         map: getComputedStyle(document.querySelector('[data-b=worldmap]')).display,
       };
     });
-    expect(home.area).toBe('home');
-    expect(home.name).toBe("SKIPPY'S PLACE");
-    expect(home.text).toMatch(/SKIPPY, HURRY, RETURN TO DREAMLAND/);
-    expect(home.text).not.toMatch(/DREAM I GAVE|BOOT CAMP|I SENT THE DREAM/);
-    expect(home.spike).toBe(true);
+    expect(home.area).toBe('hub');
+    expect(home.name).toBe('THE PORTAL NEXUS');
+    expect(heard).toMatch(/PIONEER POUR/);
+    expect(heard).toMatch(/GET SOME REST/);
+    expect(heard).not.toMatch(/DREAMLAND|SPIKE/);
+    expect(home.spike).toBe(false);
     expect(home.coins).toBe(77);
     expect(home.shards).toBe(7);
     expect(home.baton).toBe(true);
@@ -140,7 +147,7 @@ test.describe('Spike DreamLand chapter', () => {
     expect(keys.skippy.flags.ch9_done).toBe(true);
     expect(keys.skippy.shards).toBe(7);
     await page.evaluate(() => { __SQ.G.saveT = 0; __SQ.step(1); });
-    await page.screenshot({ path: `${ART}/b36-home-spike.png` });
+    await page.screenshot({ path: `${ART}/b38-nexus-continue.png` });
     expect(errors, errors.join('\n')).toEqual([]);
   });
 
