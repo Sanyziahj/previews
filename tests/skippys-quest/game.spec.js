@@ -954,7 +954,7 @@ test('swap cycles items and attack stays a weapon', async ({ page }) => {
   expect(out.brand).toBe(true);
   expect(out.justice).toBe(true);
   expect(out.attackStillQuiet).toBe(true);
-  expect(out.melee).toBe('');
+  expect(out.melee).toBe('strike');
   const skippy = await page.evaluate(() => {
     const S = __SQ;
     S.G.story = 'skippy';
