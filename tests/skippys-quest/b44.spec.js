@@ -115,12 +115,12 @@ function shot(page, name) {
   return page.locator('#game').screenshot({ path: `${ART}/${name}.png` });
 }
 
-test('build is b44 and the page stays unlisted once', async ({ page }) => {
+test('build is b45 and the page stays unlisted once', async ({ page }) => {
   const errors = await boot(page);
   const cache = await page.evaluate(() => document.querySelector('script').textContent);
-  expect(cache).toContain('window.__SQ_BUILD="b44"');
-  expect(cache).toContain('v=b44');
-  expect(await page.evaluate(() => __SQ.build())).toBe('b44');
+  expect(cache).toContain('window.__SQ_BUILD="b45"');
+  expect(cache).toContain('v=b45');
+  expect(await page.evaluate(() => __SQ.build())).toBe('b45');
   expect(await page.locator('meta[name="robots"]').count()).toBe(1);
   expect(await page.locator('meta[name="robots"]').first().getAttribute('content')).toBe('noindex,nofollow');
   expect(errors, errors.join('\n')).toEqual([]);

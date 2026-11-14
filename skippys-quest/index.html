@@ -3,7 +3,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script>window.__SQ_BUILD="b44";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b44(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b44");location.replace(u.href);}</script>
+<script>window.__SQ_BUILD="b45";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b45(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b45");location.replace(u.href);}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Space Riders: Skippy's Quest</title><link rel="icon" href="data:,">
 <meta name="description" content="Space Riders: Skippy's Quest - a free 16-bit top-down action adventure browser game. The Red King is missing. Ride with ROS through the Sand Dungeon, take Cash's portals to the Seaport and Ramshackle the Viking, win Ronin's flaming sword, beat the house at the Andromeda Casino and stop the Overlord on the Moon, survive the meteor shower with Blaze and earn your space board at the Crossroad and cross the mirror into the Dark World, then storm Fright's castle and bring the Red King home. Chapters 1-9 (Complete) out now.">
@@ -12899,11 +12899,8 @@ ram_mem_amulet: [
     if (A.story !== "drill" || !w) return;
     let id = w.id || "";
     if (id === "ds_breathe") {
-      A.radioInk = drawSentences(
+      A.radioInk = drawRunner(
         ["BREATHE. IN FOUR. OUT FOUR. THIS IS NOW.", dsObjective()].filter(Boolean),
-        160,
-        140,
-        260,
         "#9ff0ea",
         "radio",
       );
@@ -12933,11 +12930,8 @@ ram_mem_amulet: [
       n.fillStyle = (i + Math.floor((A.t || 0) * 18)) % 2 ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)";
       n.fillRect((i * 53 + Math.floor((A.t || 0) * 80)) % 320, (i * 31) % 190, 3, 1);
     }
-    A.radioInk = drawSentences(
+    A.radioInk = drawRunner(
       ["RADIO: YOU ARE AT THE ACADEMY. THIS ALREADY HAPPENED.", dsObjective()].filter(Boolean),
-      160,
-      132,
-      288,
       "#9ff0ea",
       "radio",
     );
@@ -13721,7 +13715,15 @@ ram_mem_amulet: [
       }
     }
     function Q(e, a = 1.8) {
-      ((A.toast = e), (A.toastT = a));
+      let text = String(e || "");
+      if (!text) return;
+      if (A.toast === text && (A.toastT || 0) > 0.05) return;
+      if (A.toastKey === text && A.t - (A.toastAt || -9) < 0.45) return;
+      ((A.toast = text),
+        (A.toastT = a),
+        (A.toastKey = text),
+        (A.toastAt = A.t),
+        (A.toastSeq = (A.toastSeq || 0) + 1));
     }
     function ie(e, a) {
       return e < 0 || a < 0 || e >= we || a >= ve ? "#" : De[a][e];
@@ -18281,7 +18283,7 @@ ram_mem_amulet: [
       for (let a = 0; a < 16; a++)
         I((a * 23) % 320, 20 + ((a * 17) % 70), 2, 2, "#fff2c8");
       (v(n, "SPACE RIDERS", 160, 8, "#ff4fd8", 2, "center", "#2a0a14"),
-        v(n, window.__SQ_BUILD || "b44", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
+        v(n, window.__SQ_BUILD || "b45", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
         v(n, "SIDE QUESTS COME HOME", 160, 28, "#ffcc33", 1, "center", "#2a0a14"));
       let a = 58;
       for (let t = 0; t < STORY_ROWS.length; t++) {
@@ -21101,26 +21103,6 @@ ram_mem_amulet: [
         d.shards && Is(140, 16),
         fn(262, 2, 56, 20, !1),
         ws(),
-        A.story === "ros" &&
-          !A.paused &&
-          !A.ev &&
-          !q &&
-          drawCrisp(rosObjective(), 160, 208, "#ffe0a0", "center"),
-        A.story === "ramshackle" &&
-          !A.paused &&
-          !q &&
-          drawCrisp(ramObjective(), 160, 208, "#ffe0a0", "center"),
-        A.story === "drill" &&
-          !A.paused &&
-          !q &&
-          !A.radioInk &&
-          drawCrisp(dsObjective(), 160, 208, "#ffe0a0", "center"),
-        A.story === "skippy" &&
-          !A.paused &&
-          !A.choice &&
-          !q &&
-          skippyObjective() &&
-          drawCrisp(skippyObjective(), 160, 208, "#ffe0a0", "center"),
         A.ev && drawEvidence(),
         A.choice && drawChoice());
     }
@@ -22121,6 +22103,133 @@ ram_mem_amulet: [
       if (box.y + box.h > 220) box.y = Math.max(36, 220 - box.h);
       return box;
     }
+    function runnerBase() {
+      let floor = 222;
+      if (q) {
+        let g = speechGeom(q.who === "sys");
+        g.y > 120 && (floor = Math.min(floor, g.y - 1));
+      }
+      return floor;
+    }
+    function controlObstacles() {
+      if (A.runnerObs) return A.runnerObs;
+      let obs = [];
+      A.runnerObs = obs;
+      if (!dn()) return obs;
+      let canvas = document.getElementById("game");
+      if (!canvas) return obs;
+      let rect = canvas.getBoundingClientRect();
+      if (rect.width < 8 || rect.height < 8) return obs;
+      let sx = rect.width / 320,
+        sy = rect.height / 224,
+        nodes = document.querySelectorAll(".srml-b,#stick");
+      for (let i = 0; i < nodes.length; i++) {
+        let el = nodes[i];
+        if (el.style.display === "none") continue;
+        let r = el.getBoundingClientRect();
+        if (r.width < 2 || r.height < 2) continue;
+        let x = (r.left - rect.left) / sx,
+          y = (r.top - rect.top) / sy,
+          w = r.width / sx,
+          h = r.height / sy;
+        if (x + w < 0 || y + h < 0 || x > 320 || y > 224) continue;
+        obs.push({ x: x, y: y, w: w, h: h });
+      }
+      return obs;
+    }
+    function placeRunner(h) {
+      A.runnerFloor == null && (A.runnerFloor = runnerBase());
+      let y = Math.round(A.runnerFloor - h),
+        obs = controlObstacles();
+      for (let ntry = 0; ntry < 8; ntry++) {
+        let band = { x: 0, y: y, w: 320, h: h },
+          hit = null;
+        for (let i = 0; i < obs.length; i++)
+          if (rectHit(band, obs[i])) {
+            hit = obs[i];
+            break;
+          }
+        if (!hit) break;
+        y = Math.floor(hit.y - h - 1);
+      }
+      y < 30 && (y = 30);
+      A.runnerFloor = y - 1;
+      return y;
+    }
+    function drawRunner(parts, color, kind) {
+      let raw = [];
+      for (let i = 0; i < (parts || []).length; i++) {
+        let part = String(parts[i] || "").replace(/\s+/g, " ").trim();
+        if (part) raw.push(part);
+      }
+      if (!raw.length) return null;
+      let pages = Math.ceil(raw.length / 2),
+        page = pages > 1 ? Math.floor((A.t || 0) / 2.6) % pages : 0,
+        lines = raw.slice(page * 2, page * 2 + 2),
+        nLines = lines.length,
+        pitch = 10,
+        h = 12 + (nLines - 1) * pitch,
+        y = placeRunner(h),
+        box = { x: 0, y: y, w: 320, h: h },
+        clipX = 4,
+        clipW = 312;
+      ((n.fillStyle = "rgba(8,6,16,0.78)"),
+        n.fillRect(0, y, 320, h),
+        I(0, y, 320, 1, color || "#9ff0ea"));
+      let ink = [];
+      for (let i = 0; i < nLines; i++) {
+        let label = lines[i].toUpperCase(),
+          tw = Ya(label, 1),
+          ly = y + 2 + i * pitch,
+          fits = tw <= 316;
+        (n.save(),
+          n.beginPath(),
+          n.rect(clipX, ly, clipW, 8),
+          n.clip());
+        if (fits) v(n, label, 160, ly, "#fff6c0", 1, "center", "#000");
+        else {
+          let gap = 40,
+            span = tw + gap,
+            shift = Math.floor((A.t || 0) * 32) % span,
+            x0 = clipX - shift;
+          (v(n, label, x0, ly, "#fff6c0", 1, "", "#000"),
+            v(n, label, x0 + span, ly, "#fff6c0", 1, "", "#000"));
+        }
+        n.restore();
+        if (fits) {
+          let bit = inkOf(label, 160, ly, "center");
+          ((bit.fit = !0), ink.push(bit));
+        } else
+          ink.push({
+            text: label,
+            x: clipX,
+            y: ly,
+            w: clipW,
+            h: 7,
+            fit: !1,
+            scroll: !0,
+          });
+      }
+      return noteInk(kind || "runner", { box: box, lines: ink });
+    }
+    function drawObjectives() {
+      if (!w || A.paused || q || A.state !== "play") return;
+      let text = "";
+      A.story === "ros" && !A.ev
+        ? (text = rosObjective())
+        : A.story === "ramshackle"
+          ? (text = ramObjective())
+          : A.story === "drill" && !A.radioInk
+            ? (text = dsObjective())
+            : A.story === "skippy" && !A.choice && (text = skippyObjective());
+      if (!text) return;
+      let floor = A.runnerFloor == null ? 216 : A.runnerFloor,
+        y = Math.min(208, floor - 10);
+      if (A.savedInk && A.savedInk.box && y < A.savedInk.box.y + A.savedInk.box.h && y + 8 > A.savedInk.box.y)
+        y = A.savedInk.box.y - 10;
+      y < 36 && (y = 36);
+      drawCrisp(text, 160, y, "#ffe0a0", "center");
+    }
     function drawSentences(parts, cx, cy, maxW, color, kind) {
       let cols = Math.max(8, Math.floor((maxW - 16) / 6)),
         lines = [];
@@ -22141,13 +22250,13 @@ ram_mem_amulet: [
       return noteInk(kind || "box", { box: box, lines: ink });
     }
     function drawBoxed(text, cx, cy, maxW, color, kind) {
-      return drawSentences([text], cx, cy, maxW, color, kind || "toast");
+      return drawRunner([text], color || "#4ff0ff", kind || "toast");
     }
     function placeSaved() {
       let label = "SAVED",
         w = Ya(label, 1) + 14,
         h = 16,
-        occ = [A.radioInk, A.speechInk, A.bannerInk, A.hailInk, A.toastInk, A.shopInk, A.choiceInk]
+        occ = [A.radioInk, A.speechInk, A.bannerInk, A.hailInk, A.toastInk, A.gotInk, A.shopInk, A.choiceInk]
           .map((ink) => ink && ink.box)
           .filter(Boolean);
       occ.push({ x: 0, y: 0, w: 320, h: 34 });
@@ -22294,11 +22403,8 @@ ram_mem_amulet: [
             : ue.item === "arrows"
               ? ue.n + " ARROWS!"
               : "YOU GOT THE " + a + "!";
-      (na(30, 34, 260, 44, "#3dff6a"),
-        v(n, t, 160, 42, "#3dff6a", 1, "center", X));
-      let i =
-        ue.item === "bow" || ue.item === "tbow" ? " +" + ue.n + " ARROWS" : "";
-      v(n, (e ? e.desc : "") + i, 160, 56, "#ffffff", 1, "center", X);
+      let i = ue.item === "bow" || ue.item === "tbow" ? " +" + ue.n + " ARROWS" : "";
+      A.gotInk = drawRunner([t, ((e && e.desc) || "") + i], "#3dff6a", "got");
     }
     function dn() {
       try {
@@ -22469,7 +22575,7 @@ ram_mem_amulet: [
       let e = A.t;
       (v(n, "SPACE RIDERS", 160, 14, "#ff4fd8", 3, "center", "#2a0a3a"),
         v(n, "SKIPPY'S QUEST", 160, 42, "#ffcc33", 2, "center", "#2a0a3a"),
-        v(n, window.__SQ_BUILD || "b44", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
+        v(n, window.__SQ_BUILD || "b45", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
       let a = (s, E, f, c, S) => {
         let y = Ue(s, S, 0);
         n.drawImage(
@@ -22997,9 +23103,12 @@ ram_mem_amulet: [
     function Es() {
       ((A.frameInk = []),
         (A.savedInk = null),
-        !(A.toastT > 0 && A.toast) && (A.toastInk = null),
+        (A.toastInk = null),
         (A.hailInk = null),
-        !(A.bannerT > 0) && (A.bannerInk = null),
+        (A.bannerInk = null),
+        (A.gotInk = null),
+        (A.runnerFloor = null),
+        (A.runnerObs = null),
         !q && (A.speechInk = null),
         !le && (A.shopInk = null),
         !A.choice && (A.choiceInk = null));
@@ -23108,24 +23217,16 @@ ram_mem_amulet: [
           ),
           v(n, ut(), 160, 44, "#ffffff", 1, "center", X)),
         rs(),
-        A.bannerT > 0 && !q)
-      ) {
-        let lines = Nn(A.banner, 28).slice(0, 2),
-          bw = Math.min(304, Math.max.apply(null, lines.map((l) => Ya(l.toUpperCase(), 1))) + 16),
-          bh = 10 + lines.length * 12,
-          bx = Math.round(160 - bw / 2);
-        (na(bx, 34, bw, bh, "#ffcc33"),
-          lines.forEach((l, i) => v(n, l, 160, 40 + i * 12, "#fff6c0", 1, "center", "")),
-          (A.bannerInk = noteInk("banner", {
-            box: { x: bx, y: 34, w: bw, h: bh },
-            lines: lines.map((l, i) => inkOf(l, 160, 40 + i * 12, "center")),
-          })));
-      }
+        A.bannerT > 0 && A.banner && !q)
+      )
+        A.bannerInk = drawRunner([A.banner], "#ffcc33", "banner");
       if (A.hailT > 0 && A.hail && !q && !A.choice && !A.paused)
-        A.hailInk = drawBoxed(A.hail, 160, 40, 304, "#ffcc33", "hail");
-      if ((os(), ys(), Us(), ss(), fs(), A.toastT > 0 && A.toast))
-        A.toastInk = drawBoxed(A.toast, 160, 124, 292, "#4ff0ff");
+        A.hailInk = drawRunner([A.hail], "#ffcc33", "hail");
+      (os(), ys(), Us(), ss(), fs());
+      if (A.toastT > 0 && A.toast)
+        A.toastInk = drawRunner([A.toast], "#4ff0ff", "toast");
       A.saveT > 0 && placeSaved();
+      drawObjectives();
       if (
         (A.paused && is(),
         A.fade > 0.001 &&
@@ -25181,40 +25282,47 @@ ram_mem_amulet: [
       },
     }),
       (ra.castle = !0));
-    function hn(e, a) {
-      (M(),
-        a &&
-          !U[e] &&
-          (e === "attack"
-            ? (U.attackE = !0)
-            : e === "item"
-              ? (U.itemE = !0)
-              : e === "roll"
-                ? (U.rollE = !0)
-                : e === "talk"
-                  ? (U.talkE = !0)
-                  : e === "map"
-                    ? (U.mapE = !0)
-                    : e === "swap"
-                      ? (U.swapE = !0)
-                      : e === "tool"
-                        ? (U.toolE = !0)
-                        : e === "pri"
-                          ? (U.priE = !0)
-                          : e === "sec"
-                            ? (U.secE = !0)
-                            : e === "up"
-                        ? (U.upE = !0)
-                        : e === "down"
-                        ? (U.downE = !0)
-                        : e === "magic"
-                        ? (U.magicE = !0)
-                        : e === "worldmap"
-                          ? (U.mapE = !0)
-                        : e === "board"
-                          ? (U.boardE = !0)
-                          : e === "back" && (U.backE = !0)),
-        (U[e] = a));
+    function hn(e, a, src) {
+      M();
+      if (a && !U[e]) {
+        let now = performance.now(),
+          prev = A.edgeAt && A.edgeAt[e];
+        if (prev && src && prev.src && src !== prev.src && now - prev.t < 500) {
+          U[e] = !0;
+          return;
+        }
+        (A.edgeAt || (A.edgeAt = {}), (A.edgeAt[e] = { t: now, src: src || "" }));
+        e === "attack"
+          ? (U.attackE = !0)
+          : e === "item"
+            ? (U.itemE = !0)
+            : e === "roll"
+              ? (U.rollE = !0)
+              : e === "talk"
+                ? (U.talkE = !0)
+                : e === "map"
+                  ? (U.mapE = !0)
+                  : e === "swap"
+                    ? (U.swapE = !0)
+                    : e === "tool"
+                      ? (U.toolE = !0)
+                      : e === "pri"
+                        ? (U.priE = !0)
+                        : e === "sec"
+                          ? (U.secE = !0)
+                          : e === "up"
+                            ? (U.upE = !0)
+                            : e === "down"
+                              ? (U.downE = !0)
+                              : e === "magic"
+                                ? (U.magicE = !0)
+                                : e === "worldmap"
+                                  ? (U.mapE = !0)
+                                  : e === "board"
+                                    ? (U.boardE = !0)
+                                    : e === "back" && (U.backE = !0);
+      }
+      U[e] = a;
     }
     let mn = 0;
     function Gs(e, a) {
@@ -25253,7 +25361,7 @@ ram_mem_amulet: [
       let t = Ys[e.code];
       if (t) {
         t === "roll" && hasSpaceBoard() && (t = "board");
-        (e.preventDefault(), (a && e.repeat) || hn(t, a));
+        (e.preventDefault(), (a && e.repeat) || hn(t, a, "key"));
         return;
       }
       a && !e.repeat && e.code === "KeyM" &&
@@ -25515,7 +25623,7 @@ ram_mem_amulet: [
           enterStory(id);
           return Bt();
         },
-        build: () => window.__SQ_BUILD || "b44",
+        build: () => window.__SQ_BUILD || "b45",
         cast: () => castSpell(),
         hud: () => hudBits(),
         fightHud: () => fightHud(),
@@ -25532,7 +25640,11 @@ ram_mem_amulet: [
           thunder: d.thunder || 0,
           bolts: (A.bolts || []).length,
         }),
-        toast: () => ({ text: A.toastT > 0 ? A.toast || "" : "", t: A.toastT || 0 }),
+        toast: () => ({
+          text: A.toastT > 0 ? A.toast || "" : "",
+          t: A.toastT || 0,
+          n: A.toastSeq || 0,
+        }),
         hurt: (n = 1) => be(n, d.x, d.y + 20),
         drink: (i = 0) => drinkBottle(i),
         gearAct: (i) => cosmosGearAct(i),
@@ -25645,7 +25757,7 @@ ram_mem_amulet: [
         (n.preventDefault(),
           (m.dataset.held = m.dataset.b),
           m.classList.add("on"),
-          Ye.current && Ye.current.press(m.dataset.held, !0),
+          Ye.current && Ye.current.press(m.dataset.held, !0, n.pointerType || "pointer"),
           u === "attack" &&
             (clearTimeout(holdT),
             (holdT = setTimeout(() => {
