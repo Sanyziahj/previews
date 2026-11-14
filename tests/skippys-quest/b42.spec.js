@@ -60,12 +60,12 @@ async function talk(page) {
   });
 }
 
-test('build is b42', async ({ page }) => {
+test('build is b43', async ({ page }) => {
   const errors = await boot(page);
   const cache = await page.evaluate(() => document.querySelector('script').textContent);
-  expect(cache).toContain('window.__SQ_BUILD="b42"');
-  expect(cache).toContain('v=b42');
-  expect(await page.evaluate(() => __SQ.build())).toBe('b42');
+  expect(cache).toContain('window.__SQ_BUILD="b43"');
+  expect(cache).toContain('v=b43');
+  expect(await page.evaluate(() => __SQ.build())).toBe('b43');
   expect(errors, errors.join('\n')).toEqual([]);
 });
 

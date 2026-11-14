@@ -3,7 +3,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script>window.__SQ_BUILD="b42";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b42(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b42");location.replace(u.href);}</script>
+<script>window.__SQ_BUILD="b43";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b43(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b43");location.replace(u.href);}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Space Riders: Skippy's Quest</title><link rel="icon" href="data:,">
 <meta name="description" content="Space Riders: Skippy's Quest - a free 16-bit top-down action adventure browser game. The Red King is missing. Ride with ROS through the Sand Dungeon, take Cash's portals to the Seaport and Ramshackle the Viking, win Ronin's flaming sword, beat the house at the Andromeda Casino and stop the Overlord on the Moon, survive the meteor shower with Blaze and earn your space board at the Crossroad and cross the mirror into the Dark World, then storm Fright's castle and bring the Red King home. Chapters 1-9 (Complete) out now.">
@@ -3264,6 +3264,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           dir: 0,
           talk: "drill_moon",
           hide: "drill_joined",
+          hide2: "ch5_done",
         },
         {
           id: "drill_teller",
@@ -13551,6 +13552,9 @@ ram_mem_amulet: [
         bannerT: 0,
         toast: "",
         toastT: 0,
+        hail: "",
+        hailT: 0,
+        hailInk: null,
         tv: "off",
         shake: 0,
         flash: 0,
@@ -13864,7 +13868,24 @@ ram_mem_amulet: [
       };
     }
     function nr(e) {
-      return (!e.hide || !Z(e.hide)) && (!e.show || Z(e.show));
+      return (
+        (!e.hide || !Z(e.hide)) &&
+        (!e.hide2 || !Z(e.hide2)) &&
+        (!e.show || Z(e.show))
+      );
+    }
+    function drillStandsDown() {
+      if (A.story !== "skippy" || !ee || !reached("ch5_done")) return;
+      if (!Array.isArray(Xe)) Xe = [];
+      Xe.indexOf("drill") >= 0 && (Xe = Xe.filter((id) => id !== "drill"));
+      _.id === "drill" && (_.on = !1);
+    }
+    function hailDrill() {
+      if (A.story !== "skippy" || !w || w.id !== "moon" || Ae) return;
+      if (!reached("ch5_done") || Z("tale_drill") || ee.drill_hail) return;
+      ((ee.drill_hail = !0),
+        (A.hail = "RIDER! OVER HERE. I GOT A STORY FOR YOU."),
+        (A.hailT = 6.5));
     }
     function Gt() {
       for (let e of Xe)
@@ -13906,6 +13927,8 @@ ram_mem_amulet: [
         (d.dir = i),
         (A.toast = ""),
         (A.toastT = 0),
+        (A.hail = ""),
+        (A.hailT = 0),
         (d.safeX = d.x),
         (d.safeY = d.y),
         (d.roll = 0),
@@ -13933,6 +13956,7 @@ ram_mem_amulet: [
         (Be = []),
         (ha = []),
         (ze = {}),
+        drillStandsDown(),
         (_.on = Gt()),
         (_.trail = []),
         _.on)
@@ -13952,6 +13976,7 @@ ram_mem_amulet: [
         Fr(),
         spawnClear(),
         w.onEnter && !ee["oe_" + e] && ((ee["oe_" + e] = !0), ye(w.onEnter)),
+        hailDrill(),
         e === "home" &&
           A.story === "skippy" &&
           Z("ch9_done") &&
@@ -14176,8 +14201,9 @@ ram_mem_amulet: [
             shards: e.shards,
           }),
           (d.melee = e.melee || ""),
-          (ee = e.flags),
-          (Xe = e.party),
+          (ee = e.flags || {}),
+          (Xe = Array.isArray(e.party) ? e.party : []),
+          drillStandsDown(),
           (ua = e.visited || {}),
           (A.time = e.time || 0),
           (ee["oe_" + e.area] = !0),
@@ -14448,12 +14474,14 @@ ram_mem_amulet: [
           break;
         case "flag":
           ee[t.f || ""] = !0;
+          t.f === "ch5_done" && drillStandsDown();
           break;
         case "give":
           _e(t.item || "", t.n || 0, !0);
           break;
         case "party": {
           let s = t.who || "";
+          if (s === "drill" && A.story === "skippy" && reached("ch5_done")) break;
           Xe.indexOf(s) < 0 && Xe.push(s);
           let E = za(s);
           ((_.on = Gt()),
@@ -15501,6 +15529,7 @@ ram_mem_amulet: [
         (A.st += e),
         A.bannerT > 0 && (A.bannerT -= e),
         A.toastT > 0 && (A.toastT -= e),
+        A.hailT > 0 && (A.hailT -= e),
         A.ropeT > 0 && (A.ropeT -= e),
         A.saveT > 0 && (A.saveT -= e),
         A.shake > 0 && (A.shake -= e),
@@ -15942,6 +15971,14 @@ ram_mem_amulet: [
     function skippyObjective() {
       if (Z("dl_called") && !Z("dl_ronin"))
         return "FIND THE DOWNLOAD PLANS. THE THRONE IS SEALED.";
+      if (
+        A.story === "skippy" &&
+        w &&
+        w.id === "moon" &&
+        reached("ch5_done") &&
+        !Z("tale_drill")
+      )
+        return taleById("drill").objective;
       let t = activeTale();
       return t ? t.objective : "";
     }
@@ -18244,7 +18281,7 @@ ram_mem_amulet: [
       for (let a = 0; a < 16; a++)
         I((a * 23) % 320, 20 + ((a * 17) % 70), 2, 2, "#fff2c8");
       (v(n, "SPACE RIDERS", 160, 8, "#ff4fd8", 2, "center", "#2a0a14"),
-        v(n, window.__SQ_BUILD || "b42", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
+        v(n, window.__SQ_BUILD || "b43", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
         v(n, "SIDE QUESTS COME HOME", 160, 28, "#ffcc33", 1, "center", "#2a0a14"));
       let a = 58;
       for (let t = 0; t < STORY_ROWS.length; t++) {
@@ -18507,7 +18544,8 @@ ram_mem_amulet: [
           Math.ceil(A.wanted || 0) +
           " nuke " +
           (_.on && _.id === "nuke" ? "yes" : "no") +
-          (skippyObjective() ? "\n" + skippyObjective() : "");
+          (skippyObjective() ? "\n" + skippyObjective() : "") +
+          (A.hailT > 0 && A.hail ? "\n" + A.hail : "");
       else e.textContent = A.state || "";
     }
     function sandVeil() {
@@ -22070,7 +22108,7 @@ ram_mem_amulet: [
       return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
     }
     function dodgeBox(box) {
-      let occ = [A.radioInk, A.speechInk, A.bannerInk, A.toastInk, A.savedInk, A.shopInk, A.choiceInk]
+      let occ = [A.radioInk, A.speechInk, A.bannerInk, A.hailInk, A.toastInk, A.savedInk, A.shopInk, A.choiceInk]
         .map((ink) => ink && ink.box)
         .filter(Boolean);
       let guard = 0;
@@ -22109,7 +22147,7 @@ ram_mem_amulet: [
       let label = "SAVED",
         w = Ya(label, 1) + 14,
         h = 16,
-        occ = [A.radioInk, A.speechInk, A.bannerInk, A.toastInk, A.shopInk, A.choiceInk]
+        occ = [A.radioInk, A.speechInk, A.bannerInk, A.hailInk, A.toastInk, A.shopInk, A.choiceInk]
           .map((ink) => ink && ink.box)
           .filter(Boolean);
       occ.push({ x: 0, y: 0, w: 320, h: 34 });
@@ -22424,7 +22462,7 @@ ram_mem_amulet: [
       let e = A.t;
       (v(n, "SPACE RIDERS", 160, 14, "#ff4fd8", 3, "center", "#2a0a3a"),
         v(n, "SKIPPY'S QUEST", 160, 42, "#ffcc33", 2, "center", "#2a0a3a"),
-        v(n, window.__SQ_BUILD || "b42", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
+        v(n, window.__SQ_BUILD || "b43", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
       let a = (s, E, f, c, S) => {
         let y = Ue(s, S, 0);
         n.drawImage(
@@ -22953,6 +22991,7 @@ ram_mem_amulet: [
       ((A.frameInk = []),
         (A.savedInk = null),
         !(A.toastT > 0 && A.toast) && (A.toastInk = null),
+        (A.hailInk = null),
         !(A.bannerT > 0) && (A.bannerInk = null),
         !q && (A.speechInk = null),
         !le && (A.shopInk = null),
@@ -23075,6 +23114,8 @@ ram_mem_amulet: [
             lines: lines.map((l, i) => inkOf(l, 160, 40 + i * 12, "center")),
           })));
       }
+      if (A.hailT > 0 && A.hail && !q && !A.choice && !A.paused)
+        A.hailInk = drawBoxed(A.hail, 160, 40, 304, "#ffcc33", "hail");
       if ((os(), ys(), Us(), ss(), fs(), A.toastT > 0 && A.toast))
         A.toastInk = drawBoxed(A.toast, 160, 124, 292, "#4ff0ff");
       A.saveT > 0 && placeSaved();
@@ -25349,6 +25390,7 @@ ram_mem_amulet: [
         },
         flag: (a, t = !0) => {
           ee[a] = t;
+          a === "ch5_done" && t && drillStandsDown();
         },
         give: (a, t = 0) => _e(a, t, !1),
         killAll: () => {
@@ -25466,7 +25508,7 @@ ram_mem_amulet: [
           enterStory(id);
           return Bt();
         },
-        build: () => window.__SQ_BUILD || "b42",
+        build: () => window.__SQ_BUILD || "b43",
         cast: () => castSpell(),
         hud: () => hudBits(),
         fightHud: () => fightHud(),
