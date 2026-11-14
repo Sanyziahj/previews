@@ -95,8 +95,8 @@ async function openRos(page) {
 test('ROS starts with lasers on ATTACK, and ITEM does not fire them', async ({ page }) => {
   const errors = await boot(page);
   const cache = await page.evaluate(() => document.querySelector('script').textContent);
-  expect(cache).toContain('window.__SQ_BUILD="b43"');
-  expect(cache).toContain('v=b43');
+  expect(cache).toContain('window.__SQ_BUILD="b44"');
+  expect(cache).toContain('v=b44');
 
   await openRos(page);
   const born = await page.evaluate(() => {
@@ -119,7 +119,7 @@ test('ROS starts with lasers on ATTACK, and ITEM does not fire them', async ({ p
       build: S.build(),
     };
   });
-  expect(born.build).toBe('b43');
+  expect(born.build).toBe('b44');
   expect(born.state).toBe('play');
   expect(born.area).toBe('ros_yard');
   expect(born.hero).toBe('ros');
