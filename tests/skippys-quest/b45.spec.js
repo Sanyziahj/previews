@@ -206,7 +206,7 @@ test('one keyboard BOARD press shows one steady runner', async ({ page }) => {
   expect(seen.reset).toBe(0);
   expect(seen.cameBack).toBe(false);
   expect(seen.boxes).toBe(1);
-    expect(seen.tall).toBe(false);
+  expect(seen.tall).toBe(false);
   expect(seen.wide).toBe(true);
   expect(frames.filter((f) => f.text).length).toBeGreaterThan(90);
   expect(frames[frames.length - 1].text).toBe('');
@@ -217,6 +217,139 @@ test('one keyboard BOARD press shows one steady runner', async ({ page }) => {
     S.step(1);
   });
   await page.screenshot({ path: `${ART}/b45-board-desktop.png` });
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+const LONGEST = [
+  'THE LAND DEAL IS IN A MACHINE UNDER THE STORM. YOUR BOARD WAS SEIZED AT GOLDEN STONE. YOUR ROPE IS IN THE LABELED LOCKER ON THE EAST WALL. SOMEONE MOVED IT.',
+  'THREE WHITE FACES. NOT THE BOY. A LOG: OBSERVER NODE. OVERLORD LINK. SPONSOR INK, ANDROMEDA. SOMEONE IS WATCHING THE LIGHT IN HIM. THAT IS ALL I READ.',
+  'RADIO: YOU ARE AT THE ACADEMY. THIS ALREADY HAPPENED.',
+];
+
+async function auditRunners(page) {
+  return page.evaluate((longest) => {
+    const S = __SQ;
+    function inside(line, box) {
+      return line.x >= box.x + 2
+        && line.y >= box.y + 2
+        && line.x + line.w <= box.x + box.w - 2
+        && line.y + line.h <= box.y + box.h - 2;
+    }
+    function hit(a, b) {
+      const ix = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
+      const iy = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
+      return ix > 0.5 && iy > 0.5;
+    }
+    function gapDirty(ink) {
+      const g = document.getElementById('game').getContext('2d');
+      const lines = ink.lines.slice().sort((a, b) => a.y - b.y);
+      for (let i = 0; i < lines.length - 1; i++) {
+        const top = Math.ceil(lines[i].y + 8);
+        const bot = Math.floor(lines[i + 1].y);
+        if (bot - top < 1) return 'no gap';
+        const data = g.getImageData(4, top, 312, bot - top).data;
+        for (let p = 0; p < data.length; p += 4) {
+          const r = data[p];
+          const gc = data[p + 1];
+          const b = data[p + 2];
+          if (r > 245 && gc > 235 && b > 175 && b < 215 && r - b > 30) return 'text in the gap';
+        }
+      }
+      return '';
+    }
+    function check(name, ink) {
+      const bad = [];
+      if (!ink || !ink.box || !ink.lines || !ink.lines.length) {
+        bad.push(name + ' missing');
+        return bad;
+      }
+      if (ink.lines.length > 2) bad.push(name + ' has ' + ink.lines.length + ' lines');
+      if (ink.box.h > 24) bad.push(name + ' height ' + ink.box.h);
+      const sorted = ink.lines.slice().sort((a, b) => a.y - b.y);
+      sorted.forEach((line, i) => {
+        if (!inside(line, ink.box)) bad.push(name + ' clips ' + line.text.slice(0, 28));
+        const measured = line.text.length * 6 - 1;
+        if (measured <= 316) {
+          if (!line.fit || line.w !== measured) bad.push(name + ' clipped a line that fits');
+        } else if (!line.scroll) bad.push(name + ' wrapped instead of scrolling');
+        if (i && line.y < sorted[i - 1].y + sorted[i - 1].h + 2) bad.push(name + ' lines touch');
+      });
+      for (let i = 0; i < sorted.length; i++) {
+        for (let j = i + 1; j < sorted.length; j++) {
+          if (hit(sorted[i], sorted[j])) bad.push(name + ' lines overlap');
+        }
+      }
+      const dirty = gapDirty(ink);
+      if (dirty) bad.push(name + ' ' + dirty);
+      const rects = (S.frameInk() || []).flatMap((item) => item.lines || []);
+      for (let i = 0; i < rects.length; i++) {
+        for (let j = i + 1; j < rects.length; j++) {
+          if (hit(rects[i], rects[j])) bad.push(name + ' frame overlap');
+        }
+      }
+      return bad;
+    }
+    const problems = [];
+    function park(area) {
+      S.G.state = 'play';
+      S.G.story = 'drill';
+      S.G.paused = false;
+      S.G.dsCalm = 0;
+      S.G.dsShift = -3;
+      S.flag('oe_' + area);
+      S.warp(area, 6, 6, 0);
+      quiet();
+      S.G.dsCalm = 0;
+      S.G.dsShift = -3;
+      S.G.bannerT = 0;
+      S.G.toastT = 0;
+      S.G.hailT = 0;
+      S.G.saveT = 0;
+      S.ents.forEach((e) => { e.stun = 99; e.x = 8; e.y = 8; });
+    }
+    park('ds_moon1');
+    S.step(1);
+    problems.push.apply(problems, check('academy', S.radioInk()));
+    park('ds_breathe');
+    S.step(1);
+    problems.push.apply(problems, check('breathe', S.radioInk()));
+    park('ds_camp');
+    longest.forEach((text, i) => {
+      S.G.toast = text;
+      S.G.toastT = 3;
+      S.G.bannerT = 0;
+      S.G.hailT = 0;
+      S.step(1);
+      problems.push.apply(problems, check('toast ' + i, S.toastInk()));
+    });
+    S.G.toastT = 0;
+    S.G.hail = longest[0];
+    S.G.hailT = 3;
+    S.step(1);
+    problems.push.apply(problems, check('hail', (S.frameInk() || []).find((item) => item.kind === 'hail')));
+    S.G.hailT = 0;
+    S.G.banner = 'MOON COLONY REVOLT';
+    S.G.bannerT = 3;
+    S.step(1);
+    problems.push.apply(problems, check('banner', S.bannerInk()));
+    park('ds_moon1');
+    S.G.toast = longest[0];
+    S.G.toastT = 3;
+    S.G.banner = longest[1];
+    S.G.bannerT = 3;
+    S.step(1);
+    problems.push.apply(problems, check('stacked', S.radioInk()));
+    problems.push.apply(problems, check('stacked toast', S.toastInk()));
+    problems.push.apply(problems, check('stacked banner', S.bannerInk()));
+    return problems;
+  }, LONGEST);
+}
+
+test('longest runner messages do not overlap or clip', async ({ page }) => {
+  const errors = await boot(page);
+  await page.setViewportSize({ width: 1280, height: 800 });
+  const problems = await auditRunners(page);
+  expect(problems, problems.join('\n')).toEqual([]);
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
@@ -350,6 +483,80 @@ test.describe('phone', () => {
     expect(hit.hits).toEqual([]);
     expect(hit.ratio).toBeLessThan(0.12);
     await page.screenshot({ path: `${ART}/b45-board-phone.png` });
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+
+  test('landscape runners do not overlap or clip', async ({ page }) => {
+    const errors = await boot(page);
+    await page.waitForFunction(() => document.documentElement.classList.contains('srml'));
+    const problems = await auditRunners(page);
+    expect(problems, problems.join('\n')).toEqual([]);
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+});
+
+test.describe('phone portrait', () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+
+  test('portrait Academy runner does not overlap or cover the controls', async ({ page }) => {
+    const errors = await boot(page);
+    await page.waitForFunction(() => document.documentElement.classList.contains('srml'));
+    const problems = await auditRunners(page);
+    expect(problems, problems.join('\n')).toEqual([]);
+    await page.evaluate(() => {
+      const S = __SQ;
+      S.G.state = 'play';
+      S.G.story = 'drill';
+      S.G.paused = false;
+      S.G.dsCalm = 0;
+      S.G.dsShift = -3;
+      S.flag('oe_ds_moon1');
+      S.warp('ds_moon1', 6, 6, 0);
+      quiet();
+      S.G.dsCalm = 0;
+      S.G.dsShift = -3;
+      S.G.bannerT = 0;
+      S.G.toastT = 0;
+      S.G.hailT = 0;
+      S.ents.forEach((e) => { e.stun = 99; e.x = 8; e.y = 8; });
+      S.step(2);
+    });
+    const phone = await page.evaluate(() => {
+      const S = __SQ;
+      const ink = S.radioInk();
+      const c = document.getElementById('game').getBoundingClientRect();
+      const sx = c.width / 320;
+      const sy = c.height / 224;
+      const screen = {
+        left: c.left + ink.box.x * sx,
+        top: c.top + ink.box.y * sy,
+        right: c.left + (ink.box.x + ink.box.w) * sx,
+        bottom: c.top + (ink.box.y + ink.box.h) * sy,
+        h: ink.box.h * sy,
+      };
+      const hits = [];
+      document.querySelectorAll('.srml-b, #stick').forEach((el) => {
+        const r = el.getBoundingClientRect();
+        if (r.width < 2 || r.height < 2 || getComputedStyle(el).display === 'none') return;
+        const ix = Math.min(screen.right, r.right) - Math.max(screen.left, r.left);
+        const iy = Math.min(screen.bottom, r.bottom) - Math.max(screen.top, r.top);
+        if (ix > 1 && iy > 1) hits.push((el.dataset && el.dataset.b) || el.id);
+      });
+      return {
+        lines: ink.lines.length,
+        h: ink.box.h,
+        ratio: screen.h / window.innerHeight,
+        hits,
+        text: ink.lines.map((l) => l.text).join(' | '),
+      };
+    });
+    expect(phone.lines).toBeLessThanOrEqual(2);
+    expect(phone.h).toBeLessThanOrEqual(24);
+    expect(phone.ratio).toBeLessThan(0.13);
+    expect(phone.hits).toEqual([]);
+    expect(phone.text).toContain('YOU ARE AT THE ACADEMY');
+    expect(phone.text).toContain('KEY IS NOT BY THE GATE');
+    await page.screenshot({ path: `${ART}/b45-academy-portrait.png` });
     expect(errors, errors.join('\n')).toEqual([]);
   });
 });

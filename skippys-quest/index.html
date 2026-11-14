@@ -22157,26 +22157,59 @@ ram_mem_amulet: [
       return y;
     }
     function drawRunner(parts, color, kind) {
-      let cols = 52,
-        lines = [];
+      let raw = [];
       for (let i = 0; i < (parts || []).length; i++) {
-        let part = parts[i];
-        if (!part) continue;
-        lines.push.apply(lines, Nn(String(part), cols));
+        let part = String(parts[i] || "").replace(/\s+/g, " ").trim();
+        if (part) raw.push(part);
       }
-      if (!lines.length) return null;
-      let nLines = lines.length,
-        h = 11 + (nLines - 1) * 8,
+      if (!raw.length) return null;
+      let pages = Math.ceil(raw.length / 2),
+        page = pages > 1 ? Math.floor((A.t || 0) / 2.6) % pages : 0,
+        lines = raw.slice(page * 2, page * 2 + 2),
+        nLines = lines.length,
+        pitch = 10,
+        h = 12 + (nLines - 1) * pitch,
         y = placeRunner(h),
-        box = { x: 0, y: y, w: 320, h: h };
+        box = { x: 0, y: y, w: 320, h: h },
+        clipX = 4,
+        clipW = 312;
       ((n.fillStyle = "rgba(8,6,16,0.78)"),
         n.fillRect(0, y, 320, h),
         I(0, y, 320, 1, color || "#9ff0ea"));
-      let ink = lines.map((l, i) => {
-        let ly = y + 2 + i * 8;
-        v(n, l, 160, ly, "#fff6c0", 1, "center", "#000");
-        return inkOf(l, 160, ly, "center");
-      });
+      let ink = [];
+      for (let i = 0; i < nLines; i++) {
+        let label = lines[i].toUpperCase(),
+          tw = Ya(label, 1),
+          ly = y + 2 + i * pitch,
+          fits = tw <= 316;
+        (n.save(),
+          n.beginPath(),
+          n.rect(clipX, ly, clipW, 8),
+          n.clip());
+        if (fits) v(n, label, 160, ly, "#fff6c0", 1, "center", "#000");
+        else {
+          let gap = 40,
+            span = tw + gap,
+            shift = Math.floor((A.t || 0) * 32) % span,
+            x0 = clipX - shift;
+          (v(n, label, x0, ly, "#fff6c0", 1, "", "#000"),
+            v(n, label, x0 + span, ly, "#fff6c0", 1, "", "#000"));
+        }
+        n.restore();
+        if (fits) {
+          let bit = inkOf(label, 160, ly, "center");
+          ((bit.fit = !0), ink.push(bit));
+        } else
+          ink.push({
+            text: label,
+            x: clipX,
+            y: ly,
+            w: clipW,
+            h: 7,
+            fit: !1,
+            scroll: !0,
+          });
+      }
       return noteInk(kind || "runner", { box: box, lines: ink });
     }
     function drawObjectives() {
