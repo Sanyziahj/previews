@@ -37,8 +37,8 @@ test('dream posters are drawn and the rope pulls them down', async ({ page }) =>
   expect(robots).toBe(1);
   expect(await page.locator('meta[name="robots"]').first().getAttribute('content')).toBe('noindex,nofollow');
   const cache = await page.evaluate(() => document.querySelector('script').textContent);
-  expect(cache).toContain('window.__SQ_BUILD="b42"');
-  expect(cache).toContain('v=b42');
+  expect(cache).toContain('window.__SQ_BUILD="b43"');
+  expect(cache).toContain('v=b43');
 
   const drawn = await page.evaluate(() => {
     const S = __SQ;
@@ -155,7 +155,7 @@ test('dream posters are drawn and the rope pulls them down', async ({ page }) =>
     };
   });
 
-  expect(drawn.build).toBe('b42');
+  expect(drawn.build).toBe('b43');
   expect(drawn.area).toBe('ros_dream');
   expect(drawn.name).toBe('THE DREAM');
   expect(drawn.hud).toContain('Z ROPE');
