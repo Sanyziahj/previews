@@ -60,10 +60,10 @@ function shot(page, name) {
 test('after the credits Skippy lands at Cash, and home still opens DreamLand', async ({ page }) => {
   test.setTimeout(90000);
   const errors = await boot(page, { ros: ROS_SAVE, ram: RAM_SAVE, ds: DS_SAVE });
-  expect(await page.evaluate(() => __SQ.build())).toBe('b46');
+  expect(await page.evaluate(() => __SQ.build())).toBe('b48');
   const cache = await page.evaluate(() => document.querySelector('script').textContent);
-  expect(cache).toContain('window.__SQ_BUILD="b46"');
-  expect(cache).toContain('v=b46');
+  expect(cache).toContain('window.__SQ_BUILD="b48"');
+  expect(cache).toContain('v=b48');
 
   await page.evaluate(() => {
     const S = __SQ;
@@ -161,15 +161,29 @@ test('after the credits Skippy lands at Cash, and home still opens DreamLand', a
     S.flag('dl_called', false);
     S.flag('dl_left', false);
     S.warp('home', 8.2, 8.4, 3);
-    for (let i = 0; i < 20 && !(S.dlg && /DREAMLAND/.test(S.dlg.raw || '')); i++) S.step(2);
-    if (S.dlg) S.skipText();
+    S.step(4);
+    S.P.x = 15.5 * 16;
+    S.P.y = 3.7 * 16;
+    for (let i = 0; i < 20 && !(S.G.choice && S.G.choice.id === 'home_rest'); i++) S.step(2);
   });
-  const home = await page.evaluate(() => ({
-    area: __SQ.A.id,
-    line: __SQ.dlg ? __SQ.dlg.raw : '',
-  }));
+  const home = await page.evaluate(() => {
+    const spec = __SQ.G.choice;
+    const ink = __SQ.choiceInk();
+    return {
+      area: __SQ.A.id,
+      line: __SQ.dlg ? __SQ.dlg.raw : '',
+      id: spec && spec.id,
+      prompt: ink ? ink.lines.map((l) => l.text).join(' ') : '',
+      boxY: ink ? ink.box.y : 0,
+    };
+  });
   expect(home.area).toBe('home');
-  expect(home.line).toMatch(/HURRY, RETURN TO DREAMLAND/);
+  expect(home.line).toBe('');
+  expect(home.id).toBe('home_rest');
+  expect(home.prompt).toMatch(/GET SOME REST/);
+  expect(home.prompt).toMatch(/REST/);
+  expect(home.prompt).toMatch(/NOT YET/);
+  expect(home.boxY).toBeGreaterThan(100);
 
   const keys = await page.evaluate(() => ({
     ros: localStorage.getItem('sq_save_ros_v1'),

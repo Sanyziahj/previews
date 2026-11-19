@@ -57,12 +57,12 @@ async function chartOf(page) {
   return page.evaluate(() => __SQ.chart());
 }
 
-test('build is b46 and drill rooms stay connected', async ({ page }) => {
+test('build is b48 and drill rooms stay connected', async ({ page }) => {
   const errors = await boot(page);
   const cache = await page.evaluate(() => document.querySelector('script').textContent);
-  expect(cache).toContain('window.__SQ_BUILD="b46"');
-  expect(cache).toContain('v=b46');
-  expect(await page.evaluate(() => __SQ.build())).toBe('b46');
+  expect(cache).toContain('window.__SQ_BUILD="b48"');
+  expect(cache).toContain('v=b48');
+  expect(await page.evaluate(() => __SQ.build())).toBe('b48');
   expect(await page.locator('meta[name="robots"]').count()).toBe(1);
 
   const chart = await chartOf(page);

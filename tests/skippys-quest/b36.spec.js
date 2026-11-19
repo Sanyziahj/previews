@@ -85,7 +85,7 @@ test.describe('Spike DreamLand chapter', () => {
       ds: DS_SAVE,
     });
     await page.waitForFunction(() => document.documentElement.classList.contains('srml'));
-    expect(await page.evaluate(() => __SQ.build())).toBe('b46');
+    expect(await page.evaluate(() => __SQ.build())).toBe('b48');
     await enterContinue(page);
     const heard = await page.evaluate(() => {
       const S = __SQ;
@@ -180,26 +180,49 @@ test.describe('Spike DreamLand chapter', () => {
       S.P.shards = 7;
       S.P.items.baton = true;
       S.warp('home', 8.2, 8.4, 3);
-      for (let i = 0; i < 12 && !(S.dlg && /DREAMLAND/.test(S.dlg.raw || '')); i++) S.step(2);
-      if (S.dlg) S.skipText();
-      S.step(1);
+      S.step(4);
     });
     const called = await page.evaluate(() => {
       const portals = (__SQ.A.props || []).filter((p) => p.k === 'portal');
+      const spike = __SQ.npcs.find((n) => n.id === 'spike');
       return {
         area: __SQ.A.id,
         line: __SQ.dlg ? __SQ.dlg.raw : '',
+        choice: __SQ.G.choice && __SQ.G.choice.id,
         portals: portals.length,
+        spike: !!(spike && spike.vis !== false),
       };
     });
     expect(called.area).toBe('home');
-    expect(called.line).toMatch(/HURRY, RETURN TO DREAMLAND/);
+    expect(called.line).toBe('');
+    expect(called.choice).toBeFalsy();
     expect(called.portals).toBe(0);
+    expect(called.spike).toBe(false);
+    await page.evaluate(() => {
+      const S = __SQ;
+      S.P.x = 15.5 * 16;
+      S.P.y = 3.7 * 16;
+      for (let i = 0; i < 20 && !(S.G.choice && S.G.choice.id === 'home_rest'); i++) S.step(2);
+      S.G.choice.sel = 0;
+      S.press('attack', true); S.step(1); S.press('attack', false);
+      for (let i = 0; i < 80 && !(S.dlg && /HURRY/.test(S.dlg.raw || '')); i++) {
+        if (S.dlg) { S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); }
+        S.step(4);
+      }
+      if (S.dlg) S.skipText();
+    });
+    const arrived = await page.evaluate(() => ({
+      area: __SQ.A.id,
+      line: __SQ.dlg ? __SQ.dlg.raw : '',
+      spike: __SQ.npcs.some((n) => n.id === 'spike' && n.vis !== false),
+    }));
+    expect(arrived.area).toBe('dl_yard');
+    expect(arrived.line).toMatch(/HURRY, RETURN TO DREAMLAND/);
+    expect(arrived.spike).toBe(true);
     await page.evaluate(() => {
       const S = __SQ;
       if (S.dlg) { S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); }
-      for (let i = 0; i < 40 && S.A.id !== 'dl_yard'; i++) S.step(8);
-      for (let i = 0; i < 20 && (S.G.fade > 0.05 || S.script || S.dlg); i++) {
+      for (let i = 0; i < 40 && (S.G.fade > 0.05 || S.script || S.dlg); i++) {
         if (S.dlg) { S.skipText(); S.press('talk', true); S.step(1); S.press('talk', false); }
         S.step(4);
       }

@@ -3,9 +3,9 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script>window.__SQ_BUILD="b46";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b46(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b46");location.replace(u.href);}</script>
+<script>window.__SQ_BUILD="b48";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b48(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b47");location.replace(u.href);}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Space Riders: Skippy's Quest</title><link rel="icon" href="data:,">
+<title>Space Riders: Skippy's Quest - Chapters 1-9 (Complete)</title><link rel="icon" href="data:,">
 <meta name="description" content="Space Riders: Skippy's Quest - a free 16-bit top-down action adventure browser game. The Red King is missing. Ride with ROS through the Sand Dungeon, take Cash's portals to the Seaport and Ramshackle the Viking, win Ronin's flaming sword, beat the house at the Andromeda Casino and stop the Overlord on the Moon, survive the meteor shower with Blaze and earn your space board at the Crossroad and cross the mirror into the Dark World, then storm Fright's castle and bring the Red King home. Chapters 1-9 (Complete) out now.">
 <meta property="og:url" content="https://sanyziahj.github.io/skippys-quest/"><meta property="og:type" content="website">
 <meta property="og:title" content="Space Riders: Skippy's Quest - Chapters 1-9 (Complete)">
@@ -806,17 +806,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         realm: "desert",
         music: "home",
         chests: [{ id: "c_home", x: 17, y: 3, item: "coins", n: 10 }],
-        npcs: [
-          {
-            id: "spike",
-            x: 13,
-            y: 5,
-            dir: 2,
-            talk: "spike_dl_talk",
-            show: "ch9_done",
-            hide: "dl_left",
-          },
-        ],
+        npcs: [],
         warps: [
           { x: 9, y: 11, w: 2, h: 1, to: "desert", tx: 5.5, ty: 7.4, dir: 0 },
         ],
@@ -832,6 +822,13 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
             y: 8,
             text: "THE DOOR FACES THE PIONEER POUR. CASH'S COURT IS DOWNSTAIRS OF IT.",
             kind: "sign",
+          },
+          {
+            x: 15,
+            y: 2,
+            text: "GET SOME REST?",
+            kind: "none",
+            script: "home_rest_ask",
           },
         ],
         onEnter: "home_wake",
@@ -5119,13 +5116,40 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
     ],
   });
   Object.assign(oa, {
-    spike_dl_call: [
-      { t: "flag", f: "dl_called" },
-      h("spike", "SKIPPY, HURRY, RETURN TO DREAMLAND."),
+    home_rest_ask: [{ t: "choice", a: "home_rest" }],
+    home_rest_no: [],
+    home_rest_yes: [
+      { t: "fn", f: "bedSit" },
       { t: "fade", m: "white" },
-      { t: "flag", f: "dl_arrive_said" },
+      { t: "fn", f: "armDream" },
       { t: "fn", f: "toDreamland" },
       { t: "fade", m: "in" },
+      { t: "flag", f: "dl_arrive_said" },
+      h("spike", "SKIPPY, HURRY, RETURN TO DREAMLAND."),
+      h(
+        "skippy",
+        "RED ELECTRICITY BELTS. ENEMIES EVERYWHERE. THE OVERLORD HAS TAKEN DREAMLAND.",
+      ),
+      h(
+        "spike",
+        "HE IS DOWNLOADING FRIGHT THROUGH THE NIGHTMARE REALM. HE MEANS TO BRING FRIGHT BACK.",
+      ),
+      h("skippy", "THE THRONE IS SEALED. WE LOOK FOR ANOTHER ROOM."),
+    ],
+    spike_dl_arrive: [
+      h("spike", "SKIPPY, HURRY, RETURN TO DREAMLAND."),
+      h(
+        "skippy",
+        "RED ELECTRICITY BELTS. ENEMIES EVERYWHERE. THE OVERLORD HAS TAKEN DREAMLAND.",
+      ),
+      h(
+        "spike",
+        "HE IS DOWNLOADING FRIGHT THROUGH THE NIGHTMARE REALM. HE MEANS TO BRING FRIGHT BACK.",
+      ),
+      h("skippy", "THE THRONE IS SEALED. WE LOOK FOR ANOTHER ROOM."),
+    ],
+    spike_dl_call: [
+      h("spike", "SKIPPY, HURRY, RETURN TO DREAMLAND."),
       h(
         "skippy",
         "RED ELECTRICITY BELTS. ENEMIES EVERYWHERE. THE OVERLORD HAS TAKEN DREAMLAND.",
@@ -6001,8 +6025,8 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         "#..R..................RR...#",
         "#..R.......................#",
         "#..RRRRRR......RRRR........#",
-        "#...........................",
-        "#...........................",
+        "#..........................#",
+        "#..........................#",
         "#..........................#",
         "############################",
       ],
@@ -9194,7 +9218,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
   }
   Object.assign(Ea, {
     blast: { name: "BLASTER", desc: "DRILL'S BLAST. X OR Z. HE LIKES THE BOOM.", jingle: "item" },
-    heavy: { name: "HEAVY LASER BLASTER", desc: "A GIFT FROM DRILL SERGEANT. X, Z, OR SWAP.", jingle: "item" },
+    heavy: { name: "HEAVY LASER BLASTER", desc: "A GIFT FROM DRILL SERGEANT. Z OR SWAP.", jingle: "item" },
     plasma: { name: "PLASMA EDGE", desc: "A CHARGED BLADE. X SWINGS HARDER.", jingle: "item" },
     disc: { name: "BOOMERANG DISC", desc: "Z THROWS IT. IT COMES HOME.", jingle: "item" },
     suit: { name: "RIDING SUIT", desc: "HITS LAND SOFTER.", jingle: "item" },
@@ -9468,7 +9492,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
   STORY_ROWS = [
     { id: "skippy", name: "SKIPPY'S QUEST", sub: "THE MAIN RIDE. THE RED KING IS MISSING", play: !0, save: "sq_save_v1", who: "skippy" },
     { id: "ros", name: "THE ROGUE OUTLAW SHERIFF", sub: "A SIDE QUEST. IT RETURNS TO SKIPPY", play: !0, save: "sq_save_ros_v1", who: "ros" },
-    { id: "spike", name: "SPIKE", sub: "SOON. AFTER CHAPTER 7", play: !1, who: "spike" },
+    { id: "spike", name: "SPIKE", sub: "SOON", play: !1, who: "spike" },
     { id: "drill", name: "DRILL SERGEANT", sub: "A SIDE QUEST. IT RETURNS TO SKIPPY", play: !0, save: "sq_save_ds_v1", who: "drill" },
     { id: "ronin", name: "RONIN", sub: "SOON. AFTER CHAPTER 8", play: !1, who: "ronin" },
     { id: "ramshackle", name: "RAMSHACKLE", sub: "A SIDE QUEST. IT RETURNS TO SKIPPY", play: !0, save: "sq_save_ram_v1", who: "ramshackle" },
@@ -9597,6 +9621,15 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       opts: [
         ["SIT FOR THE MEMORY", "tale_drill_yes"],
         ["NOT YET", "tale_drill_no"],
+      ],
+    },
+    home_rest: {
+      strip: !0,
+      prompt: "GET SOME REST?",
+      back: "home_rest_no",
+      opts: [
+        ["REST", "home_rest_yes"],
+        ["NOT YET", "home_rest_no"],
       ],
     },
   };
@@ -13991,12 +14024,6 @@ ram_mem_amulet: [
         spawnClear(),
         w.onEnter && !ee["oe_" + e] && ((ee["oe_" + e] = !0), ye(w.onEnter)),
         hailDrill(),
-        e === "home" &&
-          A.story === "skippy" &&
-          Z("ch9_done") &&
-          !Z("dl_called") &&
-          !Z("dl_left") &&
-          ye("spike_dl_call"),
         e === "hub" &&
           A.story === "skippy" &&
           Z("ch9_done") &&
@@ -14005,6 +14032,11 @@ ram_mem_amulet: [
           ye("cash_rest"),
         armEye(),
         (Z("woke") || A.story === "ros" || A.story === "ramshackle" || A.story === "drill") && e !== "dream" && xe());
+    }
+    function nearHomeBed() {
+      let tx = Math.floor(d.x / 16),
+        ty = Math.floor(d.y / 16);
+      return tx >= 13 && tx <= 17 && ty >= 3 && ty <= 4;
     }
     function inWarp(x, y) {
       for (let C of w.warps || [])
@@ -14179,7 +14211,43 @@ ram_mem_amulet: [
         (A.st = 0),
         ba("dream", 2, 5.5, 3));
     }
+    function drillTaleDone(flags) {
+      return !!(flags && (flags.tale_drill || flags.heavy_got || flags.ds_home_end));
+    }
+    function heavyTool(id, items) {
+      if (!id || id === "heavy" || isMelee(id)) return "";
+      return items && (items[id] || (id === "bow" && items.tbow)) ? id : "";
+    }
+    function patchHeavySave(data, equip) {
+      if (!data || typeof data !== "object" || !drillTaleDone(data.flags)) return !1;
+      let flags = data.flags || (data.flags = {}),
+        items = data.items || (data.items = {}),
+        changed = !1,
+        stuck = data.pri === "heavy" && !!data.sec && data.sec !== "heavy";
+      if (!items.heavy) {
+        items.heavy = !0;
+        flags.heavy_got = !0;
+        changed = !0;
+      }
+      if (!equip || (!changed && !stuck)) return changed;
+      let pri = heavyTool(data.pri, items) || (stuck ? heavyTool(data.sec, items) : "") || heavyTool(data.sec, items) || heavyTool(data.tool, items);
+      data.pri = pri;
+      data.sec = "heavy";
+      data.tool = "heavy";
+      data.act && (data.act = "heavy");
+      return !0;
+    }
+    function migrateHeavyStores() {
+      for (let key of ["sq_save_v1", "sq_save_ros_v1", "sq_save_ram_v1", "sq_save_ds_v1"])
+        try {
+          let raw = localStorage.getItem(key);
+          if (!raw) continue;
+          let data = JSON.parse(raw);
+          patchHeavySave(data, key === "sq_save_v1") && localStorage.setItem(key, JSON.stringify(data));
+        } catch (e) {}
+    }
     function Bt() {
+      migrateHeavyStores();
       let e = null;
       try {
         let a = window.localStorage.getItem(Mt);
@@ -14232,7 +14300,21 @@ ram_mem_amulet: [
             (e.x = p(9.5)),
             (e.y = p(7.2)),
             (e.dir = 1)),
+          A.spikeReplay &&
+            ((A.spikeReplay = !1),
+            (A._spikeArrive = !0),
+            (ee.ch9_done = !0),
+            (ee.dl_called = !0),
+            (ee.dl_done = !0),
+            (ee.dl_ronin = !1),
+            (ee.dl_blocked = !1),
+            (ee.dl_arrive_said = !1),
+            (e.area = "dl_yard"),
+            (e.x = p(10)),
+            (e.y = p(13)),
+            (e.dir = 1)),
           ba(e.area, e.x / 16 - 0.5, e.y / 16 - 0.5, e.dir),
+          A._spikeArrive && ((A._spikeArrive = !1), ye("spike_dl_arrive")),
           A.story === "ros" &&
             ((A.wanted = e.wanted || 0),
             (d.wep = e.wep || "lasers"),
@@ -14263,7 +14345,8 @@ ram_mem_amulet: [
             (d.arrowCd = 0),
             (d.charge = 0),
             migrateSlots(e),
-            A.story !== "skippy" && grantStoryBoard()),
+            A.story !== "skippy" && grantStoryBoard(),
+            xe()),
           applyCosmos(e.cosmos),
           Q(
             A.story === "ros"
@@ -14427,8 +14510,11 @@ ram_mem_amulet: [
         case "proof3":
           ((d.items[e] = !0), (ee[e] = !0));
           break;
+        case "heavy":
+          break;
       }
       noteItem(e === "blasters" ? "lasers" : e === "brand" ? "bomb" : e === "tbow" || e === "axe" ? (e === "axe" ? "sword" : "bow") : e);
+      e === "heavy" && grantHeavy();
       let s = Ea[e] ? Ea[e].jingle : "coin";
       ((D[s] || D.coin)(),
         t &&
@@ -15120,6 +15206,15 @@ ram_mem_amulet: [
             ((ee[C.once] = !0), ye(C.script));
             break;
           }
+        if (w.id !== "home" || !nearHomeBed()) A.bedLatch = !1;
+        else if (
+          A.story === "skippy" &&
+          Z("ch9_done") &&
+          (!Z("dl_called") || Z("dl_ronin")) &&
+          !A.bedLatch
+        ) {
+          ((A.bedLatch = !0), ye("home_rest_ask"));
+        }
         for (let C of w.props || [])
           if (
             C.k === "portal" &&
@@ -15950,8 +16045,13 @@ ram_mem_amulet: [
         return null;
       }
     }
+    function spikeReached(flags) {
+      return !!(flags && (flags.dl_called || flags.dl_left || flags.dl_ronin || flags.dl_done));
+    }
     function chapterMenuOpen(row) {
-      if (!row || !row.play) return !1;
+      if (!row) return !1;
+      if (row.id === "spike") return spikeReached(saveFlags("sq_save_v1"));
+      if (!row.play) return !1;
       if (!taleRowId(row.id)) return !0;
       if (taleHeard(taleHeardId(row.id))) return !0;
       let end = taleHomeFlag(row.id),
@@ -16033,10 +16133,17 @@ ram_mem_amulet: [
           if (s && s.flags && s.flags.ds_home_end) return "COMPLETE";
           if (s) return "RIDING";
         }
+        if (id === "spike") {
+          let s = JSON.parse(localStorage.getItem("sq_save_v1") || "null");
+          let f = s && s.flags;
+          if (f && (f.dl_ronin || f.dl_done)) return "COMPLETE";
+          if (spikeReached(f)) return "RIDING";
+        }
       } catch (e) {}
       return "";
     }
     function rowSub(i) {
+      if (i.id === "spike") return chapterMenuOpen(i) ? chapterStatus("spike") || "DREAMLAND" : "SOON";
       if (taleRowId(i.id) && !chapterMenuOpen(i)) return "HEAR IT ON SKIPPY'S RIDE";
       if ((i.id === "ros" || i.id === "ramshackle" || i.id === "drill") && (taleHeard(i.id === "ramshackle" ? "ram" : i.id === "drill" ? "drill" : "ros") || chapterStatus(i.id) === "COMPLETE"))
         return "THE TALE IS TOLD";
@@ -16158,10 +16265,36 @@ ram_mem_amulet: [
       ((ee.tale_ram = !0), ba("seaport", 16, 17, 1), ye("tale_ram_close"), xe());
     }
     function grantHeavy() {
+      d.items || (d.items = {});
       ((d.items.heavy = !0), (ee.heavy_got = !0));
-      if (!d.sec || isMelee(d.sec) || !ownedItem(d.sec)) d.sec = "heavy";
-      else if (d.pri !== "heavy") d.pri = "heavy";
-      settleHands();
+      if (A.story !== "skippy") return;
+      let pri =
+        (d.pri !== "heavy" && !isMelee(d.pri) && ownedItem(d.pri) && d.pri) ||
+        (d.sec !== "heavy" && !isMelee(d.sec) && ownedItem(d.sec) && d.sec) ||
+        (d.tool !== "heavy" && !isMelee(d.tool) && ownedItem(d.tool) && d.tool) ||
+        "";
+      if (!pri)
+        for (let id of ["raygun", "bow", "missile", "lasso", "disc", "blast"])
+          if (ownedItem(id)) {
+            pri = id;
+            break;
+          }
+      ((d.pri = pri), (d.sec = "heavy"), (d.tool = "heavy"), (d.act = "heavy"), settleHands());
+      if (heldItem() !== "heavy")
+        ((d.pri === "heavy" && (d.pri = pri && pri !== "heavy" ? pri : "")),
+          (d.sec = "heavy"),
+          (d.tool = "heavy"),
+          (d.act = "heavy"));
+    }
+    function standBeside() {
+      for (let f of Ta) {
+        if (!f.vis || f.leave > 0) continue;
+        if (Math.abs(f.x - d.x) < 28 && Math.abs(f.y - d.y) < 32) {
+          f.x = d.x + 40;
+          f.y = d.y;
+          f.dir = 2;
+        }
+      }
     }
     function throughDrill() {
       ((Mt = "sq_save_ds_v1"), (ee.ds_home_end = !0), (ee.ds_ready = !0));
@@ -16175,12 +16308,17 @@ ram_mem_amulet: [
       Bt() || Et();
       ((ee.tale_drill = !0), (ee.heavy_got = !0));
       (grantHeavy(),
-        ba("moon", 5, 8, 1),
+        ba("moon", 5, 11, 0),
+        (A.banner = w.name),
+        (A.bannerT = 2.2),
         (ue = { item: "heavy", n: 1, t: 0 }),
         (d.hold = "heavy"),
         (d.holdT = 8),
+        (d.dir = 0),
+        standBeside(),
         ye("tale_drill_close"),
-        xe());
+        xe(),
+        (A.saveT = 0));
     }
     function returnToPresent() {
       backToSkippy(!0);
@@ -18074,7 +18212,29 @@ ram_mem_amulet: [
         style: "",
       },
     });
+    function replaySpike() {
+      ((A.story = "skippy"), (Mt = "sq_save_v1"), (A.spikeReplay = !0));
+      if (!Bt()) {
+        (Kt(),
+          (A.state = "play"),
+          (A.st = 0),
+          (A.spikeReplay = !1),
+          (ee.woke = !0),
+          (ee.ch9_done = !0),
+          (ee.dl_called = !0),
+          (ee.dl_done = !0),
+          (ee.dl_ronin = !1),
+          (ee.dl_blocked = !1),
+          (d.sit = !1),
+          ba("dl_yard", 10, 13, 1),
+          ye("spike_dl_arrive"));
+      }
+    }
     function enterStory(id) {
+      if (id === "spike") {
+        replaySpike();
+        return;
+      }
       let row = STORY_ROWS.filter((s) => s.id === id)[0] || STORY_ROWS[0];
       ((A.story = row.id), (Mt = row.save || "sq_save_v1"));
       try {
@@ -18295,7 +18455,7 @@ ram_mem_amulet: [
       for (let a = 0; a < 16; a++)
         I((a * 23) % 320, 20 + ((a * 17) % 70), 2, 2, "#fff2c8");
       (v(n, "SPACE RIDERS", 160, 8, "#ff4fd8", 2, "center", "#2a0a14"),
-        v(n, window.__SQ_BUILD || "b46", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
+        v(n, window.__SQ_BUILD || "b48", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
         v(n, "SIDE QUESTS COME HOME", 160, 28, "#ffcc33", 1, "center", "#2a0a14"));
       let a = 58;
       for (let t = 0; t < STORY_ROWS.length; t++) {
@@ -18486,10 +18646,31 @@ ram_mem_amulet: [
       });
       v(n, "BACK CANCELS", 160, 176, "#c8b090", 1, "center", "#000");
     }
+    function drawStripChoice(spec) {
+      let g = speechGeom(!1),
+        ink = [],
+        prompt = spec.prompt || "";
+      na(g.x, g.y, g.w, g.h, "#ffcc33");
+      v(n, prompt, g.textX, g.y + 6, "#ffcc33", 1, "", X);
+      ink.push(inkOf(prompt, g.textX, g.y + 6, ""));
+      spec.opts.forEach((row, i) => {
+        let y = g.y + 22 + i * 16,
+          on = A.choice.sel === i,
+          label = (on ? "> " : "  ") + row[0];
+        (on && I(g.textX - 4, y - 2, Math.min(120, g.w - g.textX - 8), 14, "#3a2818"),
+          v(n, label, g.textX, y, on ? "#ffcc33" : "#ffffff", 1, "", X),
+          ink.push(inkOf(label, g.textX, y, "")));
+      });
+      A.choiceInk = { box: { x: g.x, y: g.y, w: g.w, h: g.h }, lines: ink };
+    }
     function drawChoice() {
       if (!A.choice) return;
       let spec = CHOICES[A.choice.id];
       if (!spec) return;
+      if (spec.strip) {
+        drawStripChoice(spec);
+        return;
+      }
       let ink = [],
         box = { x: 36, y: 48, w: 248, h: 36 + spec.opts.length * 18 + 28 };
       (I(box.x, box.y, box.w, box.h, "#140c08"),
@@ -18546,7 +18727,8 @@ ram_mem_amulet: [
         e.textContent = "THE SLUGGER IS NOT HOME\nLET'S RIDE!";
       else if (A.choice)
         e.textContent =
-          CHOICES[A.choice.id].opts.map((a) => a[0]).join("\n") + "\nsel " + A.choice.sel;
+          ((CHOICES[A.choice.id].prompt || "") + "\n" +
+          CHOICES[A.choice.id].opts.map((a) => a[0]).join("\n") + "\nsel " + A.choice.sel).trim();
       else if (A.state === "play")
         e.textContent =
           (w ? w.name : "") +
@@ -20102,8 +20284,18 @@ ram_mem_amulet: [
           (Ae = null),
           (q = null));
       }),
+      (Ia.bedSit = () => {
+        ((d.sit = !0), (d.dir = 1));
+      }),
+      (Ia.armDream = () => {
+        ((ee.dl_called = !0),
+          (ee.dl_blocked = !1),
+          (ee.dl_arrive_said = !1),
+          (ee.dl_ronin = !1));
+      }),
       (Ia.toDreamland = () => {
         ((ee.dl_left = !0),
+          (ee.dl_called = !0),
           (ee.oe_dl_yard = !0),
           (d.sit = !1),
           ba("dl_yard", 10, 13, 1));
@@ -20111,6 +20303,7 @@ ram_mem_amulet: [
       (Ia.fromDreamland = () => {
         ((ee.dl_left = !0),
           (ee.dl_ronin = !0),
+          (ee.dl_done = !0),
           (ee.oe_home = !0),
           (d.sit = !1),
           ba("home", 8.2, 8.4, 3));
@@ -21833,8 +22026,9 @@ ram_mem_amulet: [
       }
     }
     function drawHeldBlast(e, a) {
+      if (d.hold === "heavy" && d.holdT > 0) return;
       let id =
-        d.hold === "heavy" || d.pri === "heavy" || d.sec === "heavy"
+        d.pri === "heavy" || d.sec === "heavy"
           ? "heavy"
           : weaponNow() === "blast"
             ? "blast"
@@ -21944,7 +22138,16 @@ ram_mem_amulet: [
           n.drawImage(O.icon.bow, -4, -8),
           n.restore());
       }
-      if ((s || f(), d.hold && d.holdT > 0)) {
+      if ((s || f(), d.hold === "heavy" && d.holdT > 0 && O.icon.heavy)) {
+        Aa(ga(), e, a, 0, 0, 1);
+        (n.fillStyle = "#e8e8ee"),
+          n.fillRect(Math.round(e - 14), Math.round(a - 30), 4, 12),
+          n.fillRect(Math.round(e + 10), Math.round(a - 30), 4, 12),
+          (n.fillStyle = "#3a3a46"),
+          n.fillRect(Math.round(e - 15), Math.round(a - 34), 6, 5),
+          n.fillRect(Math.round(e + 9), Math.round(a - 34), 6, 5),
+          n.drawImage(O.icon.heavy, Math.round(e - 14), Math.round(a - 48), 28, 28);
+      } else if (d.hold && d.holdT > 0) {
         let c = O.icon[d.hold] || O.icon.coin;
         (n.drawImage(c, e - 8, a - 46),
           Math.random() < 0.3 &&
@@ -22587,7 +22790,7 @@ ram_mem_amulet: [
       let e = A.t;
       (v(n, "SPACE RIDERS", 160, 14, "#ff4fd8", 3, "center", "#2a0a3a"),
         v(n, "SKIPPY'S QUEST", 160, 42, "#ffcc33", 2, "center", "#2a0a3a"),
-        v(n, window.__SQ_BUILD || "b46", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
+        v(n, window.__SQ_BUILD || "b48", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
       let a = (s, E, f, c, S) => {
         let y = Ue(s, S, 0);
         n.drawImage(
@@ -25635,7 +25838,7 @@ ram_mem_amulet: [
           enterStory(id);
           return Bt();
         },
-        build: () => window.__SQ_BUILD || "b46",
+        build: () => window.__SQ_BUILD || "b48",
         chart: () => {
           let out = [];
           for (let id in Ie) {
@@ -25981,6 +26184,10 @@ html.srml #srml-rows .srml-b.on{border-color:#ffcc33}
 html.srml #prize:not([hidden]),html.srml #share:not([hidden]){position:fixed;inset:0;z-index:50;overflow:auto;background:rgba(3,2,10,.96);padding:14px;margin:0!important;max-width:none!important;touch-action:pan-y}
 html.srml #srml-shx{display:none}
 html.srml #share:not([hidden]) #srml-shx{display:inline-block}
+}
+@media (pointer:coarse) and (orientation:landscape){
+html.srml #srml-rows{gap:2px;touch-action:pan-y}
+html.srml #srml-rows .srml-b{height:48px;font-size:12px;line-height:1.15;padding:0 8px}
 }
 </style>
 <script id="srml-js">(function(){
