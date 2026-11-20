@@ -9563,8 +9563,8 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       music: "saloon",
       peace: !0,
       npcs: [
-        { id: "skippy", x: 8, y: 5, dir: 0, talk: "rn_skippy" },
-        { id: "ros", x: 12, y: 5, dir: 2, talk: "rn_ros" },
+        { id: "skippy", x: 5, y: 6, dir: 3, talk: "rn_skippy" },
+        { id: "ros", x: 13, y: 6, dir: 2, talk: "rn_ros" },
       ],
       signs: [{ x: 6, y: 8, text: "EAST DOOR. THE SUPERNOVA. ROS STAYS.", kind: "sign" }],
       warps: [{ x: 17, y: 6, w: 1, h: 2, to: "rn_club", tx: 2, ty: 6, dir: 3 }],
@@ -14589,6 +14589,49 @@ ram_mem_amulet: [
     function spriteStacked(x, y, ox, oy) {
       return Math.abs(x - ox) < 12 && Math.abs(y - oy) < 12;
     }
+    function riderBox(x, y) {
+      return { l: x - 16, t: y - 28, r: x + 16, b: y + 6 };
+    }
+    function boxesOverlap(a, b) {
+      return a.l < b.r && a.r > b.l && a.t < b.b && a.b > b.t;
+    }
+    function taleRider(id) {
+      return id === "ronin" || id === "ros" || id === "skippy" || id === "santt" || id === "drill";
+    }
+    function roninTaleRoom() {
+      return !!(w && (A.story === "ronin" || String(w.id || "").indexOf("rn_") === 0));
+    }
+    function spreadRiders() {
+      if (!roninTaleRoom()) return;
+      let spots = [{ kind: "p", x: d.x, y: d.y }];
+      _.on && taleRider(_.id) && spots.push({ kind: "f", x: _.x, y: _.y });
+      for (let f of Ta)
+        f.vis && !(f.leave > 0) && taleRider(f.look || f.id) && spots.push({ kind: "n", n: f, x: f.x, y: f.y });
+      for (let pass = 0; pass < 8; pass++) {
+        let moved = !1;
+        for (let i = 1; i < spots.length; i++)
+          for (let j = 0; j < i; j++) {
+            if (!boxesOverlap(riderBox(spots[i].x, spots[i].y), riderBox(spots[j].x, spots[j].y))) continue;
+            let mover = spots[i].kind === "p" ? spots[j] : spots[i],
+              anchor = mover === spots[i] ? spots[j] : spots[i],
+              dx = mover.x - anchor.x,
+              dy = mover.y - anchor.y;
+            Math.abs(dx) < 12 && (dx = dx < 0 ? -48 : 48);
+            let len = Math.hypot(dx, dy) || 1,
+              nx = Math.max(24, Math.min(we * 16 - 24, anchor.x + (dx / len) * 48)),
+              ny = Math.max(36, Math.min(ve * 16 - 24, anchor.y + (dy / len) * 20));
+            spawnBlocked(nx, ny) && ((nx = Math.min(we * 16 - 24, anchor.x + 40)), (ny = anchor.y));
+            ((mover.x = nx), (mover.y = ny));
+            mover.kind === "p"
+              ? ((d.x = nx), (d.y = ny), (d.safeX = nx), (d.safeY = ny))
+              : mover.kind === "f"
+                ? ((_.x = nx), (_.y = ny))
+                : ((mover.n.x = nx), (mover.n.y = ny));
+            moved = !0;
+          }
+        if (!moved) return;
+      }
+    }
     function crowdAt(x, y) {
       for (let f of Ta) if (f.vis && !(f.leave > 0) && spriteStacked(x, y, f.x, f.y)) return !0;
       for (let f of ce) if (!f.dead && spriteStacked(x, y, f.x, f.y)) return !0;
@@ -14631,7 +14674,7 @@ ram_mem_amulet: [
         }
     }
     function spawnClear() {
-      (nudgeOffWall(), nudgeOffCrowd());
+      (nudgeOffWall(), nudgeOffCrowd(), spreadRiders());
     }
     function releaseStaleLocks() {
       let scene = !!(Ae || q || le || ue || z || K || A.choice || A.trans || A.paused);
@@ -17054,6 +17097,7 @@ ram_mem_amulet: [
           f.dir = 2;
         }
       }
+      spreadRiders();
     }
     function throughDrill() {
       ((Mt = "sq_save_ds_v1"), (ee.ds_home_end = !0), (ee.ds_ready = !0));
@@ -22157,22 +22201,25 @@ ram_mem_amulet: [
         bits.push({ id: "smoke", x: sx + xl.length * 6 + 8, y: 24, w: sm.length * 6, h: 8, text: sm });
       } else if (slotsOn()) {
         let atkId = A.story === "ros" ? weaponNow() : meleeNow(),
-          xl = "X " + (atkId ? slotName(atkId, !0) : "STRIKE"),
-          zl = "Z " + (heldItem() ? slotName(heldItem(), !0) : "NONE"),
-          sx = Math.max(x, 132),
-          cap = 246,
-          gap = 10;
-        if (fireArcReady()) {
-          let arc = d.hp >= d.maxHp ? "ARC" : "ARC FULL";
-          bits.push({ id: "arc", x: sx, y: 24, w: arc.length * 6, h: 8, text: arc });
-          sx += arc.length * 6 + 8;
+          labels = [];
+        fireArcReady() && labels.push({ id: "arc", text: d.hp >= d.maxHp ? "FIRE ARC" : "FULL LIFE" });
+        labels.push({ id: "xname", text: "X " + (atkId ? slotName(atkId, !0) : "STRIKE") });
+        labels.push({ id: "zname", text: "Z " + (heldItem() ? slotName(heldItem(), !0) : "NONE") });
+        let cursor = x,
+          cap = 308,
+          need = 0;
+        for (let lab of labels) need += lab.text.length * 6 + 8;
+        if (cursor + need > cap) {
+          let star = -1;
+          for (let i = 0; i < bits.length; i++) bits[i].id === "star" && (star = i);
+          star >= 0 && ((cursor = bits[star].x), bits.splice(star, 1));
         }
-        while (sx + (xl.length + zl.length) * 6 + gap > cap && xl.length + zl.length > 6) {
-          if (xl.length >= zl.length && xl.length > 3) xl = xl.slice(0, -1);
-          else zl = zl.slice(0, -1);
+        for (let lab of labels) {
+          let w = lab.text.length * 6;
+          if (cursor + w > cap) break;
+          bits.push({ id: lab.id, x: cursor, y: 24, w: w, h: 8, text: lab.text });
+          cursor += w + 8;
         }
-        bits.push({ id: "xname", x: sx, y: 24, w: xl.length * 6, h: 8, text: xl });
-        bits.push({ id: "zname", x: sx + xl.length * 6 + gap, y: 24, w: zl.length * 6, h: 8, text: zl });
       }
       return bits;
     }
@@ -22702,12 +22749,12 @@ ram_mem_amulet: [
                 n.globalAlpha = 1;
               } else if (f.id === "nuke") drawNukeWorld(i(f.x), s(f.y) + c);
               else {
-                boardUnder(f.look || f.id) &&
+                (boardUnder(f.look || f.id) || (roninTaleRoom() && taleRider(f.look || f.id))) &&
                   drawCanonBoard(i(f.x), s(f.y) + c, f.dir, f.id === "jazz" ? 3 : f.id === "x_lane" ? 2 : 1, !0);
                 Aa(
                   f.look || f.id,
                   i(f.x),
-                  s(f.y) + c - (boardUnder(f.look || f.id) ? 2 : 0),
+                  s(f.y) + c - (boardUnder(f.look || f.id) || (roninTaleRoom() && taleRider(f.look || f.id)) ? 2 : 0),
                   f.dir,
                   Math.floor(A.t * 1.5 + f.x) % 2 && f.mv ? 1 : 0,
                   y,

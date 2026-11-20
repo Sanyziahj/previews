@@ -494,6 +494,87 @@ test('a b49 fireball save becomes the sword arc and a replay does not grant it e
   await page.locator('#game').screenshot({ path: `${ART}/ronin-hud-katana-desktop.png` });
 });
 
+test('Ronin tale riders keep their own boards', async ({ page }) => {
+  const errors = await boot(page);
+  const rooms = await page.evaluate(() => {
+    const S = __SQ;
+    const box = (x, y) => ({ l: x - 16, t: y - 28, r: x + 16, b: y + 6 });
+    const hit = (a, b) => a.l < b.r && a.r > b.l && a.t < b.b && a.b > b.t;
+    const check = (area, x, y) => {
+      S.G.state = 'play';
+      S.G.story = 'ronin';
+      S.P.items = { katana: true };
+      S.flag('space_board');
+      S.flag('oe_' + area);
+      S.warp(area, x, y, 3);
+      for (let i = 0; i < 4 && (S.script || S.dlg); i++) {
+        if (S.dlg) S.skipText();
+        S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
+      }
+      const riders = [{ id: 'player', x: S.P.x, y: S.P.y }];
+      for (const n of S.npcs)
+        if (n.vis !== false && /^(ronin|skippy|ros|santt)$/.test(n.look || n.id))
+          riders.push({ id: n.look || n.id, x: n.x, y: n.y });
+      if (S.comp.on && /^(ronin|ros|skippy|santt)$/.test(S.comp.id))
+        riders.push({ id: 'follow', x: S.comp.x, y: S.comp.y });
+      const hits = [];
+      for (let i = 0; i < riders.length; i++)
+        for (let j = i + 1; j < riders.length; j++)
+          if (hit(box(riders[i].x, riders[i].y), box(riders[j].x, riders[j].y)))
+            hits.push(riders[i].id + '/' + riders[j].id);
+      return { area, x, y, riders, hits };
+    };
+    return [check('rn_pour', 8, 6), check('rn_pour', 8, 5), check('rn_pour', 8, 8), check('rn_back', 8, 7), check('rn_thanks', 9, 6)];
+  });
+  for (const room of rooms) expect(room.hits, JSON.stringify(room)).toEqual([]);
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test('the fire arc HUD uses whole words', async ({ page }) => {
+  const errors = await boot(page);
+  const hud = await page.evaluate(() => {
+    const S = __SQ;
+    S.G.state = 'play';
+    S.G.story = 'skippy';
+    S.flag('woke');
+    S.flag('tale_ronin');
+    S.flag('fireball_got');
+    S.flag('oe_saloon');
+    S.P.items = { sword: true, heavy: true, raygun: true };
+    S.P.melee = 'sword';
+    S.P.wep = 'sword';
+    S.P.pri = 'raygun';
+    S.P.sec = 'heavy';
+    S.P.hp = S.P.maxHp = 10;
+    S.P.spell = 'lantern';
+    S.warp('saloon', 8, 8, 1);
+    S.step(1);
+    const bits = S.hud().filter((b) => b.text);
+    const hits = [];
+    for (let i = 0; i < bits.length; i++)
+      for (let j = i + 1; j < bits.length; j++) {
+        const a = bits[i], b = bits[j];
+        const ix = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
+        const iy = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
+        if (ix > 0 && iy > 0) hits.push(a.text + ' / ' + b.text);
+      }
+    return {
+      texts: bits.map((b) => b.text),
+      hits,
+      clipped: bits.some((b) => b.x < 0 || b.x + b.w > 312),
+    };
+  });
+  const line = hud.texts.join(' ');
+  expect(line).toContain('FIRE ARC');
+  expect(line).toContain('X SWORD');
+  expect(line).toContain('Z HEAVY');
+  expect(line).toContain('LANTERN');
+  expect(line).not.toMatch(/\bSWO\b|\bHEAV\b/);
+  expect(hud.hits, line).toEqual([]);
+  expect(hud.clipped).toBe(false);
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
 test.describe('sideways phone', () => {
   test.use({ viewport: { width: 844, height: 390 }, hasTouch: true, isMobile: true });
 
