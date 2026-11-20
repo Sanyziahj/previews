@@ -3,7 +3,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script>window.__SQ_BUILD="b48";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b48(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b48");location.replace(u.href);}</script>
+<script>window.__SQ_BUILD="b49";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b49(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b49");location.replace(u.href);}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Space Riders: Skippy's Quest - Chapters 1-9 (Complete)</title><link rel="icon" href="data:,">
 <meta name="description" content="Space Riders: Skippy's Quest - a free 16-bit top-down action adventure browser game. The Red King is missing. Ride with ROS through the Sand Dungeon, take Cash's portals to the Seaport and Ramshackle the Viking, win Ronin's flaming sword, beat the house at the Andromeda Casino and stop the Overlord on the Moon, survive the meteor shower with Blaze and earn your space board at the Crossroad and cross the mirror into the Dark World, then storm Fright's castle and bring the Red King home. Chapters 1-9 (Complete) out now.">
@@ -974,6 +974,8 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           { id: "kal", x: 6, y: 7, dir: 2, talk: "kal_talk" },
           { id: "shadow", x: 12, y: 7, dir: 3, talk: "shadow_talk" },
           { id: "draco", x: 15, y: 7, dir: 2, talk: "draco_talk" },
+          { id: "ros_seat", look: "ros", x: 11, y: 5, dir: 2, talk: "ros_ronin_offer", show: "dl_ronin", hide: "tale_ronin" },
+          { id: "ronin_back", look: "ronin", x: 8, y: 8, dir: 3, talk: "rn_after", show: "tale_ronin" },
           { id: "x_pirate", x: 2, y: 4.2, dir: 1, talk: "x_pirate" },
           { id: "x_sombrero", x: 17.5, y: 9, dir: 2, talk: "x_sombrero" },
           { id: "x_wizard", x: 13.5, y: 9.5, dir: 0, talk: "x_wizard" },
@@ -2246,6 +2248,23 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       cheek: "#f7a8d8",
       brows: !1,
       extra: "jet patches",
+    },
+    fire: {
+      name: "THE FIRE",
+      head: ["#ff9a3d", "#ffe066", "#d8323a"],
+      suit: "#ff9a3d",
+      suit2: "#ffe066",
+      gloves: "#fff6c0",
+      boots: "#d8323a",
+      hat: "none",
+      hatC: "",
+      hatC2: "",
+      eyes: "oval",
+      eyeC: "#fff6c0",
+      mouth: "line",
+      cheek: "#f7a8d8",
+      brows: !1,
+      extra: "jet",
     },
     spark: {
       name: "SPARK",
@@ -9489,12 +9508,384 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
     ],
   });
 
+  Object.assign(Ea, {
+    fireball: {
+      name: "FIREBALL",
+      desc: "RONIN'S GIFT. Z OR SWAP. X STAYS THE SWORD.",
+      jingle: "item",
+    },
+    smoke: {
+      name: "SMOKE",
+      desc: "WHERE THERE IS SMOKE, THERE IS FIRE.",
+      jingle: "item",
+    },
+  });
+  Object.assign(Ka, {
+    rnsh: { name: "SHADOW TRIAL", cols: 3, rows: 1 },
+    rnk: { name: "SEAL VAULT", cols: 3, rows: 1 },
+  });
+  Object.assign(Se, {
+    rnshadow: {
+      name: "SHADOW",
+      sub: "A TRIAL. HE KEEPS HIS OATH TO SANTT.",
+      flag: "boss_shadow",
+      shard: "smoke",
+      shardFlag: "smoke_got",
+      contFlag: "rn_nocont",
+      down: "rn_shadow_down",
+      get: "rn_shadow_down",
+      shardAt: [],
+      contAt: [],
+      upload: !1,
+    },
+    rnkal: {
+      name: "COMMANDER KAL",
+      sub: "ROBOT ARMOR. HE GUARDS THE SEAL.",
+      flag: "boss_kal",
+      shard: "key",
+      shardFlag: "rn_key_got",
+      contFlag: "rn_nocont",
+      down: "rn_kal_down",
+      get: "rn_kal_down",
+      shardAt: [],
+      contAt: [],
+      upload: !1,
+    },
+  });
+  Object.assign(Ie, {
+    rn_pour: {
+      id: "rn_pour",
+      name: "PIONEER POUR",
+      theme: "wood",
+      realm: "desert",
+      music: "saloon",
+      peace: !0,
+      npcs: [
+        { id: "skippy", x: 8, y: 5, dir: 0, talk: "rn_skippy" },
+        { id: "ros", x: 12, y: 5, dir: 2, talk: "rn_ros" },
+      ],
+      signs: [{ x: 6, y: 8, text: "EAST DOOR. THE SUPERNOVA. ROS STAYS.", kind: "sign" }],
+      warps: [{ x: 17, y: 6, w: 1, h: 2, to: "rn_club", tx: 2, ty: 6, dir: 3 }],
+      onEnter: "rn_open",
+    },
+    rn_club: {
+      id: "rn_club",
+      name: "SUPERNOVA CLUB",
+      theme: "club",
+      realm: "desert",
+      music: "club",
+      peace: !0,
+      npcs: [{ id: "deejay", x: 12, y: 5, dir: 2, talk: "rn_deejay" }],
+      props: [{ k: "brazier", x: 6, y: 4 }, { k: "brazier", x: 15, y: 8 }],
+      signs: [{ x: 8, y: 8, text: "NEUTRAL GROUND. DEEJAY HAS THE MYSTERY. NO GUNS ON THIS FLOOR.", kind: "sign" }],
+      warps: [{ x: 0, y: 6, w: 1, h: 2, to: "rn_pour", tx: 15, ty: 6, dir: 2 }],
+    },
+    rn_torch: {
+      id: "rn_torch",
+      name: "WHERE FIRE WAS BORN",
+      theme: "dream",
+      realm: "void",
+      music: "dream",
+      npcs: [],
+      props: [{ k: "gtorch", x: 9, y: 5 }],
+      signs: [{ x: 5, y: 8, text: "THE FIRE SPEAKS. GATHER THE FLAMES. EAST IS THE TRIAL.", kind: "sign" }],
+      warps: [{ x: 17, y: 6, w: 1, h: 2, to: "rn_s1", tx: 2, ty: 6, dir: 3 }],
+      onEnter: "rn_torch_talk",
+    },
+    rn_s1: {
+      id: "rn_s1",
+      name: "SMOKE ROAD",
+      theme: "dream",
+      realm: "void",
+      music: "dungeon",
+      dungeon: "rnsh",
+      room: [0, 0],
+      enemies: [{ k: "vov", x: 8, y: 5, v: 1 }, { k: "vov", x: 12, y: 8, v: 2 }],
+      props: [{ k: "brazier", x: 4, y: 3 }],
+      signs: [{ x: 6, y: 8, text: "A DUNGEON, THEN A ROOM. SHADOW WAITS. THIS IS A TRIAL.", kind: "sign" }],
+      warps: [
+        { x: 0, y: 6, w: 1, h: 2, to: "rn_torch", tx: 15, ty: 6, dir: 2 },
+        { x: 17, y: 6, w: 1, h: 2, to: "rn_s2", tx: 2, ty: 6, dir: 3 },
+      ],
+    },
+    rn_s2: {
+      id: "rn_s2",
+      name: "SMOKE HALL",
+      theme: "dream",
+      realm: "void",
+      music: "dungeon",
+      dungeon: "rnsh",
+      room: [1, 0],
+      enemies: [{ k: "crawler", x: 8, y: 6 }, { k: "vov", x: 13, y: 4, v: 0 }],
+      props: [{ k: "brazier", x: 14, y: 8 }],
+      signs: [{ x: 6, y: 4, text: "EAST IS THE BOSS ROOM. SHADOW IS LOYAL TO SANTT. NOT AN ENEMY.", kind: "sign" }],
+      warps: [
+        { x: 0, y: 6, w: 1, h: 2, to: "rn_s1", tx: 15, ty: 6, dir: 2 },
+        { x: 17, y: 6, w: 1, h: 2, to: "rn_shadow", tx: 2, ty: 6, dir: 3 },
+      ],
+    },
+    rn_shadow: {
+      id: "rn_shadow",
+      name: "SHADOW'S ROOM",
+      theme: "dream",
+      realm: "void",
+      music: "boss",
+      dungeon: "rnsh",
+      room: [2, 0],
+      boss: "rnshadow",
+      props: [{ k: "brazier", x: 4, y: 3 }, { k: "brazier", x: 14, y: 3 }],
+      signs: [{ x: 8, y: 8, text: "A SPAR. KATANAS. HE WEARS BLACK. THE SMOKE IS THE PRIZE.", kind: "sign" }],
+      warps: [{ x: 0, y: 6, w: 1, h: 2, to: "rn_s2", tx: 15, ty: 6, dir: 2 }],
+      onEnter: "rn_shadow_meet",
+    },
+    rn_ac: {
+      id: "rn_ac",
+      name: "SPACE RIDER ACADEMY",
+      theme: "station",
+      realm: "void",
+      music: "station",
+      npcs: [{ id: "kal", x: 10, y: 5, dir: 0, talk: "rn_kal_warn" }],
+      props: [{ k: "brazier", x: 4, y: 4 }, { k: "brazier", x: 15, y: 8 }],
+      signs: [{ x: 6, y: 8, text: "EAST IS KAL'S VAULT. NORTH IS THE SEAL DOOR. THE KEY IS NOT BY THAT DOOR.", kind: "sign" }],
+      warps: [
+        { x: 9, y: 0, w: 2, h: 1, to: "rn_sealdoor", tx: 8, ty: 9, dir: 1 },
+        { x: 19, y: 6, w: 1, h: 2, to: "rn_k1", tx: 2, ty: 6, dir: 3 },
+      ],
+      onEnter: "rn_kal_first",
+    },
+    rn_k1: {
+      id: "rn_k1",
+      name: "ACADEMY VAULT",
+      theme: "station",
+      realm: "void",
+      music: "dungeon",
+      dungeon: "rnk",
+      room: [0, 0],
+      enemies: [{ k: "mbot", x: 8, y: 5 }, { k: "drone", x: 12, y: 8 }],
+      props: [{ k: "brazier", x: 5, y: 3 }],
+      signs: [{ x: 6, y: 8, text: "KAL IS FURTHER EAST. HE WEARS THE ARMOR. HE IS GUARDING, NOT HUNTING.", kind: "sign" }],
+      warps: [
+        { x: 0, y: 6, w: 1, h: 2, to: "rn_ac", tx: 15, ty: 6, dir: 2 },
+        { x: 17, y: 6, w: 1, h: 2, to: "rn_k2", tx: 2, ty: 6, dir: 3 },
+      ],
+    },
+    rn_k2: {
+      id: "rn_k2",
+      name: "ARMOR HALL",
+      theme: "station",
+      realm: "void",
+      music: "dungeon",
+      dungeon: "rnk",
+      room: [1, 0],
+      enemies: [{ k: "mbot", x: 7, y: 4 }, { k: "vov", x: 12, y: 8, v: 4 }],
+      props: [{ k: "brazier", x: 14, y: 4 }],
+      signs: [{ x: 8, y: 8, text: "THE BOSS ROOM IS EAST. THE SEAL DOOR IS BACK AT THE ACADEMY, NORTH.", kind: "sign" }],
+      warps: [
+        { x: 0, y: 6, w: 1, h: 2, to: "rn_k1", tx: 15, ty: 6, dir: 2 },
+        { x: 17, y: 6, w: 1, h: 2, to: "rn_kboss", tx: 2, ty: 6, dir: 3 },
+      ],
+    },
+    rn_kboss: {
+      id: "rn_kboss",
+      name: "KAL'S STAND",
+      theme: "station",
+      realm: "void",
+      music: "boss",
+      dungeon: "rnk",
+      room: [2, 0],
+      boss: "rnkal",
+      props: [{ k: "brazier", x: 4, y: 3 }, { k: "brazier", x: 14, y: 8 }],
+      signs: [{ x: 8, y: 8, text: "ROBOT ARMOR. IF HE FALLS, HE GIVES A KEY. THE DOOR IT OPENS IS NOT HERE.", kind: "sign" }],
+      warps: [{ x: 0, y: 6, w: 1, h: 2, to: "rn_k2", tx: 15, ty: 6, dir: 2 }],
+    },
+    rn_sealdoor: {
+      id: "rn_sealdoor",
+      name: "SEAL HALL",
+      theme: "station",
+      realm: "void",
+      music: "station",
+      dungeon: "rnk",
+      locks: { D: { flag: "door_rnscroll", key: "small" } },
+      props: [{ k: "brazier", x: 4, y: 5 }],
+      signs: [{ x: 5, y: 6, text: "LOCKED. THE KEY IS FROM KAL, IN THE EAST VAULT. IT IS NOT IN THIS ROOM.", kind: "sign" }],
+      warps: [
+        { x: 8, y: 11, w: 2, h: 1, to: "rn_ac", tx: 9, ty: 2, dir: 0 },
+        { x: 8, y: 0, w: 2, h: 1, to: "rn_scroll", tx: 8, ty: 9, dir: 1 },
+      ],
+    },
+    rn_scroll: {
+      id: "rn_scroll",
+      name: "THE LAST PIECE",
+      theme: "station",
+      realm: "void",
+      music: "station",
+      props: [{ k: "scroll", x: 9, y: 4 }, { k: "brazier", x: 4, y: 6 }],
+      signs: [{ x: 9, y: 6, text: "A SCROLL.", kind: "sign", script: "rn_scroll_read" }],
+      warps: [
+        { x: 8, y: 11, w: 2, h: 1, to: "rn_sealdoor", tx: 8, ty: 2, dir: 0 },
+        { x: 8, y: 0, w: 2, h: 1, to: "rn_seal", tx: 8, ty: 9, dir: 1, need: "rn_scroll" },
+      ],
+      onEnter: "rn_scroll_read",
+    },
+    rn_seal: {
+      id: "rn_seal",
+      name: "THE FIRE SEAL",
+      theme: "dream",
+      realm: "void",
+      music: "boss",
+      props: [{ k: "gtorch", x: 9, y: 4 }, { k: "brazier", x: 4, y: 8 }],
+      signs: [{ x: 6, y: 8, text: "THE FIRE IS WITHIN. BREAK THE SEAL.", kind: "sign" }],
+      onEnter: "rn_seal_break",
+    },
+    rn_back: {
+      id: "rn_back",
+      name: "PIONEER POUR",
+      theme: "wood",
+      realm: "desert",
+      music: "saloon",
+      peace: !0,
+      npcs: [
+        { id: "skippy", x: 10, y: 6, dir: 2, talk: "rn_give" },
+        { id: "ros", x: 13, y: 5, dir: 2, talk: "rn_ros" },
+      ],
+      props: [{ k: "brazier", x: 5, y: 4 }],
+      signs: [{ x: 6, y: 8, text: "SKIPPY CAN RETURN. THE FIREBALL IS HIS.", kind: "sign" }],
+      onEnter: "rn_give",
+    },
+  });
+  Object.assign(Zs, {
+    rn_pour: dsRoom(18, 12, "e"),
+    rn_club: dsRoom(20, 12, "w"),
+    rn_torch: dsRoom(18, 12, "e"),
+    rn_s1: dsRoom(18, 12, "we"),
+    rn_s2: dsRoom(18, 12, "we"),
+    rn_shadow: dsRoom(18, 12, "w"),
+    rn_ac: dsRoom(20, 12, "ne"),
+    rn_k1: dsRoom(18, 12, "we"),
+    rn_k2: dsRoom(18, 12, "we"),
+    rn_kboss: dsRoom(18, 12, "w"),
+    rn_sealdoor: dsRoom(18, 12, "sD"),
+    rn_scroll: dsRoom(18, 12, "ns"),
+    rn_seal: dsRoom(18, 12, "s"),
+    rn_back: dsRoom(18, 12, ""),
+  });
+  Object.assign(oa, {
+    ros_ronin_offer: [
+      h("ros", "SKIPPY. RONIN GOT THE PLANS. THE FIRE SEAL. THE PORTAL."),
+      h("ros", "HE SAYS WAIT HERE. I KEEP YOU SAFE. HE RIDES THE UNSEEN REALM."),
+      h("ros", "SIT, AND THE RIDE IS HIS. YOU CAN SAY NOT YET."),
+      { t: "choice", a: "tale_ronin_choice", tale: "ronin" },
+    ],
+    tale_ronin_yes: [
+      h("ros", "THEN SIT. YOU WAKE AS RONIN. THIS SEAT STAYS YOURS."),
+      { t: "fn", f: "taleYes" },
+    ],
+    tale_ronin_no: [h("ros", "THE SEAT STAYS. GO WHEN YOU ARE READY. I AM NOT MOVING YOU.")],
+    rn_after: [h("ronin", "THE FIREBALL IS YOURS. I HOLD NEUTRAL GROUND.")],
+    rn_open: [
+      h("skippy", "SPIKE RODE THE PLANS HERE. A FIRE SEAL. A PORTAL."),
+      h("ronin", "WAIT. ROS KEEPS YOU SAFE. I GO TO THE UNSEEN REALM."),
+      h("ros", "I HAVE HIM. RIDE."),
+      { t: "flag", f: "rn_heard" },
+      { t: "save" },
+    ],
+    rn_skippy: [h("skippy", "I WILL WAIT. ROS IS HERE.")],
+    rn_ros: [h("ros", "HE STAYS. YOU RIDE. THE SUPERNOVA IS EAST.")],
+    rn_deejay: [
+      h("deejay", "RONIN. THE FLOOR STAYS QUIET WHILE YOU ARE ON IT."),
+      h("deejay", "AN ANCIENT MYSTERY. THE PLACE WHERE FIRE WAS BORN."),
+      h("ronin", "SHOW ME."),
+      { t: "flag", f: "rn_deejay" },
+      { t: "fn", f: "pixelate" },
+      { t: "fade", m: "white" },
+      { t: "warp", area: "rn_torch", x: 6, y: 8, dir: 3 },
+      { t: "fade", m: "in" },
+      { t: "save" },
+    ],
+    rn_torch_talk: [
+      { t: "fade", m: "in" },
+      h("fire", "TO BREAK THE SEAL, GATHER THE FLAMES."),
+      h("fire", "SMOKE FIRST. THE RIDER IN BLACK. THEN THE ACADEMY."),
+      h("ronin", "..."),
+      { t: "flag", f: "rn_torch" },
+      { t: "save" },
+    ],
+    rn_shadow_meet: [
+      h("shadow", "SANTT HAS MY OATH. THIS IS A SPAR. NOT HATE."),
+      h("ronin", "THEN THE SMOKE."),
+    ],
+    rn_shadow_down: [
+      h("shadow", "A FAIR TRIAL. THE SMOKE IS YOURS."),
+      h("shadow", "WHERE THERE IS SMOKE, THERE IS FIRE."),
+      h("ronin", "I TAKE IT."),
+      { t: "give", item: "smoke" },
+      { t: "flag", f: "smoke_got" },
+      { t: "warp", area: "rn_ac", x: 8, y: 7, dir: 3 },
+      { t: "save" },
+    ],
+    rn_kal_first: [
+      h("kal", "RONIN. DO NOT OPEN THE SEAL."),
+      h("ronin", "THE FIRE ASKED."),
+      h("kal", "THEN WE FIGHT. I WEAR THE ARMOR. I AM NOT YOUR ENEMY."),
+      { t: "flag", f: "rn_kal_met" },
+      { t: "save" },
+    ],
+    rn_kal_again: [h("kal", "THE VAULT IS EAST. THE DOOR YOU WANT IS NOT BESIDE ME.")],
+    rn_kal_after: [h("kal", "THE KEY IS YOURS. THE SEAL DOOR IS NORTH OF THE ACADEMY. I STILL WISH IT STAYED SHUT.")],
+    rn_kal_down: [
+      h("kal", "THE ARMOR IS QUIET. I GUARDED THE SEAL OUT OF CAUTION."),
+      h("kal", "TAKE THE KEY. THE DOOR IS NOT IN THIS ROOM."),
+      h("ronin", "UNDERSTOOD."),
+      { t: "give", item: "key" },
+      { t: "flag", f: "rn_key_got" },
+      { t: "save" },
+    ],
+    rn_scroll_read: [
+      h("sys", "THE SCROLL SAYS THE FIRE IS WITHIN HIM."),
+      h("ronin", "WITHIN ME."),
+      { t: "flag", f: "rn_scroll" },
+      { t: "save" },
+    ],
+    rn_scroll_again: [h("ronin", "THE FIRE IS WITHIN. NORTH.")],
+    rn_seal_break: [
+      h("fire", "THE SEAL BREAKS. THE FIRE WAS YOURS."),
+      h("ronin", "..."),
+      { t: "flag", f: "rn_seal" },
+      { t: "fn", f: "sealBurst" },
+      { t: "warp", area: "rn_back", x: 8, y: 7, dir: 3 },
+    ],
+    rn_give: [
+      h("ronin", "SKIPPY. THE SEAL IS OPEN."),
+      h("skippy", "THEN I CAN RETURN."),
+      h("ronin", "A FIREBALL. THANK YOU. YOU REMINDED ME."),
+      { t: "fn", f: "throughRonin" },
+    ],
+    tale_ronin_close: [
+      h("ronin", "THE FIREBALL STAYS WITH YOU."),
+      h("skippy", "I WILL CARRY IT. MY SWORD STAYS ON ATTACK."),
+      { t: "flag", f: "tale_ronin" },
+      { t: "flag", f: "fireball_got" },
+      { t: "save" },
+    ],
+  });
+  Object.assign(Ce, {
+    rn_kal_warn: [
+      { need: "boss_kal", s: "rn_kal_after" },
+      { need: "rn_kal_met", s: "rn_kal_again" },
+      { s: "rn_kal_first" },
+    ],
+    rn_scroll_read: [
+      { need: "rn_scroll", s: "rn_scroll_again" },
+      { s: "rn_scroll_read" },
+    ],
+  });
+
   STORY_ROWS = [
     { id: "skippy", name: "SKIPPY'S QUEST", sub: "THE MAIN RIDE. THE RED KING IS MISSING", play: !0, save: "sq_save_v1", who: "skippy" },
     { id: "ros", name: "THE ROGUE OUTLAW SHERIFF", sub: "A SIDE QUEST. IT RETURNS TO SKIPPY", play: !0, save: "sq_save_ros_v1", who: "ros" },
     { id: "spike", name: "SPIKE", sub: "SOON", play: !1, who: "spike" },
     { id: "drill", name: "DRILL SERGEANT", sub: "A SIDE QUEST. IT RETURNS TO SKIPPY", play: !0, save: "sq_save_ds_v1", who: "drill" },
-    { id: "ronin", name: "RONIN", sub: "SOON. AFTER CHAPTER 8", play: !1, who: "ronin" },
+    { id: "ronin", name: "RONIN", sub: "A SIDE QUEST. IT RETURNS TO SKIPPY", play: !0, save: "sq_save_ronin_v1", who: "ronin" },
     { id: "ramshackle", name: "RAMSHACKLE", sub: "A SIDE QUEST. IT RETURNS TO SKIPPY", play: !0, save: "sq_save_ram_v1", who: "ramshackle" },
     { id: "santt", name: "SANTT", sub: "SOON. LAST", play: !1, who: "santt" },
   ];
@@ -9509,6 +9900,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
     { id: "lasso", name: "SHERIFF LASSO", tier: 2, from: "TALE", where: "ROS", opens: "GRAPPLE LATCHES" },
     { id: "axe", name: "RAM AXE", tier: 3, from: "TALE", where: "RAMSHACKLE", opens: "THICK WOOD" },
     { id: "heavy", name: "HEAVY BLASTER", tier: 3, from: "TALE", where: "DRILL", opens: "REINFORCED CASES" },
+    { id: "fireball", name: "FIREBALL", tier: 3, from: "TALE", where: "RONIN", opens: "A FLAME IN THE ITEM SLOT" },
     { id: "plasma", name: "PLASMA EDGE", tier: 3, from: "SHOP", where: "CADET STORE", opens: "A HARDER SWING" },
     { id: "disc", name: "BOOMERANG DISC", tier: 2, from: "SHOP", where: "CADET STORE", opens: "A RETURNING THROW" },
     { id: "suit", name: "RIDING SUIT", tier: 2, from: "SHOP", where: "CADET STORE", opens: "SOFTER HITS" },
@@ -9587,6 +9979,23 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       close: "THE MEMORY ENDS. THE BLASTER STAYS.",
       place: "A TALE AT THE MOON COLONY",
     },
+    {
+      id: "ronin",
+      n: 5,
+      title: "RONIN",
+      teller: "ros",
+      hero: "ronin",
+      save: "sq_save_ronin_v1",
+      need: "dl_ronin",
+      heard: "tale_ronin",
+      area: "saloon",
+      x: 10,
+      y: 8,
+      face: 1,
+      objective: "PIONEER POUR: ROS KEEPS A SEAT. RONIN SENT WORD.",
+      close: "THE FIREBALL STAYS. THE SEAL IS OPEN.",
+      place: "A TALE AT THE PIONEER POUR",
+    },
   ];
   var CHOICES = {
     tale_ros_choice: {
@@ -9621,6 +10030,15 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       opts: [
         ["SIT FOR THE MEMORY", "tale_drill_yes"],
         ["NOT YET", "tale_drill_no"],
+      ],
+    },
+    tale_ronin_choice: {
+      tale: "ronin",
+      who: "ros",
+      back: "tale_ronin_no",
+      opts: [
+        ["HEAR RONIN", "tale_ronin_yes"],
+        ["NOT YET", "tale_ronin_no"],
       ],
     },
     home_rest: {
@@ -12293,6 +12711,7 @@ ram_mem_amulet: [
     ((ee.space_board = !0),
       A.story === "ramshackle" && (ee.ram_board = !0),
       A.story === "drill" && (ee.ds_board = !0),
+      A.story === "ronin" && (ee.rn_board = !0),
       (d.ownB = Math.max(1, d.ownB || 1)),
       (d.gearB = Math.max(1, Math.min(d.gearB || 1, d.ownB))));
   }
@@ -12790,6 +13209,9 @@ ram_mem_amulet: [
   }
   function ridingNpc(id) {
     return id === "slide" || id === "cavendish" || id === "jazz" || id === "x_lane";
+  }
+  function voidRider(id) {
+    return !!id && id !== "nuke" && id !== "fire";
   }
   function drawRace() {
     let r = A.race;
@@ -14031,7 +14453,7 @@ ram_mem_amulet: [
           !Z("dl_called") &&
           ye("cash_rest"),
         armEye(),
-        (Z("woke") || A.story === "ros" || A.story === "ramshackle" || A.story === "drill") && e !== "dream" && xe());
+        (Z("woke") || A.story === "ros" || A.story === "ramshackle" || A.story === "drill" || A.story === "ronin") && e !== "dream" && xe());
     }
     function nearHomeBed() {
       let tx = Math.floor(d.x / 16),
@@ -14149,6 +14571,30 @@ ram_mem_amulet: [
         (A.paused = !1),
         (A.choice = null));
     }
+    function EtRonin() {
+      (Kt(),
+        (d.hp = 10),
+        (d.maxHp = 10),
+        (d.coins = 0),
+        (d.items.sword = !0),
+        (d.melee = "sword"),
+        (d.wep = "sword"),
+        (d.pri = ""),
+        (d.sec = ""),
+        (d.tool = ""),
+        (d.act = ""),
+        settleHands(),
+        (d.cds = {}),
+        (ee.rn_board = !0),
+        (ee.space_board = !0),
+        (ee.rn_nocont = !0),
+        (d.ownB = 1),
+        (d.gearB = 1),
+        (A.state = "play"),
+        (A.st = 0),
+        grantStoryBoard(),
+        ba("rn_pour", 8, 8, 1));
+    }
     function EtDrill() {
       (Kt(),
         (d.coins = 0),
@@ -14201,6 +14647,10 @@ ram_mem_amulet: [
       }
       if (A.story === "drill") {
         EtDrill();
+        return;
+      }
+      if (A.story === "ronin") {
+        EtRonin();
         return;
       }
       (Kt(),
@@ -14266,6 +14716,9 @@ ram_mem_amulet: [
       }
       if (e && A.story === "drill" && !Ie[e.area]) {
         ((e.area = "ds_camp"), (e.x = p(8)), (e.y = p(7)), (e.dir = 0));
+      }
+      if (e && A.story === "ronin" && !Ie[e.area]) {
+        ((e.area = "rn_pour"), (e.x = p(8)), (e.y = p(8)), (e.dir = 1));
       }
       return !e || !Ie[e.area]
         ? !1
@@ -14511,10 +14964,15 @@ ram_mem_amulet: [
           ((d.items[e] = !0), (ee[e] = !0));
           break;
         case "heavy":
+        case "fireball":
+          break;
+        case "smoke":
+          ((d.items.smoke = !0), (ee.smoke_got = !0));
           break;
       }
       noteItem(e === "blasters" ? "lasers" : e === "brand" ? "bomb" : e === "tbow" || e === "axe" ? (e === "axe" ? "sword" : "bow") : e);
       e === "heavy" && grantHeavy();
+      e === "fireball" && grantFireball();
       let s = Ea[e] ? Ea[e].jingle : "coin";
       ((D[s] || D.coin)(),
         t &&
@@ -14563,6 +15021,11 @@ ram_mem_amulet: [
         t = a[La];
       if (!t) {
         Ae = null;
+        if (A.afterTale) {
+          let next = A.afterTale;
+          A.afterTale = "";
+          ye(next);
+        }
         return;
       }
       let i = !0;
@@ -14685,7 +15148,13 @@ ram_mem_amulet: [
           break;
         }
       }
-      i && Ae === a && (La++, (Ca = 0), La >= a.length && (Ae = null));
+      i &&
+        Ae === a &&
+        (La++,
+        (Ca = 0),
+        La >= a.length &&
+          ((Ae = null),
+          A.afterTale && ((Ae = oa[A.afterTale] || null), (La = 0), (Ca = 0), (Va = !1), (A.afterTale = ""))));
     }
     function sr(e) {
       let a = Ce[e];
@@ -14854,8 +15323,8 @@ ram_mem_amulet: [
           ne(
             e.x,
             e.y - 4,
-            A.story === "ros" || (w && w.realm === "dreamland") ? 22 : 14,
-            A.story === "ros" || (w && w.realm === "dreamland")
+            A.story === "ros" || A.story === "ronin" || (w && (w.realm === "dreamland" || w.realm === "void")) ? 22 : 14,
+            A.story === "ros" || A.story === "ronin" || (w && (w.realm === "dreamland" || w.realm === "void"))
               ? ["#fff6c0", "#ffe080", "#ffffff", "#7ad0ff"]
               : e.k === "dummy"
                 ? ["#e8c070", "#d8323a"]
@@ -14890,7 +15359,11 @@ ram_mem_amulet: [
           Q(
             r.kind === "centipede"
               ? "THE CENTIPEDE IS ENRAGED!"
-              : ut() + " IS ENRAGED!",
+              : r.kind === "rnshadow"
+                ? "SHADOW PRESSES THE TRIAL."
+                : r.kind === "rnkal"
+                  ? "THE ARMOR HOLDS."
+                  : ut() + " IS ENRAGED!",
           )),
         r.hp <= 0)
       ) {
@@ -15535,8 +16008,10 @@ ram_mem_amulet: [
         if (Wt(i, s)) {
             (a.kind === "arrow" && (D.tink(), ne(a.x, a.y, 4, ["#c89a64"], 30)),
             a.kind === "fire" && ne(a.x, a.y, 6, ["#ff9a3d", "#ffe066"], 40),
-            (a.kind === "blast" || a.kind === "heavy") &&
-              (ne(a.x, a.y, 12, ["#ffe066", "#ff9a3d", "#ffffff"], 36), D.boom(), (A.shake = 0.08)),
+            (a.kind === "blast" || a.kind === "heavy" || a.kind === "fireball") &&
+              (ne(a.x, a.y, 12, a.kind === "fireball" ? ["#fff6c0", "#ff9a3d", "#d8323a"] : ["#ffe066", "#ff9a3d", "#ffffff"], 36),
+              a.kind !== "fireball" && D.boom(),
+              (A.shake = 0.08)),
             (a.t = 99));
           continue;
         }
@@ -15550,7 +16025,8 @@ ram_mem_amulet: [
           a.kind === "fire" ||
           a.kind === "missile" ||
           a.kind === "blast" ||
-          a.kind === "heavy"
+          a.kind === "heavy" ||
+          a.kind === "fireball"
             ? 2
             : 1;
         for (let f of ce)
@@ -15562,8 +16038,8 @@ ram_mem_amulet: [
           ) {
             (_a(f, a.kind === "justice" ? 3 : E, a.x - a.vx, a.y - a.vy, a.kind === "stun" ? 0.55 : 0),
               (a.t = 99),
-              (t || a.kind === "blast" || a.kind === "heavy") &&
-                ne(a.x, a.y, 10, ["#ffe066", "#ff9a3d", "#ffffff"], 50));
+              (t || a.kind === "blast" || a.kind === "heavy" || a.kind === "fireball") &&
+                ne(a.x, a.y, 10, a.kind === "fireball" ? ["#fff6c0", "#ff9a3d"] : ["#ffe066", "#ff9a3d", "#ffffff"], 50));
             break;
           }
         if (a.t < 90 && r.state === "fight")
@@ -15572,8 +16048,8 @@ ram_mem_amulet: [
             if (ae(a.x, a.y, c[0], c[1]) < c[2]) {
               (Ja(f, a.kind === "cmissile" ? "comp" : a.kind, E),
                 (a.t = 99),
-                (t || a.kind === "blast" || a.kind === "heavy") &&
-                  ne(a.x, a.y, 12, ["#ffe066", "#ffffff", "#ff9a3d"], 40));
+                (t || a.kind === "blast" || a.kind === "heavy" || a.kind === "fireball") &&
+                  ne(a.x, a.y, 12, a.kind === "fireball" ? ["#fff6c0", "#ff9a3d"] : ["#ffe066", "#ffffff", "#ff9a3d"], 40));
               break;
             }
           }
@@ -15643,6 +16119,7 @@ ram_mem_amulet: [
         A.saveT > 0 && (A.saveT -= e),
         A.shake > 0 && (A.shake -= e),
         A.flash > 0 && (A.flash -= e),
+        A.pixelT > 0 && (A.pixelT -= e),
         (A.fade += Ee(A.fadeTo - A.fade, -e * 1.4, e * 1.4)));
       for (let f of ha)
         ((f.life -= e),
@@ -16048,9 +16525,16 @@ ram_mem_amulet: [
     function spikeReached(flags) {
       return !!(flags && (flags.dl_called || flags.dl_left || flags.dl_ronin || flags.dl_done));
     }
+    function roninChapterDone() {
+      let skip = saveFlags("sq_save_v1");
+      if (skip && (skip.tale_ronin || skip.rn_home_end || skip.fireball_got)) return !0;
+      let tale = saveFlags("sq_save_ronin_v1");
+      return !!(tale && tale.rn_home_end);
+    }
     function chapterMenuOpen(row) {
       if (!row) return !1;
       if (row.id === "spike") return spikeReached(saveFlags("sq_save_v1"));
+      if (row.id === "ronin") return roninChapterDone();
       if (!row.play) return !1;
       if (!taleRowId(row.id)) return !0;
       if (taleHeard(taleHeardId(row.id))) return !0;
@@ -16085,6 +16569,8 @@ ram_mem_amulet: [
     function skippyObjective() {
       if (Z("dl_called") && !Z("dl_ronin"))
         return "FIND THE DOWNLOAD PLANS. THE THRONE IS SEALED.";
+      if (Z("dl_ronin") && !Z("tale_ronin"))
+        return "PIONEER POUR: ROS KEEPS A SEAT. RONIN SENT WORD.";
       if (
         A.story === "skippy" &&
         w &&
@@ -16109,6 +16595,7 @@ ram_mem_amulet: [
         { id: "ros", text: mark("tale_ros", reached("ch2_done")) + " ROS  AFTER CHAPTER 2" },
         { id: "ram", text: mark("tale_ram", reached("ch3_done")) + " RAM  AFTER CHAPTER 3" },
         { id: "drill", text: mark("tale_drill", reached("ch5_done")) + " DRILL  MOON COLONY" },
+        { id: "ronin", text: mark("tale_ronin", Z("dl_ronin")) + " RONIN  PIONEER POUR" },
       ];
     }
     function chapterStatus(id) {
@@ -16139,10 +16626,12 @@ ram_mem_amulet: [
           if (f && (f.dl_ronin || f.dl_done)) return "COMPLETE";
           if (spikeReached(f)) return "RIDING";
         }
+        if (id === "ronin") return roninChapterDone() ? "COMPLETE" : "";
       } catch (e) {}
       return "";
     }
     function rowSub(i) {
+      if (i.id === "ronin") return chapterMenuOpen(i) ? "COMPLETE" : "HEAR IT ON SKIPPY'S RIDE";
       if (i.id === "spike") return chapterMenuOpen(i) ? chapterStatus("spike") || "DREAMLAND" : "SOON";
       if (taleRowId(i.id) && !chapterMenuOpen(i)) return "HEAR IT ON SKIPPY'S RIDE";
       if ((i.id === "ros" || i.id === "ramshackle" || i.id === "drill") && (taleHeard(i.id === "ramshackle" ? "ram" : i.id === "drill" ? "drill" : "ros") || chapterStatus(i.id) === "COMPLETE"))
@@ -16285,6 +16774,40 @@ ram_mem_amulet: [
           (d.sec = "heavy"),
           (d.tool = "heavy"),
           (d.act = "heavy"));
+    }
+    function grantFireball() {
+      d.items || (d.items = {});
+      ((d.items.fireball = !0), (ee.fireball_got = !0));
+      if (A.story !== "skippy") return;
+      let keep = heldItem();
+      settleHands();
+      if (keep === "heavy" && ownedItem("heavy") && heldItem() !== "heavy" && (d.pri === "heavy" || d.sec === "heavy"))
+        ((d.sec = "heavy"), (d.tool = "heavy"), (d.act = "heavy"));
+    }
+    function throughRonin() {
+      ((ee.rn_home_end = !0), (ee.rn_seal = !0));
+      A.state === "play" && xe();
+      ((A.story = "skippy"),
+        (Mt = "sq_save_v1"),
+        (A.paused = !1),
+        (A.choice = null),
+        (A.taleFrom = ""),
+        (A.pixelT = 0),
+        (A.rosLeave = 0));
+      Bt() || Et();
+      ((ee.tale_ronin = !0), (ee.fireball_got = !0));
+      (grantFireball(),
+        ba("saloon", 10, 8, 3),
+        (A.banner = "PIONEER POUR"),
+        (A.bannerT = 2.2),
+        (ue = { item: "fireball", n: 1, t: 0 }),
+        (d.hold = "fireball"),
+        (d.holdT = 10),
+        (d.dir = 3),
+        (A.afterTale = "tale_ronin_close"),
+        standBeside(),
+        xe(),
+        (A.saveT = 0));
     }
     function standBeside() {
       for (let f of Ta) {
@@ -16644,9 +17167,11 @@ ram_mem_amulet: [
             i[0],
             i[1],
             18,
-            A.story === "ros"
-              ? ["#3dff6a", "#f0c060", "#ffffff", "#4a3a28"]
-              : ["#ff4fd8", "#c87a30", "#ffffff", "#1a0e24"],
+            A.story === "ronin"
+              ? ["#fff6c0", "#ffe080", "#ffffff", "#7ad0ff"]
+              : A.story === "ros"
+                ? ["#3dff6a", "#f0c060", "#ffffff", "#4a3a28"]
+                : ["#ff4fd8", "#c87a30", "#ffffff", "#1a0e24"],
             90,
           ),
           D.boom()),
@@ -18455,7 +18980,7 @@ ram_mem_amulet: [
       for (let a = 0; a < 16; a++)
         I((a * 23) % 320, 20 + ((a * 17) % 70), 2, 2, "#fff2c8");
       (v(n, "SPACE RIDERS", 160, 8, "#ff4fd8", 2, "center", "#2a0a14"),
-        v(n, window.__SQ_BUILD || "b48", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
+        v(n, window.__SQ_BUILD || "b49", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
         v(n, "SIDE QUESTS COME HOME", 160, 28, "#ffcc33", 1, "center", "#2a0a14"));
       let a = 58;
       for (let t = 0; t < STORY_ROWS.length; t++) {
@@ -19105,6 +19630,33 @@ ram_mem_amulet: [
       if (!Z("ds_pluto")) return "SOUTH: THE PLUTO CONQUEST";
       return "ELITE HALL. THE PORTAL TAKES YOU HOME TO SKIPPY.";
     }
+    function rnObjective() {
+      let id = (w && w.id) || "";
+      if (id === "rn_club") return "DEEJAY. WHERE FIRE WAS BORN.";
+      if (id === "rn_torch") return "THE TORCH. GATHER THE FLAMES.";
+      if (id.indexOf("rn_s") === 0 || id === "rn_shadow") return "SHADOW. A TRIAL. TAKE THE SMOKE.";
+      if (id.indexOf("rn_k") === 0 || id === "rn_kboss") return "KAL. ROBOT ARMOR. THE KEY IS NOT BY ITS DOOR.";
+      if (id === "rn_sealdoor") return "THE SEAL DOOR. THE KEY CAME FROM KAL.";
+      if (id === "rn_scroll") return "THE SCROLL. THE FIRE IS WITHIN.";
+      if (id === "rn_seal") return "BREAK THE SEAL.";
+      if (!Z("rn_deejay")) return "SUPERNOVA. DEEJAY.";
+      if (!Z("smoke_got")) return "FIND SHADOW.";
+      if (!Z("rn_key_got")) return "THE ACADEMY. KAL GUARDS THE SEAL.";
+      if (!Z("rn_scroll")) return "THE KEY OPENS A FAR DOOR.";
+      if (!Z("rn_seal")) return "THE FIRE IS WITHIN.";
+      return "THE POUR. SKIPPY IS WAITING.";
+    }
+    function nearPortalLabel() {
+      if (!w || w.id !== "cosmos") return "";
+      let best = "",
+        bestD = 42;
+      for (let prop of w.props || []) {
+        if (prop.k !== "portal" || !prop.label) continue;
+        let dist = ae(d.x, d.y, p(prop.x), p(prop.y));
+        if (dist < bestD) ((bestD = dist), (best = prop.label));
+      }
+      return best;
+    }
     function ramObjective() {
       let id = (w && w.id) || "";
       if (id === "ram_memory" || id.indexOf("ram_mem") === 0) return "MEMORY: THE HACK ON THE MOUNTAIN";
@@ -19440,6 +19992,7 @@ ram_mem_amulet: [
       if (id === "amulet") return !!(d.items.amulet || Z("amulet_got"));
       if (id === "blast") return !!(d.items.blast || A.story === "drill");
       if (id === "heavy") return !!(d.items.heavy || Z("heavy_got"));
+      if (id === "fireball") return !!(d.items.fireball || Z("fireball_got"));
       if (id === "plasma" || id === "disc" || id === "suit" || id === "plate" || id === "gloves" || id === "boots")
         return !!(d.items && d.items[id]);
       return !1;
@@ -19466,6 +20019,7 @@ ram_mem_amulet: [
           amulet: "POWER AMULET",
           blast: "BLASTER",
           heavy: "HEAVY LASER BLASTER",
+          fireball: "FIREBALL",
           plasma: "PLASMA EDGE",
           disc: "BOOMERANG DISC",
         },
@@ -19487,6 +20041,7 @@ ram_mem_amulet: [
           amulet: "AMULET",
           blast: "BLAST",
           heavy: "HEAVY",
+          fireball: "FIRE",
         };
       return id ? (short ? sh : full)[id] || id.toUpperCase() : "NONE";
     }
@@ -19524,6 +20079,7 @@ ram_mem_amulet: [
         amulet: 2.8,
         blast: 0.34,
         heavy: 0.36,
+        fireball: 0.4,
       }[id] || 0.4;
       return Math.min(1, itemLeft(id) / max);
     }
@@ -19553,7 +20109,7 @@ ram_mem_amulet: [
     }
     function toolish(id) {
       return (
-        ["lasers", "justice", "lasso", "bomb", "bow", "raygun", "missile", "shield", "amulet", "blast", "heavy", "disc"].indexOf(
+        ["lasers", "justice", "lasso", "bomb", "bow", "raygun", "missile", "shield", "amulet", "blast", "heavy", "fireball", "disc"].indexOf(
           id,
         ) >= 0
       );
@@ -19666,6 +20222,7 @@ ram_mem_amulet: [
       else if (id === "shield") raiseShield();
       else if (id === "amulet") thunderBurst();
       else if (id === "blast" || id === "heavy") fireBlast(id);
+      else if (id === "fireball") fireBall();
       else if (id === "plasma") ((d.plasma = 0.3), swingItem("sword"));
       else if (id === "disc") throwDisc();
     }
@@ -19812,6 +20369,24 @@ ram_mem_amulet: [
         D.boom(),
         ne(d.x + te[0] * 14, d.y - 8, 8, ["#ffe066", "#ff9a3d", "#ffffff"], 24));
     }
+    function fireBall() {
+      if (!ownedItem("fireball") || itemLeft("fireball") > 0) return;
+      let te = Ne[d.dir];
+      (Oe.push({
+        x: d.x + te[0] * 10,
+        y: d.y - 8 + te[1] * 8,
+        vx: te[0] * 220,
+        vy: te[1] * 220,
+        t: 0,
+        kind: "fireball",
+        dir: d.dir,
+      }),
+        spend("fireball", 0.4),
+        (d.swingKind = ""),
+        (d.atk = 0.12),
+        D.fire(),
+        ne(d.x + te[0] * 12, d.y - 8, 8, ["#fff6c0", "#ff9a3d", "#d8323a"], 20));
+    }
     function fireRay() {
       if (!d.items.raygun || itemLeft("raygun") > 0) return;
       let te = Ne[d.dir];
@@ -19858,9 +20433,11 @@ ram_mem_amulet: [
       let ids =
         A.story === "ramshackle"
           ? ["axe", "hatchet"]
-          : A.story === "drill"
+          :         A.story === "drill"
             ? []
-            : ["plasma", "axe", "sword", "hatchet", "baton"];
+            : A.story === "ronin"
+              ? ["sword"]
+              : ["plasma", "axe", "sword", "hatchet", "baton"];
       return ids.filter((id) => ownedItem(id));
     }
     function ownedGear() {
@@ -19871,7 +20448,9 @@ ram_mem_amulet: [
             ? ["shield", "amulet"]
             : A.story === "drill"
               ? ["blast"]
-              : ["raygun", "bow", "missile", "lasso", "heavy", "disc", "blast"];
+              : A.story === "ronin"
+                ? []
+                : ["raygun", "bow", "missile", "lasso", "heavy", "fireball", "disc", "blast"];
       return ids.filter((id) => ownedItem(id) && !isMelee(id));
     }
     function ownedWeapons() {
@@ -20213,7 +20792,17 @@ ram_mem_amulet: [
       (Ia.checkProofs = () => {
         Z("proof1") && Z("proof3") && Z("truce") && (ee.ros_ready = !0);
       }),
-      (Ia.taleYes = () => taleYes());
+      (Ia.taleYes = () => taleYes()),
+      (Ia.pixelate = () => {
+        A.pixelT = 1.15;
+      }),
+      (Ia.sealBurst = () => {
+        ((A.flash = 0.7),
+          (A.shake = 0.45),
+          D.shard(),
+          ne(d.x, d.y - 12, 36, ["#fff6c0", "#ffe080", "#ffffff", "#ff9a3d", "#7ad0ff"], 80));
+      }),
+      (Ia.throughRonin = () => throughRonin());
     Le.shadowd = {
       init: () => {
         ((ee.shadow_nocont = !0),
@@ -20254,6 +20843,118 @@ ram_mem_amulet: [
         });
       },
     };
+    function roninBossStep(e, speed, reach, cd) {
+      let ang = Math.atan2(d.y - r.y, d.x - r.x);
+      r.swing > 0 && (r.swing -= e);
+      r.eyeT -= e;
+      let dist = ae(d.x, d.y, r.x, r.y);
+      if (dist > reach) {
+        r.x += Math.cos(ang) * speed * e;
+        r.y += Math.sin(ang) * speed * e;
+      } else if (r.eyeT <= 0) {
+        ((r.swing = 0.26), (r.eyeT = cd));
+        dist < reach + 8 && be(1, r.x, r.y);
+      }
+      r.x = Ee(r.x, p(2.2), p(15.6));
+      r.y = Ee(r.y, p(2.4), p(9.2));
+    }
+    Le.rnshadow = {
+      init: () => {
+        ((r.hp = r.max = 8),
+          (r.x = p(11)),
+          (r.y = p(5)),
+          (r.eyeT = 0.7),
+          (r.swing = 0));
+      },
+      upd: (e) => {
+        roninBossStep(e, 52, 30, 0.85);
+      },
+      parts: (e) => {
+        e.push([r.x, r.y - 8, 14, 1, 0]);
+      },
+      hit: () => {
+        Fe(1);
+      },
+      draw: (e, a, t) => {
+        e.push({
+          y: r.y,
+          f: () => {
+            let x = a(r.x),
+              y = t(r.y),
+              ang = r.swing > 0 ? -0.6 + (0.26 - r.swing) * 8 : -1.1;
+            (drawCanonBoard(x, y, 3, 1, !0),
+              Aa("shadow", x, y - 2, 3, r.swing > 0 ? 1 : 0, 1),
+              (n.strokeStyle = "#c5ccd8"),
+              (n.lineWidth = 2),
+              n.beginPath(),
+              n.moveTo(x + 8, y - 16),
+              n.lineTo(x + 8 + Math.cos(ang) * 18, y - 16 + Math.sin(ang) * 18),
+              n.stroke(),
+              (n.strokeStyle = "#f4f7fb"),
+              (n.lineWidth = 1),
+              n.beginPath(),
+              n.moveTo(x + 8 + Math.cos(ang) * 6, y - 16 + Math.sin(ang) * 6),
+              n.lineTo(x + 8 + Math.cos(ang) * 18, y - 16 + Math.sin(ang) * 18),
+              n.stroke());
+          },
+        });
+      },
+    };
+    Le.rnkal = {
+      init: () => {
+        ((r.hp = r.max = 10),
+          (r.x = p(11)),
+          (r.y = p(5)),
+          (r.eyeT = 0.9),
+          (r.swing = 0));
+      },
+      upd: (e) => {
+        roninBossStep(e, 36, 36, 1.05);
+        if (r.eyeT < 0.2 && Math.random() < 0.04) {
+          let ang = Math.atan2(d.y - r.y, d.x - r.x);
+          Oe.push({
+            x: r.x,
+            y: r.y - 10,
+            vx: Math.cos(ang) * 80,
+            vy: Math.sin(ang) * 80,
+            t: 0,
+            kind: "stun",
+            col: "#e8b830",
+            dir: 0,
+          });
+        }
+      },
+      parts: (e) => {
+        e.push([r.x, r.y - 16, 18, 1, 0]);
+      },
+      hit: () => {
+        Fe(1);
+      },
+      draw: (e, a, t) => {
+        e.push({
+          y: r.y,
+          f: () => {
+            let x = a(r.x),
+              y = t(r.y);
+            (drawCanonBoard(x, y + 2, 2, 2, !0),
+              I(x - 9, y - 12, 7, 12, "#e6e8ec"),
+              I(x + 2, y - 12, 7, 12, "#e6e8ec"),
+              I(x - 14, y - 32, 28, 20, "#f4f6fa"),
+              I(x - 14, y - 32, 28, 4, "#e8b830"),
+              I(x - 5, y - 24, 10, 7, "#e8b830"),
+              I(x - 20, y - 30, 7, 16, "#d0d4dc"),
+              I(x + 13, y - 30, 7, 16, "#d0d4dc"),
+              I(x - 1, y - 22, 3, 3, "#fff6c0"),
+              R(n, x, y - 42, 9, 9, "#d6dae0"),
+              R(n, x, y - 44, 7, 6, "#ffffff"),
+              R(n, x - 4, y - 40, 2.2, 1.5, "#f7a8d8"),
+              R(n, x + 4, y - 40, 2.2, 1.5, "#f7a8d8"),
+              I(x - 6, y - 45, 4, 2, "#1a1a22"),
+              I(x + 2, y - 45, 4, 2, "#1a1a22"));
+          },
+        });
+      },
+    };
     function ga() {
       return A.story === "ros"
         ? "ros"
@@ -20261,9 +20962,11 @@ ram_mem_amulet: [
           ? "ramshackle"
           : A.story === "drill"
             ? "drill"
-            : Z("hardened")
-              ? "skippy2"
-              : "skippy";
+            : A.story === "ronin"
+              ? "ronin"
+              : Z("hardened")
+                ? "skippy2"
+                : "skippy";
     }
     ((Ia.gate = () => {
       Z("cgate_open") ||
@@ -21414,6 +22117,7 @@ ram_mem_amulet: [
         a = Math.round(he.x + e),
         t = Math.round(he.y);
       es(a, t);
+      w && w.realm === "void" && drawVoidSky();
       let i = (f) => f - a,
         s = (f) => f - t + 24,
         E = [];
@@ -21505,6 +22209,8 @@ ram_mem_amulet: [
                   R(n, c + 4, S - 1, 1.4, 1.4, "#041018"));
               },
             });
+          } else if (f.k === "gtorch" || f.k === "brazier" || f.k === "scroll") {
+            drawRoninProp(f, E, i, s);
           } else if (f.k === "portal" && !f.label) {
             let c = i(p(f.x)),
               S = s(p(f.y));
@@ -21671,12 +22377,12 @@ ram_mem_amulet: [
                 n.globalAlpha = 1;
               } else if (f.id === "nuke") drawNukeWorld(i(f.x), s(f.y) + c);
               else {
-                ridingNpc(f.look || f.id) &&
+                (ridingNpc(f.look || f.id) || (w.realm === "void" && voidRider(f.look || f.id))) &&
                   drawCanonBoard(i(f.x), s(f.y) + c, f.dir, f.id === "jazz" ? 3 : f.id === "x_lane" ? 2 : 1, !0);
                 Aa(
                   f.look || f.id,
                   i(f.x),
-                  s(f.y) + c - (ridingNpc(f.look || f.id) ? 2 : 0),
+                  s(f.y) + c - (ridingNpc(f.look || f.id) || (w.realm === "void" && voidRider(f.look || f.id)) ? 2 : 0),
                   f.dir,
                   Math.floor(A.t * 1.5 + f.x) % 2 && f.mv ? 1 : 0,
                   y,
@@ -22115,6 +22821,18 @@ ram_mem_amulet: [
             (d.boardDash || 0) > 0 || !!d.moving || !!(w && w.surf),
           ),
         Aa(ga(), e, a - (hasSpaceBoard() ? 2 : 0), d.dir, (d.boardDash || 0) > 0 ? 1 : t, 1),
+        A.story === "ronin" &&
+          (d.moving || d.atk > 0) &&
+          Math.random() < 0.7 &&
+          oe(
+            d.x - (Ne[d.dir][0] || 0) * 6,
+            d.y + 2,
+            -(Ne[d.dir][0] || 0) * 16,
+            -14,
+            0.32,
+            Math.random() < 0.5 ? "#ff9a3d" : "#ffe066",
+            2,
+          ),
         drawVisorAt(e, a),
         drawCompanion(e, a),
         drawHeldAxe(e, a),
@@ -22147,6 +22865,10 @@ ram_mem_amulet: [
           n.fillRect(Math.round(e - 15), Math.round(a - 34), 6, 5),
           n.fillRect(Math.round(e + 9), Math.round(a - 34), 6, 5),
           n.drawImage(O.icon.heavy, Math.round(e - 14), Math.round(a - 48), 28, 28);
+      } else if (d.hold === "fireball" && d.holdT > 0) {
+        (R(n, e, a - 44, 7, 7, "#ff9a3d"),
+          R(n, e, a - 46, 4, 4, "#ffe066"),
+          R(n, e - 1, a - 48, 2, 2, "#ffffff"));
       } else if (d.hold && d.holdT > 0) {
         let c = O.icon[d.hold] || O.icon.coin;
         (n.drawImage(c, e - 8, a - 46),
@@ -22429,14 +23151,19 @@ ram_mem_amulet: [
     }
     function drawObjectives() {
       if (!w || A.paused || q || A.state !== "play") return;
-      let text = "";
-      A.story === "ros" && !A.ev
-        ? (text = rosObjective())
-        : A.story === "ramshackle"
-          ? (text = ramObjective())
-          : A.story === "drill" && !A.radioInk
-            ? (text = dsObjective())
-            : A.story === "skippy" && !A.choice && (text = skippyObjective());
+      let near = nearPortalLabel();
+      A.portalHint = near || "";
+      let text = near ? "PORTAL: " + near : "";
+      if (!text)
+        A.story === "ros" && !A.ev
+          ? (text = rosObjective())
+          : A.story === "ramshackle"
+            ? (text = ramObjective())
+            : A.story === "drill" && !A.radioInk
+              ? (text = dsObjective())
+              : A.story === "ronin"
+                ? (text = rnObjective())
+                : A.story === "skippy" && !A.choice && (text = skippyObjective());
       if (!text) return;
       let floor = A.runnerFloor == null ? 216 : A.runnerFloor,
         y = Math.min(208, floor - 10);
@@ -22790,7 +23517,7 @@ ram_mem_amulet: [
       let e = A.t;
       (v(n, "SPACE RIDERS", 160, 14, "#ff4fd8", 3, "center", "#2a0a3a"),
         v(n, "SKIPPY'S QUEST", 160, 42, "#ffcc33", 2, "center", "#2a0a3a"),
-        v(n, window.__SQ_BUILD || "b48", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
+        v(n, window.__SQ_BUILD || "b49", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
       let a = (s, E, f, c, S) => {
         let y = Ue(s, S, 0);
         n.drawImage(
@@ -23442,6 +24169,7 @@ ram_mem_amulet: [
         A.toastInk = drawRunner([A.toast], "#4ff0ff", "toast");
       A.saveT > 0 && placeSaved();
       drawObjectives();
+      A.pixelT > 0 && drawPixelate();
       if (
         (A.paused && is(),
         A.fade > 0.001 &&
@@ -24047,6 +24775,88 @@ ram_mem_amulet: [
                 ? "#7a4a22"
                 : "";
     }
+    function drawVoidSky() {
+      I(0, 24, 320, 200, "#10182e");
+      for (let i = 0; i < 60; i++) {
+        let x = (i * 47 + (i % 5) * 3) % 320,
+          y = 28 + ((i * 31) % 176);
+        I(x, y, i % 7 === 0 ? 2 : 1, i % 7 === 0 ? 2 : 1, i % 3 === 0 ? "#ffe9b0" : "#d7e6ff");
+      }
+      ((n.fillStyle = "rgba(90,140,190,0.18)"),
+        n.beginPath(),
+        n.ellipse(160, 150, 110, 28, 0, 0, 6.283),
+        n.fill());
+    }
+    function paintPlaque(x, y, text) {
+      let b = String(text || "").toUpperCase(),
+        g = Math.max(12, b.length * 6 - 1),
+        V = Math.round(x - g / 2),
+        j = Math.round(y);
+      (I(Math.round(x) - 1, j - 14, 2, 14, "#5a3218"),
+        I(V - 3, j - 2, g + 6, 12, "#3a2414"),
+        I(V - 2, j - 1, g + 4, 10, "#e6c98a"),
+        I(V - 2, j - 1, g + 4, 1, "#fff1c8"),
+        (n.fillStyle = "#2a160c"));
+      for (let G = 0; G < b.length; G++) {
+        let se = Dt[b[G]] || Dt[" "];
+        if (!se) continue;
+        for (let D = 0; D < 7; D++) {
+          let Te = se[D];
+          if (!Te) continue;
+          for (let $ = 0; $ < 5; $++) Te & (16 >> $) && n.fillRect(V + G * 6 + $, j + D, 1, 1);
+        }
+      }
+    }
+    function drawRoninProp(f, E, i, s) {
+      let c = i(p(f.x)),
+        S = s(p(f.y));
+      E.push({
+        y: p(f.y),
+        f: () => {
+          if (f.k === "brazier") {
+            (I(c - 6, S - 2, 12, 6, "#5a3218"),
+              I(c - 4, S - 4, 8, 4, "#3a2414"),
+              R(n, c, S - 10, 5, 7, "#ff9a3d"),
+              R(n, c, S - 14, 3, 5, "#ffe066"),
+              R(n, c, S - 16, 1.4, 2, "#ffffff"));
+          } else if (f.k === "scroll") {
+            (I(c - 10, S - 8, 20, 14, "#5a3218"),
+              I(c - 8, S - 12, 16, 14, "#f4efe2"),
+              I(c - 6, S - 9, 12, 1, "#c45a38"),
+              I(c - 6, S - 6, 8, 1, "#2a1818"),
+              I(c - 6, S - 3, 10, 1, "#2a1818"),
+              R(n, c, S - 6, 3, 3, "#d8323a"));
+          } else {
+            (I(c - 4, S - 70, 8, 78, "#6a3a20"),
+              I(c - 6, S - 78, 12, 10, "#4a2814"),
+              R(n, c, S - 100, 22, 28, "#ff6a1a"),
+              R(n, c, S - 112, 14, 20, "#ffe066"),
+              R(n, c, S - 122, 7, 12, "#fff6c0"),
+              R(n, c - 4, S - 108, 3, 3, "#ffffff"),
+              (n.fillStyle = "rgba(255,160,60,0.28)"),
+              n.beginPath(),
+              n.ellipse(c, S - 20, 48, 16, 0, 0, 6.283),
+              n.fill());
+          }
+        },
+      });
+    }
+    function drawPixelate() {
+      let step = 6,
+        img;
+      try {
+        img = n.getImageData(0, 0, 320, 224);
+      } catch (e) {
+        return;
+      }
+      let data = img.data;
+      for (let y = 0; y < 224; y += step)
+        for (let x = 0; x < 320; x += step) {
+          let o = (y * 320 + x) * 4;
+          ((n.fillStyle = "rgb(" + data[o] + "," + data[o + 1] + "," + data[o + 2] + ")"),
+            n.fillRect(x, y, step, step));
+        }
+    }
     function ms(e, a, t) {
       let i = a(p(e.x)),
         s = t(p(e.y)),
@@ -24062,6 +24872,7 @@ ram_mem_amulet: [
           n.beginPath(),
           n.ellipse(i, s, 6 + c * 3, 3 + c * 1.4, 0, 0, 6.283),
           n.stroke());
+      w && w.id === "cosmos" && e.label && paintPlaque(i, s + 18, e.label);
       if (
         (!f &&
           Math.random() < 0.4 &&
@@ -24319,6 +25130,14 @@ ram_mem_amulet: [
               "#ff9a3d",
               2,
             ),
+          !0
+        );
+      }
+      if (e.kind === "fireball") {
+        return (
+          R(n, a, t, 5, 5, "#ff9a3d"),
+          R(n, a, t, 3, 3, "#ffe066"),
+          R(n, a - 1, t - 1, 1.4, 1.4, "#ffffff"),
           !0
         );
       }
@@ -25791,7 +26610,16 @@ ram_mem_amulet: [
         worldInk: () => (A.worldInk || []).map((w) => ({ t: w.t, x: w.x, y: w.y })),
         cycleMelee: () => cycleMelee(),
         objective: () =>
-          A.story === "ros" ? rosObjective() : A.story === "ramshackle" ? ramObjective() : A.story === "drill" ? dsObjective() : skippyObjective(),
+          A.story === "ros"
+            ? rosObjective()
+            : A.story === "ramshackle"
+              ? ramObjective()
+              : A.story === "drill"
+                ? dsObjective()
+                : A.story === "ronin"
+                  ? rnObjective()
+                  : skippyObjective(),
+        portalHint: () => nearPortalLabel(),
         chapters: () => STORY_ROWS.map((r) => ({ id: r.id, status: chapterStatus(r.id), sub: rowSub(r), open: chapterMenuOpen(r) })),
         riderLog: () => riderLog(),
         gearTable: () => GEAR_TABLE,
@@ -25838,7 +26666,7 @@ ram_mem_amulet: [
           enterStory(id);
           return Bt();
         },
-        build: () => window.__SQ_BUILD || "b48",
+        build: () => window.__SQ_BUILD || "b49",
         chart: () => {
           let out = [];
           for (let id in Ie) {
