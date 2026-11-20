@@ -4,7 +4,7 @@ import fs from 'fs';
 const HTML_PATH = '/agent/repos/previews/skippys-quest/index.html';
 const ART = '/opt/cursor/artifacts';
 const BARE = 'https://sanyziahj.github.io/previews/skippys-quest/';
-const BUILD = 'b49';
+const BUILD = 'b50';
 
 fs.mkdirSync(ART, { recursive: true });
 
@@ -59,7 +59,7 @@ test('cache-bust build id, version check, and redirect write are the same', () =
   expect(html).toContain('<meta name="robots" content="noindex,nofollow">');
 });
 
-test('a bare github.io open redirects once to v=b49 and shows the title screen', async ({ page }) => {
+test('a bare github.io open redirects once to v=b50 and shows the title screen', async ({ page }) => {
   test.setTimeout(60000);
   const html = fs.readFileSync(HTML_PATH, 'utf8');
   const ids = buildIds(cacheScript(html));
@@ -69,7 +69,7 @@ test('a bare github.io open redirects once to v=b49 and shows the title screen',
   const { docs, errors } = await installPages(page, html);
 
   const landed = page.waitForURL(
-    (url) => /[?&]v=b49(?:&|$)/.test(url.search) && url.hostname.endsWith('github.io'),
+    (url) => /[?&]v=b50(?:&|$)/.test(url.search) && url.hostname.endsWith('github.io'),
     { timeout: 15000, waitUntil: 'domcontentloaded' },
   );
   await page.goto(BARE, { waitUntil: 'commit', timeout: 15000 });
@@ -126,7 +126,7 @@ test('a bare github.io open redirects once to v=b49 and shows the title screen',
   await page.screenshot({ path: `${ART}/skippys-quest-title-screen.png` });
 });
 
-test('opening github.io with v=b49 already set does not redirect again', async ({ page }) => {
+test('opening github.io with v=b50 already set does not redirect again', async ({ page }) => {
   test.setTimeout(60000);
   const html = fs.readFileSync(HTML_PATH, 'utf8');
   const { docs, errors } = await installPages(page, html);

@@ -3,7 +3,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<script>window.__SQ_BUILD="b49";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b49(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b49");location.replace(u.href);}</script>
+<script>window.__SQ_BUILD="b50";if(/github\.io$/.test(location.hostname)&&!/[?&]v=b50(?:&|$)/.test(location.search)){var u=new URL(location.href);u.searchParams.set("v","b50");location.replace(u.href);}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Space Riders: Skippy's Quest - Chapters 1-9 (Complete)</title><link rel="icon" href="data:,">
 <meta name="description" content="Space Riders: Skippy's Quest - a free 16-bit top-down action adventure browser game. The Red King is missing. Ride with ROS through the Sand Dungeon, take Cash's portals to the Seaport and Ramshackle the Viking, win Ronin's flaming sword, beat the house at the Andromeda Casino and stop the Overlord on the Moon, survive the meteor shower with Blaze and earn your space board at the Crossroad and cross the mirror into the Dark World, then storm Fright's castle and bring the Red King home. Chapters 1-9 (Complete) out now.">
@@ -975,6 +975,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
           { id: "shadow", x: 12, y: 7, dir: 3, talk: "shadow_talk" },
           { id: "draco", x: 15, y: 7, dir: 2, talk: "draco_talk" },
           { id: "ros_seat", look: "ros", x: 11, y: 5, dir: 2, talk: "ros_ronin_offer", show: "dl_ronin", hide: "tale_ronin" },
+          { id: "santt_pour", look: "santt", x: 6, y: 5, dir: 3, talk: "santt_pour", show: "dl_ronin", hide: "tale_ronin" },
           { id: "ronin_back", look: "ronin", x: 8, y: 8, dir: 3, talk: "rn_after", show: "tale_ronin" },
           { id: "x_pirate", x: 2, y: 4.2, dir: 1, talk: "x_pirate" },
           { id: "x_sombrero", x: 17.5, y: 9, dir: 2, talk: "x_sombrero" },
@@ -9510,8 +9511,8 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
 
   Object.assign(Ea, {
     fireball: {
-      name: "FIREBALL",
-      desc: "RONIN'S GIFT. Z OR SWAP. X STAYS THE SWORD.",
+      name: "FIRE ARC",
+      desc: "AT FULL LIFE, THE SWORD THROWS A FIRE ARC.",
       jingle: "item",
     },
     smoke: {
@@ -9787,7 +9788,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
         { id: "ros", x: 13, y: 5, dir: 2, talk: "rn_ros" },
       ],
       props: [{ k: "brazier", x: 5, y: 4 }],
-      signs: [{ x: 6, y: 8, text: "SKIPPY CAN RETURN. THE FIREBALL IS HIS.", kind: "sign" }],
+      signs: [{ x: 6, y: 8, text: "SKIPPY CAN RETURN. THE FIRE ARC IS HIS.", kind: "sign" }],
       onEnter: "rn_give",
     },
     rn_thanks: {
@@ -9862,7 +9863,12 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       { t: "fn", f: "taleYes" },
     ],
     tale_ronin_no: [h("ros", "THE SEAT STAYS. GO WHEN YOU ARE READY. I AM NOT MOVING YOU.")],
-    rn_after: [h("ronin", "THE FIREBALL IS YOURS. I HOLD NEUTRAL GROUND.")],
+    santt_pour: [
+      h("santt", "..."),
+      h("santt", "THAT SEAT IS HIS. I AM ONLY POINTING."),
+      h("santt", "I GO BACK TO THE WORK."),
+    ],
+    rn_after: [h("ronin", "THE FIRE ARC IS ON YOUR SWORD. I HOLD NEUTRAL GROUND.")],
     rn_open: [
       h("skippy", "SPIKE RODE THE PLANS HERE. A FIRE SEAL. A PORTAL."),
       h("ronin", "WAIT. ROS KEEPS YOU SAFE. I GO TO THE UNSEEN REALM."),
@@ -9939,16 +9945,16 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
     rn_give: [
       h("ronin", "SKIPPY. THE SEAL IS OPEN."),
       h("skippy", "THEN I CAN RETURN."),
-      h("ronin", "A FIREBALL. FOR THE REMINDER."),
+      h("ronin", "YOUR SWORD THROWS A FIRE ARC. AT FULL LIFE."),
       { t: "fn", f: "throughRonin" },
     ],
     tale_ronin_close: [
       h("ronin", "THANK YOU. YOU REMINDED ME THE FIRE IS MINE."),
-      h("ronin", "THIS FIREBALL IS YOURS."),
-      h("skippy", "I WILL CARRY IT. MY SWORD STAYS ON ATTACK."),
+      h("ronin", "YOUR SWORD THROWS A FIRE ARC NOW."),
+      h("ronin", "AT FULL LIFE, THE BLADE SENDS IT ACROSS THE ROOM."),
+      h("skippy", "I WILL CARRY THE FIRE ON THE SWORD."),
       { t: "flag", f: "tale_ronin" },
       { t: "flag", f: "fireball_got" },
-      { t: "give", item: "fireball" },
       { t: "warp", area: "saloon", x: 10, y: 8, dir: 1 },
       { t: "save" },
     ],
@@ -9986,7 +9992,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
     { id: "lasso", name: "SHERIFF LASSO", tier: 2, from: "TALE", where: "ROS", opens: "GRAPPLE LATCHES" },
     { id: "axe", name: "RAM AXE", tier: 3, from: "TALE", where: "RAMSHACKLE", opens: "THICK WOOD" },
     { id: "heavy", name: "HEAVY BLASTER", tier: 3, from: "TALE", where: "DRILL", opens: "REINFORCED CASES" },
-    { id: "fireball", name: "FIREBALL", tier: 3, from: "TALE", where: "RONIN", opens: "A FLAME IN THE ITEM SLOT" },
+    { id: "fireball", name: "FIRE ARC", tier: 3, from: "TALE", where: "RONIN", opens: "SWORD ARC AT FULL LIFE" },
     { id: "plasma", name: "PLASMA EDGE", tier: 3, from: "SHOP", where: "CADET STORE", opens: "A HARDER SWING" },
     { id: "disc", name: "BOOMERANG DISC", tier: 2, from: "SHOP", where: "CADET STORE", opens: "A RETURNING THROW" },
     { id: "suit", name: "RIDING SUIT", tier: 2, from: "SHOP", where: "CADET STORE", opens: "SOFTER HITS" },
@@ -10079,7 +10085,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       y: 8,
       face: 1,
       objective: "PIONEER POUR: ROS KEEPS A SEAT. RONIN SENT WORD.",
-      close: "THE FIREBALL STAYS. THE SEAL IS OPEN.",
+      close: "THE FIRE ARC STAYS ON THE SWORD. THE SEAL IS OPEN.",
       place: "A TALE AT THE PIONEER POUR",
     },
   ];
@@ -14433,11 +14439,17 @@ ram_mem_amulet: [
       };
     }
     function nr(e) {
+      if (e.talk === "ros_saloon" && Z("dl_ronin") && !Z("tale_ronin")) return !1;
       return (
         (!e.hide || !Z(e.hide)) &&
         (!e.hide2 || !Z(e.hide2)) &&
         (!e.show || (/^ch\d+_done$/.test(e.show) ? reached(e.show) : Z(e.show)))
       );
+    }
+    function rosStanding() {
+      for (let f of Ta)
+        if (f.vis && f.leave <= 0 && (f.alpha == null || f.alpha > 0.5) && (f.look || f.id) === "ros") return !0;
+      return !1;
     }
     function drillStandsDown() {
       if (A.story !== "skippy" || !ee || !reached("ch5_done")) return;
@@ -14454,8 +14466,11 @@ ram_mem_amulet: [
     }
     function Gt() {
       if (A.story === "ronin") return !1;
-      for (let e of Xe)
-        if (sa[e] && sa[e].realm === w.realm) return ((_.id = e), !0);
+      for (let e of Xe) {
+        if (!sa[e] || sa[e].realm !== w.realm) continue;
+        if (e === "ros" && rosStanding()) continue;
+        return ((_.id = e), !0);
+      }
       return !1;
     }
     function Yt(e) {
@@ -14630,6 +14645,7 @@ ram_mem_amulet: [
     }
     function xe() {
       if (w.id === "dream" || A.state !== "play") return;
+      syncFireArc();
       if (A.story === "ronin" && Mt !== "sq_save_ronin_v1") Mt = "sq_save_ronin_v1";
       if (A.story === "skippy" && Mt === "sq_save_ronin_v1") Mt = "sq_save_v1";
       let e = {
@@ -14835,8 +14851,68 @@ ram_mem_amulet: [
           patchHeavySave(data, key === "sq_save_v1") && localStorage.setItem(key, JSON.stringify(data));
         } catch (e) {}
     }
+    function patchFireArc(data, grant) {
+      if (!data || typeof data !== "object") return !1;
+      let items = data.items || {},
+        flags = data.flags || (data.flags = {}),
+        had = !!(
+          items.fireball ||
+          data.pri === "fireball" ||
+          data.sec === "fireball" ||
+          data.tool === "fireball" ||
+          data.act === "fireball" ||
+          data.z === "fireball" ||
+          data.hold === "fireball"
+        );
+      if (!had) return !1;
+      items.fireball && delete items.fireball;
+      if (grant) ((flags.fireball_got = !0), (flags.tale_ronin = !0));
+      let pri = items.raygun ? "raygun" : items.bow ? "bow" : items.missile ? "missile" : "",
+        sec = items.heavy ? "heavy" : "";
+      sec === pri && (sec = "");
+      data.pri === "fireball" && (data.pri = pri);
+      data.sec === "fireball" && (data.sec = sec && sec !== data.pri ? sec : "");
+      data.tool === "fireball" && (data.tool = data.sec || data.pri || "");
+      data.act === "fireball" && (data.act = data.tool || "");
+      data.z === "fireball" && (data.z = data.pri || "bow");
+      data.hold === "fireball" && (data.hold = "");
+      return !0;
+    }
+    function migrateFireArc() {
+      for (let key of ["sq_save_v1", "sq_save_ros_v1", "sq_save_ram_v1", "sq_save_ds_v1", "sq_save_ronin_v1"])
+        try {
+          let raw = localStorage.getItem(key);
+          if (!raw) continue;
+          let data = JSON.parse(raw);
+          patchFireArc(data, key === "sq_save_v1") && localStorage.setItem(key, JSON.stringify(data));
+        } catch (e) {}
+    }
+    function syncFireArc() {
+      if (!d) return;
+      let slotted = !!(
+        (d.items && d.items.fireball) ||
+        d.pri === "fireball" ||
+        d.sec === "fireball" ||
+        d.tool === "fireball" ||
+        d.act === "fireball" ||
+        d.z === "fireball"
+      );
+      if (!slotted) return;
+      d.items && delete d.items.fireball;
+      if (A.story === "skippy") ((ee.fireball_got = !0), (ee.tale_ronin = !0));
+      let pri = d.items && d.items.raygun ? "raygun" : d.items && d.items.bow ? "bow" : "",
+        sec = d.items && d.items.heavy ? "heavy" : "";
+      sec === pri && (sec = "");
+      d.pri === "fireball" && (d.pri = pri);
+      d.sec === "fireball" && (d.sec = sec && sec !== d.pri ? sec : "");
+      d.tool === "fireball" && (d.tool = d.sec || d.pri || "");
+      d.act === "fireball" && (d.act = d.tool || "");
+      d.z === "fireball" && (d.z = d.pri || "bow");
+      d.hold === "fireball" && (d.hold = "firearc");
+    }
     function Bt() {
       migrateHeavyStores();
+      migrateFireArc();
       let e = null;
       try {
         let a = window.localStorage.getItem(Mt);
@@ -15608,7 +15684,9 @@ ram_mem_amulet: [
         d.roll <= 0 && (d.boardDash = 0),
         d.rollCd > 0 && (d.rollCd -= e),
         d.inv > 0 && (d.inv -= e),
-        d.beamCd > 0 && (d.beamCd -= e));
+        d.beamCd > 0 && (d.beamCd -= e),
+        d.arcCd > 0 && (d.arcCd -= e),
+        d.arcNote > 0 && (d.arcNote -= e));
       if (w.surf && !E) return surfSteer(e, a);
       let f = 0,
         c = 0;
@@ -16013,6 +16091,12 @@ ram_mem_amulet: [
           (a.t += e),
           (a.x += a.vx * e),
           (a.y += a.vy * e));
+        if (a.kind === "firearc") {
+          (a.trail || (a.trail = [])).push(a.x, a.y);
+          a.trail.length > 12 && a.trail.splice(0, a.trail.length - 12);
+          Math.random() < 0.45 &&
+            oe(a.x, a.y, (Math.random() - 0.5) * 28, (Math.random() - 0.5) * 18, 0.22, Math.random() < 0.5 ? "#ffe066" : "#ff9a3d", 1.6);
+        }
         let i = Math.floor(a.x / 16),
           s = Math.floor(a.y / 16);
         if (a.kind === "axe") {
@@ -16136,7 +16220,7 @@ ram_mem_amulet: [
             (a.t = 99));
           continue;
         }
-        if (ie(i, s) === "z" && a.kind === "fire") {
+        if (ie(i, s) === "z" && (a.kind === "fire" || a.kind === "firearc")) {
           (Zt(i, s), (a.t = 99));
           continue;
         }
@@ -16147,21 +16231,30 @@ ram_mem_amulet: [
         if (Wt(i, s)) {
             (a.kind === "arrow" && (D.tink(), ne(a.x, a.y, 4, ["#c89a64"], 30)),
             a.kind === "fire" && ne(a.x, a.y, 6, ["#ff9a3d", "#ffe066"], 40),
-            (a.kind === "blast" || a.kind === "heavy" || a.kind === "fireball") &&
-              (ne(a.x, a.y, 12, a.kind === "fireball" ? ["#fff6c0", "#ff9a3d", "#d8323a"] : ["#ffe066", "#ff9a3d", "#ffffff"], 36),
-              a.kind !== "fireball" && D.boom(),
+            (a.kind === "blast" || a.kind === "heavy" || a.kind === "fireball" || a.kind === "firearc") &&
+              (ne(
+                a.x,
+                a.y,
+                a.kind === "firearc" ? 8 : 12,
+                a.kind === "fireball" || a.kind === "firearc" ? ["#fff6c0", "#ff9a3d", "#d8323a"] : ["#ffe066", "#ff9a3d", "#ffffff"],
+                a.kind === "firearc" ? 28 : 36,
+              ),
+              a.kind !== "fireball" && a.kind !== "firearc" && D.boom(),
               (A.shake = 0.08)),
             (a.t = 99));
           continue;
         }
-        if (a.t > (a.kind === "fire" ? 0.9 : t ? 1.8 : 1.2)) {
+        if (a.t > (a.kind === "firearc" ? 1.55 : a.kind === "fire" ? 0.9 : t ? 1.8 : 1.2)) {
+          a.kind === "firearc" && ne(a.x, a.y, 6, ["#fff6c0", "#ff9a3d", "#ffffff"], 22);
           a.t = 99;
           continue;
         }
-        let E =
+        let pad = a.kind === "firearc" ? 8 : 2,
+          E =
           a.kind === "arrow" ||
           a.kind === "ray" ||
           a.kind === "fire" ||
+          a.kind === "firearc" ||
           a.kind === "missile" ||
           a.kind === "blast" ||
           a.kind === "heavy" ||
@@ -16172,13 +16265,19 @@ ram_mem_amulet: [
           if (
             !f.dead &&
             (f.k !== "dummy" || A.story === "ros") &&
-            Math.abs(f.x - a.x) < f.def.w / 2 + 2 &&
-            Math.abs(f.y - 5 - a.y) < f.def.h / 2 + 3
+            Math.abs(f.x - a.x) < f.def.w / 2 + pad &&
+            Math.abs(f.y - 5 - a.y) < f.def.h / 2 + pad + 1
           ) {
             (_a(f, a.kind === "justice" ? 3 : E, a.x - a.vx, a.y - a.vy, a.kind === "stun" ? 0.55 : 0),
               (a.t = 99),
-              (t || a.kind === "blast" || a.kind === "heavy" || a.kind === "fireball") &&
-                ne(a.x, a.y, 10, a.kind === "fireball" ? ["#fff6c0", "#ff9a3d"] : ["#ffe066", "#ff9a3d", "#ffffff"], 50));
+              (a.kind === "firearc" || t || a.kind === "blast" || a.kind === "heavy" || a.kind === "fireball") &&
+                ne(
+                  a.x,
+                  a.y,
+                  a.kind === "firearc" ? 8 : 10,
+                  a.kind === "firearc" ? ["#fff6c0", "#ffe080", "#ffffff", "#7ad0ff"] : a.kind === "fireball" ? ["#fff6c0", "#ff9a3d"] : ["#ffe066", "#ff9a3d", "#ffffff"],
+                  a.kind === "firearc" ? 24 : 50,
+                ));
             break;
           }
         if (a.t < 90 && r.state === "fight")
@@ -16915,13 +17014,10 @@ ram_mem_amulet: [
           (d.act = "heavy"));
     }
     function grantFireball() {
-      d.items || (d.items = {});
-      ((d.items.fireball = !0), (ee.fireball_got = !0));
-      if (A.story !== "skippy") return;
-      let keep = heldItem();
-      settleHands();
-      if (keep === "heavy" && ownedItem("heavy") && heldItem() !== "heavy" && (d.pri === "heavy" || d.sec === "heavy"))
-        ((d.sec = "heavy"), (d.tool = "heavy"), (d.act = "heavy"));
+      ((ee.fireball_got = !0), A.story === "skippy" && (ee.tale_ronin = !0));
+      d.items && delete d.items.fireball;
+      syncFireArc();
+      A.story === "skippy" && settleHands();
     }
     function throughRonin() {
       ((ee.rn_home_end = !0), (ee.rn_seal = !0));
@@ -16939,7 +17035,7 @@ ram_mem_amulet: [
         ba("rn_thanks", 9, 6, 2),
         (A.banner = ""),
         (A.bannerT = 0),
-        (d.hold = "fireball"),
+        (d.hold = "firearc"),
         (d.holdT = 8),
         (d.inv = 0),
         (d.dir = 2),
@@ -19120,7 +19216,7 @@ ram_mem_amulet: [
       for (let a = 0; a < 16; a++)
         I((a * 23) % 320, 20 + ((a * 17) % 70), 2, 2, "#fff2c8");
       (v(n, "SPACE RIDERS", 160, 8, "#ff4fd8", 2, "center", "#2a0a14"),
-        v(n, window.__SQ_BUILD || "b49", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
+        v(n, window.__SQ_BUILD || "b50", 312, 8, "#fff6c0", 1, "right", "#2a0a14"),
         v(n, "SIDE QUESTS COME HOME", 160, 28, "#ffcc33", 1, "center", "#2a0a14"));
       let a = 58;
       for (let t = 0; t < STORY_ROWS.length; t++) {
@@ -20133,7 +20229,7 @@ ram_mem_amulet: [
       if (id === "amulet") return !!(d.items.amulet || Z("amulet_got"));
       if (id === "blast") return !!(d.items.blast || A.story === "drill");
       if (id === "heavy") return A.story !== "ronin" && !!(d.items.heavy || Z("heavy_got"));
-      if (id === "fireball") return A.story !== "ronin" && !!(d.items.fireball || Z("fireball_got"));
+      if (id === "fireball") return !1;
       if (id === "katana") return !!(A.story === "ronin" || (d.items && d.items.katana));
       if (id === "smoke") return !!(d.items && d.items.smoke) || (A.story === "ronin" && Z("smoke_got"));
       if (id === "plasma" || id === "disc" || id === "suit" || id === "plate" || id === "gloves" || id === "boots")
@@ -20552,9 +20648,37 @@ ram_mem_amulet: [
         (d.atk = 0.12),
         D.ray());
     }
+    function fireArcReady() {
+      return A.story === "skippy" && Z("tale_ronin") && Z("fireball_got");
+    }
+    function launchFireArc() {
+      if (!fireArcReady()) return;
+      if (d.hp < d.maxHp) {
+        (d.arcNote || 0) <= 0 && (Q("FULL LIFE SENDS THE FIRE ARC.", 1.4), (d.arcNote = 2.4));
+        return;
+      }
+      if ((d.arcCd || 0) > 0) return;
+      let C = Ne[d.dir];
+      (D.fire(),
+        Oe.push({
+          x: d.x + C[0] * 14,
+          y: d.y - 10 + C[1] * 10,
+          vx: C[0] * 220,
+          vy: C[1] * 220,
+          t: 0,
+          kind: "firearc",
+          dir: d.dir,
+          trail: [],
+        }),
+        (d.arcCd = 0.42));
+    }
     function swingItem(id) {
       if (itemLeft(id) > 0) return;
       ((d.swingKind = "melee"), (d.atk = 0.26), (ft = []), (it = !1), D.swing(), spend(id, 0.26));
+      if (id === "sword" && fireArcReady()) {
+        launchFireArc();
+        return;
+      }
       if (id === "sword" && d.hp >= d.maxHp && (d.beamCd || 0) <= 0) {
         let C = Ne[d.dir];
         (D.fire(),
@@ -20597,8 +20721,8 @@ ram_mem_amulet: [
             : A.story === "drill"
               ? ["blast"]
               : A.story === "ronin"
-                ? ["smoke"]
-                : ["raygun", "bow", "missile", "lasso", "heavy", "fireball", "disc", "blast"];
+                ? []
+                : ["raygun", "bow", "missile", "lasso", "heavy", "disc", "blast"];
       return ids.filter((id) => ownedItem(id) && !isMelee(id));
     }
     function ownedWeapons() {
@@ -20616,7 +20740,8 @@ ram_mem_amulet: [
       return list.length ? list[0] : "";
     }
     function heldItem() {
-      if (A.story === "ronin") return ownedItem("smoke") ? "smoke" : "";
+      syncFireArc();
+      if (A.story === "ronin") return "";
       if (A.story === "ros") {
         if (d.tool && !isMelee(d.tool) && ownedItem(d.tool)) return d.tool;
         if (d.sec && !isMelee(d.sec) && ownedItem(d.sec)) return d.sec;
@@ -20638,6 +20763,10 @@ ram_mem_amulet: [
       return heldItem();
     }
     function settleHands() {
+      if (A.story === "ronin") {
+        ((d.melee = "katana"), (d.wep = "katana"), (d.pri = ""), (d.sec = ""), (d.tool = ""), (d.act = ""));
+        return;
+      }
       let melee = "";
       if (isMelee(d.melee) && ownedItem(d.melee)) melee = d.melee;
       else if (isMelee(d.wep) && ownedItem(d.wep)) melee = d.wep;
@@ -20708,7 +20837,12 @@ ram_mem_amulet: [
     }
     function armSmoke() {
       d.items || (d.items = {});
-      ((d.items.smoke = !0), (ee.smoke_got = !0), (d.sec = "smoke"), (d.tool = "smoke"), (d.act = "smoke"), settleHands());
+      ((d.items.smoke = !0), (ee.smoke_got = !0));
+      d.pri === "smoke" && (d.pri = "");
+      d.sec === "smoke" && (d.sec = "");
+      d.tool === "smoke" && (d.tool = "");
+      d.act === "smoke" && (d.act = "");
+      A.story === "ronin" && settleHands();
     }
     function cycleMelee() {
       if (A.story === "ros") return;
@@ -20722,6 +20856,7 @@ ram_mem_amulet: [
       ((d.melee = next), settleHands(), D.sel(), Q("ATTACK " + slotName(next)), xe());
     }
     function cycleTool() {
+      if (A.story === "ronin") return;
       let gear = ownedGear();
       if (!gear.length) {
         Q(A.story === "ros" ? "NO ITEM YET. THE ROPE LOCKER IS ON THE EAST WALL." : "NO ITEM YET.");
@@ -20755,6 +20890,10 @@ ram_mem_amulet: [
       ((d.sec = next), (d.tool = next), (d.act = next), D.sel(), Q(slotName(next)), xe());
     }
     function slotCombat(e) {
+      if (A.story === "ronin") {
+        U.attackE && d.roll <= 0 && d.atk <= 0 && swingMelee("katana");
+        return;
+      }
       let it = heldItem();
       if (it === "justice")
         if (U.item) d.charge = Math.min(1, (d.charge || 0) + e);
@@ -22010,13 +22149,24 @@ ram_mem_amulet: [
         bits.push({ id: "star", x, y: 24, w: 30, h: 8, text: "STARS" });
         x += 38;
       }
-      if (slotsOn() || A.story === "ronin") {
-        let atkId = A.story === "ronin" ? "katana" : A.story === "ros" ? weaponNow() : meleeNow(),
+      if (A.story === "ronin") {
+        let xl = "X KATANA",
+          sm = Z("smoke_got") ? "SMOKE OK" : "SMOKE",
+          sx = Math.max(x, 132);
+        bits.push({ id: "xname", x: sx, y: 24, w: xl.length * 6, h: 8, text: xl });
+        bits.push({ id: "smoke", x: sx + xl.length * 6 + 8, y: 24, w: sm.length * 6, h: 8, text: sm });
+      } else if (slotsOn()) {
+        let atkId = A.story === "ros" ? weaponNow() : meleeNow(),
           xl = "X " + (atkId ? slotName(atkId, !0) : "STRIKE"),
           zl = "Z " + (heldItem() ? slotName(heldItem(), !0) : "NONE"),
           sx = Math.max(x, 132),
           cap = 246,
           gap = 10;
+        if (fireArcReady()) {
+          let arc = d.hp >= d.maxHp ? "ARC" : "ARC FULL";
+          bits.push({ id: "arc", x: sx, y: 24, w: arc.length * 6, h: 8, text: arc });
+          sx += arc.length * 6 + 8;
+        }
         while (sx + (xl.length + zl.length) * 6 + gap > cap && xl.length + zl.length > 6) {
           if (xl.length >= zl.length && xl.length > 3) xl = xl.slice(0, -1);
           else zl = zl.slice(0, -1);
@@ -22060,7 +22210,7 @@ ram_mem_amulet: [
             bit.text,
             bit.x,
             bit.y,
-            bit.id === "zname" ? "#4ff0ff" : bit.id === "xname" ? "#ffe0a0" : bit.id === "star" ? "#c9a0ff" : "#ff9ae8",
+            bit.id === "zname" ? "#4ff0ff" : bit.id === "xname" || bit.id === "arc" ? "#ffe0a0" : bit.id === "smoke" ? "#fff6c0" : bit.id === "star" ? "#c9a0ff" : "#ff9ae8",
             1,
             "",
             "#000",
@@ -22152,8 +22302,10 @@ ram_mem_amulet: [
           s && O.icon[s] && n.drawImage(O.icon[s], t + 1, 4),
           v(n, i, t + 13, 15, "#ffffff", 1, "", X));
       };
-      (slotsOn() || A.story === "ronin"
-        ? (a(96, "X", itemIcon(A.story === "ronin" ? "katana" : weaponNow())), a(118, "Z", itemIcon(toolNow())), drawSlotHud())
+      (A.story === "ronin"
+        ? (a(96, "X", "katana"), drawSlotMark("katana", 96), paintCooldown(document.querySelector("[data-b=attack]"), "katana"))
+        : slotsOn()
+        ? (a(96, "X", itemIcon(weaponNow())), a(118, "Z", itemIcon(toolNow())), drawSlotHud())
         : (a(96, "X", Rs()),
           a(118, "Z", A.story === "ros" ? rosActIcon() : bs()),
           A.story === "ros" && drawActHud()),
@@ -23045,6 +23197,24 @@ ram_mem_amulet: [
           n.fillRect(Math.round(e - 15), Math.round(a - 34), 6, 5),
           n.fillRect(Math.round(e + 9), Math.round(a - 34), 6, 5),
           n.drawImage(O.icon.heavy, Math.round(e - 14), Math.round(a - 48), 28, 28);
+      } else if (d.hold === "firearc" && d.holdT > 0) {
+        (n.save(),
+          n.translate(e, a - 42),
+          (n.strokeStyle = "#fff6c0"),
+          (n.lineWidth = 3),
+          n.beginPath(),
+          n.arc(0, 0, 11, -2.5, -0.64),
+          n.stroke(),
+          (n.strokeStyle = "#ff3a12"),
+          (n.lineWidth = 2),
+          n.beginPath(),
+          n.arc(0, 2, 8, -2.4, -0.74),
+          n.stroke(),
+          (n.fillStyle = "#ffe066"),
+          n.beginPath(),
+          n.arc(8, -6, 2, 0, 6.283),
+          n.fill(),
+          n.restore());
       } else if (d.hold === "fireball" && d.holdT > 0) {
         (R(n, e, a - 44, 7, 7, "#ff9a3d"),
           R(n, e, a - 46, 4, 4, "#ffe066"),
@@ -23699,7 +23869,7 @@ ram_mem_amulet: [
       let e = A.t;
       (v(n, "SPACE RIDERS", 160, 14, "#ff4fd8", 3, "center", "#2a0a3a"),
         v(n, "SKIPPY'S QUEST", 160, 42, "#ffcc33", 2, "center", "#2a0a3a"),
-        v(n, window.__SQ_BUILD || "b49", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
+        v(n, window.__SQ_BUILD || "b50", 316, 208, "#8a8aa8", 1, "right", "#2a0a3a"));
       let a = (s, E, f, c, S) => {
         let y = Ue(s, S, 0);
         n.drawImage(
@@ -24209,9 +24379,10 @@ ram_mem_amulet: [
         armed = !!(weaponNow() || toolNow() === "shield");
       ((root.dataset.touch = mode),
         (root.dataset.race = A.race && A.race.phase === "done" ? "done" : "run"),
-        (root.dataset.item = "1"),
-        (root.dataset.itemon = mode === "play" && toolNow() ? "1" : "0"),
-        (root.dataset.swap = mode === "play" && ownedTools().filter((id) => id !== weaponNow()).length > 1 ? "1" : "0"),
+        (root.dataset.item = A.story === "ronin" ? "0" : "1"),
+        (root.dataset.itemon = mode === "play" && A.story !== "ronin" && toolNow() ? "1" : "0"),
+        (root.dataset.swap =
+          A.story === "ronin" ? "0" : mode === "play" && ownedTools().filter((id) => id !== weaponNow()).length > 1 ? "1" : "0"),
         (root.dataset.talk = "1"),
         (root.dataset.actlabel = face.label),
         (root.dataset.acton = mode === "play" && face.on ? "1" : "0"),
@@ -25344,6 +25515,45 @@ ram_mem_amulet: [
             ),
           !0
         );
+      }
+      if (e.kind === "firearc") {
+        let ang = Math.atan2(e.vy, e.vx) || 0,
+          ox = a - e.x,
+          oy = t - e.y,
+          trail = e.trail || [];
+        n.save();
+        for (let i = 0; i < trail.length; i += 2) {
+          let k = i / Math.max(2, trail.length);
+          n.globalAlpha = 0.15 + k * 0.45;
+          n.fillStyle = i % 4 ? "#ff9a3d" : "#ffe066";
+          n.beginPath();
+          n.ellipse(ox + trail[i], oy + trail[i + 1], 7 - k * 3, 4, ang, 0, 6.283);
+          n.fill();
+        }
+        n.globalAlpha = 0.55;
+        n.fillStyle = "#ff6a1a";
+        n.beginPath();
+        n.ellipse(a, t, 16, 9, ang, 0, 6.283);
+        n.fill();
+        n.globalAlpha = 1;
+        n.translate(a, t);
+        n.rotate(ang);
+        n.strokeStyle = "#fff6c0";
+        n.lineWidth = 3;
+        n.beginPath();
+        n.arc(2, 0, 11, -1.2, 1.2);
+        n.stroke();
+        n.strokeStyle = "#ff3a12";
+        n.lineWidth = 2;
+        n.beginPath();
+        n.arc(-2, 0, 8, -1.05, 1.05);
+        n.stroke();
+        n.fillStyle = "#ffffff";
+        n.beginPath();
+        n.arc(9, 0, 2.2, 0, 6.283);
+        n.fill();
+        n.restore();
+        return !0;
       }
       if (e.kind === "fireball") {
         return (
@@ -26878,7 +27088,7 @@ ram_mem_amulet: [
           enterStory(id);
           return Bt();
         },
-        build: () => window.__SQ_BUILD || "b49",
+        build: () => window.__SQ_BUILD || "b50",
         chart: () => {
           let out = [];
           for (let id in Ie) {
@@ -27359,10 +27569,17 @@ function layout(){
     if(by.roll) by.roll.dataset.b=R.dataset.rollact==="board"?"board":"roll";
     var actLabel=mode==="dialog"?"ACTION":(R.dataset.actlabel||"ACTION");
     var rollLabel=R.dataset.rolllabel||"ROLL";
-    show(by.swap, c.swap.x, c.swap.y, c.swap.w, c.swap.h, "SWAP", R.dataset.swap!=="1");
+    if(R.dataset.item==="0"){
+      var slide=(c.item.x+c.item.w)-(c.atk.x+c.atk.w);
+      c.atk.x+=slide;
+      c.talk.x=c.atk.x+(c.atk.w-c.talk.w)/2;
+      c.board.x=c.atk.x+(c.atk.w-c.board.w)/2;
+    }else{
+      show(by.swap, c.swap.x, c.swap.y, c.swap.w, c.swap.h, "SWAP", R.dataset.swap!=="1");
+      show(by.item, c.item.x, c.item.y, c.item.w, c.item.h, "ITEM", mode==="play"&&R.dataset.itemon==="0");
+    }
     show(by.talk, c.talk.x, c.talk.y, c.talk.w, c.talk.h, actLabel, mode==="play"&&R.dataset.acton==="0");
     show(by.attack, c.atk.x, c.atk.y, c.atk.w, c.atk.h, "ATTACK", mode==="play"&&R.dataset.attackon==="0");
-    show(by.item, c.item.x, c.item.y, c.item.w, c.item.h, "ITEM", mode==="play"&&R.dataset.itemon==="0");
     show(by.roll, c.board.x, c.board.y, c.board.w, c.board.h, rollLabel, false);
     var pauseS=48, gap=8, pauseX=sal+10, pauseY=sat+8;
     if(by.map) show(by.map, pauseX, pauseY, pauseS, pauseS, "PAUSE", false);

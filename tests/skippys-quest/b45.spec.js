@@ -83,12 +83,12 @@ function traceOf(frames) {
   };
 }
 
-test('build is b49 and notices stay a bottom runner', async ({ page }) => {
+test('build is b50 and notices stay a bottom runner', async ({ page }) => {
   const errors = await boot(page);
   const cache = await page.evaluate(() => document.querySelector('script').textContent);
-  expect(cache).toContain('window.__SQ_BUILD="b49"');
-  expect(cache).toContain('v=b49');
-  expect(await page.evaluate(() => __SQ.build())).toBe('b49');
+  expect(cache).toContain('window.__SQ_BUILD="b50"');
+  expect(cache).toContain('v=b50');
+  expect(await page.evaluate(() => __SQ.build())).toBe('b50');
   expect(await page.locator('meta[name="robots"]').count()).toBe(1);
 
   await page.evaluate(() => {

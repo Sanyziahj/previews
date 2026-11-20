@@ -109,8 +109,8 @@ test.use({ viewport: { width: 944, height: 661 } });
 test('a new ROS game puts the green lasers on ATTACK', async ({ page }) => {
   const errors = await boot(page);
   const cache = await page.evaluate(() => document.querySelector('script').textContent);
-  expect(cache).toContain('window.__SQ_BUILD="b49"');
-  expect(cache).toContain('v=b49');
+  expect(cache).toContain('window.__SQ_BUILD="b50"');
+  expect(cache).toContain('v=b50');
   await openRos(page);
   const born = await page.evaluate(() => {
     const S = __SQ;
@@ -133,7 +133,7 @@ test('a new ROS game puts the green lasers on ATTACK', async ({ page }) => {
       build: S.build(),
     };
   });
-  expect(born.build).toBe('b49');
+  expect(born.build).toBe('b50');
   expect(born.state).toBe('play');
   expect(born.story).toBe('ros');
   expect(born.area).toBe('ros_yard');

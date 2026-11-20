@@ -56,19 +56,19 @@ async function shot(page, name) {
   await page.locator('#game').screenshot({ path: `${ART}/${name}` });
 }
 
-test('cache-bust ids, badge, and noindex stay on b49', async ({ page }) => {
+test('cache-bust ids, badge, and noindex stay on b50', async ({ page }) => {
   const errors = await boot(page);
   const html = fs.readFileSync(HTML, 'utf8');
   const script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
   const build = script.match(/window\.__SQ_BUILD="(b\d+)"/)[1];
   const check = script.match(/\[\?&\]v=(b\d+)\(\?:&\|\$\)/)[1];
   const set = script.match(/searchParams\.set\("v","(b\d+)"\)/)[1];
-  expect(build).toBe('b49');
+  expect(build).toBe('b50');
   expect(check).toBe(build);
   expect(set).toBe(build);
   expect(html.split('noindex').length - 1).toBe(1);
   const live = await page.evaluate(() => __SQ.build());
-  expect(live).toBe('b49');
+  expect(live).toBe('b50');
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
@@ -544,7 +544,8 @@ test('each Ronin beat, the far key, and the Fireball return', async ({ page }) =
   expect(back.tale).toBe(true);
   expect(back.seal).toBe(true);
   expect(back.melee).toBe('sword');
-  expect(back.kit).toEqual(expect.arrayContaining(['sword', 'heavy', 'fireball']));
+  expect(back.kit).toEqual(expect.arrayContaining(['sword', 'heavy']));
+  expect(back.kit).not.toContain('fireball');
   expect(back.chapter.open).toBe(true);
   expect(back.chapter.status).toBe('COMPLETE');
   expect(back.line).toMatch(/THANK YOU/);
@@ -573,6 +574,7 @@ test('each Ronin beat, the far key, and the Fireball return', async ({ page }) =
       if (S.dlg) S.skipText();
       S.press('talk', true); S.step(1); S.press('talk', false); S.step(2);
     }
+    S.P.hp = S.P.maxHp;
     S.P.cds = {};
     S.shots.length = 0;
     S.press('attack', true); S.step(2); S.press('attack', false); S.step(1);
@@ -581,13 +583,8 @@ test('each Ronin beat, the far key, and the Fireball return', async ({ page }) =
       shots: S.shots.map((s) => s.kind),
       hand: S.melee(),
     };
-    let guard = 0;
-    while (S.hands().item !== 'fireball' && guard < 6) {
-      S.press('swap', true); S.step(2); S.press('swap', false); S.step(1);
-      guard += 1;
-    }
+    S.press('swap', true); S.step(2); S.press('swap', false); S.step(1);
     S.P.cds = {};
-    S.shots.length = 0;
     S.press('item', true); S.step(2); S.press('item', false); S.step(2);
     return {
       melee,
@@ -596,17 +593,20 @@ test('each Ronin beat, the far key, and the Fireball return', async ({ page }) =
       shots: S.shots.map((s) => s.kind),
       heavy: !!S.P.items.heavy,
       fire: !!S.P.items.fireball,
+      arc: !!(S.flags.tale_ronin && S.flags.fireball_got),
     };
   });
   expect(attack.melee.hand).toBe('sword');
   expect(attack.melee.swing).toBe('melee');
+  expect(attack.melee.shots).toContain('firearc');
   expect(attack.melee.shots).not.toContain('fireball');
   expect(attack.melee.shots).not.toContain('heavy');
-  expect(attack.item).toBe('fireball');
+  expect(attack.item).not.toBe('fireball');
   expect(attack.meleeNow).toBe('sword');
-  expect(attack.shots).toContain('fireball');
+  expect(attack.shots).not.toContain('fireball');
   expect(attack.heavy).toBe(true);
-  expect(attack.fire).toBe(true);
+  expect(attack.fire).toBe(false);
+  expect(attack.arc).toBe(true);
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
@@ -665,7 +665,7 @@ test('ronin replay opens from the chapter list and other saves stay', async ({ p
       ch9: !!(skippy.flags && skippy.flags.ch9_done),
       heavy: !!(skippy.flags && skippy.flags.heavy_got),
       tale: !!(skippy.flags && skippy.flags.tale_ronin),
-      fire: !!(skippy.items && skippy.items.fireball),
+      fire: !!(skippy.flags && skippy.flags.fireball_got) && !(skippy.items && skippy.items.fireball),
       row,
     };
   }, before);
@@ -831,7 +831,8 @@ test('Ronin keeps his own kit and does not rewrite Skippy until the Fireball', a
   expect(kit.melee).toBe('katana');
   expect(kit.item).toBe('');
   expect(kit.hud).toMatch(/X KATANA/);
-  expect(kit.hud).toMatch(/Z NONE/);
+  expect(kit.hud).toMatch(/SMOKE/);
+  expect(kit.hud).not.toMatch(/\bZ\b/);
   expect(kit.hud).not.toMatch(/HEAVY|LANTERN|SWORD/);
   expect(kit.area).toBe('rn_pour');
   expect(kit.line).toMatch(/PIONEER POUR/);
@@ -1013,7 +1014,9 @@ test.describe('sideways phone', () => {
     expect(hud).not.toMatch(/HEAVY|LANTERN/);
     expect(boxes.state).toBe('fight');
     expect(boxes.vw).toBeGreaterThan(boxes.vh);
-    const names = ['attack', 'item', 'swap', 'talk', 'board'];
+    expect(boxes.item && boxes.item.on, 'item hidden').toBe(false);
+    expect(boxes.swap && boxes.swap.on, 'swap hidden').toBe(false);
+    const names = ['attack', 'talk', 'board'];
     for (const name of names) {
       const b = boxes[name];
       expect(b && b.on, name).toBeTruthy();
