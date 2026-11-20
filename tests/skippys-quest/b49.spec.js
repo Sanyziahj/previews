@@ -15,7 +15,30 @@ async function boot(page) {
   await page.goto(GAME);
   await page.waitForFunction(() => window.__SQ);
   await page.locator('#game').focus();
-  await page.evaluate(() => __SQ.setManual(true));
+  await page.evaluate(() => {
+    __SQ.setManual(true);
+    window.riderSeen = () => {
+      const S = __SQ;
+      S.P.inv = 0;
+      S.step(1);
+      const sx = S.P.x - S.cam.x;
+      const sy = S.P.y - S.cam.y + 24;
+      const img = document.getElementById('game').getContext('2d').getImageData(0, 0, 320, 224).data;
+      let ink = 0;
+      for (let y = Math.round(sy - 26); y < Math.round(sy - 8); y++)
+        for (let x = Math.round(sx - 8); x < Math.round(sx + 8); x++) {
+          if (x < 0 || y < 36 || x >= 320 || y >= 200) continue;
+          const i = (y * 320 + x) * 4;
+          if (Math.abs(img[i] - img[i + 1]) > 24 || Math.abs(img[i] - img[i + 2]) > 24) ink++;
+        }
+      const foes = (S.ents || []).filter((e) => !e.dead && Math.abs(e.x - S.P.x) < 28 && Math.abs(e.y - S.P.y) < 34);
+      const riders = S.npcs.filter((n) => n.vis !== false && /^(ronin|skippy|ros|drill|slide|cavendish|jazz|x_lane)$/.test(n.look || n.id));
+      const stacks = riders
+        .filter((n) => Math.abs(n.x - S.P.x) < 22 && Math.abs(n.y - S.P.y) < 30)
+        .map((n) => n.look || n.id);
+      return { sx, sy, ink, foes: foes.length, stacks, riders: riders.length, area: S.A.id, line: S.objective(), board: S.board().has };
+    };
+  });
   return errors;
 }
 
@@ -300,14 +323,21 @@ test('each Ronin beat, the far key, and the Fireball return', async ({ page }) =
   await page.evaluate(() => {
     const S = __SQ;
     S.flag('oe_rn_s1');
-    S.warp('rn_s1', 8, 6, 3);
+    S.warp('rn_s1', 10, 7, 3);
+    S.P.inv = 0;
     S.G.bannerT = 0;
     for (let i = 0; i < 6 && (S.script || S.dlg); i++) {
       if (S.dlg) S.skipText();
       S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
     }
+    S.P.inv = 0;
     S.step(2);
   });
+  const shadowSeen = await page.evaluate(() => riderSeen());
+  expect(shadowSeen.ink, JSON.stringify(shadowSeen)).toBeGreaterThan(8);
+  expect(shadowSeen.sy).toBeGreaterThan(50);
+  expect(shadowSeen.sy).toBeLessThan(180);
+  expect(shadowSeen.foes).toBe(0);
   await shot(page, 'ronin-shadow-dungeon.png');
 
   await page.evaluate(() => {
@@ -356,14 +386,21 @@ test('each Ronin beat, the far key, and the Fireball return', async ({ page }) =
       S.press('talk', true); S.step(1); S.press('talk', false); S.step(2);
     }
     S.flag('oe_rn_k1');
-    S.warp('rn_k1', 8, 6, 3);
+    S.warp('rn_k1', 10, 7, 3);
+    S.P.inv = 0;
     S.G.bannerT = 0;
     for (let i = 0; i < 4 && (S.script || S.dlg); i++) {
       if (S.dlg) S.skipText();
       S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
     }
+    S.P.inv = 0;
     S.step(1);
   });
+  const kalSeen = await page.evaluate(() => riderSeen());
+  expect(kalSeen.ink, JSON.stringify(kalSeen)).toBeGreaterThan(8);
+  expect(kalSeen.sy).toBeGreaterThan(50);
+  expect(kalSeen.sy).toBeLessThan(200);
+  expect(kalSeen.foes).toBe(0);
   await shot(page, 'ronin-kal-dungeon.png');
   await page.evaluate(() => {
     const S = __SQ;
@@ -767,7 +804,8 @@ test('Ronin keeps his own kit and does not rewrite Skippy until the Fireball', a
     S.flag('space_board');
     S.flag('rn_nocont');
     S.flag('oe_rn_pour');
-    S.warp('rn_pour', 8, 6, 1);
+    S.warp('rn_pour', 8, 8, 3);
+    S.P.inv = 0;
     for (let i = 0; i < 6 && (S.script || S.dlg); i++) {
       if (S.dlg) S.skipText();
       S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
@@ -781,6 +819,13 @@ test('Ronin keeps his own kit and does not rewrite Skippy until the Fireball', a
       magic: S.P.magic || 0,
       save: localStorage.getItem('sq_save_v1'),
       loaded,
+      area: S.A.id,
+      line: S.objective(),
+      gap: (() => {
+        const n = S.npcs.find((p) => (p.look || p.id) === 'skippy');
+        return n ? Math.hypot(n.x - S.P.x, n.y - S.P.y) : 0;
+      })(),
+      board: S.board().has,
     };
   });
   expect(kit.melee).toBe('katana');
@@ -788,6 +833,11 @@ test('Ronin keeps his own kit and does not rewrite Skippy until the Fireball', a
   expect(kit.hud).toMatch(/X KATANA/);
   expect(kit.hud).toMatch(/Z NONE/);
   expect(kit.hud).not.toMatch(/HEAVY|LANTERN|SWORD/);
+  expect(kit.area).toBe('rn_pour');
+  expect(kit.line).toMatch(/PIONEER POUR/);
+  expect(kit.line).not.toMatch(/SUPERNOVA\. DEEJAY/);
+  expect(kit.gap).toBeGreaterThan(30);
+  expect(kit.board).toBe(true);
   expect(kit.coins).toBe(0);
   expect(kit.magic).toBe(0);
   expect(kit.save).toBe(kit.loaded);
@@ -849,6 +899,64 @@ test('Shadow and Kal each have a dungeon, a far key, and a boss room', async ({ 
   expect(map.kal.toBoss).toContain('rn_kboss');
   expect(map.kal.sealKeys).toBe(0);
   expect(map.kal.sealLock.flag).toBe('door_rnscroll');
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test('room entry keeps riders apart, on a board, and on screen', async ({ page }) => {
+  const errors = await boot(page);
+  const pour = await page.evaluate(() => {
+    const S = __SQ;
+    S.G.state = 'play';
+    S.G.story = 'ronin';
+    S.P.items = { katana: true };
+    S.flag('space_board');
+    S.flag('oe_rn_pour');
+    S.warp('rn_pour', 8, 5, 3);
+    return riderSeen();
+  });
+  expect(pour.stacks, JSON.stringify(pour)).toEqual([]);
+  expect(pour.line).toMatch(/PIONEER POUR/);
+  expect(pour.line).not.toMatch(/SUPERNOVA\. DEEJAY/);
+  expect(pour.board).toBe(true);
+  expect(pour.ink).toBeGreaterThan(8);
+
+  const moon = await page.evaluate(() => {
+    const S = __SQ;
+    S.G.story = 'skippy';
+    S.G.state = 'play';
+    S.P.items = { sword: true, board: true };
+    S.flag('woke');
+    S.flag('ch5_done', false);
+    S.flag('drill_joined', false);
+    S.flag('space_board');
+    S.flag('oe_moon');
+    S.party.length = 0;
+    S.party.push('drill');
+    S.warp('moon', 16, 10, 3);
+    const seen = riderSeen();
+    const comp = S.comp;
+    seen.follow = comp && comp.on ? { id: comp.id, dx: Math.abs(comp.x - S.P.x), dy: Math.abs(comp.y - S.P.y) } : null;
+    return seen;
+  });
+  expect(moon.area).toBe('moon');
+  expect(moon.follow && moon.follow.id, JSON.stringify(moon)).toBe('drill');
+  expect(moon.follow.dx >= 36 || moon.follow.dy >= 36).toBe(true);
+  expect(moon.stacks, JSON.stringify(moon)).toEqual([]);
+
+  const den = await page.evaluate(() => {
+    const S = __SQ;
+    S.G.story = 'ronin';
+    S.P.items = { katana: true };
+    S.flag('oe_rn_s1');
+    S.warp('rn_s1', 10, 7, 3);
+    return riderSeen();
+  });
+  expect(den.area).toBe('rn_s1');
+  expect(den.foes).toBe(0);
+  expect(den.sy).toBeGreaterThan(50);
+  expect(den.sy).toBeLessThan(180);
+  expect(den.ink).toBeGreaterThan(8);
+  expect(den.board).toBe(true);
   expect(errors, errors.join('\n')).toEqual([]);
 });
 

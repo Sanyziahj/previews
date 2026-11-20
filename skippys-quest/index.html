@@ -13299,6 +13299,16 @@ ram_mem_amulet: [
   function voidRider(id) {
     return !!id && id !== "nuke" && id !== "fire";
   }
+  function boardUnder(id) {
+    return (
+      ridingNpc(id) ||
+      id === "ronin" ||
+      id === "ros" ||
+      id === "drill" ||
+      id === "ramshackle" ||
+      (!!w && w.realm === "void" && voidRider(id))
+    );
+  }
   function drawRace() {
     let r = A.race;
     if (!r) return;
@@ -14443,6 +14453,7 @@ ram_mem_amulet: [
         (A.hailT = 6.5));
     }
     function Gt() {
+      if (A.story === "ronin") return !1;
       for (let e of Xe)
         if (sa[e] && sa[e].realm === w.realm) return ((_.id = e), !0);
       return !1;
@@ -14517,7 +14528,7 @@ ram_mem_amulet: [
         _.on)
       ) {
         let E = Ne[i];
-        ((_.x = d.x - E[0] * 14), (_.y = d.y - E[1] * 14), (_.dir = i));
+        ((_.x = d.x - E[0] * 40), (_.y = d.y - E[1] * 40), (_.dir = i));
       }
       ((r.state = "none"), (r.kind = w.boss || ""), (r.sub = ""), Zr());
       let s = w.boss ? Se[w.boss] : null;
@@ -14557,20 +14568,55 @@ ram_mem_amulet: [
           return !0;
       return !1;
     }
-    function spawnClear() {
-      let blocked = (x, y) => ja(x, y, 5, 5, 2, !1, Ut()) || inWarp(x, y);
-      if (!blocked(d.x, d.y)) return;
+    function spawnBlocked(x, y) {
+      return ja(x, y, 5, 5, 2, !1, Ut()) || inWarp(x, y);
+    }
+    function spriteStacked(x, y, ox, oy) {
+      return Math.abs(x - ox) < 12 && Math.abs(y - oy) < 12;
+    }
+    function crowdAt(x, y) {
+      for (let f of Ta) if (f.vis && !(f.leave > 0) && spriteStacked(x, y, f.x, f.y)) return !0;
+      for (let f of ce) if (!f.dead && spriteStacked(x, y, f.x, f.y)) return !0;
+      return !1;
+    }
+    function nudgeOffWall() {
+      if (!spawnBlocked(d.x, d.y)) return;
       for (let r = 1; r <= 12; r++)
         for (let dy = -r; dy <= r; dy++)
           for (let dx = -r; dx <= r; dx++) {
             if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
             let nx = d.x + dx * 8,
               ny = d.y + dy * 8;
-            if (!blocked(nx, ny)) {
+            if (!spawnBlocked(nx, ny)) {
               ((d.x = nx), (d.y = ny), (d.safeX = nx), (d.safeY = ny));
               return;
             }
           }
+    }
+    function nudgeOffCrowd() {
+      if (!crowdAt(d.x, d.y)) return;
+      let dirs = [
+        [1, 0],
+        [-1, 0],
+        [0, 1],
+        [0, -1],
+        [1, 1],
+        [-1, 1],
+        [1, -1],
+        [-1, -1],
+      ];
+      for (let step = 32; step <= 80; step += 16)
+        for (let dir of dirs) {
+          let nx = d.x + dir[0] * step,
+            ny = d.y + dir[1] * step;
+          if (!spawnBlocked(nx, ny) && !crowdAt(nx, ny)) {
+            ((d.x = nx), (d.y = ny), (d.safeX = nx), (d.safeY = ny));
+            return;
+          }
+        }
+    }
+    function spawnClear() {
+      (nudgeOffWall(), nudgeOffCrowd());
     }
     function releaseStaleLocks() {
       let scene = !!(Ae || q || le || ue || z || K || A.choice || A.trans || A.paused);
@@ -19726,6 +19772,7 @@ ram_mem_amulet: [
     }
     function rnObjective() {
       let id = (w && w.id) || "";
+      if (id === "rn_pour") return "PIONEER POUR. THE SUPERNOVA IS EAST.";
       if (id === "rn_club") return "DEEJAY. WHERE FIRE WAS BORN.";
       if (id === "rn_torch") return "THE TORCH. GATHER THE FLAMES.";
       if (id.indexOf("rn_s") === 0 || id === "rn_shadow") return "SHADOW. A TRIAL. TAKE THE SMOKE.";
@@ -22503,12 +22550,12 @@ ram_mem_amulet: [
                 n.globalAlpha = 1;
               } else if (f.id === "nuke") drawNukeWorld(i(f.x), s(f.y) + c);
               else {
-                (ridingNpc(f.look || f.id) || (w.realm === "void" && voidRider(f.look || f.id))) &&
+                boardUnder(f.look || f.id) &&
                   drawCanonBoard(i(f.x), s(f.y) + c, f.dir, f.id === "jazz" ? 3 : f.id === "x_lane" ? 2 : 1, !0);
                 Aa(
                   f.look || f.id,
                   i(f.x),
-                  s(f.y) + c - (ridingNpc(f.look || f.id) || (w.realm === "void" && voidRider(f.look || f.id)) ? 2 : 0),
+                  s(f.y) + c - (boardUnder(f.look || f.id) ? 2 : 0),
                   f.dir,
                   Math.floor(A.t * 1.5 + f.x) % 2 && f.mv ? 1 : 0,
                   y,
@@ -22585,14 +22632,16 @@ ram_mem_amulet: [
           E.push({
             y: _.y,
             f: () => {
+              let ride = boardUnder(_.id);
               (Je(i(_.x), s(_.y) + 1, 6),
+                ride && drawCanonBoard(i(_.x), s(_.y), _.dir, 1, !1),
                 _.dir === 1 && un(i, s),
                 _.id === "nuke"
                   ? drawNukeWorld(i(_.x), s(_.y))
                   : Aa(
                       _.id,
                       i(_.x),
-                      s(_.y),
+                      s(_.y) - (ride ? 2 : 0),
                       _.dir,
                       _.swing > 0 ? 2 : Math.floor(_.walkT * 7) % 2,
                       1,
