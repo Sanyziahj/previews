@@ -9521,8 +9521,9 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
     },
   });
   Object.assign(Ka, {
-    rnsh: { name: "SHADOW TRIAL", cols: 3, rows: 1 },
-    rnk: { name: "SEAL VAULT", cols: 3, rows: 1 },
+    rnsh: { name: "SHADOW TRIAL", cols: 3, rows: 2 },
+    rnka: { name: "RESTRICTED WING", cols: 3, rows: 2 },
+    rnk: { name: "SEAL VAULT", cols: 2, rows: 1 },
   });
   Object.assign(Se, {
     rnshadow: {
@@ -9575,9 +9576,13 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       realm: "desert",
       music: "club",
       peace: !0,
-      npcs: [{ id: "deejay", x: 12, y: 5, dir: 2, talk: "rn_deejay" }],
-      props: [{ k: "brazier", x: 6, y: 4 }, { k: "brazier", x: 15, y: 8 }],
-      signs: [{ x: 8, y: 8, text: "NEUTRAL GROUND. DEEJAY HAS THE MYSTERY. NO GUNS ON THIS FLOOR.", kind: "sign" }],
+      npcs: [{ id: "deejay", x: 14, y: 4.8, dir: 0, talk: "rn_deejay" }],
+      props: [
+        { k: "booth", x: 14, y: 3.2 },
+        { k: "speaker", x: 11.2, y: 3.6 },
+        { k: "speaker", x: 16.6, y: 3.6 },
+      ],
+      signs: [{ x: 8, y: 9, text: "SUPERNOVA. NEUTRAL GROUND. DEEJAY HAS THE BOOTH. NO GUNS ON THIS FLOOR.", kind: "sign" }],
       warps: [{ x: 0, y: 6, w: 1, h: 2, to: "rn_pour", tx: 15, ty: 6, dir: 2 }],
     },
     rn_torch: {
@@ -9595,47 +9600,63 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
     rn_s1: {
       id: "rn_s1",
       name: "SMOKE ROAD",
-      theme: "dream",
+      theme: "dungeon",
       realm: "void",
       music: "dungeon",
       dungeon: "rnsh",
       room: [0, 0],
-      enemies: [{ k: "vov", x: 8, y: 5, v: 1 }, { k: "vov", x: 12, y: 8, v: 2 }],
-      props: [{ k: "brazier", x: 4, y: 3 }],
-      signs: [{ x: 6, y: 8, text: "A DUNGEON, THEN A ROOM. SHADOW WAITS. THIS IS A TRIAL.", kind: "sign" }],
+      enemies: [{ k: "vov", x: 8, y: 5, v: 1 }, { k: "vov", x: 12, y: 8, v: 2 }, { k: "crawler", x: 6, y: 8 }],
+      props: [{ k: "brazier", x: 4, y: 3 }, { k: "brazier", x: 14, y: 9 }],
+      signs: [{ x: 6, y: 4, text: "UNSEEN REALM. NORTH HOLDS THE TRIAL KEY. THE BOSS DOOR IS EAST, THEN EAST. THEY ARE NOT THE SAME ROOM.", kind: "sign" }],
       warps: [
         { x: 0, y: 6, w: 1, h: 2, to: "rn_torch", tx: 15, ty: 6, dir: 2 },
+        { x: 8, y: 0, w: 2, h: 1, to: "rn_skey", tx: 8, ty: 9, dir: 1 },
         { x: 17, y: 6, w: 1, h: 2, to: "rn_s2", tx: 2, ty: 6, dir: 3 },
       ],
     },
+    rn_skey: {
+      id: "rn_skey",
+      name: "SMOKE CACHE",
+      theme: "dungeon",
+      realm: "void",
+      music: "dungeon",
+      dungeon: "rnsh",
+      room: [0, 1],
+      enemies: [{ k: "crawler", x: 12, y: 6 }],
+      chests: [{ id: "rn_smoke_key", x: 4, y: 3, item: "key", n: 1 }],
+      props: [{ k: "brazier", x: 14, y: 4 }],
+      signs: [{ x: 8, y: 6, text: "THE KEY IS IN THIS CACHE. THE DOOR IT OPENS IS NOT IN THIS ROOM.", kind: "sign" }],
+      warps: [{ x: 8, y: 11, w: 2, h: 1, to: "rn_s1", tx: 8, ty: 2, dir: 0 }],
+    },
     rn_s2: {
       id: "rn_s2",
-      name: "SMOKE HALL",
-      theme: "dream",
+      name: "SMOKE GATE",
+      theme: "dungeon",
       realm: "void",
       music: "dungeon",
       dungeon: "rnsh",
       room: [1, 0],
-      enemies: [{ k: "crawler", x: 8, y: 6 }, { k: "vov", x: 13, y: 4, v: 0 }],
-      props: [{ k: "brazier", x: 14, y: 8 }],
-      signs: [{ x: 6, y: 4, text: "EAST IS THE BOSS ROOM. SHADOW IS LOYAL TO SANTT. NOT AN ENEMY.", kind: "sign" }],
+      locks: { D: { flag: "door_rnshadow", key: "small" } },
+      enemies: [{ k: "vov", x: 6, y: 4, v: 0 }, { k: "vov", x: 8, y: 8, v: 3 }],
+      props: [{ k: "brazier", x: 4, y: 8 }, { k: "brazier", x: 13, y: 3 }],
+      signs: [{ x: 5, y: 6, text: "LOCKED. THE KEY IS BACK WEST, THEN NORTH. SHADOW WAITS PAST THIS DOOR.", kind: "sign" }],
       warps: [
         { x: 0, y: 6, w: 1, h: 2, to: "rn_s1", tx: 15, ty: 6, dir: 2 },
-        { x: 17, y: 6, w: 1, h: 2, to: "rn_shadow", tx: 2, ty: 6, dir: 3 },
+        { x: 8, y: 0, w: 2, h: 1, to: "rn_shadow", tx: 8, ty: 9, dir: 1 },
       ],
     },
     rn_shadow: {
       id: "rn_shadow",
       name: "SHADOW'S ROOM",
-      theme: "dream",
+      theme: "dungeon",
       realm: "void",
       music: "boss",
       dungeon: "rnsh",
       room: [2, 0],
       boss: "rnshadow",
-      props: [{ k: "brazier", x: 4, y: 3 }, { k: "brazier", x: 14, y: 3 }],
-      signs: [{ x: 8, y: 8, text: "A SPAR. KATANAS. HE WEARS BLACK. THE SMOKE IS THE PRIZE.", kind: "sign" }],
-      warps: [{ x: 0, y: 6, w: 1, h: 2, to: "rn_s2", tx: 15, ty: 6, dir: 2 }],
+      props: [{ k: "brazier", x: 3, y: 3 }, { k: "brazier", x: 15, y: 3 }, { k: "brazier", x: 9, y: 8 }],
+      signs: [{ x: 5, y: 8, text: "A SPAR. HE WEARS BLACK AND A PLAIN KATANA. THE SMOKE IS THE PRIZE.", kind: "sign" }],
+      warps: [{ x: 8, y: 11, w: 2, h: 1, to: "rn_s2", tx: 8, ty: 2, dir: 0 }],
       onEnter: "rn_shadow_meet",
     },
     rn_ac: {
@@ -9655,34 +9676,50 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
     },
     rn_k1: {
       id: "rn_k1",
-      name: "ACADEMY VAULT",
+      name: "RESTRICTED WING",
       theme: "station",
       realm: "void",
       music: "dungeon",
-      dungeon: "rnk",
+      dungeon: "rnka",
       room: [0, 0],
-      enemies: [{ k: "mbot", x: 8, y: 5 }, { k: "drone", x: 12, y: 8 }],
-      props: [{ k: "brazier", x: 5, y: 3 }],
-      signs: [{ x: 6, y: 8, text: "KAL IS FURTHER EAST. HE WEARS THE ARMOR. HE IS GUARDING, NOT HUNTING.", kind: "sign" }],
+      enemies: [{ k: "mbot", x: 8, y: 5 }, { k: "drone", x: 12, y: 8 }, { k: "mbot", x: 5, y: 8 }],
+      props: [{ k: "brazier", x: 4, y: 3 }, { k: "brazier", x: 14, y: 9 }],
+      signs: [{ x: 6, y: 4, text: "RESTRICTED WING. THE WING KEY IS NORTH. KAL'S DOOR IS EAST OF HERE. THE KEY IS NOT BY THAT DOOR.", kind: "sign" }],
       warps: [
-        { x: 0, y: 6, w: 1, h: 2, to: "rn_ac", tx: 15, ty: 6, dir: 2 },
-        { x: 17, y: 6, w: 1, h: 2, to: "rn_k2", tx: 2, ty: 6, dir: 3 },
+        { x: 0, y: 6, w: 1, h: 2, to: "rn_ac", tx: 17, ty: 6, dir: 2 },
+        { x: 8, y: 0, w: 2, h: 1, to: "rn_kkey", tx: 8, ty: 9, dir: 1 },
+        { x: 17, y: 6, w: 1, h: 2, to: "rn_kdoor", tx: 2, ty: 6, dir: 3 },
       ],
     },
-    rn_k2: {
-      id: "rn_k2",
-      name: "ARMOR HALL",
+    rn_kkey: {
+      id: "rn_kkey",
+      name: "WING CACHE",
       theme: "station",
       realm: "void",
       music: "dungeon",
-      dungeon: "rnk",
+      dungeon: "rnka",
+      room: [0, 1],
+      enemies: [{ k: "drone", x: 12, y: 5 }],
+      chests: [{ id: "rn_wing_key", x: 4, y: 3, item: "key", n: 1 }],
+      props: [{ k: "brazier", x: 14, y: 8 }],
+      signs: [{ x: 8, y: 6, text: "WING KEY. CARRY IT SOUTH, THEN EAST. THIS ROOM HAS NO LOCKED DOOR.", kind: "sign" }],
+      warps: [{ x: 8, y: 11, w: 2, h: 1, to: "rn_k1", tx: 8, ty: 2, dir: 0 }],
+    },
+    rn_kdoor: {
+      id: "rn_kdoor",
+      name: "ARMOR GATE",
+      theme: "station",
+      realm: "void",
+      music: "dungeon",
+      dungeon: "rnka",
       room: [1, 0],
-      enemies: [{ k: "mbot", x: 7, y: 4 }, { k: "vov", x: 12, y: 8, v: 4 }],
-      props: [{ k: "brazier", x: 14, y: 4 }],
-      signs: [{ x: 8, y: 8, text: "THE BOSS ROOM IS EAST. THE SEAL DOOR IS BACK AT THE ACADEMY, NORTH.", kind: "sign" }],
+      locks: { D: { flag: "door_rnkal", key: "small" } },
+      enemies: [{ k: "mbot", x: 6, y: 8 }, { k: "vov", x: 10, y: 4, v: 4 }],
+      props: [{ k: "brazier", x: 4, y: 4 }, { k: "brazier", x: 13, y: 8 }],
+      signs: [{ x: 5, y: 6, text: "LOCKED. THE WING KEY IS BACK WEST, THEN NORTH. KAL IS PAST THIS GATE.", kind: "sign" }],
       warps: [
         { x: 0, y: 6, w: 1, h: 2, to: "rn_k1", tx: 15, ty: 6, dir: 2 },
-        { x: 17, y: 6, w: 1, h: 2, to: "rn_kboss", tx: 2, ty: 6, dir: 3 },
+        { x: 8, y: 0, w: 2, h: 1, to: "rn_kboss", tx: 8, ty: 9, dir: 1 },
       ],
     },
     rn_kboss: {
@@ -9692,11 +9729,11 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       realm: "void",
       music: "boss",
       dungeon: "rnk",
-      room: [2, 0],
+      room: [1, 0],
       boss: "rnkal",
-      props: [{ k: "brazier", x: 4, y: 3 }, { k: "brazier", x: 14, y: 8 }],
-      signs: [{ x: 8, y: 8, text: "ROBOT ARMOR. IF HE FALLS, HE GIVES A KEY. THE DOOR IT OPENS IS NOT HERE.", kind: "sign" }],
-      warps: [{ x: 0, y: 6, w: 1, h: 2, to: "rn_k2", tx: 15, ty: 6, dir: 2 }],
+      props: [{ k: "brazier", x: 3, y: 3 }, { k: "brazier", x: 15, y: 3 }, { k: "brazier", x: 9, y: 8 }],
+      signs: [{ x: 5, y: 8, text: "ROBOT ARMOR. IF HE FALLS, HE GIVES THE SEAL KEY. THAT DOOR IS NOT IN THIS ROOM.", kind: "sign" }],
+      warps: [{ x: 8, y: 11, w: 2, h: 1, to: "rn_kdoor", tx: 8, ty: 2, dir: 0 }],
     },
     rn_sealdoor: {
       id: "rn_sealdoor",
@@ -9705,6 +9742,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       realm: "void",
       music: "station",
       dungeon: "rnk",
+      room: [0, 0],
       locks: { D: { flag: "door_rnscroll", key: "small" } },
       props: [{ k: "brazier", x: 4, y: 5 }],
       signs: [{ x: 5, y: 6, text: "LOCKED. THE KEY IS FROM KAL, IN THE EAST VAULT. IT IS NOT IN THIS ROOM.", kind: "sign" }],
@@ -9752,22 +9790,65 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       signs: [{ x: 6, y: 8, text: "SKIPPY CAN RETURN. THE FIREBALL IS HIS.", kind: "sign" }],
       onEnter: "rn_give",
     },
+    rn_thanks: {
+      id: "rn_thanks",
+      name: "PIONEER POUR",
+      theme: "wood",
+      realm: "desert",
+      music: "saloon",
+      peace: !0,
+      npcs: [
+        { id: "ronin", x: 7, y: 6, dir: 3, talk: "rn_after" },
+        { id: "ros", x: 14, y: 5, dir: 2, talk: "rn_ros_thanks" },
+      ],
+      props: [{ k: "brazier", x: 4, y: 3 }, { k: "brazier", x: 15, y: 3 }],
+      signs: [{ x: 10, y: 3, text: "THE BAR IS QUIET. RONIN KEPT HIS WORD.", kind: "sign" }],
+    },
   });
   Object.assign(Zs, {
     rn_pour: dsRoom(18, 12, "e"),
-    rn_club: dsRoom(20, 12, "w"),
+    rn_club: [
+      "####################",
+      "#n................n#",
+      "#..................#",
+      "#..................#",
+      "#......rrrrrr......#",
+      "#......rrrrrr......#",
+      ".......rrrrrr......#",
+      ".......rrrrrr......#",
+      "#......rrrrrr......#",
+      "#..................#",
+      "#n................n#",
+      "####################",
+    ],
     rn_torch: dsRoom(18, 12, "e"),
-    rn_s1: dsRoom(18, 12, "we"),
-    rn_s2: dsRoom(18, 12, "we"),
-    rn_shadow: dsRoom(18, 12, "w"),
+    rn_s1: dsRoom(18, 12, "nwe"),
+    rn_skey: dsRoom(18, 12, "s"),
+    rn_s2: dsRoom(18, 12, "wD"),
+    rn_shadow: dsRoom(18, 12, "s"),
     rn_ac: dsRoom(20, 12, "ne"),
-    rn_k1: dsRoom(18, 12, "we"),
-    rn_k2: dsRoom(18, 12, "we"),
-    rn_kboss: dsRoom(18, 12, "w"),
+    rn_k1: dsRoom(18, 12, "nwe"),
+    rn_kkey: dsRoom(18, 12, "s"),
+    rn_kdoor: dsRoom(18, 12, "wD"),
+    rn_kboss: dsRoom(18, 12, "s"),
     rn_sealdoor: dsRoom(18, 12, "sD"),
     rn_scroll: dsRoom(18, 12, "ns"),
     rn_seal: dsRoom(18, 12, "s"),
     rn_back: dsRoom(18, 12, ""),
+    rn_thanks: [
+      "####################",
+      "#..................#",
+      "#..HHHH............#",
+      "#..H..H............#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "#..................#",
+      "####################",
+    ],
   });
   Object.assign(oa, {
     ros_ronin_offer: [
@@ -9798,7 +9879,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       { t: "flag", f: "rn_deejay" },
       { t: "fn", f: "pixelate" },
       { t: "fade", m: "white" },
-      { t: "warp", area: "rn_torch", x: 6, y: 8, dir: 3 },
+      { t: "warp", area: "rn_torch", x: 8, y: 8, dir: 1 },
       { t: "fade", m: "in" },
       { t: "save" },
     ],
@@ -9820,6 +9901,7 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
       h("ronin", "I TAKE IT."),
       { t: "give", item: "smoke" },
       { t: "flag", f: "smoke_got" },
+      { t: "fn", f: "armSmoke" },
       { t: "warp", area: "rn_ac", x: 8, y: 7, dir: 3 },
       { t: "save" },
     ],
@@ -9857,16 +9939,20 @@ canvas{display:block;width:100%;aspect-ratio:320/224;image-rendering:pixelated;i
     rn_give: [
       h("ronin", "SKIPPY. THE SEAL IS OPEN."),
       h("skippy", "THEN I CAN RETURN."),
-      h("ronin", "A FIREBALL. THANK YOU. YOU REMINDED ME."),
+      h("ronin", "A FIREBALL. FOR THE REMINDER."),
       { t: "fn", f: "throughRonin" },
     ],
     tale_ronin_close: [
-      h("ronin", "THE FIREBALL STAYS WITH YOU."),
+      h("ronin", "THANK YOU. YOU REMINDED ME THE FIRE IS MINE."),
+      h("ronin", "THIS FIREBALL IS YOURS."),
       h("skippy", "I WILL CARRY IT. MY SWORD STAYS ON ATTACK."),
       { t: "flag", f: "tale_ronin" },
       { t: "flag", f: "fireball_got" },
+      { t: "give", item: "fireball" },
+      { t: "warp", area: "saloon", x: 10, y: 8, dir: 1 },
       { t: "save" },
     ],
+    rn_ros_thanks: [h("ros", "HE IS SAFE. THE SEAT HELD. TAKE THE GIFT AND RIDE.")],
   });
   Object.assign(Ce, {
     rn_kal_warn: [
@@ -14498,6 +14584,8 @@ ram_mem_amulet: [
     }
     function xe() {
       if (w.id === "dream" || A.state !== "play") return;
+      if (A.story === "ronin" && Mt !== "sq_save_ronin_v1") Mt = "sq_save_ronin_v1";
+      if (A.story === "skippy" && Mt === "sq_save_ronin_v1") Mt = "sq_save_v1";
       let e = {
         z: d.z,
         v: 1,
@@ -14576,9 +14664,14 @@ ram_mem_amulet: [
         (d.hp = 10),
         (d.maxHp = 10),
         (d.coins = 0),
-        (d.items.sword = !0),
-        (d.melee = "sword"),
-        (d.wep = "sword"),
+        (d.arrows = 0),
+        (d.magic = 0),
+        (d.lantern = 0),
+        (d.ward = 0),
+        (d.shards = 0),
+        (d.items = { katana: !0 }),
+        (d.melee = "katana"),
+        (d.wep = "katana"),
         (d.pri = ""),
         (d.sec = ""),
         (d.tool = ""),
@@ -15622,7 +15715,7 @@ ram_mem_amulet: [
         ((d.fall = 0.6), D.fall(), (d.roll = 0));
         return;
       }
-      if (ie(k, Y) === "r" && d.roll <= 0 && (w.theme !== "club" || zt())) {
+      if (ie(k, Y) === "r" && w.id !== "rn_club" && d.roll <= 0 && (w.theme !== "club" || zt())) {
         let C = Ne[d.dir];
         (va(d, -C[0] * 22, -C[1] * 22, 5, 5, 2, !1, a, !1),
           D.zap(),
@@ -16795,16 +16888,17 @@ ram_mem_amulet: [
         (A.pixelT = 0),
         (A.rosLeave = 0));
       Bt() || Et();
-      ((ee.tale_ronin = !0), (ee.fireball_got = !0));
+      ((ee.tale_ronin = !0), (ee.fireball_got = !0), (ee.rn_seal = !0));
       (grantFireball(),
-        ba("saloon", 10, 8, 3),
-        (A.banner = "PIONEER POUR"),
-        (A.bannerT = 2.2),
-        (ue = { item: "fireball", n: 1, t: 0 }),
+        ba("rn_thanks", 9, 6, 2),
+        (A.banner = ""),
+        (A.bannerT = 0),
         (d.hold = "fireball"),
-        (d.holdT = 10),
-        (d.dir = 3),
-        (A.afterTale = "tale_ronin_close"),
+        (d.holdT = 8),
+        (d.inv = 0),
+        (d.dir = 2),
+        (A.afterTale = ""),
+        ye("tale_ronin_close"),
         standBeside(),
         xe(),
         (A.saveT = 0));
@@ -19991,8 +20085,10 @@ ram_mem_amulet: [
       if (id === "shield") return !!(d.items.shield || Z("shield_got"));
       if (id === "amulet") return !!(d.items.amulet || Z("amulet_got"));
       if (id === "blast") return !!(d.items.blast || A.story === "drill");
-      if (id === "heavy") return !!(d.items.heavy || Z("heavy_got"));
-      if (id === "fireball") return !!(d.items.fireball || Z("fireball_got"));
+      if (id === "heavy") return A.story !== "ronin" && !!(d.items.heavy || Z("heavy_got"));
+      if (id === "fireball") return A.story !== "ronin" && !!(d.items.fireball || Z("fireball_got"));
+      if (id === "katana") return !!(A.story === "ronin" || (d.items && d.items.katana));
+      if (id === "smoke") return !!(d.items && d.items.smoke) || (A.story === "ronin" && Z("smoke_got"));
       if (id === "plasma" || id === "disc" || id === "suit" || id === "plate" || id === "gloves" || id === "boots")
         return !!(d.items && d.items[id]);
       return !1;
@@ -20012,6 +20108,8 @@ ram_mem_amulet: [
           raygun: "RAYGUN",
           missile: "MISSILES",
           sword: "FLAME SWORD",
+          katana: "FLAMING KATANA",
+          smoke: "SMOKE",
           baton: "STUN BATON",
           hatchet: "HATCHET",
           axe: "ETERNAL AXE",
@@ -20034,6 +20132,8 @@ ram_mem_amulet: [
           raygun: "RAY",
           missile: "MISSILE",
           sword: "SWORD",
+          katana: "KATANA",
+          smoke: "SMOKE",
           baton: "BATON",
           hatchet: "HATCHET",
           axe: "AXE",
@@ -20223,6 +20323,7 @@ ram_mem_amulet: [
       else if (id === "amulet") thunderBurst();
       else if (id === "blast" || id === "heavy") fireBlast(id);
       else if (id === "fireball") fireBall();
+      else if (id === "smoke") puffSmoke();
       else if (id === "plasma") ((d.plasma = 0.3), swingItem("sword"));
       else if (id === "disc") throwDisc();
     }
@@ -20423,7 +20524,7 @@ ram_mem_amulet: [
       }
     }
     function isMelee(id) {
-      return id === "baton" || id === "sword" || id === "hatchet" || id === "axe" || id === "plasma";
+      return id === "baton" || id === "sword" || id === "hatchet" || id === "axe" || id === "plasma" || id === "katana";
     }
     function rosItemOk(id) {
       return !!(id && id !== "lasers" && id !== "strike" && !isMelee(id) && ownedItem(id));
@@ -20436,7 +20537,7 @@ ram_mem_amulet: [
           :         A.story === "drill"
             ? []
             : A.story === "ronin"
-              ? ["sword"]
+              ? ["katana"]
               : ["plasma", "axe", "sword", "hatchet", "baton"];
       return ids.filter((id) => ownedItem(id));
     }
@@ -20449,7 +20550,7 @@ ram_mem_amulet: [
             : A.story === "drill"
               ? ["blast"]
               : A.story === "ronin"
-                ? []
+                ? ["smoke"]
                 : ["raygun", "bow", "missile", "lasso", "heavy", "fireball", "disc", "blast"];
       return ids.filter((id) => ownedItem(id) && !isMelee(id));
     }
@@ -20461,12 +20562,14 @@ ram_mem_amulet: [
     }
     function meleeNow() {
       if (A.story === "ros") return "";
+      if (A.story === "ronin") return "katana";
       if (isMelee(d.melee) && ownedItem(d.melee)) return d.melee;
       if (isMelee(d.wep) && ownedItem(d.wep)) return d.wep;
       let list = ownedMelee();
       return list.length ? list[0] : "";
     }
     function heldItem() {
+      if (A.story === "ronin") return ownedItem("smoke") ? "smoke" : "";
       if (A.story === "ros") {
         if (d.tool && !isMelee(d.tool) && ownedItem(d.tool)) return d.tool;
         if (d.sec && !isMelee(d.sec) && ownedItem(d.sec)) return d.sec;
@@ -20544,8 +20647,21 @@ ram_mem_amulet: [
       d.swingKind = "melee";
       if (id === "axe") throwAxe();
       else if (id === "plasma") ((d.plasma = 0.3), swingItem("sword"));
+      else if (id === "katana") ((d.items.katana = !0), swingItem("sword"));
       else if (id === "baton" || id === "sword" || id === "hatchet") swingItem(id);
       else ((d.atk = 0.26), (ft = []), (it = !1), D.swing());
+    }
+    function puffSmoke() {
+      if (!ownedItem("smoke") || itemLeft("smoke") > 0) return;
+      spend("smoke", 0.45);
+      D.tink();
+      ne(d.x, d.y - 8, 16, ["#d7dbe6", "#ffffff", "#9aa3b5"], 28);
+      for (let f of ce)
+        !f.dead && ae(f.x, f.y, d.x, d.y) < 42 && ((f.stun = Math.max(f.stun || 0, 1.1)), (f.flash = 0.2));
+    }
+    function armSmoke() {
+      d.items || (d.items = {});
+      ((d.items.smoke = !0), (ee.smoke_got = !0), (d.sec = "smoke"), (d.tool = "smoke"), (d.act = "smoke"), settleHands());
     }
     function cycleMelee() {
       if (A.story === "ros") return;
@@ -20802,7 +20918,8 @@ ram_mem_amulet: [
           D.shard(),
           ne(d.x, d.y - 12, 36, ["#fff6c0", "#ffe080", "#ffffff", "#ff9a3d", "#7ad0ff"], 80));
       }),
-      (Ia.throughRonin = () => throughRonin());
+      (Ia.throughRonin = () => throughRonin()),
+      (Ia.armSmoke = () => armSmoke());
     Le.shadowd = {
       init: () => {
         ((ee.shadow_nocont = !0),
@@ -21823,6 +21940,8 @@ ram_mem_amulet: [
     function drawSlotMark(id, x) {
       if (id === "bomb") (I(x + 5, 8, 6, 6, "#2a241c"), I(x + 7, 5, 2, 3, "#ff9a3d"));
       if (id === "justice") I(x + 4, 8, 8, 2, "#fff6c0");
+      if (id === "katana") (I(x + 3, 10, 12, 2, "#ff9a3d"), I(x + 5, 8, 8, 2, "#ffe066"), I(x + 8, 6, 2, 2, "#ffffff"));
+      if (id === "smoke") (I(x + 4, 8, 3, 3, "#d7dbe6"), I(x + 8, 6, 4, 4, "#ffffff"), I(x + 6, 11, 3, 3, "#9aa3b5"));
       let cool = coolFrac(id);
       cool > 0 &&
         (I(x, 20, 16, 2, "#3a2a20"),
@@ -21832,7 +21951,7 @@ ram_mem_amulet: [
       let spell = (d.spell === "ward" ? "WARD" : "LANTERN") + ((d.ward || 0) ? " " + d.ward : ""),
         bits = [{ id: "bar", x: 4, y: 24, w: 48, h: 5 }],
         x = 56;
-      if (!dn()) {
+      if (!dn() && A.story !== "ronin") {
         bits.push({ id: "spell", x, y: 24, w: spell.length * 6, h: 8, text: spell });
         x += spell.length * 6 + 8;
       }
@@ -21844,8 +21963,8 @@ ram_mem_amulet: [
         bits.push({ id: "star", x, y: 24, w: 30, h: 8, text: "STARS" });
         x += 38;
       }
-      if (slotsOn()) {
-        let atkId = A.story === "ros" ? weaponNow() : meleeNow(),
+      if (slotsOn() || A.story === "ronin") {
+        let atkId = A.story === "ronin" ? "katana" : A.story === "ros" ? weaponNow() : meleeNow(),
           xl = "X " + (atkId ? slotName(atkId, !0) : "STRIKE"),
           zl = "Z " + (heldItem() ? slotName(heldItem(), !0) : "NONE"),
           sx = Math.max(x, 132),
@@ -21972,6 +22091,7 @@ ram_mem_amulet: [
         d.pieces && I(92, 20, 2, 2, "#8ae878");
       }
       dn() ||
+        A.story === "ronin" ||
         (I(4, 24, 48, 5, "#2a1848"),
         I(4, 24, Math.max(0, Math.floor(48 * ((d.magic || 0) / (d.magicMax || 8)))), 5, "#c060ff"),
         I(4, 24, 48, 1, "#ff9ae8"));
@@ -21985,8 +22105,8 @@ ram_mem_amulet: [
           s && O.icon[s] && n.drawImage(O.icon[s], t + 1, 4),
           v(n, i, t + 13, 15, "#ffffff", 1, "", X));
       };
-      (slotsOn()
-        ? (a(96, "X", itemIcon(weaponNow())), a(118, "Z", itemIcon(toolNow())), drawSlotHud())
+      (slotsOn() || A.story === "ronin"
+        ? (a(96, "X", itemIcon(A.story === "ronin" ? "katana" : weaponNow())), a(118, "Z", itemIcon(toolNow())), drawSlotHud())
         : (a(96, "X", Rs()),
           a(118, "Z", A.story === "ros" ? rosActIcon() : bs()),
           A.story === "ros" && drawActHud()),
@@ -21997,7 +22117,7 @@ ram_mem_amulet: [
               (I(140 + s * 10, 12, 8, 8, on ? "#ffcc33" : "#3a2a20"),
                 I(142 + s * 10, 14, 4, 4, on ? "#fff6c0" : "#1a140c"));
             }))
-            : A.story === "ramshackle"
+            : A.story === "ramshackle" || A.story === "ronin"
               ? void 0
               : (n.drawImage(O.icon.coin, 140, 4),
             v(n, String(d.coins).padStart(3, "0"), 154, 9, A.story === "skippy" ? "#ff9ae8" : "#ffe070", 1, "", ""),
@@ -22028,7 +22148,7 @@ ram_mem_amulet: [
     }
     function drawRamProp(f, E, i, s) {
       let ks = { tent: 1, wheel: 1, dome: 1, rover: 1, arch: 1, glitch: 1, mirror: 1, booth: 1, pad: 1 };
-      if (!ks[f.k]) return !1;
+      if (!ks[f.k] || (f.k === "booth" && !f.c)) return !1;
       let c = i(p(f.x)),
         S = s(p(f.y)),
         col = f.c || "#ff4fd8";
@@ -22117,7 +22237,7 @@ ram_mem_amulet: [
         a = Math.round(he.x + e),
         t = Math.round(he.y);
       es(a, t);
-      w && w.realm === "void" && drawVoidSky();
+      w && (w.id === "rn_torch" || w.id === "rn_seal") && drawVoidSky();
       let i = (f) => f - a,
         s = (f) => f - t + 24,
         E = [];
@@ -22209,7 +22329,13 @@ ram_mem_amulet: [
                   R(n, c + 4, S - 1, 1.4, 1.4, "#041018"));
               },
             });
-          } else if (f.k === "gtorch" || f.k === "brazier" || f.k === "scroll") {
+          } else if (
+            f.k === "gtorch" ||
+            f.k === "brazier" ||
+            f.k === "scroll" ||
+            f.k === "booth" ||
+            f.k === "speaker"
+          ) {
             drawRoninProp(f, E, i, s);
           } else if (f.k === "portal" && !f.label) {
             let c = i(p(f.x)),
@@ -22387,6 +22513,11 @@ ram_mem_amulet: [
                   Math.floor(A.t * 1.5 + f.x) % 2 && f.mv ? 1 : 0,
                   y,
                 );
+                w.id === "rn_thanks" &&
+                  (f.look || f.id) === "ronin" &&
+                  (R(n, i(f.x) + 8, s(f.y) + c - 16, 5, 5, "#ff9a3d"),
+                  R(n, i(f.x) + 8, s(f.y) + c - 17, 3, 3, "#ffe066"),
+                  R(n, i(f.x) + 7, s(f.y) + c - 18, 1.4, 1.4, "#ffffff"));
               }
               if (c < -2)
                 for (let N = 0; N < 2; N++)
@@ -22744,7 +22875,7 @@ ram_mem_amulet: [
       n.drawImage(O.icon[id], Math.round(e + dir[0] * 10 - 8), Math.round(a - 16 + dir[1] * 6));
     }
     function ns(e, a) {
-      if (d.inv > 0 && d.roll <= 0 && Math.floor(A.t * 14) % 2 && d.fall <= 0)
+      if (d.inv > 0 && !talkOpen() && d.roll <= 0 && Math.floor(A.t * 14) % 2 && d.fall <= 0)
         return;
       if (d.sit) {
         Aa(ga(), e, a - 4, 1, 0, 1);
@@ -23150,7 +23281,8 @@ ram_mem_amulet: [
       return noteInk(kind || "runner", { box: box, lines: ink });
     }
     function drawObjectives() {
-      if (!w || A.paused || q || A.state !== "play") return;
+      A.objShown = "";
+      if (!w || A.paused || q || ue || A.choice || A.state !== "play") return;
       let near = nearPortalLabel();
       A.portalHint = near || "";
       let text = near ? "PORTAL: " + near : "";
@@ -23170,6 +23302,7 @@ ram_mem_amulet: [
       if (A.savedInk && A.savedInk.box && y < A.savedInk.box.y + A.savedInk.box.h && y + 8 > A.savedInk.box.y)
         y = A.savedInk.box.y - 10;
       y < 36 && (y = 36);
+      A.objShown = text;
       drawCrisp(text, 160, y, "#ffe0a0", "center");
     }
     function drawSentences(parts, cx, cy, maxW, color, kind) {
@@ -24819,6 +24952,36 @@ ram_mem_amulet: [
               R(n, c, S - 10, 5, 7, "#ff9a3d"),
               R(n, c, S - 14, 3, 5, "#ffe066"),
               R(n, c, S - 16, 1.4, 2, "#ffffff"));
+          } else if (f.k === "booth") {
+            let word = "SUPERNOVA",
+              tw = word.length * 6;
+            (I(c - 36, S - 8, 72, 20, "#12081c"),
+              I(c - 34, S - 34, 68, 28, "#1a0a28"),
+              I(c - 32, S - 32, 64, 5, Math.floor(A.t * 6) % 2 ? "#ff4fd8" : "#4ff0ff"),
+              I(c - tw / 2 - 2, S - 24, tw + 4, 11, "#0a0614"),
+              I(c - 34, S - 12, 8, 3, "#b44dff"),
+              I(c - 20, S - 2, 12, 4, "#4ff0ff"),
+              I(c - 4, S - 2, 12, 4, "#ffe066"),
+              I(c + 12, S - 2, 12, 4, "#ff4fd8"),
+              (n.fillStyle = "#ffe066"));
+            for (let G = 0; G < word.length; G++) {
+              let se = Dt[word[G]] || Dt[" "];
+              if (!se) continue;
+              for (let D = 0; D < 7; D++) {
+                let Te = se[D];
+                if (!Te) continue;
+                for (let $ = 0; $ < 5; $++)
+                  Te & (16 >> $) &&
+                    n.fillRect(Math.round(c - tw / 2 + G * 6 + $), Math.round(S - 22 + D), 1, 1);
+              }
+            }
+          } else if (f.k === "speaker") {
+            (I(c - 8, S - 28, 16, 32, "#16161c"),
+              I(c - 6, S - 26, 12, 12, "#2a2a32"),
+              I(c - 6, S - 10, 12, 10, "#2a2a32"),
+              R(n, c, S - 20, 4, 4, "#ff4fd8"),
+              R(n, c, S - 5, 3, 3, "#4ff0ff"),
+              I(c - 8, S + 4, 16, 4, "#0a0a10"));
           } else if (f.k === "scroll") {
             (I(c - 10, S - 8, 20, 14, "#5a3218"),
               I(c - 8, S - 12, 16, 14, "#f4efe2"),
@@ -25048,7 +25211,7 @@ ram_mem_amulet: [
           n.stroke());
     }
     function Ss(e, a) {
-      if (!(d.atk > 0 && d.arrowCd < 0.2 && d.items.sword)) return !1;
+      if (!(d.atk > 0 && d.arrowCd < 0.2 && (d.items.sword || d.items.katana || meleeNow() === "katana"))) return !1;
       let t = Ne[d.dir],
         i = 1 - d.atk / 0.26,
         E = [Math.PI / 2, -Math.PI / 2, Math.PI, 0][d.dir] - 1.3 + i * 2.6,

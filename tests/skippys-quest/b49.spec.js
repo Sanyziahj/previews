@@ -165,7 +165,7 @@ test('Ronin stays locked until Spike is done, then the tale can start', async ({
   }));
   expect(started.story).toBe('ronin');
   expect(started.area).toBe('rn_pour');
-  expect(started.melee).toBe('sword');
+  expect(started.melee).toBe('katana');
   expect(started.board).toBe(true);
   expect(started.open).toBe(false);
   expect(errors, errors.join('\n')).toEqual([]);
@@ -194,11 +194,18 @@ test('each Ronin beat, the far key, and the Fireball return', async ({ page }) =
     S.save();
     S.G.story = 'ronin';
     S.G.state = 'play';
-    S.P.items = { sword: true };
-    S.P.melee = 'sword';
-    S.P.wep = 'sword';
+    S.P.items = { katana: true };
+    S.P.melee = 'katana';
+    S.P.wep = 'katana';
     S.P.pri = '';
     S.P.sec = '';
+    S.P.tool = '';
+    S.P.act = '';
+    S.P.coins = 0;
+    S.P.arrows = 0;
+    S.P.magic = 0;
+    S.P.lantern = 0;
+    S.flag('heavy_got', false);
     S.flag('rn_nocont');
     S.flag('space_board');
     S.warp('rn_club', 8, 6, 3);
@@ -209,17 +216,44 @@ test('each Ronin beat, the far key, and the Fireball return', async ({ page }) =
     }
   });
   const club = await page.evaluate(() => {
-    const dj = __SQ.npcs.find((n) => n.id === 'deejay');
+    const S = __SQ;
+    const dj = S.npcs.find((n) => n.id === 'deejay');
+    const hud = S.hud().map((b) => b.text).join(' ');
     return {
-      area: __SQ.A.id,
-      name: __SQ.A.name,
+      area: S.A.id,
+      name: S.A.name,
       dj: !!(dj && dj.vis !== false),
-      peace: __SQ.A.peace || __SQ.A.id === 'rn_club',
+      peace: S.A.id === 'rn_club',
+      hud,
+      melee: S.melee(),
+      item: S.hands().item,
+      coins: S.P.coins,
+      magic: S.P.magic || 0,
+      booth: (S.A.props || []).filter((p) => p.k === 'booth').length,
+      speakers: (S.A.props || []).filter((p) => p.k === 'speaker').length,
+      neon: (() => {
+        S.step(1);
+        const c = document.getElementById('game');
+        const img = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+        let n = 0;
+        for (let i = 0; i < img.length; i += 4)
+          if (img[i] === 180 && img[i + 1] === 77 && img[i + 2] === 255 && img[i + 3] === 255) n++;
+        return n;
+      })(),
     };
   });
   expect(club.area).toBe('rn_club');
   expect(club.name).toMatch(/SUPERNOVA/);
   expect(club.dj).toBe(true);
+  expect(club.booth).toBe(1);
+  expect(club.speakers).toBe(2);
+  expect(club.neon).toBeGreaterThan(16);
+  expect(club.melee).toBe('katana');
+  expect(club.item).toBe('');
+  expect(club.hud).toMatch(/KATANA/);
+  expect(club.hud).not.toMatch(/HEAVY|LANTERN|SWORD/);
+  expect(club.coins).toBe(0);
+  expect(club.magic).toBe(0);
   await shot(page, 'ronin-deejay-supernova.png');
 
   await page.evaluate(() => {
@@ -265,8 +299,21 @@ test('each Ronin beat, the far key, and the Fireball return', async ({ page }) =
 
   await page.evaluate(() => {
     const S = __SQ;
+    S.flag('oe_rn_s1');
+    S.warp('rn_s1', 8, 6, 3);
+    S.G.bannerT = 0;
+    for (let i = 0; i < 6 && (S.script || S.dlg); i++) {
+      if (S.dlg) S.skipText();
+      S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
+    }
+    S.step(2);
+  });
+  await shot(page, 'ronin-shadow-dungeon.png');
+
+  await page.evaluate(() => {
+    const S = __SQ;
     S.flag('oe_rn_shadow');
-    S.warp('rn_shadow', 4, 6, 3);
+    S.warp('rn_shadow', 8, 7, 1);
     S.G.bannerT = 0;
     for (let i = 0; i < 8 && (S.script || S.dlg); i++) {
       if (S.dlg) S.skipText();
@@ -308,8 +355,20 @@ test('each Ronin beat, the far key, and the Fireball return', async ({ page }) =
       if (S.dlg) S.skipText();
       S.press('talk', true); S.step(1); S.press('talk', false); S.step(2);
     }
+    S.flag('oe_rn_k1');
+    S.warp('rn_k1', 8, 6, 3);
+    S.G.bannerT = 0;
+    for (let i = 0; i < 4 && (S.script || S.dlg); i++) {
+      if (S.dlg) S.skipText();
+      S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
+    }
+    S.step(1);
+  });
+  await shot(page, 'ronin-kal-dungeon.png');
+  await page.evaluate(() => {
+    const S = __SQ;
     S.flag('oe_rn_kboss');
-    S.warp('rn_kboss', 4, 6, 3);
+    S.warp('rn_kboss', 8, 7, 1);
     S.G.bannerT = 0;
     for (let i = 0; i < 80 && S.B.state !== 'fight'; i++) S.step(4);
   });
@@ -410,8 +469,8 @@ test('each Ronin beat, the far key, and the Fireball return', async ({ page }) =
       if (S.dlg) S.skipText();
       S.press('talk', true); S.step(1); S.press('talk', false); S.step(4);
     }
-    for (let i = 0; i < 16 && S.story() !== 'skippy'; i++) {
-      if (S.dlg) S.skipText();
+    for (let i = 0; i < 60 && !(S.dlg && /THANK YOU/.test(S.dlg.raw || '')); i++) {
+      if (S.dlg && !/THANK YOU/.test(S.dlg.raw || '')) S.skipText();
       if (S.getPop) {
         S.press('talk', true); S.step(1); S.press('talk', false); S.step(2);
       }
@@ -419,6 +478,7 @@ test('each Ronin beat, the far key, and the Fireball return', async ({ page }) =
     }
     S.G.bannerT = 0;
     S.G.saveT = 0;
+    S.G.toastT = 0;
     if (S.dlg) S.skipText();
     S.step(1);
   });
@@ -433,12 +493,16 @@ test('each Ronin beat, the far key, and the Fireball return', async ({ page }) =
     kit: __SQ.kit(),
     slots: __SQ.slots(),
     ronin: __SQ.npcs.some((n) => (n.look || n.id) === 'ronin' && n.vis !== false),
+    gap: (() => {
+      const r = __SQ.npcs.find((n) => (n.look || n.id) === 'ronin');
+      return r ? Math.hypot(r.x - __SQ.P.x, r.y - __SQ.P.y) : 999;
+    })(),
     hold: __SQ.P.hold,
     line: (__SQ.dlg && __SQ.dlg.raw) || '',
     chapter: __SQ.chapters().find((c) => c.id === 'ronin'),
   }));
   expect(back.story).toBe('skippy');
-  expect(back.area).toBe('saloon');
+  expect(back.area).toBe('rn_thanks');
   expect(back.name).toMatch(/PIONEER POUR/);
   expect(back.tale).toBe(true);
   expect(back.seal).toBe(true);
@@ -446,8 +510,24 @@ test('each Ronin beat, the far key, and the Fireball return', async ({ page }) =
   expect(back.kit).toEqual(expect.arrayContaining(['sword', 'heavy', 'fireball']));
   expect(back.chapter.open).toBe(true);
   expect(back.chapter.status).toBe('COMPLETE');
-  expect(back.chapter.sub).toBe('COMPLETE');
+  expect(back.line).toMatch(/THANK YOU/);
+  expect(back.line).toMatch(/REMINDED ME/);
   expect(back.ronin).toBe(true);
+  expect(back.gap).toBeGreaterThan(24);
+  expect(back.gap).toBeLessThan(48);
+  const banners = await page.evaluate(() => {
+    const S = __SQ;
+    S.step(1);
+    return {
+      obj: S.objective(),
+      drawn: S.G.objShown || '',
+      dlg: !!(S.dlg && /THANK YOU/.test(S.dlg.raw || '')),
+      hint: (S.worldInk().map((w) => w.t).join(' ')),
+    };
+  });
+  expect(banners.dlg).toBe(true);
+  expect(banners.drawn).not.toMatch(/HI LIFE|HEAR THE OUTLAW|PIONEER POUR/);
+  expect(banners.hint).not.toMatch(/HI LIFE|HEAR THE OUTLAW/);
   await shot(page, 'ronin-fireball-pour.png');
 
   const attack = await page.evaluate(() => {
@@ -596,7 +676,7 @@ test('ronin replay opens from the chapter list and other saves stay', async ({ p
   expect(replay.title.story).toBe('ronin');
   expect(replay.area).toBe('rn_pour');
   expect(replay.story).toBe('ronin');
-  expect(replay.melee).toBe('sword');
+  expect(replay.melee).toBe('katana');
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
@@ -654,6 +734,124 @@ test('downstairs cosmos portals wear plaques and a near label', async ({ page })
   expect(errors, errors.join('\n')).toEqual([]);
 });
 
+test('Ronin keeps his own kit and does not rewrite Skippy until the Fireball', async ({ page }) => {
+  const errors = await boot(page);
+  const before = await page.evaluate(() => {
+    const skippy = {
+      v: 1, area: 'saloon', x: 160, y: 120, dir: 1, hp: 8, maxHp: 10, coins: 37, arrows: 9,
+      items: { sword: true, raygun: true, heavy: true }, keys: {}, bigKeys: {},
+      flags: { woke: true, ch9_done: true, dl_ronin: true, heavy_got: true, tale_drill: true },
+      party: ['ros'], visited: {}, pri: 'raygun', sec: 'heavy', melee: 'sword', magic: 6, lantern: 4, z: 'bow', time: 4,
+    };
+    localStorage.setItem('sq_save_v1', JSON.stringify(skippy));
+    localStorage.setItem('sq_save_ros_v1', JSON.stringify({ v: 1, area: 'ros_pour', flags: { ros_home_end: true } }));
+    return localStorage.getItem('sq_save_v1');
+  });
+  const kit = await page.evaluate(() => {
+    const S = __SQ;
+    S.load();
+    const loaded = localStorage.getItem('sq_save_v1');
+    S.G.story = 'ronin';
+    S.G.state = 'play';
+    S.P.items = { katana: true };
+    S.P.melee = 'katana';
+    S.P.wep = 'katana';
+    S.P.pri = '';
+    S.P.sec = '';
+    S.P.tool = '';
+    S.P.coins = 0;
+    S.P.arrows = 0;
+    S.P.magic = 0;
+    S.P.lantern = 0;
+    S.flag('heavy_got', false);
+    S.flag('space_board');
+    S.flag('rn_nocont');
+    S.flag('oe_rn_pour');
+    S.warp('rn_pour', 8, 6, 1);
+    for (let i = 0; i < 6 && (S.script || S.dlg); i++) {
+      if (S.dlg) S.skipText();
+      S.press('talk', true); S.step(1); S.press('talk', false); S.step(1);
+    }
+    S.step(2);
+    return {
+      hud: S.hud().map((b) => b.text).join(' '),
+      melee: S.melee(),
+      item: S.hands().item,
+      coins: S.P.coins,
+      magic: S.P.magic || 0,
+      save: localStorage.getItem('sq_save_v1'),
+      loaded,
+    };
+  });
+  expect(kit.melee).toBe('katana');
+  expect(kit.item).toBe('');
+  expect(kit.hud).toMatch(/X KATANA/);
+  expect(kit.hud).toMatch(/Z NONE/);
+  expect(kit.hud).not.toMatch(/HEAVY|LANTERN|SWORD/);
+  expect(kit.coins).toBe(0);
+  expect(kit.magic).toBe(0);
+  expect(kit.save).toBe(kit.loaded);
+  const kept = JSON.parse(kit.save);
+  expect(kept.items.heavy).toBe(true);
+  expect(kept.items.sword).toBe(true);
+  expect(kept.items.raygun).toBe(true);
+  expect(kept.coins).toBe(37);
+  expect(kept.items.fireball).toBeUndefined();
+  await shot(page, 'ronin-hud-katana.png');
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
+test('Shadow and Kal each have a dungeon, a far key, and a boss room', async ({ page }) => {
+  const errors = await boot(page);
+  const map = await page.evaluate(() => {
+    const S = __SQ;
+    const chart = S.chart();
+    const by = (id) => chart.find((a) => a.id === id);
+    const links = (id) => (by(id).warps || []).map((w) => w.to);
+    const keys = (id) => (by(id).chests || []).filter((c) => c.item === 'key');
+    return {
+      shadow: {
+        rooms: ['rn_s1', 'rn_skey', 'rn_s2', 'rn_shadow'].map((id) => ({
+          id,
+          enemies: (by(id).rows || []).length > 0,
+          dungeon: by(id).dungeon,
+        })),
+        s1: links('rn_s1'),
+        key: keys('rn_skey').length,
+        doorKeys: keys('rn_s2').length,
+        bossKeys: keys('rn_shadow').length,
+        lock: by('rn_s2').locks && by('rn_s2').locks.D,
+        toBoss: links('rn_s2'),
+      },
+      kal: {
+        k1: links('rn_k1'),
+        key: keys('rn_kkey').length,
+        doorKeys: keys('rn_kdoor').length,
+        bossKeys: keys('rn_kboss').length,
+        lock: by('rn_kdoor').locks && by('rn_kdoor').locks.D,
+        toBoss: links('rn_kdoor'),
+        sealKeys: keys('rn_sealdoor').length,
+        sealLock: by('rn_sealdoor').locks && by('rn_sealdoor').locks.D,
+      },
+    };
+  });
+  expect(map.shadow.s1).toEqual(expect.arrayContaining(['rn_skey', 'rn_s2']));
+  expect(map.shadow.key).toBe(1);
+  expect(map.shadow.doorKeys).toBe(0);
+  expect(map.shadow.bossKeys).toBe(0);
+  expect(map.shadow.lock.flag).toBe('door_rnshadow');
+  expect(map.shadow.toBoss).toContain('rn_shadow');
+  expect(map.kal.k1).toEqual(expect.arrayContaining(['rn_kkey', 'rn_kdoor']));
+  expect(map.kal.key).toBe(1);
+  expect(map.kal.doorKeys).toBe(0);
+  expect(map.kal.bossKeys).toBe(0);
+  expect(map.kal.lock.flag).toBe('door_rnkal');
+  expect(map.kal.toBoss).toContain('rn_kboss');
+  expect(map.kal.sealKeys).toBe(0);
+  expect(map.kal.sealLock.flag).toBe('door_rnscroll');
+  expect(errors, errors.join('\n')).toEqual([]);
+});
+
 test.describe('sideways phone', () => {
   test.use({ viewport: { width: 844, height: 390 }, hasTouch: true, isMobile: true });
   test('a boss fight keeps the buttons in the gutters', async ({ page }) => {
@@ -702,6 +900,9 @@ test.describe('sideways phone', () => {
         state: __SQ.B.state,
       };
     });
+    const hud = await page.evaluate(() => __SQ.hud().map((b) => b.text).join(' '));
+    expect(hud).toMatch(/KATANA/);
+    expect(hud).not.toMatch(/HEAVY|LANTERN/);
     expect(boxes.state).toBe('fight');
     expect(boxes.vw).toBeGreaterThan(boxes.vh);
     const names = ['attack', 'item', 'swap', 'talk', 'board'];
