@@ -54,7 +54,7 @@ test('desktop: menus, loadouts, third person, scope, shatter, pause', async ({ p
   expect(src.toLowerCase()).not.toContain('hoverboard');
 
   const hi = await page.evaluate(() => __DRILL__.highlight());
-  expect(hi.sel).toMatch(/LET'S RIDE/);
+  expect(hi.sel).toMatch(/^START\b/);
   expect(hi.selOpacity).toBeGreaterThan(0.9);
   expect(hi.otherOpacity).toBeLessThan(0.6);
   expect(hi.selScale).toBeGreaterThan(1.03);
@@ -68,8 +68,8 @@ test('desktop: menus, loadouts, third person, scope, shatter, pause', async ({ p
 
   await page.keyboard.press('ArrowUp');
   await page.waitForTimeout(160);
-  expect((await page.evaluate(() => __DRILL__.highlight())).sel).toMatch(/LET'S RIDE/);
-  await page.keyboard.press('Enter');
+  expect((await page.evaluate(() => __DRILL__.highlight())).sel).toMatch(/^START\b/);
+  await page.locator('#screen-title .menu-btn', { hasText: 'LOADOUT' }).click();
   await page.waitForTimeout(180);
   expect(await page.locator('#screen-loadout').isVisible()).toBe(true);
 
@@ -81,7 +81,7 @@ test('desktop: menus, loadouts, third person, scope, shatter, pause', async ({ p
   ];
   for (const [label, id] of kits) {
     await page.locator('#screen-loadout .menu-btn', { hasText: label }).click();
-    await page.waitForTimeout(140);
+    await page.waitForTimeout(280);
     const st = await page.evaluate(() => __DRILL__.state());
     expect(st.loadout).toBe(id);
     const h = await page.evaluate(() => __DRILL__.highlight());
@@ -93,9 +93,7 @@ test('desktop: menus, loadouts, third person, scope, shatter, pause', async ({ p
   await page.waitForTimeout(160);
   await page.screenshot({ path: `${ART}/proving-ground-loadout.png` });
 
-  await page.locator('#screen-loadout .menu-btn', { hasText: 'CONTINUE' }).click();
-  await page.waitForTimeout(150);
-  await page.locator('#screen-courses .menu-btn', { hasText: 'Bullseye Lane' }).click();
+  await page.locator('#screen-loadout .menu-btn', { hasText: 'START RANGE' }).click();
   await page.waitForFunction(() => __DRILL__.state().mode === 'play');
   await page.waitForTimeout(200);
 
@@ -175,6 +173,7 @@ test('desktop: menus, loadouts, third person, scope, shatter, pause', async ({ p
   expect(killed.left).toBeLessThan(killed.before);
   expect(killed.burst).toBeGreaterThan(8);
 
+  await page.mouse.move(8, 8);
   await page.keyboard.press('Escape');
   await page.waitForFunction(() => __DRILL__.state().mode === 'pause');
   await page.waitForTimeout(160);
@@ -259,11 +258,50 @@ async function assertClear(page, land) {
   return lay;
 }
 
+async function assertStartInView(page) {
+  const start = page.locator('#screen-title .menu-btn', { hasText: /^START$/ });
+  await expect(start).toBeVisible();
+  const box = await start.boundingBox();
+  const vp = page.viewportSize();
+  expect(box).toBeTruthy();
+  expect(box.y).toBeGreaterThanOrEqual(-1);
+  expect(box.x).toBeGreaterThanOrEqual(-1);
+  expect(box.y + box.height).toBeLessThanOrEqual(vp.height + 1);
+  expect(box.x + box.width).toBeLessThanOrEqual(vp.width + 1);
+}
+
+async function assertGuttersHidden(page) {
+  const lay = await page.evaluate(() => ({
+    menu: document.body.classList.contains('menu-open'),
+    lay: __DRILL__.layout(),
+  }));
+  expect(lay.menu).toBe(true);
+  expect(lay.lay.touch).toBe(true);
+  for (const c of [lay.lay.stickL, lay.lay.stickR, lay.lay.fire, lay.lay.scope, lay.lay.breath, lay.lay.crouch, lay.lay.pause]) {
+    expect(c.visible, 'gutter control hidden on menu').toBe(false);
+  }
+}
+
 test.describe('portrait phone', () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
   test('controls sit under the screen and touch play works', async ({ page }) => {
     const errors = await boot(page, 'touch=1');
-    await page.evaluate(() => __DRILL__.startCourse(0));
+    await assertGuttersHidden(page);
+    await assertStartInView(page);
+    await page.screenshot({ path: `${ART}/proving-ground-title-portrait.png` });
+
+    await page.locator('#screen-title .menu-btn', { hasText: 'LOADOUT' }).tap();
+    await page.waitForTimeout(150);
+    await page.locator('#screen-loadout .menu-btn', { hasText: 'Laser Marksman' }).tap();
+    await page.waitForTimeout(120);
+    expect((await page.evaluate(() => __DRILL__.state().loadout))).toBe('laser');
+    const go = page.locator('#screen-loadout .menu-btn', { hasText: 'START RANGE' });
+    const goBox = await go.boundingBox();
+    const vp = page.viewportSize();
+    expect(goBox.y + goBox.height).toBeLessThanOrEqual(vp.height + 1);
+    await page.screenshot({ path: `${ART}/proving-ground-loadout-portrait.png` });
+    await go.tap();
+    await page.waitForFunction(() => __DRILL__.state().mode === 'play' && __DRILL__.state().loadout === 'laser');
     await page.waitForTimeout(200);
     await assertClear(page, false);
     await page.screenshot({ path: `${ART}/proving-ground-portrait.png` });
@@ -307,10 +345,33 @@ test.describe('portrait phone', () => {
   });
 });
 
+test.describe('short portrait phone', () => {
+  test.use({ viewport: { width: 390, height: 664 }, hasTouch: true, isMobile: true });
+  test('START is on screen and the first tap launches', async ({ page }) => {
+    const errors = await boot(page, 'touch=1');
+    await assertGuttersHidden(page);
+    await assertStartInView(page);
+    await page.locator('#screen-title .menu-btn', { hasText: /^START$/ }).tap();
+    await page.waitForFunction(() => __DRILL__.state().mode === 'play');
+    const lay = await page.evaluate(() => __DRILL__.layout());
+    expect(lay.overlay.visible).toBe(false);
+    expect(lay.fire.visible).toBe(true);
+    expect(lay.pause.visible).toBe(true);
+    expect(overlaps(lay.fire, lay.canvas)).toBe(false);
+    expect(overlaps(lay.pause, lay.canvas)).toBe(false);
+    expect(errors, errors.join('\n')).toEqual([]);
+  });
+});
+
 test.describe('landscape phone', () => {
   test.use({ viewport: { width: 844, height: 390 }, hasTouch: true, isMobile: true });
   test('side gutters stay off the canvas and the frame stays quick', async ({ page }) => {
     const errors = await boot(page, 'touch=1');
+    await assertGuttersHidden(page);
+    await assertStartInView(page);
+    await page.screenshot({ path: `${ART}/proving-ground-title-landscape.png` });
+    await page.locator('#screen-title .menu-btn', { hasText: /^START$/ }).tap();
+    await page.waitForFunction(() => __DRILL__.state().mode === 'play');
     await page.evaluate(() => __DRILL__.startCourse(7));
     await page.waitForTimeout(250);
     await assertClear(page, true);

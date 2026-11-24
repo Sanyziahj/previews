@@ -1762,7 +1762,8 @@ gl_FragColor=vec4(vCol.rgb, (1.0-d)*min(1.0,vCol.a)); }`;
     return 0;
   }
   function hook(btn) {
-    btn.addEventListener('pointerenter', function () {
+    btn.addEventListener('pointerenter', function (e) {
+      if (e.pointerType && e.pointerType !== 'mouse') return;
       const btns = menuButtons();
       for (let i = 0; i < btns.length; i++) btns[i].classList.toggle('sel', btns[i] === btn);
     });
@@ -1800,6 +1801,7 @@ gl_FragColor=vec4(vCol.rgb, (1.0-d)*min(1.0,vCol.a)); }`;
     const sections = document.querySelectorAll('.screen');
     for (let i = 0; i < sections.length; i++) sections[i].hidden = sections[i].id !== 'screen-' + name;
     overlay.classList.add('show');
+    document.body.classList.add('menu-open');
     if (name === 'courses') fillCourses();
     if (name === 'loadout') {
       const btns = menuButtons();
@@ -1811,13 +1813,20 @@ gl_FragColor=vec4(vCol.rgb, (1.0-d)*min(1.0,vCol.a)); }`;
   }
   function hideMenu() {
     overlay.classList.remove('show');
+    document.body.classList.remove('menu-open');
     const sections = document.querySelectorAll('.screen');
     for (let i = 0; i < sections.length; i++) sections[i].hidden = true;
   }
   function activate(btn) {
     const act = btn.dataset.act;
     sfx('ui');
-    if (act === 'pick') { setLoadout(btn.dataset.id); return; }
+    if (act === 'pick') {
+      setLoadout(btn.dataset.id);
+      const btns = menuButtons();
+      for (let i = 0; i < btns.length; i++) btns[i].classList.toggle('sel', btns[i] === btn);
+      return;
+    }
+    if (act === 'start') { startCourse(inRun ? courseIndex : 0); return; }
     if (act === 'ride' || act === 'loadout') { openScreen('loadout'); return; }
     if (act === 'courses') { openScreen('courses'); return; }
     if (act === 'manual') { openScreen('manual'); return; }
@@ -1852,7 +1861,7 @@ gl_FragColor=vec4(vCol.rgb, (1.0-d)*min(1.0,vCol.a)); }`;
   function startCourse(index) {
     courseIndex = Math.max(0, Math.min(COURSES.length - 1, index | 0));
     course = COURSES[courseIndex];
-    buildWorld(course);
+    if (gl) buildWorld(course);
     spawnEntities(course);
     player.x = course.spawn[0];
     player.z = course.spawn[1];
@@ -2300,17 +2309,17 @@ gl_FragColor=vec4(vCol.rgb, (1.0-d)*min(1.0,vCol.a)); }`;
   PRIM.sphere = makeSphere(8, 12);
   PRIM.cyl = makeCylinder(12);
   buildBaked();
-  if (!initGL()) {
-    window.__DRILL__ = api;
-    return;
-  }
-  loadout = save.loadout || 'rifle';
-  course = COURSES[0];
-  courseIndex = 0;
+  const glOk = initGL();
+loadout = save.loadout || 'rifle';
+course = COURSES[0];
+courseIndex = 0;
+if (glOk) {
   buildWorld(course);
   spawnEntities(course);
-  bootInput();
-  openScreen('title');
-  window.__DRILL__ = api;
-  requestAnimationFrame(loop);
+}
+bootInput();
+openScreen('title');
+window.__DRILL__ = api;
+if (glOk) requestAnimationFrame(loop);
+else api.ready = true;
 })();
