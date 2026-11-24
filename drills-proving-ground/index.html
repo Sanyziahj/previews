@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#10161b">
+<meta name="description" content="Drill Sergeant: Proving Ground. A Space Riders tactical training range. Let's Ride!">
+<title>Drill Sergeant: Proving Ground</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect rx='12' width='64' height='64' fill='%2310161b'/%3E%3Cellipse cx='32' cy='30' rx='22' ry='7' fill='%235c3a22'/%3E%3Ccircle cx='32' cy='40' r='14' fill='%23ff7a18'/%3E%3Crect x='40' y='22' width='10' height='8' rx='1' fill='%23e6ebf2'/%3E%3C/svg%3E">
+<style>
+:root { color-scheme: dark; --teal:#3dffe0; --orange:#ff8a2a; --ink:#10161b; --dim:.38; }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body {
+  margin: 0; height: 100%; background: var(--ink); color: #e7eef4;
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  overflow: hidden; touch-action: none; user-select: none;
+  -webkit-user-select: none; -webkit-touch-callout: none;
+}
+body { position: fixed; inset: 0; }
+button, input { font-family: inherit; }
+#app {
+  height: 100%; min-height: 0;
+  display: grid;
+  grid-template-areas: "stage";
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+}
+#stage { grid-area: stage; position: relative; min-width: 0; min-height: 0; background: #1a242c; overflow: hidden; }
+#view { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+#gutterL, #gutterR { display: none; }
+body.touch #app {
+  grid-template-areas: "stage stage" "left right";
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+body.touch #gutterL, body.touch #gutterR {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  padding: 8px 8px calc(10px + env(safe-area-inset-bottom));
+  background: #0b1014; min-height: 0;
+}
+body.touch #gutterL { grid-area: left; }
+body.touch #gutterR { grid-area: right; }
+body.touch.land #app {
+  grid-template-areas: "left stage right";
+  grid-template-columns: 126px minmax(0, 1fr) 148px;
+  grid-template-rows: minmax(0, 1fr);
+}
+body.touch.land #gutterL, body.touch.land #gutterR {
+  height: 100%; padding: 8px 6px; justify-content: center;
+}
+.stick {
+  width: 118px; height: 118px; border-radius: 50%; position: relative; flex: none;
+  background: radial-gradient(circle at 50% 42%, #3a4c59, #141b22 72%);
+  border: 3px solid #8ea0b0; touch-action: none;
+}
+.stick i {
+  position: absolute; width: 46px; height: 46px; border-radius: 50%;
+  left: 50%; top: 50%; transform: translate(-50%, -50%);
+  background: radial-gradient(circle at 35% 30%, #e7eef3, #627280);
+  border: 2px solid #f4f7f8; pointer-events: none;
+}
+body.touch.land .stick { width: 96px; height: 96px; }
+body.touch.land .stick i { width: 40px; height: 40px; }
+.btnGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; }
+body.touch.land .btnGrid { grid-template-columns: 1fr; width: 100%; }
+.ctrl {
+  appearance: none; -webkit-appearance: none;
+  border: 2px solid #9aabba; background: #24313b; color: #f4f8fb;
+  font-weight: 800; letter-spacing: .06em; border-radius: 12px;
+  min-width: 0; width: 100%; min-height: 46px; padding: 0 6px;
+  font-size: 12px; touch-action: none;
+}
+body.touch.land .ctrl { min-height: 40px; font-size: 11px; letter-spacing: .04em; }
+#btnFire { background: #f0a03a; color: #1b1206; border-color: #ffe2ad; }
+#btnScope { background: #1c4e63; border-color: #8fd0c4; color: #e7fff8; }
+#btnBreath { background: #2a2150; border-color: #c7b6ff; color: #f3ecff; }
+#btnCrouch { background: #1d3330; border-color: #8fd0c4; color: #e7fff8; min-height: 46px; width: min(148px, 100%); }
+body.touch.land #btnCrouch { width: 100%; min-height: 40px; }
+#btnPause { background: #2a241c; color: #ffe1a8; border-color: #e7b15a; }
+.ctrl.on { box-shadow: 0 0 0 2px #e8fff8, 0 0 16px #3dffe0; }
+#hud {
+  position: absolute; left: 8px; right: 8px; top: 6px; z-index: 2;
+  display: flex; flex-direction: column; gap: 2px; pointer-events: none;
+  font-weight: 800; letter-spacing: .04em; text-shadow: 0 1px 2px #000;
+}
+#hud[hidden] { display: none !important; }
+#hud .row { display: flex; justify-content: space-between; gap: 8px; align-items: center; font-size: 13px; }
+#hudName { color: #ffe7b0; }
+#hudObj { color: #d5dee6; font-size: 12px; font-weight: 700; }
+#hudTime { color: #f4f8fb; }
+#hudTime.low { color: #ffb4a8; }
+#btnMute {
+  pointer-events: auto; border: 0; background: transparent; color: #ffe1a8;
+  font-weight: 800; font-family: inherit; letter-spacing: .08em; font-size: 12px;
+  min-height: 28px; padding: 0 4px;
+}
+#heat {
+  height: 8px; background: #1c242c; border-radius: 6px; overflow: hidden; border: 1px solid #445566;
+  width: min(220px, 46vw); margin-left: auto;
+}
+#heat[hidden] { display: none !important; }
+#heat i { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, #7ef0ff, #ff5ad4); }
+#heat.hot { border-color: #ff8a8a; }
+#quietChip {
+  display: none; font-size: 11px; letter-spacing: .12em; color: #06221f;
+  background: #7dffe8; border-radius: 999px; padding: 2px 7px;
+}
+#quietChip.on { display: inline-block; }
+#reticle {
+  position: absolute; left: 50%; top: 50%; width: 22px; height: 22px;
+  transform: translate(-50%, -50%); pointer-events: none; z-index: 3;
+}
+#reticle[hidden] { display: none !important; }
+#reticle::before, #reticle::after {
+  content: ""; position: absolute; background: #fff; box-shadow: 0 0 0 1px #000;
+}
+#reticle::before { left: 50%; top: 0; bottom: 0; width: 2px; transform: translateX(-50%); }
+#reticle::after { top: 50%; left: 0; right: 0; height: 2px; transform: translateY(-50%); }
+#reticle b {
+  position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; border-radius: 50%;
+  transform: translate(-50%, -50%); background: #fff; box-shadow: 0 0 0 1px #000;
+}
+#reticle.hit b { background: #ffe27a; }
+#reticle.bull b { background: #7dffe8; box-shadow: 0 0 8px #7dffe8; }
+#scope {
+  position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 0 31%, rgba(0,0,0,.55) 36%, rgba(0,0,0,.82) 46%, rgba(0,0,0,.88) 70%);
+}
+#scope[hidden] { display: none !important; }
+#scope .ring {
+  position: absolute; left: 50%; top: 50%; height: 64%; width: auto; aspect-ratio: 1;
+  max-width: 90%; transform: translate(-50%, -50%); border-radius: 50%;
+  border: 2px solid rgba(220, 255, 245, .92);
+  box-shadow: inset 0 0 24px rgba(0, 0, 0, .25);
+}
+#scope .ch {
+  position: absolute; left: 50%; top: 50%; width: 90px; height: 90px; transform: translate(-50%, -50%);
+}
+#scope .ch i { position: absolute; background: #06120f; box-shadow: 0 0 0 1px rgba(232, 255, 246, .9); }
+#scope .ch .v { left: 50%; top: 0; bottom: 0; width: 1px; transform: translateX(-50%); }
+#scope .ch .h { top: 50%; left: 0; right: 0; height: 1px; transform: translateY(-50%); }
+#scope .ticks { position: absolute; left: 50%; top: 50%; width: 0; height: 0; }
+#scope .ticks b {
+  position: absolute; left: 0; width: 18px; height: 2px; background: #06120f;
+  transform: translateX(-50%); box-shadow: 0 0 0 1px rgba(232, 255, 246, .85);
+}
+#scope .read {
+  position: absolute; left: 50%; top: 16%; transform: translateX(-50%);
+  display: flex; gap: 14px; align-items: center;
+  color: #e9fff8; font-weight: 800; letter-spacing: .08em; font-size: 14px;
+  text-shadow: 0 1px 2px #000;
+}
+#windArrow {
+  display: inline-block; width: 18px; height: 18px; margin-right: 4px; vertical-align: -3px;
+  border-radius: 50%; border: 2px solid #d8fff4; position: relative;
+}
+#windArrow::after {
+  content: ""; position: absolute; left: 50%; top: 50%; width: 7px; height: 2px; background: #d8fff4;
+  transform-origin: left center;
+}
+#breathWrap {
+  position: absolute; left: 50%; bottom: 16%; transform: translateX(-50%);
+  width: min(180px, 40%); height: 8px; border-radius: 6px; border: 1px solid #c7b6ff;
+  background: rgba(10, 8, 20, .55); overflow: hidden;
+}
+#breathFill { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #9b8cff, #e7e0ff); }
+#breathWrap.hot #breathFill { background: #ffb089; }
+#scopeTag {
+  position: absolute; right: 8%; top: 22%; color: #ffe7b0; font-size: 11px;
+  letter-spacing: .14em; font-weight: 800; text-shadow: 0 1px 2px #000;
+}
+#overlay {
+  display: none; position: absolute; inset: 0; z-index: 5;
+  align-items: center; justify-content: flex-start;
+  padding: 12px; background: rgba(6, 10, 14, .28);
+}
+#overlay.show { display: flex; }
+#panel {
+  width: min(520px, 100%); max-height: 100%; overflow: auto;
+  background: linear-gradient(180deg, rgba(14, 22, 28, .96), rgba(8, 12, 16, .94));
+  border: 1px solid rgba(140, 230, 214, .38); border-radius: 18px;
+  padding: 14px 14px 16px; box-shadow: 0 16px 50px rgba(0, 0, 0, .35);
+}
+.brand { display: flex; gap: 10px; align-items: center; margin-bottom: 6px; }
+.bust {
+  width: 54px; height: 54px; flex: none; position: relative;
+}
+.bust .head {
+  position: absolute; left: 8px; top: 16px; width: 38px; height: 38px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffb066, #ff6a12 62%, #d24c00);
+}
+.bust .brim {
+  position: absolute; left: 0; top: 14px; width: 54px; height: 10px; border-radius: 8px;
+  background: #5c3a22;
+}
+.bust .crown {
+  position: absolute; left: 16px; top: 2px; width: 22px; height: 16px; border-radius: 6px 6px 2px 2px;
+  background: #6a4528;
+}
+.bust .badge {
+  position: absolute; right: 4px; top: 10px; width: 14px; height: 10px; background: #e6ebf2;
+  color: #111; font-size: 7px; font-weight: 900; display: flex; align-items: center; justify-content: center;
+  border-radius: 1px;
+}
+.kicker { letter-spacing: .18em; font-size: 11px; color: #9adfd4; font-weight: 800; margin: 0; }
+h1, h2 { margin: 0; letter-spacing: .04em; }
+h1 { font-size: 26px; line-height: 1; }
+h1 span { display: block; color: #ffb15a; font-size: 15px; letter-spacing: .16em; margin-top: 3px; }
+h2 { font-size: 20px; color: #ffe7b0; }
+.lede { margin: 6px 0 8px; color: #c5d5df; font-size: 13px; line-height: 1.35; }
+.zone {
+  margin: 8px 0 2px; font-size: 11px; letter-spacing: .14em; color: #8fd0c4; font-weight: 800;
+}
+.menu-btn {
+  display: block; width: 100%; text-align: left; cursor: pointer;
+  border-radius: 14px; border: 2px solid transparent;
+  padding: 10px 12px; margin: 6px 0;
+  background: #182228; color: #d5e4ea;
+  font-weight: 800; letter-spacing: .05em; font-size: 15px;
+  opacity: .38; transform: scale(1); transform-origin: center left;
+  transition: transform .06s linear, opacity .06s linear, box-shadow .06s linear, background .06s linear;
+}
+.menu-btn small {
+  display: block; font-weight: 700; font-size: 11px; letter-spacing: .04em;
+  color: #b7d4cf; margin-top: 2px;
+}
+.menu-btn.sel {
+  opacity: 1; transform: scale(1.06);
+  background: #1a3c3c; border-color: #d7fff6;
+  box-shadow: 0 0 0 2px #e8fff8, 0 0 22px 2px rgba(61, 255, 224, .55);
+  z-index: 1; position: relative;
+}
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.grid .menu-btn { margin: 0; min-height: 96px; }
+.card.rifle { box-shadow: inset 4px 0 0 #e7b15a; }
+.card.stealth { box-shadow: inset 4px 0 0 #3dffe0; }
+.card.laser { box-shadow: inset 4px 0 0 #7ef0ff; }
+.card.heavy { box-shadow: inset 4px 0 0 #ff8a2a; }
+.menu-btn.sel.card { box-shadow: inset 4px 0 0 #ffe7b0, 0 0 0 2px #e8fff8, 0 0 22px 2px rgba(61, 255, 224, .55); }
+.manual { font-size: 13px; line-height: 1.45; color: #d5e4ea; }
+.manual p { margin: 6px 0; }
+.stats { list-style: none; padding: 0; margin: 8px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; }
+.stats li { font-size: 13px; font-weight: 800; color: #e7eef4; }
+.stats li span { display: block; font-size: 10px; letter-spacing: .12em; color: #9adfd4; }
+.debrief-head { display: flex; gap: 10px; align-items: center; }
+.stars { color: #ffe27a; letter-spacing: .08em; font-size: 18px; }
+#glstatus {
+  position: absolute; left: 8px; bottom: 8px; color: #ffb4a8; font-size: 12px; z-index: 4;
+}
+@media (max-width: 720px) {
+  #overlay { justify-content: center; padding: 8px; }
+  h1 { font-size: 22px; }
+  .grid { gap: 6px; }
+  .grid .menu-btn { min-height: 84px; font-size: 14px; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="gutterL">
+    <div id="stickL" class="stick" data-stick="move"><i></i></div>
+    <button id="btnCrouch" class="ctrl" type="button">CROUCH</button>
+  </div>
+  <div id="stage">
+    <canvas id="view"></canvas>
+    <div id="hud" hidden>
+      <div class="row">
+        <div id="hudName">PROVING GROUND</div>
+        <div><span id="hudTime">0:00</span> <button id="btnMute" type="button">SOUND</button></div>
+      </div>
+      <div class="row"><div id="hudObj"></div><div id="quietChip">QUIET</div></div>
+      <div class="row"><div id="hudLeft">TARGETS</div><div id="hudRight">RIFLE</div></div>
+      <div id="heat" hidden><i></i></div>
+    </div>
+    <div id="reticle" hidden><b></b></div>
+    <div id="scope" hidden>
+      <div class="ring"></div>
+      <div class="ch"><i class="v"></i><i class="h"></i></div>
+      <div class="ticks" id="ticks"></div>
+      <div class="read"><span id="distText">-- m</span><span><i id="windArrow"></i><span id="windText">WIND 0</span></span></div>
+      <div id="scopeTag">SCOPE</div>
+      <div id="breathWrap"><i id="breathFill"></i></div>
+    </div>
+    <div id="overlay" class="show">
+      <div id="panel">
+        <section id="screen-title" class="screen">
+          <div class="brand">
+            <div class="bust" aria-hidden="true"><div class="crown"></div><div class="brim"></div><div class="head"></div><div class="badge">SR</div></div>
+            <div>
+              <p class="kicker">SPACE RIDERS</p>
+              <h1>DRILL SERGEANT<span>PROVING GROUND</span></h1>
+            </div>
+          </div>
+          <p class="lede">Third-person range day. Point and shoot up close, then settle into the scope. Clean holes only. Let's Ride!</p>
+          <button class="menu-btn sel" type="button" data-act="ride">LET'S RIDE</button>
+          <button class="menu-btn" type="button" data-act="loadout">LOADOUT</button>
+          <button class="menu-btn" type="button" data-act="courses">COURSES</button>
+          <button class="menu-btn" type="button" data-act="manual">FIELD MANUAL</button>
+        </section>
+        <section id="screen-loadout" class="screen" hidden>
+          <p class="kicker">BEFORE THE COURSE</p>
+          <h2>CHOOSE LOADOUT</h2>
+          <p class="lede">Four kits, four tempers. The glowing card is the one you take downrange.</p>
+          <div class="grid" id="loadGrid">
+            <button class="menu-btn card rifle sel" type="button" data-act="pick" data-id="rifle"><b>Precision Rifle</b><small>High zoom · windage · bullseye bonus · suppressor</small></button>
+            <button class="menu-btn card stealth" type="button" data-act="pick" data-id="stealth"><b>Stealth Carbine</b><small>Quiet shots · decoy ping · crouch veil</small></button>
+            <button class="menu-btn card laser" type="button" data-act="pick" data-id="laser"><b>Laser Marksman</b><small>Hitscan beam · zero drop · heat gauge</small></button>
+            <button class="menu-btn card heavy" type="button" data-act="pick" data-id="heavy"><b>Heavy Launcher</b><small>Pierces barricades · splash stardust · rail punch</small></button>
+          </div>
+          <button class="menu-btn" type="button" data-act="courses">CONTINUE</button>
+          <button class="menu-btn" type="button" data-act="back">BACK</button>
+        </section>
+        <section id="screen-courses" class="screen" hidden>
+          <p class="kicker">THREE ZONES</p>
+          <h2>TRAINING COURSES</h2>
+          <p class="lede">Stars stick around on this device. Accuracy, bullseyes, and a quiet run raise them.</p>
+          <div id="courseList"></div>
+          <button class="menu-btn" type="button" data-act="loadout">LOADOUT</button>
+          <button class="menu-btn" type="button" data-act="back">BACK</button>
+        </section>
+        <section id="screen-manual" class="screen" hidden>
+          <p class="kicker">HOW TO DRILL</p>
+          <h2>FIELD MANUAL</h2>
+          <div class="manual">
+            <p><b>Move</b> WASD or arrows. Left stick on a phone. <b>Crouch</b> with C. Still and low in the stealth kit veils you from cones.</p>
+            <p><b>Aim</b> with the mouse, or drag the aim pad. <b>Fire</b> is left click. <b>Scope</b> is right click, Shift, or the SCOPE button. Inside the glass, distance and wind sit on the reticle.</p>
+            <p><b>Steady Breath</b> (Space, or BREATH while scoped) slows the moment and settles the sway. <b>Gadget</b> is Q, or BREATH while you are not scoped: suppressor, decoy ping, heat vent, or a charged rail.</p>
+            <p><b>1–4</b> swaps the kit. <b>Esc</b> or PAUSE holds the range. Gamepad: sticks, RT fire, LT scope, RB breath, A crouch, B gadget, Start pause.</p>
+            <p>Pop-ups, spinning plates, patrol drones, and armored bots. Bullseyes and glowing cores throw a short stardust slow-mo. No mess, just drill.</p>
+          </div>
+          <button class="menu-btn sel" type="button" data-act="back">BACK</button>
+        </section>
+        <section id="screen-pause" class="screen" hidden>
+          <p class="kicker">HOLDING</p>
+          <h2>PAUSED</h2>
+          <p class="lede" id="pauseLede">The range is frozen.</p>
+          <button class="menu-btn sel" type="button" data-act="resume">RESUME</button>
+          <button class="menu-btn" type="button" data-act="restart">RESTART</button>
+          <button class="menu-btn" type="button" data-act="loadout">LOADOUT</button>
+          <button class="menu-btn" type="button" data-act="courses">COURSES</button>
+          <button class="menu-btn" type="button" data-act="title">QUIT</button>
+        </section>
+        <section id="screen-debrief" class="screen" hidden>
+          <div class="debrief-head">
+            <div class="bust" aria-hidden="true"><div class="crown"></div><div class="brim"></div><div class="head"></div><div class="badge">SR</div></div>
+            <div>
+              <p class="kicker">DRILL SERGEANT</p>
+              <h2 id="debriefTitle">COURSE CLEAR</h2>
+              <div class="stars" id="debriefStars"></div>
+            </div>
+          </div>
+          <p class="lede" id="debriefQuote"></p>
+          <ul class="stats" id="debriefStats"></ul>
+          <button class="menu-btn sel" type="button" data-act="restart">RETRY</button>
+          <button class="menu-btn" type="button" data-act="next" id="btnNext">NEXT COURSE</button>
+          <button class="menu-btn" type="button" data-act="courses">COURSES</button>
+          <button class="menu-btn" type="button" data-act="title">TITLE</button>
+        </section>
+      </div>
+    </div>
+    <div id="glstatus"></div>
+  </div>
+  <div id="gutterR">
+    <div id="stickR" class="stick" data-stick="aim"><i></i></div>
+    <div class="btnGrid">
+      <button id="btnFire" class="ctrl" type="button">FIRE</button>
+      <button id="btnScope" class="ctrl" type="button">SCOPE</button>
+      <button id="btnBreath" class="ctrl" type="button">BREATH</button>
+      <button id="btnPause" class="ctrl" type="button">PAUSE</button>
+    </div>
+  </div>
+</div>
+<script src="game.js"></script>
+</body>
+</html>
