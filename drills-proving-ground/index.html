@@ -50,6 +50,14 @@ body.touch.land #app {
 body.touch.land #gutterL, body.touch.land #gutterR {
   height: 100%; padding: 8px 6px; justify-content: center;
 }
+body.menu-open #gutterL, body.menu-open #gutterR { display: none !important; }
+body.touch.menu-open #app,
+body.touch.land.menu-open #app {
+  grid-template-areas: "stage";
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+}
+body.menu-open { touch-action: pan-y; }
 .stick {
   width: 118px; height: 118px; border-radius: 50%; position: relative; flex: none;
   background: radial-gradient(circle at 50% 42%, #3a4c59, #141b22 72%);
@@ -175,6 +183,7 @@ body.touch.land #btnCrouch { width: 100%; min-height: 40px; }
   display: none; position: absolute; inset: 0; z-index: 5;
   align-items: center; justify-content: flex-start;
   padding: 12px; background: rgba(6, 10, 14, .28);
+  overflow: auto; touch-action: pan-y; -webkit-overflow-scrolling: touch;
 }
 #overlay.show { display: flex; }
 #panel {
@@ -182,6 +191,7 @@ body.touch.land #btnCrouch { width: 100%; min-height: 40px; }
   background: linear-gradient(180deg, rgba(14, 22, 28, .96), rgba(8, 12, 16, .94));
   border: 1px solid rgba(140, 230, 214, .38); border-radius: 18px;
   padding: 14px 14px 16px; box-shadow: 0 16px 50px rgba(0, 0, 0, .35);
+  touch-action: pan-y; -webkit-overflow-scrolling: touch;
 }
 .brand { display: flex; gap: 10px; align-items: center; margin-bottom: 6px; }
 .bust {
@@ -221,6 +231,7 @@ h2 { font-size: 20px; color: #ffe7b0; }
   font-weight: 800; letter-spacing: .05em; font-size: 15px;
   opacity: .38; transform: scale(1); transform-origin: center left;
   transition: transform .06s linear, opacity .06s linear, box-shadow .06s linear, background .06s linear;
+  touch-action: manipulation;
 }
 .menu-btn small {
   display: block; font-weight: 700; font-size: 11px; letter-spacing: .04em;
@@ -249,15 +260,25 @@ h2 { font-size: 20px; color: #ffe7b0; }
 #glstatus {
   position: absolute; left: 8px; bottom: 8px; color: #ffb4a8; font-size: 12px; z-index: 4;
 }
-@media (max-width: 720px) {
-  #overlay { justify-content: center; padding: 8px; }
-  h1 { font-size: 22px; }
+@media (max-width: 720px), (max-height: 420px) {
+  #overlay { justify-content: center; padding: 10px; align-items: flex-start; }
+  #panel { padding: 8px 10px 10px; border-radius: 14px; }
+  .brand { gap: 8px; margin-bottom: 2px; }
+  .bust { width: 40px; height: 40px; transform: scale(0.74); transform-origin: left center; }
+  h1 { font-size: 18px; }
+  h1 span { font-size: 12px; margin-top: 1px; }
+  h2 { font-size: 16px; }
+  .lede { font-size: 12px; margin: 3px 0 4px; line-height: 1.25; }
+  .kicker { font-size: 10px; }
+  .menu-btn { padding: 7px 10px; margin: 3px 0; font-size: 14px; border-radius: 12px; }
+  .menu-btn.sel { transform: scale(1.04); transform-origin: center; }
   .grid { gap: 6px; }
-  .grid .menu-btn { min-height: 84px; font-size: 14px; }
+  .grid .menu-btn { min-height: 0; font-size: 13px; padding: 6px 8px; }
+  .grid .menu-btn small { font-size: 10px; }
 }
 </style>
 </head>
-<body>
+<body class="menu-open">
 <div id="app">
   <div id="gutterL">
     <div id="stickL" class="stick" data-stick="move"><i></i></div>
@@ -294,7 +315,7 @@ h2 { font-size: 20px; color: #ffe7b0; }
             </div>
           </div>
           <p class="lede">Third-person range day. Point and shoot up close, then settle into the scope. Clean holes only. Let's Ride!</p>
-          <button class="menu-btn sel" type="button" data-act="ride">LET'S RIDE</button>
+          <button class="menu-btn sel" type="button" data-act="start">START</button>
           <button class="menu-btn" type="button" data-act="loadout">LOADOUT</button>
           <button class="menu-btn" type="button" data-act="courses">COURSES</button>
           <button class="menu-btn" type="button" data-act="manual">FIELD MANUAL</button>
@@ -309,7 +330,8 @@ h2 { font-size: 20px; color: #ffe7b0; }
             <button class="menu-btn card laser" type="button" data-act="pick" data-id="laser"><b>Laser Marksman</b><small>Hitscan beam · zero drop · heat gauge</small></button>
             <button class="menu-btn card heavy" type="button" data-act="pick" data-id="heavy"><b>Heavy Launcher</b><small>Pierces barricades · splash stardust · rail punch</small></button>
           </div>
-          <button class="menu-btn" type="button" data-act="courses">CONTINUE</button>
+          <button class="menu-btn" type="button" data-act="start">START RANGE</button>
+          <button class="menu-btn" type="button" data-act="courses">COURSES</button>
           <button class="menu-btn" type="button" data-act="back">BACK</button>
         </section>
         <section id="screen-courses" class="screen" hidden>
