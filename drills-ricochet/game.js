@@ -1630,7 +1630,7 @@
   function drawActor(c, e, friendly) {
     c.save();
     c.translate(e.x, e.y);
-    c.scale(1.28, 1.28);
+    c.scale(1.38, 1.38);
     if (e.flash > 0) c.globalAlpha = 0.55;
     const body = friendly ? tierCfg().kind : e.body;
     if (body === 'turret') drawTurret(c, e);
@@ -1644,16 +1644,16 @@
     c.restore();
     if (e.shield) {
       c.strokeStyle = 'rgba(130, 230, 255, .9)';
-      c.lineWidth = 4;
-      c.beginPath();
-      c.arc(e.x, e.y, e.r + 8, e.shieldAngle - e.shieldArc, e.shieldAngle + e.shieldArc);
-      c.stroke();
-    }
-    if (e.state === 'tele') {
-      c.save();
-      c.strokeStyle = 'rgba(255, 96, 72, .85)';
-      c.lineWidth = 2;
-      c.setLineDash([6, 6]);
+    c.lineWidth = 3 / camScale;
+    c.beginPath();
+    c.arc(e.x, e.y, e.r + 8, e.shieldAngle - e.shieldArc, e.shieldAngle + e.shieldArc);
+    c.stroke();
+  }
+  if (e.state === 'tele') {
+    c.save();
+    c.strokeStyle = 'rgba(255, 96, 72, .95)';
+    c.lineWidth = 2.6 / camScale;
+    c.setLineDash([8 / camScale, 6 / camScale]);
       c.beginPath();
       c.moveTo(e.x, e.y);
       c.lineTo(e.x + Math.cos(e.aim) * 78, e.y + Math.sin(e.aim) * 78);
@@ -1676,21 +1676,24 @@
         if (t === '#' || t === '+') {
           c.fillStyle = t === '+' ? '#b7c6d6' : WALLC[tier];
           c.fillRect(px, py, TILE, TILE);
-          c.fillStyle = t === '+' ? 'rgba(255,255,255,.55)' : 'rgba(255,255,255,.08)';
-          c.fillRect(px, py, TILE, 5);
+          c.strokeStyle = t === '+' ? 'rgba(255,255,255,.85)' : 'rgba(0,0,0,.55)';
+          c.lineWidth = 2.2 / camScale;
+          c.strokeRect(px + c.lineWidth / 2, py + c.lineWidth / 2, TILE - c.lineWidth, TILE - c.lineWidth);
+          c.fillStyle = t === '+' ? 'rgba(255,255,255,.55)' : 'rgba(255,255,255,.14)';
+          c.fillRect(px, py, TILE, Math.max(5, 3 / camScale));
           if (t === '+') {
-            c.strokeStyle = 'rgba(255,255,255,.7)';
-            c.lineWidth = 2;
+            c.strokeStyle = 'rgba(255,255,255,.85)';
+            c.lineWidth = 2.2 / camScale;
             c.strokeRect(px + 8, py + 8, TILE - 16, TILE - 16);
           }
         } else {
           c.fillStyle = (x + y) % 2 === 0 ? pair[0] : pair[1];
           c.fillRect(px, py, TILE, TILE);
           if (t === '=') {
-            c.fillStyle = '#8d7346';
-            c.fillRect(px + 6, py + 22, TILE - 12, 20);
-            c.fillStyle = '#d7b57a';
-            c.fillRect(px + 6, py + 22, TILE - 12, 5);
+            c.fillStyle = '#6a4e2e';
+            c.fillRect(px + 4, py + 16, TILE - 8, 32);
+            c.fillStyle = '#e2c07a';
+            c.fillRect(px + 4, py + 16, TILE - 8, Math.max(6, 3 / camScale));
           }
         }
       }
@@ -1748,19 +1751,11 @@
     const bw = Math.max(2, Math.round(viewW * dpr));
     const bh = Math.max(2, Math.round(viewH * dpr));
     if (view.width !== bw || view.height !== bh) { view.width = bw; view.height = bh; }
-    const fit = Math.min((viewW - 8) / worldW, (viewH - 8) / worldH);
-    const zoom = fit < 1.35;
-    camScale = zoom ? 1.35 : fit;
-    const vw = viewW / camScale, vh = viewH / camScale;
-    if (zoom) {
-      camX = Math.max(vw / 2, Math.min(worldW - vw / 2, player.x));
-      camY = Math.max(vh / 2, Math.min(worldH - vh / 2, player.y));
-      if (vw >= worldW) camX = worldW / 2;
-      if (vh >= worldH) camY = worldH / 2;
-    } else {
-      camX = worldW / 2;
-      camY = worldH / 2;
-    }
+    const margin = Math.min(14, Math.max(4, Math.floor(Math.min(viewW, viewH) * 0.03)));
+    const fit = Math.min((viewW - margin * 2) / worldW, (viewH - margin * 2) / worldH);
+    camScale = fit;
+    camX = worldW / 2;
+    camY = worldH / 2;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.fillStyle = tierNum() === 5 ? '#070b14' : '#12181e';
     ctx.fillRect(0, 0, viewW, viewH);
@@ -1784,7 +1779,7 @@
       ctx.fillStyle = '#f0c14a';
       ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, 7); ctx.fill();
       ctx.strokeStyle = '#fff4c8';
-      ctx.lineWidth = 3;
+      ctx.lineWidth = 2.4 / camScale;
       ctx.stroke();
     }
     for (let i = 0; i < crates.length; i++) {
@@ -1793,8 +1788,8 @@
       const x = cr.tx * TILE + 8, y = cr.ty * TILE + 8;
       ctx.fillStyle = '#c4843c';
       roundRect(ctx, x, y, TILE - 16, TILE - 16, 4); ctx.fill();
-      ctx.strokeStyle = '#6a4018';
-      ctx.lineWidth = 3;
+      ctx.strokeStyle = '#4a2c10';
+      ctx.lineWidth = Math.max(3, 2.2 / camScale);
       ctx.beginPath();
       ctx.moveTo(x + 4, y + 4); ctx.lineTo(x + TILE - 20, y + TILE - 20);
       ctx.moveTo(x + TILE - 20, y + 4); ctx.lineTo(x + 4, y + TILE - 20);
@@ -1811,19 +1806,25 @@
     for (let i = 0; i < shots.length; i++) {
       const s = shots[i];
       ctx.fillStyle = s.color;
-      ctx.beginPath(); ctx.arc(s.x, s.y, s.owner === 'player' ? 5 : 4, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.arc(s.x, s.y, Math.max(s.owner === 'player' ? 5 : 4, 4 / camScale), 0, 7); ctx.fill();
     }
     for (let i = 0; i < enemies.length; i++) if (!enemies[i].dead) drawActor(ctx, enemies[i], false);
-    const blink = player.inv > 0 && Math.floor(simTime * 16) % 2 === 0;
-    if (!blink) {
-      const aim = mode === 'title' ? (performance.now() / 1000) * 0.7 : player.aim;
-      drawActor(ctx, { x: player.x, y: player.y, heading: player.body, aim: aim, body: tierCfg().kind, color: '#14b89a', r: player.r, spin: simTime * 8, shield: false, state: 'idle' }, true);
+    const aim = mode === 'title' ? (performance.now() / 1000) * 0.7 : player.aim;
+    if (player.inv > 0) ctx.globalAlpha = 0.72 + 0.28 * Math.abs(Math.sin(simTime * 9));
+    drawActor(ctx, { x: player.x, y: player.y, heading: player.body, aim: aim, body: tierCfg().kind, color: '#14b89a', r: player.r, spin: simTime * 8, shield: false, state: 'idle' }, true);
+    ctx.globalAlpha = 1;
+    if (player.inv > 0 && (mode === 'play' || mode === 'pause')) {
+      ctx.strokeStyle = '#ffe7a0';
+      ctx.lineWidth = 2.4 / camScale;
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, player.r + 10, 0, Math.PI * 2);
+      ctx.stroke();
     }
     if (mode === 'play' || mode === 'pause' || mode === 'brief' || mode === 'title') {
       const pts = previewPts();
-      ctx.strokeStyle = 'rgba(255,255,255,.62)';
-      ctx.lineWidth = 2;
-      ctx.setLineDash([7, 6]);
+      ctx.strokeStyle = 'rgba(255,255,255,.9)';
+      ctx.lineWidth = 2.4 / camScale;
+      ctx.setLineDash([8 / camScale, 6 / camScale]);
       ctx.beginPath();
       ctx.moveTo(pts[0].x, pts[0].y);
       for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
@@ -1832,7 +1833,7 @@
       if (pts.length > 2) {
         const b = pts[1];
         ctx.fillStyle = 'rgba(255, 224, 138, .9)';
-        ctx.beginPath(); ctx.arc(b.x, b.y, 3.5, 0, 7); ctx.fill();
+        ctx.beginPath(); ctx.arc(b.x, b.y, Math.max(3.5, 3.2 / camScale), 0, 7); ctx.fill();
       }
     }
     for (let i = 0; i < rings.length; i++) {
@@ -1844,7 +1845,8 @@
       const p = particles[i];
       ctx.globalAlpha = Math.max(0, p.life / p.max);
       ctx.fillStyle = p.color;
-      ctx.fillRect(p.x, p.y, p.size, p.size);
+      const ps = Math.max(p.size, 3.4 / camScale);
+      ctx.fillRect(p.x, p.y, ps, ps);
     }
     ctx.globalAlpha = 1;
     ctx.restore();
@@ -2090,6 +2092,33 @@
       }
       const s = info(sel), o = info(other);
       return { sel: s && s.text, other: o && o.text, selOpacity: s && s.opacity, otherOpacity: o && o.opacity, selScale: s && s.scale, mode: mode };
+    },
+    visibility: function () {
+      render();
+      const canvas = view.getBoundingClientRect();
+      function pt(x, y) {
+        return {
+          x: canvas.left + (x - camX) * camScale + viewW / 2,
+          y: canvas.top + (y - camY) * camScale + viewH / 2,
+        };
+      }
+      const foes = [];
+      for (let i = 0; i < enemies.length; i++) {
+        if (!enemies[i].dead) foes.push(pt(enemies[i].x, enemies[i].y));
+      }
+      return {
+        canvas: { x: canvas.left, y: canvas.top, w: canvas.width, h: canvas.height },
+        corners: [pt(0, 0), pt(worldW, 0), pt(0, worldH), pt(worldW, worldH)],
+        walls: [
+          pt(worldW / 2, TILE / 2),
+          pt(worldW / 2, worldH - TILE / 2),
+          pt(TILE / 2, worldH / 2),
+          pt(worldW - TILE / 2, worldH / 2),
+        ],
+        player: pt(player.x, player.y),
+        enemies: foes,
+        scale: camScale,
+      };
     },
     layout: function () {
       return {

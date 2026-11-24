@@ -20,6 +20,28 @@ async function boot(page, query) {
   return errors;
 }
 
+function inside(box, p, name) {
+  expect(p.x, name + ' left').toBeGreaterThanOrEqual(box.x - 1);
+  expect(p.y, name + ' top').toBeGreaterThanOrEqual(box.y - 1);
+  expect(p.x, name + ' right').toBeLessThanOrEqual(box.x + box.w + 1);
+  expect(p.y, name + ' bottom').toBeLessThanOrEqual(box.y + box.h + 1);
+}
+
+async function assertFullArena(page, label) {
+  const view = await page.evaluate(() => __RICOCHET__.visibility());
+  expect(view.walls, label).toHaveLength(4);
+  expect(view.enemies.length, label + ' enemies').toBeGreaterThan(0);
+  view.walls.forEach((w, i) => inside(view.canvas, w, label + ' wall ' + i));
+  view.corners.forEach((w, i) => inside(view.canvas, w, label + ' corner ' + i));
+  inside(view.canvas, view.player, label + ' player');
+  view.enemies.forEach((e, i) => inside(view.canvas, e, label + ' enemy ' + i));
+  const spanX = Math.abs(view.corners[1].x - view.corners[0].x);
+  const spanY = Math.abs(view.corners[2].y - view.corners[0].y);
+  expect(spanX, label + ' arena width').toBeLessThanOrEqual(view.canvas.w + 1);
+  expect(spanY, label + ' arena height').toBeLessThanOrEqual(view.canvas.h + 1);
+  expect(Math.max(spanX / view.canvas.w, spanY / view.canvas.h), label + ' fit').toBeGreaterThan(0.9);
+}
+
 function overlaps(a, b) {
   if (!a || !b || !a.visible || !b.visible) return false;
   const ix = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
@@ -60,6 +82,7 @@ test('desktop play: highlight, ricochet, keyboard, pause, tiers', async ({ page 
   expect((await page.evaluate(() => __RICOCHET__.highlight())).selScale).toBeGreaterThan(1.03);
   await page.keyboard.press('Enter');
   await page.waitForFunction(() => __RICOCHET__.state().mode === 'play');
+  await assertFullArena(page, 'desktop');
 
   const shot = await page.evaluate(() => {
     const G = __RICOCHET__;
@@ -283,6 +306,7 @@ test.describe('portrait phone', () => {
     const errors = await boot(page, 'touch=1');
     await page.evaluate(() => __RICOCHET__.startStage(1));
     await page.waitForTimeout(100);
+    await assertFullArena(page, 'portrait');
     await assertClear(page, false);
     const x0 = await page.evaluate(() => __RICOCHET__.state().x);
     await stick(page, '#stickL', 46, 0, false);
@@ -319,6 +343,7 @@ test.describe('landscape phone', () => {
     const errors = await boot(page, 'touch=1');
     await page.evaluate(() => __RICOCHET__.startStage(1));
     await page.waitForTimeout(100);
+    await assertFullArena(page, 'landscape');
     await assertClear(page, true);
     const y0 = await page.evaluate(() => __RICOCHET__.state().y);
     await stick(page, '#stickL', 0, 40, false);
