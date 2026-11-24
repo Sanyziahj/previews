@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0e1216">
+<meta name="description" content="Drill's Ricochet. A Space Riders bank-shot arcade. Let's Ride!">
+<title>Drill's Ricochet</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='38' r='16' fill='%23ff7a18'/%3E%3Cellipse cx='32' cy='22' rx='20' ry='6' fill='%235c3b22'/%3E%3Crect x='36' y='16' width='8' height='6' rx='1' fill='%23e6ebf2'/%3E%3C/svg%3E">
+<style>
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; height: 100%; background: #0e1216; color: #e7eef4;
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  overflow: hidden; touch-action: none; user-select: none;
+  -webkit-user-select: none; -webkit-touch-callout: none;
+}
+body { position: fixed; inset: 0; }
+#app {
+  height: 100%;
+  display: grid;
+  grid-template-areas: "stage";
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+}
+#stage { grid-area: stage; position: relative; min-width: 0; min-height: 0; background: #10161c; }
+#view { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+#gutterL, #gutterR { display: none; }
+body.touch #app {
+  grid-template-areas: "stage stage" "left right";
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) 252px;
+}
+body.touch #gutterL, body.touch #gutterR {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 6px 8px calc(10px + env(safe-area-inset-bottom));
+  background: #0c1014;
+}
+body.touch #gutterL { grid-area: left; }
+body.touch #gutterR { grid-area: right; flex-direction: column; }
+body.touch.land #app {
+  grid-template-areas: "left stage right";
+  grid-template-columns: 124px minmax(0, 1fr) 132px;
+  grid-template-rows: minmax(0, 1fr);
+}
+body.touch.land #gutterL, body.touch.land #gutterR {
+  flex-direction: column; height: 100%; padding: 8px 6px; justify-content: center;
+}
+.stick {
+  width: 120px; height: 120px; border-radius: 50%; position: relative; flex: none;
+  background: radial-gradient(circle at 50% 42%, #334554, #151b22 72%);
+  border: 3px solid #7d8d9c; touch-action: none;
+}
+.stick i {
+  position: absolute; width: 48px; height: 48px; border-radius: 50%;
+  left: 50%; top: 50%; transform: translate(-50%, -50%);
+  background: radial-gradient(circle at 35% 30%, #d5dee6, #5c6b78);
+  border: 2px solid #f4f7f8; pointer-events: none;
+}
+body.touch.land .stick { width: 108px; height: 108px; }
+body.touch.land .stick i { width: 44px; height: 44px; }
+#fireRow { display: flex; gap: 8px; justify-content: center; }
+body.touch.land #fireRow { flex-direction: column; align-items: center; }
+.ctrl {
+  appearance: none; -webkit-appearance: none;
+  border: 2px solid #9aabba; background: #24313b; color: #f4f8fb;
+  font-weight: 800; letter-spacing: .08em; border-radius: 14px;
+  min-width: 78px; min-height: 48px; padding: 0 10px;
+  font-size: 13px; font-family: inherit; touch-action: none;
+}
+#btnFire { background: #f0a03a; color: #1b1206; border-color: #ffe2ad; min-width: 88px; }
+#btnPause { min-height: 36px; min-width: 88px; background: #2a241c; color: #ffe1a8; border-color: #e7b15a; }
+#btnSpecial { background: #1c4e63; border-color: #8fd0c4; color: #e7fff8; }
+#hud {
+  position: absolute; left: 8px; right: 8px; top: 6px; z-index: 2;
+  display: flex; flex-direction: column; gap: 3px; pointer-events: none;
+  font-weight: 800; letter-spacing: .04em; text-shadow: 0 1px 2px #000;
+}
+#hud[hidden] { display: none !important; }
+#hud .row { display: flex; justify-content: space-between; gap: 8px; align-items: center; font-size: 13px; }
+#hudTier { color: #ffe7b0; }
+#hudStage { color: #d5dee6; }
+#btnMute {
+  pointer-events: auto; border: 0; background: transparent; color: #ffe1a8;
+  font-weight: 800; font-family: inherit; letter-spacing: .08em; font-size: 12px;
+}
+.pips { display: flex; gap: 4px; }
+.pips i { width: 12px; height: 12px; border-radius: 50%; background: #ff7a18; display: block; box-shadow: inset 0 -2px 0 #c44800; }
+.pips i.off { background: #2a3138; box-shadow: none; }
+#bossBar { height: 8px; background: #1c242c; border-radius: 6px; overflow: hidden; border: 1px solid #445566; }
+#bossBar[hidden] { display: none !important; }
+#bossBar i { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, #7a5cff, #ff7ad9); }
+#overlay {
+  display: none; position: absolute; inset: 0; z-index: 4;
+  align-items: center; justify-content: center; padding: 8px;
+  background: rgba(6, 10, 14, .46);
+}
+#overlay.show { display: flex; }
+.card {
+  width: min(520px, 100%); max-height: 100%; overflow: auto;
+  background: linear-gradient(180deg, #1c2631, #12181f);
+  border: 2px solid #e7b15a; border-radius: 18px;
+  padding: 12px 14px 14px; text-align: center;
+  box-shadow: 0 18px 60px rgba(0,0,0,.45);
+}
+#portrait { width: 168px; height: 190px; display: block; margin: 0 auto 2px; }
+.card h1 { font-size: 30px; line-height: 1.05; margin: 2px 0 4px; letter-spacing: .03em; color: #ffe7b0; }
+.card h1 span { display: block; font-size: 12px; letter-spacing: .22em; color: #8fd0c4; margin-bottom: 3px; }
+.card p { margin: 4px 0 8px; color: #d5dee6; font-size: 15px; line-height: 1.35; }
+.menu-btn {
+  display: block; width: 100%; margin: 6px 0; padding: 11px 12px;
+  border-radius: 12px; border: 2px solid #3d4a57;
+  background: #1a222b; color: #c5d0da;
+  font-weight: 800; letter-spacing: .06em; font-family: inherit; font-size: 15px;
+  opacity: .38; transform: scale(1);
+  transition: transform .12s ease, opacity .12s ease, box-shadow .12s ease, background .12s ease, color .12s ease;
+}
+.menu-btn.sel {
+  opacity: 1; transform: scale(1.06); color: #1a1206;
+  background: linear-gradient(180deg, #ffe08a, #f0a03a);
+  border-color: #fff1c4;
+  box-shadow: 0 0 0 2px rgba(255,255,255,.35), 0 0 26px rgba(255,176,60,.95);
+}
+.menu-btn.lock { opacity: .2; }
+.stage-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.stage-grid .menu-btn { margin: 0; padding: 8px 4px; font-size: 13px; }
+.stage-grid .menu-btn small { display: block; font-weight: 700; letter-spacing: 0; }
+.ghost {
+  margin-top: 4px; border: 0; background: transparent; color: #ffe1a8;
+  font-weight: 800; font-family: inherit; letter-spacing: .08em; font-size: 12px;
+}
+body.touch.land #portrait { width: 76px; height: 86px; }
+body.touch.land .card { padding: 8px 8px 10px; }
+body.touch.land .card h1 { font-size: 18px; }
+body.touch.land .card p { font-size: 13px; margin: 2px 0 4px; }
+body.touch.land .menu-btn { padding: 6px 8px; margin: 3px 0; font-size: 13px; }
+body.touch.land .stage-grid { grid-template-columns: repeat(4, 1fr); }
+body.touch.land .stage-grid .menu-btn { font-size: 11px; padding: 5px 2px; }
+body.touch:not(.land) .card h1 { font-size: 26px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <aside id="gutterL">
+    <div id="stickL" class="stick" role="slider" aria-label="Move"><i></i></div>
+  </aside>
+  <div id="stage">
+    <canvas id="view" width="960" height="640"></canvas>
+    <div id="hud" hidden>
+      <div class="row">
+        <span id="hudTier">TANKS</span>
+        <span id="hudStage">1 · Drill Yard</span>
+        <button id="btnMute" type="button">MUTE</button>
+      </div>
+      <div class="row">
+        <span id="hudScore">0</span>
+        <span id="hudBest">BEST 0</span>
+        <span class="pips" id="hudLives"></span>
+      </div>
+      <div id="bossBar" hidden><i></i></div>
+    </div>
+    <div id="overlay" class="show"><div class="card" id="card"></div></div>
+  </div>
+  <aside id="gutterR">
+    <button id="btnPause" class="ctrl" type="button">PAUSE</button>
+    <div id="stickR" class="stick" role="slider" aria-label="Aim"><i></i></div>
+    <div id="fireRow">
+      <button id="btnFire" class="ctrl" type="button">FIRE</button>
+      <button id="btnSpecial" class="ctrl" type="button">MINE</button>
+    </div>
+  </aside>
+</div>
+<script src="game.js"></script>
+</body>
+</html>
