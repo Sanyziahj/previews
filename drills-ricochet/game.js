@@ -894,8 +894,7 @@
       }
       html += '</div>' + btn('BACK', function () { showOverlay(menu.returnTo || 'title'); });
     } else if (kind === 'brief') {
-      html = '<canvas id="portrait" width="220" height="248"></canvas>'
-        + '<h1><span>' + tier.name.toUpperCase() + '</span>' + def.name.toUpperCase() + '</h1>'
+      html = '<h1><span>' + tier.name.toUpperCase() + '</span>' + def.name.toUpperCase() + '</h1>'
         + '<p>' + def.brief + '</p>'
         + btn('ROLL OUT', function () { beginPlay(); });
     } else if (kind === 'clear') {
@@ -904,15 +903,14 @@
         + '<h1><span>RANGE CLEAR</span>' + def.name.toUpperCase() + '</h1>'
         + '<p>' + def.clear + '</p>'
         + (last ? '' : '<p>Next range: ' + STAGES[stageIndex + 1].name + '</p>');
-      if (last) html += btn('VICTORY', function () { showOverlay('victory'); });
-      else html += btn('CONTINUE', function () { openBrief(stageIndex + 1); });
-      html += btn('STAGE SELECT', function () { menu.returnTo = 'title'; showOverlay('stages'); });
+      if (last) html += btn('MENU', function () { showOverlay('victory'); });
+      else html += btn('NEXT STAGE', function () { openBrief(stageIndex + 1); });
+      html += btn('MENU', function () { showOverlay('title'); });
     } else if (kind === 'victory') {
       html = '<canvas id="portrait" width="220" height="248"></canvas>'
         + '<h1><span>DISMISSED</span>RANGE IS OURS</h1>'
         + '<p>Drill Sergeant, standing down. Score ' + score + '.</p>'
-        + btn('STAGE SELECT', function () { showOverlay('stages'); })
-        + btn('TITLE', function () { showOverlay('title'); });
+        + btn('MENU', function () { showOverlay('title'); });
     } else if (kind === 'pause') {
       html = '<h1><span>HOLD FIRE</span>PAUSED</h1>'
         + '<p>' + def.name + ' · ' + tier.name + '</p>'
@@ -925,8 +923,7 @@
         + '<h1><span>DOWN</span>DUST OFF</h1>'
         + '<p>The range is still hot. Score ' + score + '.</p>'
         + btn('RETRY', function () { lives = 3; loadLevel(stageIndex); beginPlay(); })
-        + btn('STAGE SELECT', function () { showOverlay('stages'); })
-        + btn('TITLE', function () { showOverlay('title'); });
+        + btn('MENU', function () { showOverlay('title'); });
     }
     menu.items = items;
     card.innerHTML = html;
@@ -940,6 +937,7 @@
   }
   function hideOverlay() {
     overlay.classList.remove('show');
+    card.innerHTML = '';
   }
   function bindMenu() {
     const buttons = card.querySelectorAll('.menu-btn');
@@ -1523,21 +1521,37 @@
     c.beginPath(); c.arc(x + s * 1.05, y + s * 1.15, s * 0.22, 0, 7); c.fill();
     drawDrillHead(c, x, y, s);
   }
+  function strokeW() { return 2.4 / Math.max(0.25, camScale) / 1.38; }
   function drawTank(c, e, friendly) {
+    const hull = friendly ? '#12c8b0' : (e.color || '#c46a45');
+    const trim = friendly ? '#ffe08a' : '#2c241c';
     c.save();
     c.rotate(e.heading || e.body || 0);
-    c.fillStyle = '#171b1f';
-    roundRect(c, -22, -16, 44, 9, 2); c.fill();
-    roundRect(c, -22, 7, 44, 9, 2); c.fill();
-    c.fillStyle = friendly ? '#14b89a' : e.color;
-    roundRect(c, -15, -12, 30, 24, 4); c.fill();
-    c.fillStyle = 'rgba(0,0,0,.28)';
-    c.beginPath(); c.arc(0, 0, 7, 0, 7); c.fill();
+    c.fillStyle = '#14181c';
+    roundRect(c, -26, -18, 52, 11, 3); c.fill();
+    roundRect(c, -26, 7, 52, 11, 3); c.fill();
+    c.fillStyle = friendly ? '#08332e' : '#3a2418';
+    for (let i = -18; i <= 18; i += 8) {
+      c.fillRect(i, -16, 3, 7);
+      c.fillRect(i, 9, 3, 7);
+    }
+    c.fillStyle = hull;
+    roundRect(c, -18, -13, 36, 26, 5); c.fill();
+    c.strokeStyle = trim;
+    c.lineWidth = strokeW();
+    c.stroke();
     c.restore();
     c.save();
-    c.rotate(e.aim || 0);
-    c.fillStyle = '#2a3036';
-    roundRect(c, 6, -3.2, 18, 6.4, 2); c.fill();
+    c.rotate(e.aim || e.heading || 0);
+    c.fillStyle = friendly ? '#0c7f72' : '#3d342c';
+    c.beginPath(); c.arc(0, 0, 9, 0, Math.PI * 2); c.fill();
+    c.strokeStyle = trim;
+    c.lineWidth = strokeW();
+    c.stroke();
+    c.fillStyle = '#1a1e22';
+    roundRect(c, 7, -2.8, 20, 5.6, 2); c.fill();
+    c.fillStyle = trim;
+    c.fillRect(25, -2.2, 4, 4.4);
     c.restore();
   }
   function drawTurret(c, e) {
@@ -1552,65 +1566,130 @@
     c.restore();
   }
   function drawHeli(c, e, friendly) {
+    const body = friendly ? '#12c8b0' : e.color;
+    const trim = friendly ? '#ffe08a' : '#2a241c';
     c.save();
     c.rotate(e.heading || 0);
-    c.fillStyle = '#222';
-    c.fillRect(-14, -16, 28, 4);
-    c.fillRect(-14, 12, 28, 4);
-    c.fillStyle = friendly ? '#14b89a' : e.color;
-    roundRect(c, -12, -12, 24, 24, 6); c.fill();
+    c.fillStyle = body;
+    roundRect(c, -30, -3, 18, 6, 2); c.fill();
+    c.beginPath();
+    c.moveTo(-28, -3); c.lineTo(-36, -12); c.lineTo(-22, -3); c.fill();
+    roundRect(c, -8, -10, 30, 20, 7); c.fill();
+    c.strokeStyle = trim;
+    c.lineWidth = strokeW();
+    c.stroke();
+    c.fillStyle = friendly ? '#e7fff6' : 'rgba(255,255,255,.4)';
+    roundRect(c, 4, -5, 12, 10, 3); c.fill();
+    c.strokeStyle = '#14181c';
+    c.lineWidth = strokeW();
+    c.beginPath();
+    c.moveTo(-4, -13); c.lineTo(14, -13);
+    c.moveTo(-4, 13); c.lineTo(14, 13);
+    c.stroke();
     c.restore();
-    c.strokeStyle = 'rgba(220,230,236,.75)';
-    c.lineWidth = 2;
-    c.beginPath(); c.ellipse(0, 0, 22, 7, e.spin, 0, 7); c.stroke();
     c.save();
-    c.rotate(e.aim || 0);
-    c.fillStyle = '#243036';
-    c.fillRect(6, -2.4, 14, 4.8);
+    c.rotate(e.spin || 0);
+    c.strokeStyle = friendly ? '#ffe08a' : 'rgba(255,255,255,.85)';
+    c.lineWidth = strokeW();
+    c.beginPath();
+    c.moveTo(-24, 0); c.lineTo(24, 0);
+    c.moveTo(0, -24); c.lineTo(0, 24);
+    c.stroke();
+    c.restore();
+    c.save();
+    c.rotate(e.aim || e.heading || 0);
+    c.fillStyle = '#1a1e22';
+    c.fillRect(12, -2.2, 14, 4.4);
+    c.fillStyle = trim;
+    c.fillRect(24, -2, 4, 4);
     c.restore();
   }
   function drawJet(c, e, friendly) {
-    c.save();
-    c.rotate(e.heading || 0);
-    c.fillStyle = friendly ? '#3aa0ff' : e.color;
-    c.beginPath();
-    c.moveTo(18, 0); c.lineTo(-14, -12); c.lineTo(-8, 0); c.lineTo(-14, 12); c.closePath();
-    c.fill();
-    c.fillStyle = '#ffb15a';
-    c.fillRect(-18, -3, 8, 6);
-    c.restore();
-    if (friendly) {
-      c.save();
-      c.rotate(e.aim || 0);
-      c.fillStyle = '#d7ecff';
-      c.fillRect(8, -2, 12, 4);
-      c.restore();
-    }
-  }
-  function drawSaucer(c, e, friendly) {
-    c.fillStyle = 'rgba(0,0,0,.25)';
-    c.beginPath(); c.ellipse(0, 6, 18, 6, 0, 0, 7); c.fill();
-    c.fillStyle = friendly ? '#c46bff' : e.color;
-    c.beginPath(); c.ellipse(0, 2, 22, 12, 0, 0, 7); c.fill();
-    if (!friendly) {
-      c.fillStyle = '#d9c8ff';
-      c.beginPath(); c.ellipse(0, -2, 9, 7, 0, 0, 7); c.fill();
-    }
-    c.fillStyle = 'rgba(255,255,255,.35)';
-    for (let i = 0; i < 4; i++) {
-      const a = e.spin + i * 1.57;
-      c.beginPath(); c.arc(Math.cos(a) * 14, Math.sin(a) * 6, 2.2, 0, 7); c.fill();
-    }
-  }
-  function drawShip(c, e, friendly) {
+    const body = friendly ? '#12c8b0' : e.color;
+    const trim = friendly ? '#ffe08a' : '#3a2020';
     c.save();
     c.rotate(e.heading || e.aim || 0);
-    c.fillStyle = '#8fd8ff';
-    c.fillRect(-20, -3, 10, 6);
-    c.fillStyle = friendly ? '#7ee0ff' : e.color;
+    c.fillStyle = friendly ? '#0c8f82' : body;
     c.beginPath();
-    c.moveTo(20, 0); c.lineTo(-10, -13); c.lineTo(-4, 0); c.lineTo(-10, 13); c.closePath();
+    c.moveTo(6, 0); c.lineTo(-6, -20); c.lineTo(0, -7); c.lineTo(-10, 0); c.lineTo(0, 7); c.lineTo(-6, 20); c.closePath();
     c.fill();
+    c.fillStyle = body;
+    c.beginPath();
+    c.moveTo(24, 0); c.lineTo(-14, -7); c.lineTo(-10, 0); c.lineTo(-14, 7); c.closePath();
+    c.fill();
+    c.strokeStyle = trim;
+    c.lineWidth = strokeW();
+    c.stroke();
+    c.fillStyle = friendly ? '#e7fff6' : 'rgba(255,255,255,.45)';
+    c.beginPath(); c.ellipse(6, 0, 5.5, 3.2, 0, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#ffb15a';
+    c.fillRect(-18, -5.5, 8, 3.2);
+    c.fillRect(-18, 2.3, 8, 3.2);
+    c.fillStyle = '#fff6d0';
+    c.fillRect(-20, -4.6, 3, 1.6);
+    c.fillRect(-20, 3.1, 3, 1.6);
+    c.fillStyle = '#1a1e22';
+    c.fillRect(20, -1.6, 8, 3.2);
+    c.restore();
+  }
+  function drawSaucer(c, e, friendly) {
+    const disc = friendly ? '#12c8b0' : e.color;
+    const trim = friendly ? '#ffe08a' : '#efe6ff';
+    c.fillStyle = 'rgba(0,0,0,.28)';
+    c.beginPath(); c.ellipse(0, 7, 20, 7, 0, 0, Math.PI * 2); c.fill();
+    c.fillStyle = disc;
+    c.beginPath(); c.ellipse(0, 0, 22, 12, 0, 0, Math.PI * 2); c.fill();
+    c.strokeStyle = trim;
+    c.lineWidth = strokeW();
+    c.stroke();
+    c.fillStyle = friendly ? '#bffff4' : '#efe6ff';
+    c.beginPath(); c.ellipse(0, -1, 8, 5.5, 0, 0, Math.PI * 2); c.fill();
+    c.fillStyle = 'rgba(255,255,255,.8)';
+    c.beginPath(); c.ellipse(-2, -2, 2.6, 1.6, 0, 0, Math.PI * 2); c.fill();
+    for (let i = 0; i < 6; i++) {
+      const a = (e.spin || 0) + i * (Math.PI / 3);
+      c.fillStyle = i % 2 ? trim : '#ffffff';
+      c.beginPath(); c.arc(Math.cos(a) * 16, Math.sin(a) * 8, 2.1, 0, Math.PI * 2); c.fill();
+    }
+    c.save();
+    c.rotate(e.aim || 0);
+    c.fillStyle = '#1a1e22';
+    c.fillRect(14, -2, 12, 4);
+    c.fillStyle = trim;
+    c.beginPath(); c.arc(26, 0, 2.5, 0, Math.PI * 2); c.fill();
+    c.restore();
+  }
+  function drawShip(c, e, friendly) {
+    const body = friendly ? '#7ee8ff' : (e.color || '#c5d2e0');
+    const trim = friendly ? '#ffe08a' : '#5a6a78';
+    c.save();
+    c.rotate(e.heading || 0);
+    c.fillStyle = friendly ? '#1490c4' : '#8aa0b4';
+    c.beginPath();
+    c.moveTo(2, 0); c.lineTo(-10, -18); c.lineTo(-2, -6); c.lineTo(-16, 0); c.lineTo(-2, 6); c.lineTo(-10, 18); c.closePath();
+    c.fill();
+    c.fillStyle = body;
+    c.beginPath();
+    c.moveTo(24, 0); c.lineTo(-6, -8); c.lineTo(-14, 0); c.lineTo(-6, 8); c.closePath();
+    c.fill();
+    c.strokeStyle = trim;
+    c.lineWidth = strokeW();
+    c.stroke();
+    c.fillStyle = friendly ? '#e7fff6' : '#e4eef6';
+    c.beginPath(); c.ellipse(6, 0, 5, 3, 0, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#7af0ff';
+    c.fillRect(-20, -3.2, 8, 6.4);
+    c.fillStyle = '#ffffff';
+    c.fillRect(-22, -1.6, 4, 3.2);
+    c.restore();
+    c.save();
+    c.rotate(e.aim || e.heading || 0);
+    c.fillStyle = '#1a2228';
+    c.fillRect(8, -6.2, 16, 3);
+    c.fillRect(8, 3.2, 16, 3);
+    c.fillStyle = trim;
+    c.fillRect(22, -6.2, 4, 3);
+    c.fillRect(22, 3.2, 4, 3);
     c.restore();
   }
   function drawBoss(c, e) {
@@ -1640,7 +1719,6 @@
     else if (body === 'ship' || body === 'drone') drawShip(c, e, friendly);
     else if (body === 'boss') drawBoss(c, e);
     else drawTank(c, e, friendly);
-    if (friendly) drawDrillHead(c, 0, body === 'saucer' ? -10 : -1, body === 'saucer' ? 12 : 11);
     c.restore();
     if (e.shield) {
       c.strokeStyle = 'rgba(130, 230, 255, .9)';
@@ -2069,6 +2147,10 @@
     },
     teleport: function (x, y) { player.x = x; player.y = y; player.vx = 0; player.vy = 0; },
     setHover: function (v) { hoverOverride = v; },
+    showResult: function (kind) {
+      if (kind === 'clear') openClear();
+      else showOverlay('over');
+    },
     wipeEnemies: function () {
       for (let i = 0; i < enemies.length; i++) if (!enemies[i].dead) killEnemy(enemies[i], 1);
     },

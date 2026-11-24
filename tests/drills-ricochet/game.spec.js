@@ -82,6 +82,7 @@ test('desktop play: highlight, ricochet, keyboard, pause, tiers', async ({ page 
   expect((await page.evaluate(() => __RICOCHET__.highlight())).selScale).toBeGreaterThan(1.03);
   await page.keyboard.press('Enter');
   await page.waitForFunction(() => __RICOCHET__.state().mode === 'play');
+  expect(await page.locator('#portrait').count()).toBe(0);
   await assertFullArena(page, 'desktop');
 
   const shot = await page.evaluate(() => {
@@ -194,7 +195,27 @@ test('desktop play: highlight, ricochet, keyboard, pause, tiers', async ({ page 
   expect(prog.saucer.mode).toBe('play');
   expect(prog.saucer.particles).toBeGreaterThan(8);
   expect(prog.saucer.shots.some((s) => s.bounced > 0)).toBe(true);
-  await page.screenshot({ path: `${ART}/drills-ricochet-saucer.png` });
+  await page.screenshot({ path: `${ART}/drills-ricochet-v2-vehicle.png` });
+  await page.evaluate(() => __RICOCHET__.showResult('over'));
+  await page.waitForTimeout(180);
+  const popup = await page.evaluate(() => {
+    const canvas = document.querySelector('#portrait');
+    const data = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+    let orange = 0;
+    for (let i = 0; i < data.length; i += 16) {
+      const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
+      if (a > 40 && r > 190 && g > 70 && g < 180 && b < 90) orange++;
+    }
+    const hi = __RICOCHET__.highlight();
+    return { orange, mode: __RICOCHET__.state().mode, sel: hi.sel, scale: hi.selScale, dim: hi.otherOpacity, line: document.querySelector('#card p').textContent };
+  });
+  expect(popup.mode).toBe('over');
+  expect(popup.orange).toBeGreaterThan(8);
+  expect(popup.sel).toMatch(/RETRY/);
+  expect(popup.scale).toBeGreaterThan(1.03);
+  expect(popup.dim).toBeLessThan(0.6);
+  expect(popup.line.length).toBeGreaterThan(4);
+  await page.screenshot({ path: `${ART}/drills-ricochet-v2-popup.png` });
 
   const rest = await page.evaluate(() => {
     const G = __RICOCHET__;
@@ -319,7 +340,8 @@ test.describe('portrait phone', () => {
     await page.waitForTimeout(120);
     const shots1 = await page.evaluate(() => __RICOCHET__.state().shots);
     expect(shots1).toBeGreaterThan(shots0);
-    await page.screenshot({ path: `${ART}/drills-ricochet-portrait.png` });
+    expect(await page.locator('#portrait').count()).toBe(0);
+    await page.screenshot({ path: `${ART}/drills-ricochet-v2-portrait.png` });
 
     await page.evaluate(() => __RICOCHET__.press('pause', true));
     await page.waitForTimeout(150);
@@ -354,7 +376,8 @@ test.describe('landscape phone', () => {
     await page.waitForTimeout(80);
     const shots = await page.evaluate(() => __RICOCHET__.state().shots);
     expect(shots).toBeGreaterThan(0);
-    await page.screenshot({ path: `${ART}/drills-ricochet-landscape.png` });
+    expect(await page.locator('#portrait').count()).toBe(0);
+    await page.screenshot({ path: `${ART}/drills-ricochet-v2-landscape.png` });
 
     await page.evaluate(() => {
       __RICOCHET__.startStage(8);
